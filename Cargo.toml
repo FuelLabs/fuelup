@@ -1,0 +1,28 @@
+[package]
+name = "fuelup"
+version = "0.0.0"
+authors = ["Fuel Labs <contact@fuel.sh>"]
+edition = "2021"
+homepage = "https://fuel.network/"
+license = "Apache-2.0"
+repository = "https://github.com/FuelLabs/fuelup"
+description = "Fuel Orchestrator."
+publish = false
+
+[lib]
+name = "fuelup"
+path = "src/lib.rs"
+
+[[bin]]
+name = "fuelup"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1"
+clap = { version = "3.1", features = ["cargo", "derive", "env"] }
+curl = "0.4"
+flate2 = "1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+dirs = "4"
+tar = "0.4"

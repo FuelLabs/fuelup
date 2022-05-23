@@ -22,6 +22,22 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
+
+  cargo-clippy:
+    needs: cancel-previous-runs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v1
+      - name: Check Clippy Linter
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --all-features --all-targets -- -D warnings
+
   publish-fuelup-binaries:
     name: 
     runs-on: ${{ matrix.job.os }}

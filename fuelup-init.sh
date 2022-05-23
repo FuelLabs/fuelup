@@ -28,10 +28,7 @@ main() {
 
 
   local _dir
-
   _dir="$(ensure mktemp -d)"
-  echo "dir"
-  echo "$_dir"
   local _file="${_dir}/fuelup"
 
   ensure downloader "$_tmp_url" "$_file" "$_arch"
@@ -59,8 +56,8 @@ main() {
 
     local _retval=$?
 
+    ignore rmdir "$_dir"
     ignore rm "$_file"
-
 
     return "$_retval"
 }
@@ -148,6 +145,7 @@ downloader() {
     local _err
     local _status
     local _retry
+
     if check_cmd curl; then
         _dld=curl
     elif check_cmd wget; then
@@ -155,8 +153,6 @@ downloader() {
     else
         _dld='curl or wget' # to be used in error message of need_cmd
     fi
-        echo "$1"
-
 
     if [ "$1" = --check ]; then
         need_cmd "$_dld"

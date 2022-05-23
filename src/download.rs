@@ -107,7 +107,7 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<File> {
 
     let mut file = OpenOptions::new().write(true).create(true).open(&path)?;
 
-    handle.url(&url)?;
+    handle.url(url)?;
     handle.connect_timeout(Duration::new(30, 0))?;
     handle.follow_location(true)?;
     handle.useragent("user-agent")?;

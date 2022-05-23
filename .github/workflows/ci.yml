@@ -22,8 +22,8 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-  install-and-upload-fuelup:
-    name: Install and upload fuelup to release
+  publish-fuelup-binaries:
+    name: 
     runs-on: ${{ matrix.job.os }}
     if: github.event_name == 'release' && github.event.action == 'published'
     needs: [

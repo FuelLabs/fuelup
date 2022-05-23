@@ -55,6 +55,7 @@ pub fn fuel_core_bin_tarball_name(version: &str) -> Result<String> {
 
     Ok(format!(
         "fuel-core-{}-{}-{}-{}.tar.gz",
+        // strip the 'v' from the version string to match the file name of the releases
         &version[1..version.len()],
         architecture?,
         vendor,

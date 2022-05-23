@@ -56,8 +56,8 @@ main() {
 
     local _retval=$?
 
-    ignore rmdir "$_dir"
     ignore rm "$_file"
+    ignore rmdir "$_dir"
 
     return "$_retval"
 }

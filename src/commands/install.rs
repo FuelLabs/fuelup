@@ -28,6 +28,9 @@ pub fn install() -> Result<()> {
         GITHUB_API_REPOS_BASE_URL, FUEL_CORE_REPO, RELEASES_LATEST
     ))?;
 
+    info!("Fetching forc {}", &forc_release_latest_tag);
+    info!("Fetching fuel-core {}", &fuel_core_release_latest_tag);
+
     let forc_bin_tarball_name = forc_bin_tarball_name()?;
     let fuel_core_bin_tarball_name = fuel_core_bin_tarball_name(&fuel_core_release_latest_tag)?;
 
@@ -50,7 +53,7 @@ pub fn install() -> Result<()> {
             for bin in std::fs::read_dir(&sub_path)? {
                 let bin_file = bin?;
                 info!(
-                    "Unpacking and moving {} to {}/.fuelup...",
+                    "Unpacking and moving {} to {}/.fuelup",
                     &bin_file.file_name().to_string_lossy(),
                     home_dir().unwrap().display()
                 );

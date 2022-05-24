@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{bail, Result};
 use curl::easy::Easy;
 use dirs::home_dir;
 use flate2::read::GzDecoder;
@@ -22,24 +22,24 @@ struct LatestReleaseApiResponse {
 
 pub fn forc_bin_tarball_name() -> Result<String> {
     let os = match std::env::consts::OS {
-        "macos" => Ok("darwin"),
-        "linux" => Ok("linux"),
-        unsupported_os => Err(anyhow!("Unsupported os: {}", unsupported_os)),
+        "macos" => "darwin",
+        "linux" => "linux",
+        unsupported_os => bail!("Unsupported os: {}", unsupported_os),
     };
     let architecture = match std::env::consts::ARCH {
-        "aarch64" => Ok("arm64"),
-        "x86_64" => Ok("amd64"),
-        unsupported_arch => Err(anyhow!("Unsupported architecture: {}", unsupported_arch)),
+        "aarch64" => "arm64",
+        "x86_64" => "amd64",
+        unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
     };
 
-    Ok(format!("forc-binaries-{}_{}.tar.gz", os?, architecture?))
+    Ok(format!("forc-binaries-{}_{}.tar.gz", os, architecture))
 }
 
 pub fn fuel_core_bin_tarball_name(version: &str) -> Result<String> {
     let architecture = match std::env::consts::ARCH {
-        "aarch64" => Ok("aarch64"),
-        "x86_64" => Ok("x86_64"),
-        unsupported_arch => Err(anyhow!("Unsupported architecture: {}", unsupported_arch)),
+        "aarch64" => "aarch64",
+        "x86_64" => "x86_64",
+        unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
     };
 
     let vendor = match std::env::consts::OS {
@@ -48,18 +48,18 @@ pub fn fuel_core_bin_tarball_name(version: &str) -> Result<String> {
     };
 
     let os = match std::env::consts::OS {
-        "macos" => Ok("darwin"),
-        "linux" => Ok("linux-gnu"),
-        unsupported_os => Err(anyhow!("Unsupported os: {}", unsupported_os)),
+        "macos" => "darwin",
+        "linux" => "linux-gnu",
+        unsupported_os => bail!("Unsupported os: {}", unsupported_os),
     };
 
     Ok(format!(
         "fuel-core-{}-{}-{}-{}.tar.gz",
         // strip the 'v' from the version string to match the file name of the releases
         &version[1..version.len()],
-        architecture?,
+        architecture,
         vendor,
-        os?
+        os
     ))
 }
 

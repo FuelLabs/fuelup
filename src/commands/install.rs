@@ -4,6 +4,7 @@ use std::path::Path;
 use anyhow::Result;
 use clap::Parser;
 use dirs::home_dir;
+use tracing::info;
 
 use crate::constants::{FUELUP_PATH, FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL};
 use crate::download::download_file_and_unpack;
@@ -16,7 +17,7 @@ use crate::{
 pub struct InstallCommand {}
 
 pub fn install() -> Result<()> {
-    println!("Downloading the Forc toolchain");
+    info!("Downloading the Forc toolchain");
 
     let forc_release_latest_tag = get_latest_tag(&format!(
         "{}{}/{}",
@@ -48,7 +49,7 @@ pub fn install() -> Result<()> {
         if sub_path.is_dir() {
             for bin in std::fs::read_dir(&sub_path)? {
                 let bin_file = bin?;
-                println!(
+                info!(
                     "Unpacking and moving {} to {}/.fuelup...",
                     &bin_file.file_name().to_string_lossy(),
                     home_dir().unwrap().display()

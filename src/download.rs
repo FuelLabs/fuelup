@@ -1,5 +1,3 @@
-use std::path::{Path, PathBuf};
-
 use anyhow::{anyhow, Result};
 use curl::easy::Easy;
 use dirs::home_dir;
@@ -8,8 +6,10 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io::Write;
+use std::path::{Path, PathBuf};
 use std::time::Duration;
 use tar::Archive;
+use tracing::{error, info};
 
 use crate::constants::FUELUP_PATH;
 
@@ -97,7 +97,7 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
     let mut archive = Archive::new(decompressed);
 
     if let Err(e) = archive.unpack(dst) {
-        eprintln!("{}", e);
+        error!("{}", e);
     };
 
     Ok(())
@@ -144,7 +144,7 @@ pub fn download_file_and_unpack(
 ) -> Result<()> {
     let tarball_url = format!("{}/{}/{}", &github_release_url, &tag, &tarball_name);
 
-    println!("Fetching binary from {}", &tarball_url);
+    info!("Fetching binary from {}", &tarball_url);
 
     let tarball_path = fuelup_path().join(tarball_name);
 

@@ -135,7 +135,7 @@ jobs:
           # trim v from tag prefix
           FUELUP_VERSION="${FUELUP_VERSION#v}"
 
-          echo "version is: $FUEL_CORE_VERSION"
+          echo "version is: $FUELUP_VERSION"
 
           # setup artifact filename
           ZIP_FILE_NAME=fuelup-${{ env.PLATFORM_NAME }}_${{ env.ARCH }}.tar.gz

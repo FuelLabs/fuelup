@@ -145,7 +145,7 @@ jobs:
           cp $(which ${fuelup}) .
           tar -czvf $ZIP_FILE_NAME . 
 
-      - name: Archive fuelup binaries
+      - name: Upload release archive
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}

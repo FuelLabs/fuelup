@@ -51,10 +51,10 @@ jobs:
           command: fmt
           args: --all -- --check
 
-  publish-fuelup-binaries:
+  build-release:
     name: 
     runs-on: ${{ matrix.job.os }}
-    if: github.event_name == 'release' && github.event.action == 'published'
+    if: github.event_name == 'release'
     needs: [
       cancel-previous-runs,
     ]
@@ -74,7 +74,7 @@ jobs:
           - os: macos-latest
             platform: darwin
             target: x86_64-apple-darwin
-            rch: amd64
+            arch: amd64
             svm_target_platform: macosx-amd64
           - os: macos-latest
             platform: darwin
@@ -96,23 +96,32 @@ jobs:
       - uses: Swatinem/rust-cache@v1
         with:
           cache-on-failure: true
+          key: "${{ matrix.job.target }}"
+
+      - name: Install Cross
+        uses: baptiste0928/cargo-install@v1
+        with:
+          crate: cross
+          cache-key: "${{ matrix.job.target }}"
 
       - name: Apple M1 setup
         if: ${{ matrix.job.target == 'aarch64-apple-darwin' }}
         run: |
           echo "SDKROOT=$(xcrun -sdk macosx --show-sdk-path)" >> $GITHUB_ENV
           echo "MACOSX_DEPLOYMENT_TARGET=$(xcrun -sdk macosx --show-sdk-platform-version)" >> $GITHUB_ENV
+
       - name: Linux ARM setup
         if: ${{ matrix.job.target == 'aarch64-unknown-linux-gnu' }}
         run: |
           sudo apt-get update -y
           sudo apt-get install -y gcc-aarch64-linux-gnu
           echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
-      - name: Install Fuelup
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: --profile=release --path .
+
+
+      - name: Build fuelup
+        run: |
+          cross build --profile=release --target ${{ matrix.job.target }} -p fuelup
+
       - name: Prep Assets
         id: prep_assets
         env:
@@ -120,11 +129,23 @@ jobs:
           TARGET: ${{ matrix.job.target }}
           ARCH: ${{ matrix.job.arch }}
         run: |
+          # See: https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/m-p/32167/highlight/true#M1027
+          FUELUP_VERSION="${GITHUB_REF#refs/tags/}"
+
+          # trim v from tag prefix
+          FUELUP_VERSION="${FUELUP_VERSION#v}"
+
+          echo "version is: $FUEL_CORE_VERSION"
+
+          # setup artifact filename
           ZIP_FILE_NAME=fuelup-${{ env.PLATFORM_NAME }}_${{ env.ARCH }}.tar.gz
           echo "ZIP_FILE_NAME=$ZIP_FILE_NAME" >> $GITHUB_ENV
+
+          # create zip file
           cp $(which ${fuelup}) .
           tar -czvf $ZIP_FILE_NAME . 
-      - name: Archive forc binaries
+
+      - name: Archive fuelup binaries
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}

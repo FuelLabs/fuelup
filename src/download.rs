@@ -144,7 +144,7 @@ pub fn download_file_and_unpack(
 
     let tarball_path = fuelup_path().join(tarball_name);
 
-    if let Err(_) = download_file(&tarball_url, &tarball_path) {
+    if download_file(&tarball_url, &tarball_path).is_err() {
         error!(
             "Failed to download from {} and write to path {}",
             &tarball_url,

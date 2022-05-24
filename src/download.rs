@@ -74,13 +74,11 @@ pub fn get_latest_tag(github_api_url: &str) -> Result<String> {
     let mut data = Vec::new();
     {
         let mut transfer = handle.transfer();
-        transfer
-            .write_function(|new_data| {
-                data.extend_from_slice(new_data);
-                Ok(new_data.len())
-            })
-            .unwrap();
-        transfer.perform().unwrap();
+        transfer.write_function(|new_data| {
+            data.extend_from_slice(new_data);
+            Ok(new_data.len())
+        })?;
+        transfer.perform()?;
     }
 
     let response: LatestReleaseApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
@@ -116,22 +114,20 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<File> {
     {
         let mut transfer = handle.transfer();
 
-        transfer
-            .write_function(|new_data| {
-                if file.write_all(new_data).is_err() {
-                    // Callback should return the number of bytes taken care of.
-                    // If there was an error in file.write_all(new_data), we Ok the wrong number of
-                    // bytes to signal an error condition and return is_write_error.
-                    //
-                    // Reference:
-                    // https://docs.rs/curl/latest/curl/easy/struct.Easy.html#method.write_function
-                    Ok(0)
-                } else {
-                    Ok(new_data.len())
-                }
-            })
-            .unwrap();
-        transfer.perform().unwrap();
+        transfer.write_function(|new_data| {
+            if file.write_all(new_data).is_err() {
+                // Callback should return the number of bytes taken care of.
+                // If there was an error in file.write_all(new_data), we Ok the wrong number of
+                // bytes to signal an error condition and return is_write_error.
+                //
+                // Reference:
+                // https://docs.rs/curl/latest/curl/easy/struct.Easy.html#method.write_function
+                Ok(0)
+            } else {
+                Ok(new_data.len())
+            }
+        })?;
+        transfer.perform()?;
     }
 
     Ok(file)
@@ -148,7 +144,13 @@ pub fn download_file_and_unpack(
 
     let tarball_path = fuelup_path().join(tarball_name);
 
-    download_file(&tarball_url, &tarball_path)?;
+    if let Err(_) = download_file(&tarball_url, &tarball_path) {
+        error!(
+            "Failed to download from {} and write to path {}",
+            &tarball_url,
+            &tarball_path.display()
+        );
+    };
     let dst_path = home_dir().unwrap().join(Path::new(".fuelup"));
 
     unpack(&tarball_path, &dst_path)?;

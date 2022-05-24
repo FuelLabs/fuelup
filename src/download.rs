@@ -14,7 +14,7 @@ use tracing::{error, info};
 use crate::constants::FUELUP_PATH;
 
 #[derive(Debug, Serialize, Deserialize)]
-struct LatestReleaseAPIResponse {
+struct LatestReleaseApiResponse {
     url: String,
     tag_name: String,
     name: String,
@@ -83,7 +83,7 @@ pub fn get_latest_tag(github_api_url: &str) -> Result<String> {
         transfer.perform().unwrap();
     }
 
-    let response: LatestReleaseAPIResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
+    let response: LatestReleaseApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
     Ok(response.tag_name)
 }
 

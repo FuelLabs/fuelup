@@ -115,10 +115,20 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<File> {
 
     {
         let mut transfer = handle.transfer();
+
         transfer
             .write_function(|new_data| {
-                file.write_all(new_data);
-                Ok(new_data.len())
+                if file.write_all(new_data).is_err() {
+                    // Callback should return the number of bytes taken care of.
+                    // If there was an error in file.write_all(new_data), we Ok the wrong number of
+                    // bytes to signal an error condition and return is_write_error.
+                    //
+                    // Reference:
+                    // https://docs.rs/curl/latest/curl/easy/struct.Easy.html#method.write_function
+                    Ok(0)
+                } else {
+                    Ok(new_data.len())
+                }
             })
             .unwrap();
         transfer.perform().unwrap();

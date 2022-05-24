@@ -129,7 +129,6 @@ jobs:
         env:
           PLATFORM_NAME: ${{ matrix.job.platform }}
           TARGET: ${{ matrix.job.target }}
-          ARCH: ${{ matrix.job.arch }}
         run: |
           # Get tag name
           # See: https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/m-p/32167/highlight/true#M1027

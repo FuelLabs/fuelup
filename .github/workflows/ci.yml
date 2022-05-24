@@ -114,6 +114,7 @@ jobs:
           TARGET: ${{ matrix.job.target }}
           ARCH: ${{ matrix.job.arch }}
         run: |
+          # Get tag name
           # See: https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/m-p/32167/highlight/true#M1027
           FUELUP_VERSION="${GITHUB_REF#refs/tags/}"
 
@@ -123,12 +124,14 @@ jobs:
           echo "version is: $FUELUP_VERSION"
 
           # setup artifact filename
-          ZIP_FILE_NAME=fuelup-${{ env.PLATFORM_NAME }}_${{ env.ARCH }}.tar.gz
+          ARTIFACT="fuelup-$FUELUP_VERSION-${{ env.TARGET }}"
+          ZIP_FILE_NAME="$ARTIFACT.tar.gz"
           echo "ZIP_FILE_NAME=$ZIP_FILE_NAME" >> $GITHUB_ENV
 
           # create zip file
-          cp $(which ${fuelup}) .
-          tar -czvf $ZIP_FILE_NAME . 
+          mkdir -pv "$ARTIFACT"
+          cp "target/${{ matrix.job.target }}/release/fuelup" "$ARTIFACT"
+          tar -czvf $ZIP_FILE_NAME "$ARTIFACT"
 
       - name: Upload release archive
         uses: actions/upload-release-asset@v1

@@ -1,6 +1,5 @@
 use anyhow::Result;
 use clap::Parser;
-use tracing_subscriber;
 
 use fuelup::commands::install::{install, InstallCommand};
 

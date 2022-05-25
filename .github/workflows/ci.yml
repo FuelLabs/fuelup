@@ -99,8 +99,8 @@ jobs:
         run: |
           cross build --profile=release --target ${{ matrix.job.target }} -p fuelup
 
-      - name: Strip release binary linux x86_64
-        if: matrix.job.platform == 'linux'
+      - name: Strip release binary x86_64-linux-gnu
+        if: matrix.job.target == 'x86_64-unknown-linux-gnu'
         run: strip "target/${{ matrix.job.target }}/release/fuelup"
 
       - name: Strip release binary aarch64-linux-gnu

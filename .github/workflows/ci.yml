@@ -51,12 +51,10 @@ jobs:
           args: --all -- --check
 
   build-release:
-    name: 
+    name: build fuelup release binaries
     runs-on: ${{ matrix.job.os }}
-    if: github.event_name == 'release'
-    needs: [
-      cancel-previous-runs,
-    ]
+    if: github.event_name == 'release' && github.event.action == 'published'
+    needs: cancel-previous-runs
     strategy:
       matrix:
         job:
@@ -89,7 +87,7 @@ jobs:
           cache-on-failure: true
           key: "${{ matrix.job.target }}"
 
-      - name: Install Cross
+      - name: Use Cross 
         uses: baptiste0928/cargo-install@v1
         with:
           crate: cross
@@ -116,7 +114,7 @@ jobs:
         if: matrix.job.os == 'mac-os'
         run: strip -x "target/${{ matrix.job.target }}/release/fuelup"
 
-      - name: Prep Assets
+      - name: Prep assets
         id: prep_assets
         env:
           PLATFORM_NAME: ${{ matrix.job.platform }}

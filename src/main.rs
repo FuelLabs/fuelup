@@ -17,6 +17,13 @@ enum Fuelup {
 }
 
 fn main() -> Result<()> {
+    let format = tracing_subscriber::fmt::format()
+        .without_time()
+        .with_level(false)
+        .with_target(false);
+
+    tracing_subscriber::fmt().event_format(format).init();
+
     let cli = Cli::parse();
 
     match cli.command {

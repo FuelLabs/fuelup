@@ -11,7 +11,7 @@ use std::time::Duration;
 use tar::Archive;
 use tracing::{error, info};
 
-use crate::constants::FUELUP_PATH;
+use crate::constants::FUELUP_BIN_PATH;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
@@ -85,8 +85,8 @@ pub fn get_latest_tag(github_api_url: &str) -> Result<String> {
     Ok(response.tag_name)
 }
 
-fn fuelup_path() -> PathBuf {
-    home_dir().unwrap().join(FUELUP_PATH)
+fn fuelup_bin_path() -> PathBuf {
+    home_dir().unwrap().join(FUELUP_BIN_PATH)
 }
 
 fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
@@ -142,7 +142,7 @@ pub fn download_file_and_unpack(
 
     info!("Fetching binary from {}", &tarball_url);
 
-    let tarball_path = fuelup_path().join(tarball_name);
+    let tarball_path = fuelup_bin_path().join(tarball_name);
 
     if download_file(&tarball_url, &tarball_path).is_err() {
         error!(
@@ -151,7 +151,7 @@ pub fn download_file_and_unpack(
             &tarball_path.display()
         );
     };
-    let dst_path = home_dir().unwrap().join(Path::new(".fuelup/bin"));
+    let dst_path = fuelup_bin_path();
 
     unpack(&tarball_path, &dst_path)?;
 

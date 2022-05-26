@@ -6,7 +6,9 @@ use clap::Parser;
 use dirs::home_dir;
 use tracing::info;
 
-use crate::constants::{FUELUP_PATH, FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL};
+use crate::constants::{
+    FUELUP_BIN_PATH, FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL,
+};
 use crate::download::download_file_and_unpack;
 use crate::{
     constants::{FUEL_CORE_REPO, GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_REPO},
@@ -52,7 +54,7 @@ pub fn install() -> Result<()> {
         &fuel_core_bin_tarball_name,
     )?;
 
-    let fuelup_path = home_dir().unwrap().join(Path::new(FUELUP_PATH));
+    let fuelup_path = home_dir().unwrap().join(Path::new(FUELUP_BIN_PATH));
     for entry in std::fs::read_dir(&fuelup_path)? {
         let sub_path = entry?.path();
 
@@ -60,7 +62,7 @@ pub fn install() -> Result<()> {
             for bin in std::fs::read_dir(&sub_path)? {
                 let bin_file = bin?;
                 info!(
-                    "Unpacking and moving {} to {}/.fuelup",
+                    "Unpacking and moving {} to {}/.fuelup/bin",
                     &bin_file.file_name().to_string_lossy(),
                     home_dir().unwrap().display()
                 );

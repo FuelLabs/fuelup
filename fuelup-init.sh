@@ -89,22 +89,6 @@ assert_nz() {
     if [ -z "$1" ]; then err "assert_nz $2"; fi
 }
 
-usage() {
-    cat 1>&2 <<EOF
-The installer for fuelup
-USAGE:
-    fuelup [OPTIONS]
-OPTIONS:
-    -h, --help      Print help information
-    -v, --version   Install a specific version
-    -b, --branch    Install a specific branch
-    -P, --pr        Install a specific Pull Request
-    -C, --commit    Install a specific commit
-    -r, --repo      Install from a remote GitHib repo (uses default branch if no other options are set)
-    -p, --path      Install a local repository
-EOF
-}
-
 say() {
     printf 'fuelup: %s\n' "$1"
 }

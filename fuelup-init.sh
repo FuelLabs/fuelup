@@ -15,10 +15,13 @@ main() {
     local _arch="$RETVAL"
     assert_nz "$_arch" "arch"
 
+    mkdir -p "$FUELUP_DIR/bin"
+
     local _fuelup_version="0.0.1"
     local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/v0.0.1/fuelup-${_fuelup_version}-${_arch}.tar.gz"
 
     local _dir
+
     _dir="$(ensure mktemp -d)"
     local _file="${_dir}/fuelup.tar.gz"
 

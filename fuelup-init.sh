@@ -18,7 +18,7 @@ main() {
     mkdir -p "$FUELUP_DIR/bin"
 
     local _fuelup_version="0.0.1"
-    local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/v0.0.1/fuelup-${_fuelup_version}-${_arch}.tar.gz"
+    local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/v${_fuelup_version}/fuelup-${_fuelup_version}-${_arch}.tar.gz"
 
     local _dir
 

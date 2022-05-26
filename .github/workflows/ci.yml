@@ -1,0 +1,150 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  release:
+    types: [published]
+
+env:
+  CARGO_TERM_COLOR: always
+  REGISTRY: ghcr.io
+
+jobs:
+  cancel-previous-runs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ github.token }}
+
+  cargo-clippy:
+    needs: cancel-previous-runs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v1
+      - name: Check Clippy Linter
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --all-features --all-targets -- -D warnings
+
+  cargo-fmt-check:
+    needs: cancel-previous-runs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Check Formatting
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+  build-release:
+    name: build fuelup release binaries
+    runs-on: ${{ matrix.job.os }}
+    if: github.event_name == 'release' && github.event.action == 'published'
+    needs: cancel-previous-runs
+    strategy:
+      matrix:
+        job:
+          - os: ubuntu-latest
+            platform: linux
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-latest
+            platform: linux
+            target: aarch64-unknown-linux-gnu
+          - os: macos-latest
+            platform: darwin
+            target: x86_64-apple-darwin
+          - os: macos-latest
+            platform: darwin
+            target: aarch64-apple-darwin
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: ${{ matrix.job.target }}
+          override: true
+
+      - uses: Swatinem/rust-cache@v1
+        with:
+          cache-on-failure: true
+          key: "${{ matrix.job.target }}"
+
+      - name: Use Cross 
+        uses: baptiste0928/cargo-install@v1
+        with:
+          crate: cross
+          cache-key: "${{ matrix.job.target }}"
+
+      - name: Build fuelup
+        run: |
+          cross build --profile=release --target ${{ matrix.job.target }} -p fuelup
+
+      - name: Strip release binary x86_64-linux-gnu
+        if: matrix.job.target == 'x86_64-unknown-linux-gnu'
+        run: strip "target/${{ matrix.job.target }}/release/fuelup"
+
+      - name: Strip release binary aarch64-linux-gnu
+        if: matrix.job.target == 'aarch64-unknown-linux-gnu'
+        run: |
+          docker run --rm -v \
+          "$PWD/target:/target:Z" \
+          ghcr.io/cross-rs/aarch64-unknown-linux-gnu:main \
+          aarch64-linux-gnu-strip \
+          /target/aarch64-unknown-linux-gnu/release/fuelup
+
+      - name: Strip release binary mac
+        if: matrix.job.os == 'macos-latest'
+        run: strip -x "target/${{ matrix.job.target }}/release/fuelup"
+
+      - name: Prep assets
+        id: prep_assets
+        env:
+          PLATFORM_NAME: ${{ matrix.job.platform }}
+          TARGET: ${{ matrix.job.target }}
+        run: |
+          # Get tag name
+          # See: https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/m-p/32167/highlight/true#M1027
+          FUELUP_VERSION="${GITHUB_REF#refs/tags/}"
+
+          # trim v from tag prefix
+          FUELUP_VERSION="${FUELUP_VERSION#v}"
+
+          echo "version is: $FUELUP_VERSION"
+
+          # setup artifact filename
+          ARTIFACT="fuelup-$FUELUP_VERSION-${{ env.TARGET }}"
+          ZIP_FILE_NAME="$ARTIFACT.tar.gz"
+          echo "ZIP_FILE_NAME=$ZIP_FILE_NAME" >> $GITHUB_ENV
+
+          # create zip file
+          mkdir -pv "$ARTIFACT"
+          cp "target/${{ matrix.job.target }}/release/fuelup" "$ARTIFACT"
+          tar -czvf $ZIP_FILE_NAME "$ARTIFACT"
+
+      - name: Upload release archive
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./${{ env.ZIP_FILE_NAME }}
+          asset_name: ${{ env.ZIP_FILE_NAME }}
+          asset_content_type: application/gzipa

@@ -29,7 +29,7 @@ main() {
 
     ignore tar -xvf "$_file" -C "$_dir"
 
-    ensure mv "$_dir/fuelup-${_fuelup_version}-${_arch}/fuelup" "$FUELUP_DIR/bin"
+    ensure mv "$_dir/fuelup-${_fuelup_version}-${_arch}/fuelup" "$FUELUP_DIR/bin/fuelup"
     ensure chmod u+x "$FUELUP_DIR/bin/fuelup"
 
     if [ ! -x "$FUELUP_DIR/bin/fuelup" ]; then

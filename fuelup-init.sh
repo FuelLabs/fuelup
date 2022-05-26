@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+FUELUP_DIR=${FUELUP_DIR-"$HOME/.fuelup"}
+
 main() {
     need_cmd git
     need_cmd curl
@@ -18,14 +20,18 @@ main() {
 
     local _dir
     _dir="$(ensure mktemp -d)"
-    local _file="${_dir}/fuelup"
+    local _file="${_dir}/fuelup.tar.gz"
 
     ensure downloader "$_fuelup_url" "$_file" "$_arch"
-    ensure chmod u+x "$_file"
 
-    if [ ! -x "$_file" ]; then
-        printf '%s\n' "Cannot execute $_file (likely because of mounting /tmp as noexec)." 1>&2
-        printf '%s\n' "Please copy the file to a location where you can execute binaries and run ./rustup-init${_ext}." 1>&2
+    ignore tar -xvf "$_file" -C "$_dir"
+
+    ensure mv "$_dir/fuelup-${_fuelup_version}-${_arch}/fuelup" "$FUELUP_DIR/bin"
+    ensure chmod u+x "$FUELUP_DIR/bin/fuelup"
+
+    if [ ! -x "$FUELUP_DIR/bin/fuelup" ]; then
+        printf '%s\n' "Cannot execute $_FUELUP_DIR/bin/fuelup." 1>&2
+        printf '%s\n' "Please copy the file to a location where you can execute binaries and run ./fuelup." 1>&2
         exit 1
     fi
 
@@ -38,14 +44,15 @@ main() {
             err "Unable to run interactively. Run with -y to accept defaults, --help for additional options"
         fi
 
-        ignore "$_file" "$@" </dev/tty
+        ignore "$FUELUP_DIR/bin/fuelup" "$@" </dev/tty
     else
-        ignore "$_file" "$@"
+        ignore "$FUELUP_DIR/bin/fuelup" "$@"
     fi
 
     local _retval=$?
 
     ignore rm "$_file"
+    ignore rmdir "$_dir/fuelup-${_fuelup_version}-${_arch}"
     ignore rmdir "$_dir"
 
     return "$_retval"

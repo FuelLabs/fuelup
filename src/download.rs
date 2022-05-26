@@ -142,7 +142,7 @@ pub fn download_file_and_unpack(
 
     info!("Fetching binary from {}", &tarball_url);
 
-    let tarball_path = fuelup_path().join(tarball_name);
+    let tarball_path = fuelup_path().join("bin").join(tarball_name);
 
     if download_file(&tarball_url, &tarball_path).is_err() {
         error!(

@@ -12,7 +12,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/FuelLabs/
 
 This will install `forc`, `forc-fmt`, `forc-explore`, `forc-lsp` as well as `fuel-core` in `~/.fuelup/bin`. You will have to add `~/.fuelup/bin` to your `PATH`.
 
-In future, _fuelup_ will also let you switch between toolchains, allowing for a smooth developer experience while allowing you to have some flexibility.
+In future, _fuelup_ will also let you switch between toolchains, allowing for a smooth developer experience while allowing you to have more flexibility, along with other features.
 
 ## License
 

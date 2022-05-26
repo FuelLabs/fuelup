@@ -13,25 +13,16 @@ main() {
   local _arch="$RETVAL"
   assert_nz "$_arch" "arch"
 
-  # TODO: update url once we publish releases
-  # releases should support linux/darwin, aarch64 and x86_64, so perhaps in the format:
-  # fuelup-init-x86_64-apple-darwin.tar.gz
-  # fuelup-init-x86_64-unknown-linux-gnu.tar.gz
-  # fuelup-init-aarch64-apple-darwin.tar.gz
-  # fuelup-init-aarch64-unknown-linux-gnu.tar.gz
-  # 
-  # Ideally devs should be able to curl this binary and run it to install forc
-  local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/fuelup-init-${_arch}"
+  echo "$_arch"
 
-  # TODO: testing with just a checked-in binary, remove when we have releases
-  local _tmp_url="https://github.com/FuelLabs/fuelup/raw/binggh/mvp/fuelup/fuelup"
-
+  local _fuelup_version="0.0.1"
+  local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/v0.0.1/fuelup-${_fuelup_version}-${_arch}.tar.gz"
 
   local _dir
   _dir="$(ensure mktemp -d)"
   local _file="${_dir}/fuelup"
 
-  ensure downloader "$_tmp_url" "$_file" "$_arch"
+  ensure downloader "$_fuelup_url" "$_file" "$_arch"
   ensure chmod u+x "$_file"
 
     if [ ! -x "$_file" ]; then
@@ -69,10 +60,10 @@ get_architecture() {
 
   case "$_ostype" in
     Linux)
-      _ostype="linux"
+      _ostype="unknown-linux"
       ;;
     Darwin)
-      _ostype="darwin"
+      _ostype="apple-darwin"
       ;;
     *)
       err "unsupported os type: $_ostype"
@@ -81,17 +72,17 @@ get_architecture() {
 
   case "$_arch" in
     x86_64 | x86-64 | x64 | amd64)
-      _arch="amd64"
+      _arch="x86_64"
       ;;
     aarch64 | arm64)
-      _arch="arm64"
+      _arch="aarch64"
       ;; 
     *)
       err "unsupported cpu type: $_cputype"
       ;;
   esac
 
-  _arch="${_ostype}-${_arch}"
+  _arch="${_arch}-${_ostype}"
 
   RETVAL="$_arch"
 }

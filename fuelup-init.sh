@@ -30,7 +30,6 @@ main() {
 
     local _dir
 
-
     _dir="$(ensure mktemp -d)"
     local _file="${_dir}/fuelup.tar.gz"
 

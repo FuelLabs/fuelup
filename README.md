@@ -4,7 +4,7 @@
 
 ## Installation
 
-Currently, this script supports Linux/macOS systems only. For other systems, please build from source by following the instructions in the [Sway repository](https://github.com/FuelLabs/sway#building-from-source).
+Currently, this script supports Linux/macOS systems only. For other systems, please [install from cargo](https://fuellabs.github.io/sway/latest/introduction/installation.html#installing-from-cargo) or, alternatively, [build from source](https://fuellabs.github.io/sway/latest/introduction/installation.html#building-from-source).
 
 Installation is simple: all you need is `fuelup-init.sh`, which downloads the core Fuel binaries needed to get you started on development.
 

@@ -35,7 +35,7 @@ main() {
 
     ensure downloader "$_fuelup_url" "$_file" "$_arch"
 
-    ignore tar -xvf "$_file" -C "$_dir"
+    ignore tar -xf "$_file" -C "$_dir"
 
     ensure mv "$_dir/fuelup-${_fuelup_version}-${_arch}/fuelup" "$FUELUP_DIR/bin/fuelup"
     ensure chmod u+x "$FUELUP_DIR/bin/fuelup"

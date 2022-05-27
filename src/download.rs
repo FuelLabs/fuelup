@@ -95,7 +95,10 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
     let mut archive = Archive::new(decompressed);
 
     if let Err(e) = archive.unpack(dst) {
-        error!("{}", e);
+        error!(
+            "{}. The archive could be corrupted or the release may not be ready yet",
+            e
+        );
     };
 
     Ok(())

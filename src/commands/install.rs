@@ -19,7 +19,7 @@ use crate::{
 pub struct InstallCommand {}
 
 pub fn install() -> Result<()> {
-    info!("Downloading the Forc toolchain");
+    info!("\nDownloading the Forc toolchain\n");
 
     let forc_release_latest_tag = match get_latest_tag(&format!(
         "{}{}/{}",
@@ -36,6 +36,12 @@ pub fn install() -> Result<()> {
         Ok(t) => t,
         Err(_) => bail!("Failed to fetch latest fuel-core release tag from GitHub API"),
     };
+
+    let fuelup_path = home_dir().unwrap().join(Path::new(FUELUP_BIN_PATH));
+
+    if !fuelup_path.is_dir() {
+        fs::create_dir_all(&fuelup_path)?;
+    }
 
     let forc_bin_tarball_name = forc_bin_tarball_name()?;
     let fuel_core_bin_tarball_name = fuel_core_bin_tarball_name(&fuel_core_release_latest_tag)?;
@@ -54,7 +60,6 @@ pub fn install() -> Result<()> {
         &fuel_core_bin_tarball_name,
     )?;
 
-    let fuelup_path = home_dir().unwrap().join(Path::new(FUELUP_BIN_PATH));
     for entry in std::fs::read_dir(&fuelup_path)? {
         let sub_path = entry?.path();
 

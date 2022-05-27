@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-
+ 
 FUELUP_DIR=${FUELUP_DIR-"$HOME/.fuelup"}
 
 main() {

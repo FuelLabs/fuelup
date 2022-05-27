@@ -105,10 +105,13 @@ pub fn install() -> Result<()> {
             errored_bins_message
         );
     };
-    info!(
-        "\nYou might need to add {} to your path.",
-        fuelup_bin_dir.display()
-    );
+
+    if errored_bins_message.is_empty() {
+        info!(
+            "\nYou might need to add {} to your path.",
+            fuelup_bin_dir.display()
+        );
+    }
 
     Ok(())
 }

@@ -10,6 +10,7 @@ main() {
     need_cmd mkdir
     need_cmd rm
     need_cmd rmdir
+    need_cmd jq
 
     get_architecture || return 1
     local _arch="$RETVAL"
@@ -17,7 +18,8 @@ main() {
 
     mkdir -p "$FUELUP_DIR/bin"
 
-    local _fuelup_version="0.0.2"
+    local _fuelup_version=$(curl -s https://api.github.com/repos/FuelLabs/fuelup/releases/latest | jq -r ".tag_name")
+    _fuelup_version=${_fuelup_version:1}
     local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/v${_fuelup_version}/fuelup-${_fuelup_version}-${_arch}.tar.gz"
 
     local _dir

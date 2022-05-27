@@ -33,8 +33,9 @@ pub fn install() -> Result<()> {
         Err(_) => bail!("Failed to fetch latest fuel-core release tag from GitHub API"),
     };
 
-    if !fuelup_bin_dir().is_dir() {
-        fs::create_dir_all(&fuelup_bin_dir())?;
+    let fuelup_bin_dir = fuelup_bin_dir();
+    if !fuelup_bin_dir.is_dir() {
+        fs::create_dir_all(&fuelup_bin_dir)?;
     }
 
     let forc_bin_tarball_name = forc_bin_tarball_name()?;
@@ -54,7 +55,7 @@ pub fn install() -> Result<()> {
         &fuel_core_bin_tarball_name,
     )?;
 
-    for entry in std::fs::read_dir(&fuelup_bin_dir())? {
+    for entry in std::fs::read_dir(&fuelup_bin_dir)? {
         let sub_path = entry?.path();
 
         if sub_path.is_dir() {
@@ -63,12 +64,9 @@ pub fn install() -> Result<()> {
                 info!(
                     "Unpacking and moving {} to {}",
                     &bin_file.file_name().to_string_lossy(),
-                    fuelup_bin_dir().display()
+                    fuelup_bin_dir.display()
                 );
-                fs::copy(
-                    &bin_file.path(),
-                    fuelup_bin_dir().join(&bin_file.file_name()),
-                )?;
+                fs::copy(&bin_file.path(), fuelup_bin_dir.join(&bin_file.file_name()))?;
             }
 
             fs::remove_dir_all(sub_path)?;
@@ -82,7 +80,7 @@ pub fn install() -> Result<()> {
     info!("\nThe Forc toolchain is installed now. Great!");
     info!(
         "\nYou might need to add {} to your path.",
-        fuelup_bin_dir().display()
+        fuelup_bin_dir.display()
     );
 
     Ok(())

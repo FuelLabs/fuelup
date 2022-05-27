@@ -145,7 +145,9 @@ pub fn download_file_and_unpack(
 
     info!("Fetching binary from {}", &tarball_url);
 
-    let tarball_path = fuelup_bin_dir().join(tarball_name);
+    let fuelup_bin_dir = fuelup_bin_dir();
+
+    let tarball_path = fuelup_bin_dir.join(tarball_name);
 
     if download_file(&tarball_url, &tarball_path).is_err() {
         error!(
@@ -154,9 +156,8 @@ pub fn download_file_and_unpack(
             &tarball_path.display()
         );
     };
-    let dst_path = fuelup_bin_dir();
 
-    unpack(&tarball_path, &dst_path)?;
+    unpack(&tarball_path, &fuelup_bin_dir)?;
 
     fs::remove_file(&tarball_path)?;
 

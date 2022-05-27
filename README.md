@@ -15,7 +15,7 @@ This will install `forc`, `forc-fmt`, `forc-explore`, `forc-lsp` as well as `fue
 For `bash`/`zsh`, in `~/.bashrc` or `~/.zshrc` respectively:
 
 ```sh
-export PATH="$HOME/.fuelup/bin"
+export PATH="$HOME/.fuelup/bin:$PATH"
 ```
 
 For `fish`, run this command below:

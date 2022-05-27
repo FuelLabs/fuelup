@@ -11,7 +11,7 @@ use std::time::Duration;
 use tar::Archive;
 use tracing::{error, info};
 
-use crate::constants::FUELUP_PATH;
+use crate::constants::FUELUP_DIR;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
@@ -85,8 +85,8 @@ pub fn get_latest_tag(github_api_url: &str) -> Result<String> {
     Ok(response.tag_name)
 }
 
-fn fuelup_path() -> PathBuf {
-    home_dir().unwrap().join(FUELUP_PATH)
+pub fn fuelup_bin_dir() -> PathBuf {
+    home_dir().unwrap().join(FUELUP_DIR).join("bin")
 }
 
 fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
@@ -95,7 +95,10 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
     let mut archive = Archive::new(decompressed);
 
     if let Err(e) = archive.unpack(dst) {
-        error!("{}", e);
+        error!(
+            "{}. The archive could be corrupted or the release may not be ready yet",
+            e
+        );
     };
 
     Ok(())
@@ -142,7 +145,9 @@ pub fn download_file_and_unpack(
 
     info!("Fetching binary from {}", &tarball_url);
 
-    let tarball_path = fuelup_path().join(tarball_name);
+    let fuelup_bin_dir = fuelup_bin_dir();
+
+    let tarball_path = fuelup_bin_dir.join(tarball_name);
 
     if download_file(&tarball_url, &tarball_path).is_err() {
         error!(
@@ -151,9 +156,8 @@ pub fn download_file_and_unpack(
             &tarball_path.display()
         );
     };
-    let dst_path = home_dir().unwrap().join(Path::new(".fuelup"));
 
-    unpack(&tarball_path, &dst_path)?;
+    unpack(&tarball_path, &fuelup_bin_dir)?;
 
     fs::remove_file(&tarball_path)?;
 

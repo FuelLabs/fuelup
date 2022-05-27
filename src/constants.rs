@@ -1,4 +1,4 @@
-pub const FUELUP_PATH: &str = ".fuelup";
+pub const FUELUP_DIR: &str = ".fuelup";
 pub const SWAY_REPO: &str = "sway";
 pub const FUEL_CORE_REPO: &str = "fuel-core";
 

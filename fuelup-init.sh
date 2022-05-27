@@ -1,42 +1,42 @@
 #!/bin/sh
 set -e
-  
+
+FUELUP_DIR=${FUELUP_DIR-"$HOME/.fuelup"}
+
 main() {
-  need_cmd git
-  need_cmd curl
-  need_cmd chmod
-  need_cmd mkdir
-  need_cmd rm
-  need_cmd rmdir
+    need_cmd git
+    need_cmd curl
+    need_cmd chmod
+    need_cmd mkdir
+    need_cmd rm
+    need_cmd rmdir
+    need_cmd jq
 
-  get_architecture || return 1
-  local _arch="$RETVAL"
-  assert_nz "$_arch" "arch"
+    get_architecture || return 1
+    local _arch="$RETVAL"
+    assert_nz "$_arch" "arch"
 
-  # TODO: update url once we publish releases
-  # releases should support linux/darwin, aarch64 and x86_64, so perhaps in the format:
-  # fuelup-init-x86_64-apple-darwin.tar.gz
-  # fuelup-init-x86_64-unknown-linux-gnu.tar.gz
-  # fuelup-init-aarch64-apple-darwin.tar.gz
-  # fuelup-init-aarch64-unknown-linux-gnu.tar.gz
-  # 
-  # Ideally devs should be able to curl this binary and run it to install forc
-  local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/fuelup-init-${_arch}"
+    mkdir -p "$FUELUP_DIR/bin"
 
-  # TODO: testing with just a checked-in binary, remove when we have releases
-  local _tmp_url="https://github.com/FuelLabs/fuelup/raw/binggh/mvp/fuelup/fuelup"
+    local _fuelup_version=$(curl -s https://api.github.com/repos/FuelLabs/fuelup/releases/latest | jq -r ".tag_name")
+    _fuelup_version=${_fuelup_version:1}
+    local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/v${_fuelup_version}/fuelup-${_fuelup_version}-${_arch}.tar.gz"
 
+    local _dir
 
-  local _dir
-  _dir="$(ensure mktemp -d)"
-  local _file="${_dir}/fuelup"
+    _dir="$(ensure mktemp -d)"
+    local _file="${_dir}/fuelup.tar.gz"
 
-  ensure downloader "$_tmp_url" "$_file" "$_arch"
-  ensure chmod u+x "$_file"
+    ensure downloader "$_fuelup_url" "$_file" "$_arch"
 
-    if [ ! -x "$_file" ]; then
-        printf '%s\n' "Cannot execute $_file (likely because of mounting /tmp as noexec)." 1>&2
-        printf '%s\n' "Please copy the file to a location where you can execute binaries and run ./rustup-init${_ext}." 1>&2
+    ignore tar -xvf "$_file" -C "$_dir"
+
+    ensure mv "$_dir/fuelup-${_fuelup_version}-${_arch}/fuelup" "$FUELUP_DIR/bin/fuelup"
+    ensure chmod u+x "$FUELUP_DIR/bin/fuelup"
+
+    if [ ! -x "$FUELUP_DIR/bin/fuelup" ]; then
+        printf '%s\n' "Cannot execute $_FUELUP_DIR/bin/fuelup." 1>&2
+        printf '%s\n' "Please copy the file to a location where you can execute binaries and run ./fuelup." 1>&2
         exit 1
     fi
 
@@ -49,72 +49,56 @@ main() {
             err "Unable to run interactively. Run with -y to accept defaults, --help for additional options"
         fi
 
-        ignore "$_file" "$@" < /dev/tty
+        ignore "$FUELUP_DIR/bin/fuelup" "$@" </dev/tty
     else
-        ignore "$_file" "$@"
+        ignore "$FUELUP_DIR/bin/fuelup" "$@"
     fi
 
     local _retval=$?
 
     ignore rm "$_file"
+    ignore rmdir "$_dir/fuelup-${_fuelup_version}-${_arch}"
     ignore rmdir "$_dir"
 
     return "$_retval"
 }
 
 get_architecture() {
-  local _ostype _cputype
-  _ostype="$(uname -s)"
-  _arch="$(uname -m)"
+    local _ostype _cputype
+    _ostype="$(uname -s)"
+    _arch="$(uname -m)"
 
-  case "$_ostype" in
+    case "$_ostype" in
     Linux)
-      _ostype="linux"
-      ;;
+        _ostype="unknown-linux-gnu"
+        ;;
     Darwin)
-      _ostype="darwin"
-      ;;
+        _ostype="apple-darwin"
+        ;;
     *)
-      err "unsupported os type: $_ostype"
-      ;;
-  esac
+        err "unsupported os type: $_ostype"
+        ;;
+    esac
 
-  case "$_arch" in
+    case "$_arch" in
     x86_64 | x86-64 | x64 | amd64)
-      _arch="amd64"
-      ;;
+        _arch="x86_64"
+        ;;
     aarch64 | arm64)
-      _arch="arm64"
-      ;; 
+        _arch="aarch64"
+        ;;
     *)
-      err "unsupported cpu type: $_cputype"
-      ;;
-  esac
+        err "unsupported cpu type: $_cputype"
+        ;;
+    esac
 
-  _arch="${_ostype}-${_arch}"
+    _arch="${_arch}-${_ostype}"
 
-  RETVAL="$_arch"
+    RETVAL="$_arch"
 }
-
 
 assert_nz() {
     if [ -z "$1" ]; then err "assert_nz $2"; fi
-}
-
-usage() {
-	cat 1>&2 <<EOF
-The installer for fuelup
-USAGE:
-    fuelup [OPTIONS]
-OPTIONS:
-    -h, --help      Print help information
-    -v, --version   Install a specific version
-    -b, --branch    Install a specific branch
-    -P, --pr        Install a specific Pull Request
-    -C, --commit    Install a specific commit
-    -r, --repo      Install from a remote GitHib repo (uses default branch if no other options are set)
-    -p, --path      Install a local repository
-EOF
 }
 
 say() {
@@ -122,13 +106,13 @@ say() {
 }
 
 need_cmd() {
-  if ! check_cmd "$1"; then
-    err "need '$1' (command not found)"
-  fi
+    if ! check_cmd "$1"; then
+        err "need '$1' (command not found)"
+    fi
 }
 
 check_cmd() {
-  command -v "$1" > /dev/null 2>&1
+    command -v "$1" >/dev/null 2>&1
 }
 
 # Run a command that should never fail. If the command fails execution
@@ -137,7 +121,6 @@ check_cmd() {
 ensure() {
     if ! "$@"; then err "command failed: $*"; fi
 }
-
 
 downloader() {
     local _dld
@@ -184,7 +167,7 @@ downloader() {
 
         return $_status
     elif [ "$_dld" = wget ]; then
-        if [ "$(wget -V 2>&1|head -2|tail -1|cut -f1 -d" ")" = "BusyBox" ]; then
+        if [ "$(wget -V 2>&1 | head -2 | tail -1 | cut -f1 -d" ")" = "BusyBox" ]; then
             echo "Warning: using the BusyBox version of wget.  Not enforcing strong cipher suites for TLS or TLS v1.2, this is potentially less secure"
             _err=$(wget "$1" -O "$2" 2>&1)
             _status=$?
@@ -214,20 +197,19 @@ downloader() {
         fi
         return $_status
     else
-        err "Unknown downloader"   # should not reach here
+        err "Unknown downloader" # should not reach here
     fi
 }
 
-
 # Check if curl supports the --retry flag, then pass it to the curl invocation.
 check_curl_for_retry_support() {
-  local _retry_supported=""
-  # "unspecified" is for arch, allows for possibility old OS using macports, homebrew, etc.
-  if check_help_for "notspecified" "curl" "--retry"; then
-    _retry_supported="--retry 3"
-  fi
+    local _retry_supported=""
+    # "unspecified" is for arch, allows for possibility old OS using macports, homebrew, etc.
+    if check_help_for "notspecified" "curl" "--retry"; then
+        _retry_supported="--retry 3"
+    fi
 
-  RETVAL="$_retry_supported"
+    RETVAL="$_retry_supported"
 
 }
 
@@ -242,33 +224,33 @@ check_help_for() {
 
     local _category
     if "$_cmd" --help | grep -q 'For all options use the manual or "--help all".'; then
-      _category="all"
+        _category="all"
     else
-      _category=""
+        _category=""
     fi
 
     case "$_arch" in
 
-        *darwin*)
+    *darwin*)
         if check_cmd sw_vers; then
             case $(sw_vers -productVersion) in
-                10.*)
-                    # If we're running on macOS, older than 10.13, then we always
-                    # fail to find these options to force fallback
-                    if [ "$(sw_vers -productVersion | cut -d. -f2)" -lt 13 ]; then
-                        # Older than 10.13
-                        echo "Warning: Detected macOS platform older than 10.13"
-                        return 1
-                    fi
-                    ;;
-                11.*)
-                    # We assume Big Sur will be OK for now
-                    ;;
-                *)
-                    # Unknown product version, warn and continue
-                    echo "Warning: Detected unknown macOS major version: $(sw_vers -productVersion)"
-                    echo "Warning TLS capabilities detection may fail"
-                    ;;
+            10.*)
+                # If we're running on macOS, older than 10.13, then we always
+                # fail to find these options to force fallback
+                if [ "$(sw_vers -productVersion | cut -d. -f2)" -lt 13 ]; then
+                    # Older than 10.13
+                    echo "Warning: Detected macOS platform older than 10.13"
+                    return 1
+                fi
+                ;;
+            11.*)
+                # We assume Big Sur will be OK for now
+                ;;
+            *)
+                # Unknown product version, warn and continue
+                echo "Warning: Detected unknown macOS major version: $(sw_vers -productVersion)"
+                echo "Warning TLS capabilities detection may fail"
+                ;;
             esac
         fi
         ;;
@@ -284,7 +266,6 @@ check_help_for() {
     true # not strictly needed
 
 }
-
 
 # Return cipher suite string specified by user, otherwise return strong TLS 1.2-1.3 cipher suites
 # if support by local tools is detected. Detection currently supports these curl backends:

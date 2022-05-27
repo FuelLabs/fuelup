@@ -1,9 +1,7 @@
 use std::fs;
-use std::path::Path;
 
 use anyhow::{bail, Result};
 use clap::Parser;
-use dirs::home_dir;
 use tracing::info;
 
 use crate::constants::{FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL};

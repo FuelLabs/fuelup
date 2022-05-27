@@ -12,6 +12,18 @@ curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/FuelLabs/
 
 This will install `forc`, `forc-fmt`, `forc-explore`, `forc-lsp` as well as `fuel-core` in `~/.fuelup/bin`. You will have to add `~/.fuelup/bin` to your `PATH`.
 
+For `bash`/`zsh`, in `~/.bashrc` or `~/.zshrc` respectively:
+
+```sh
+export PATH="$HOME/.fuelup/bin"
+```
+
+For `fish`, run this command below:
+
+```sh
+fish_add_path ~/.fuelup/bin
+```
+
 In future, `fuelup` will also let you switch between toolchains, allowing for a smooth developer experience while allowing you to have more flexibility, along with other features.
 
 ## License

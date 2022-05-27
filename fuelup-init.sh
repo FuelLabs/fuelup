@@ -12,6 +12,12 @@ main() {
     need_cmd rmdir
     need_cmd jq
 
+    check_cargo_bin forc
+    check_cargo_bin forc-fmt
+    check_cargo_bin forc-explore
+    check_cargo_bin forc-lsp
+    check_cargo_bin fuel-core 
+
     get_architecture || return 1
     local _arch="$RETVAL"
     assert_nz "$_arch" "arch"
@@ -23,6 +29,7 @@ main() {
     local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/v${_fuelup_version}/fuelup-${_fuelup_version}-${_arch}.tar.gz"
 
     local _dir
+
 
     _dir="$(ensure mktemp -d)"
     local _file="${_dir}/fuelup.tar.gz"
@@ -95,6 +102,12 @@ get_architecture() {
     _arch="${_arch}-${_ostype}"
 
     RETVAL="$_arch"
+}
+
+check_cargo_bin() {
+    if [[ $(which $1) =~ "cargo" ]]; then
+      warn "$1 is already installed via cargo and is in use by your system. You should update your PATH, or execute 'cargo uninstall $1'"
+    fi
 }
 
 assert_nz() {
@@ -331,6 +344,10 @@ get_strong_ciphersuites_for() {
 err() {
     say "$1" >&2
     exit 1
+}
+
+warn() {
+  say "warning: ${1}" >&2
 }
 
 # This is just for indicating that commands' results are being

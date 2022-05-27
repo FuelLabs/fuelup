@@ -63,13 +63,13 @@ pub fn install() -> Result<()> {
     ) {
         Ok(()) => {
             if !installed_bins_message.is_empty() {
-                installed_bins_message.push_str(&", ")
+                installed_bins_message.push_str(", ")
             }
             installed_bins_message.push_str(&format!("fuel-core {}", &fuel_core_release_latest_tag))
         }
         Err(_) => {
             if !errored_bins_message.is_empty() {
-                errored_bins_message.push_str(&", ")
+                errored_bins_message.push_str(", ")
             }
             errored_bins_message.push_str(&format!("fuel-core {}", &fuel_core_release_latest_tag))
         }
@@ -96,12 +96,12 @@ pub fn install() -> Result<()> {
     info!("\nInstalled: {}\n", installed_bins_message);
 
     if errored_bins_message.is_empty() {
-        info!("The Forc toolchain is installed now. Great!");
+        info!("The Fuel toolchain is installed now. Great!");
     } else if installed_bins_message.is_empty() {
         error!("fuelup failed to install: {}", errored_bins_message)
     } else {
         info!(
-            "The Forc toolchain is partially installed.\nfuelup failed to install: {}",
+            "The Fuel toolchain is partially installed.\nfuelup failed to install: {}",
             errored_bins_message
         );
     };

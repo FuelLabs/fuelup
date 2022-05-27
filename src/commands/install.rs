@@ -96,22 +96,18 @@ pub fn install() -> Result<()> {
     info!("\nInstalled: {}\n", installed_bins_message);
 
     if errored_bins_message.is_empty() {
-        info!("The Fuel toolchain is installed now. Great!");
+        info!(
+            "The Fuel toolchain is installed now. Great!\n You might need to add {} to your path.",
+            fuelup_bin_dir.display()
+        );
     } else if installed_bins_message.is_empty() {
         error!("fuelup failed to install: {}", errored_bins_message)
     } else {
         info!(
-            "The Fuel toolchain is partially installed.\nfuelup failed to install: {}",
-            errored_bins_message
+            "The Fuel toolchain is partially installed.\nfuelup failed to install: {}\n You might need to add {} to your path.",
+            errored_bins_message, fuelup_bin_dir.display()
         );
     };
-
-    if errored_bins_message.is_empty() {
-        info!(
-            "\nYou might need to add {} to your path.",
-            fuelup_bin_dir.display()
-        );
-    }
 
     Ok(())
 }

@@ -76,8 +76,12 @@ pub fn install() -> Result<()> {
         }
     }
 
-    info!("The Forc toolchain is installed now. Great!\n");
-    info!("You might need to add $HOME/.fuelup/bin to your path.");
+    info!(
+        "\n\nInstalled: forc {}, fuel-core {}",
+        forc_release_latest_tag, fuel_core_release_latest_tag
+    );
+    info!("\n\nThe Forc toolchain is installed now. Great!");
+    info!("\nYou might need to add $HOME/.fuelup/bin to your path.");
 
     Ok(())
 }

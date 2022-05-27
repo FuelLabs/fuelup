@@ -2,7 +2,7 @@ use std::fs;
 
 use anyhow::{bail, Result};
 use clap::Parser;
-use tracing::info;
+use tracing::{error, info};
 
 use crate::constants::{FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL};
 use crate::download::{download_file_and_unpack, fuelup_bin_dir};
@@ -42,18 +42,38 @@ pub fn install() -> Result<()> {
     let fuel_core_bin_tarball_name = fuel_core_bin_tarball_name(&fuel_core_release_latest_tag)?;
 
     info!("Fetching forc {}", &forc_release_latest_tag);
-    download_file_and_unpack(
+
+    let mut installed_bins_message = String::new();
+    let mut errored_bins_message = String::new();
+
+    match download_file_and_unpack(
         SWAY_RELEASE_DOWNLOAD_URL,
         &forc_release_latest_tag,
         &forc_bin_tarball_name,
-    )?;
+    ) {
+        Ok(()) => installed_bins_message.push_str(&format!("forc {}", &forc_release_latest_tag)),
+        Err(_) => errored_bins_message.push_str(&format!("forc {}", &forc_release_latest_tag)),
+    };
 
     info!("Fetching fuel-core {}", &fuel_core_release_latest_tag);
-    download_file_and_unpack(
+    match download_file_and_unpack(
         FUEL_CORE_RELEASE_DOWNLOAD_URL,
         &fuel_core_release_latest_tag,
         &fuel_core_bin_tarball_name,
-    )?;
+    ) {
+        Ok(()) => {
+            if !installed_bins_message.is_empty() {
+                installed_bins_message.push_str(&", ")
+            }
+            installed_bins_message.push_str(&format!("fuel-core {}", &fuel_core_release_latest_tag))
+        }
+        Err(_) => {
+            if !errored_bins_message.is_empty() {
+                errored_bins_message.push_str(&", ")
+            }
+            errored_bins_message.push_str(&format!("fuel-core {}", &fuel_core_release_latest_tag))
+        }
+    };
 
     for entry in std::fs::read_dir(&fuelup_bin_dir)? {
         let sub_path = entry?.path();
@@ -73,11 +93,18 @@ pub fn install() -> Result<()> {
         }
     }
 
-    info!(
-        "\n\nInstalled: forc {}, fuel-core {}",
-        forc_release_latest_tag, fuel_core_release_latest_tag
-    );
-    info!("\nThe Forc toolchain is installed now. Great!");
+    info!("\nInstalled: {}\n", installed_bins_message);
+
+    if errored_bins_message.is_empty() {
+        info!("The Forc toolchain is installed now. Great!");
+    } else if installed_bins_message.is_empty() {
+        error!("fuelup failed to install: {}", errored_bins_message)
+    } else {
+        info!(
+            "The Forc toolchain is partially installed.\nfuelup failed to install: {}",
+            errored_bins_message
+        );
+    };
     info!(
         "\nYou might need to add {} to your path.",
         fuelup_bin_dir.display()

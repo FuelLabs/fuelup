@@ -12,7 +12,7 @@ struct Cli {
 
 #[derive(Debug, Parser)]
 enum Fuelup {
-    /// Installs the latest forc toolchain.
+    /// Installs the latest Fuel toolchain.
     Install(InstallCommand),
 }
 

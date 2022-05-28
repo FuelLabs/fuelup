@@ -24,14 +24,65 @@ main() {
 
     mkdir -p "$FUELUP_DIR/bin"
 
-    local _fuelup_version=$(curl -s https://api.github.com/repos/FuelLabs/fuelup/releases/latest | jq -r ".tag_name")
-    _fuelup_version=${_fuelup_version:1}
+    local _fuelup_version
+    _fuelup_version="$(curl -s https://api.github.com/repos/FuelLabs/fuelup/releases/latest | jq -r ".tag_name")"
+    _fuelup_version="$(echo "${_fuelup_version}" | cut -c 1 --complement)"
     local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/v${_fuelup_version}/fuelup-${_fuelup_version}-${_arch}.tar.gz"
 
     local _dir
-
     _dir="$(ensure mktemp -d)"
     local _file="${_dir}/fuelup.tar.gz"
+
+    local _ansi_escapes_are_valid=false
+    if [ -t 2 ]; then
+        if [ "${TERM+set}" = 'set' ]; then
+            case "$TERM" in
+                xterm*|rxvt*|urxvt*|linux*|vt*)
+                    _ansi_escapes_are_valid=true
+                ;;
+            esac
+        fi
+    fi
+
+    # check if we have to use /dev/tty to prompt the user
+    local need_tty=yes
+    for arg in "$@"; do
+        case "$arg" in
+            --help)
+                usage
+                exit 0
+                ;;
+            *)
+                OPTIND=1
+                if [ "${arg%%--*}" = "" ]; then
+                    # Long option (other than --help);
+                    # don't attempt to interpret it.
+                    continue
+                fi
+                while getopts :hy sub_arg "$arg"; do
+                    case "$sub_arg" in
+                        h)
+                            usage
+                            exit 0
+                            ;;
+                        y)
+                            # user wants to skip the prompt --
+                            # we don't need /dev/tty
+                            need_tty=no
+                            ;;
+                        *)
+                            ;;
+                        esac
+                done
+                ;;
+        esac
+    done
+
+    if $_ansi_escapes_are_valid; then
+        printf "\33[1minfo:\33[0m downloading installer\n" 1>&2
+    else
+        printf '%s\n' 'info: downloading installer' 1>&2
+    fi
 
     ensure downloader "$_fuelup_url" "$_file" "$_arch"
 
@@ -66,7 +117,8 @@ main() {
     ignore rmdir "$_dir/fuelup-${_fuelup_version}-${_arch}"
     ignore rmdir "$_dir"
 
-    echo "\nfuelup ${_fuelup_version} has been installed in $FUELUP_DIR/bin. To fetch the latest forc and fuel-core binaries, run 'fuelup install'."
+    printf '\n'
+    printf '%s\n' "fuelup ${_fuelup_version} has been installed in $FUELUP_DIR/bin. To fetch the latest forc and fuel-core binaries, run 'fuelup install'." 1>&2
 
     return "$_retval"
 }
@@ -106,7 +158,7 @@ get_architecture() {
 }
 
 check_cargo_bin() {
-    if [[ $(which $1) =~ "cargo" ]]; then
+    if which "${1}" | grep -q "[.cargo]"; then
       warn "$1 is already installed via cargo and is in use by your system. You should update your PATH, or execute 'cargo uninstall $1'"
     fi
 }
@@ -272,7 +324,7 @@ check_help_for() {
     esac
 
     for _arg in "$@"; do
-        if ! "$_cmd" --help $_category | grep -q -- "$_arg"; then
+        if ! "$_cmd" --help "$_category" | grep -q -- "$_arg"; then
             return 1
         fi
     done

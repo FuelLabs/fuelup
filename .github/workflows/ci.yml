@@ -34,7 +34,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --all-features --all-targets -- -D warnings
+          args: --locked --all-features --all-targets -- -D warnings
 
   cargo-fmt-check:
     needs: cancel-previous-runs

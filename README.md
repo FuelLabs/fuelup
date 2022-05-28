@@ -30,4 +30,4 @@ In future, `fuelup` will also let you switch between toolchains, allowing for a 
 
 ## License
 
-Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or <https://www.apache.org/licenses/LICENSE-2.0>)
+Apache License, Version 2.0, ([LICENSE](./LICENSE) or <https://www.apache.org/licenses/LICENSE-2.0>)

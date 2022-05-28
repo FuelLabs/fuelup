@@ -15,7 +15,7 @@ use crate::{
 pub struct InstallCommand {}
 
 pub fn install() -> Result<()> {
-    info!("\nDownloading the Forc toolchain\n");
+    info!("\nDownloading the Fuel toolchain\n");
 
     let forc_release_latest_tag = match get_latest_tag(&format!(
         "{}{}/{}",
@@ -77,7 +77,7 @@ pub fn install() -> Result<()> {
         "\n\nInstalled: forc {}, fuel-core {}",
         forc_release_latest_tag, fuel_core_release_latest_tag
     );
-    info!("\nThe Forc toolchain is installed now. Great!");
+    info!("\nThe Fuel toolchain is installed now. Great!");
     info!(
         "\nYou might need to add {} to your path.",
         fuelup_bin_dir.display()

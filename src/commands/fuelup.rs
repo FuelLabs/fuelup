@@ -3,14 +3,13 @@ use clap::Parser;
 use tracing::info;
 
 use crate::{
-    commands::install::unpack_extracted_bins,
     constants::{FUELUP_RELEASE_DOWNLOAD_URL, GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST},
-    download::{download_file_and_unpack, fuelup_bin_dir, get_latest_tag},
+    download::{download_file_and_unpack, fuelup_bin_dir, get_latest_tag, unpack_extracted_bins},
 };
 
 #[derive(Debug, Parser)]
 pub enum FuelupSubcommand {
-    /// Updates the fuelup tool.
+    /// Updates fuelup
     Update,
 }
 
@@ -35,8 +34,6 @@ fn fuelup_bin_tarball_name(version: &str) -> Result<String> {
         unsupported_os => bail!("Unsupported os: {}", unsupported_os),
     };
 
-    println!("{:?}", version);
-
     Ok(format!(
         "fuelup-{}-{}-{}-{}.tar.gz",
         // strip the 'v' from the version string to match the file name of the releases
@@ -48,12 +45,6 @@ fn fuelup_bin_tarball_name(version: &str) -> Result<String> {
 }
 
 pub fn self_update() -> Result<()> {
-    // get latest fuelup tag
-    //
-    // download to a tmp directory
-    //
-    // replace with current fuelup
-    //
     let proc = std::process::Command::new("fuelup")
         .arg("--version")
         .output()
@@ -69,8 +60,9 @@ pub fn self_update() -> Result<()> {
         Ok(t) => t,
         Err(_) => bail!("Failed to fetch latest fuelup release tag from GitHub API"),
     };
-    if &fuelup_release_latest_tag.split_at(1).1 != &current_version {
-        println!("fuelup unchanged - at latest version ({})", current_version);
+
+    if &fuelup_release_latest_tag.split_at(1).1 == &current_version {
+        info!("fuelup unchanged - at latest version ({})", current_version);
         return Ok(());
     }
 

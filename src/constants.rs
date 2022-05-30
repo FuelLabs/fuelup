@@ -7,5 +7,7 @@ pub const RELEASES_LATEST: &str = "releases/latest";
 pub const RELEASES_TAGS: &str = "releases/tags";
 
 pub const SWAY_RELEASE_DOWNLOAD_URL: &str = "https://github.com/FuelLabs/sway/releases/download";
+pub const FUELUP_RELEASE_DOWNLOAD_URL: &str =
+    "https://github.com/FuelLabs/fuelup/releases/download";
 pub const FUEL_CORE_RELEASE_DOWNLOAD_URL: &str =
     "https://github.com/FuelLabs/fuel-core/releases/download";

@@ -1,19 +1,24 @@
 use anyhow::Result;
 use clap::Parser;
+use fuelup::commands::install;
 
-use fuelup::commands::install::{install, InstallCommand};
+use fuelup::commands::fuelup::{self_update, FuelupSubcommand};
+use fuelup::commands::install::InstallCommand;
 
 #[derive(Debug, Parser)]
 #[clap(name = "fuelup", about = "Fuel Toolchain Manager", version)]
 struct Cli {
     #[clap(subcommand)]
-    command: Fuelup,
+    command: Commands,
 }
 
 #[derive(Debug, Parser)]
-enum Fuelup {
+enum Commands {
     /// Installs the latest Fuel toolchain.
     Install(InstallCommand),
+    /// Manage your fuelup installation.
+    #[clap(name = "self", subcommand)]
+    Fuelup(FuelupSubcommand),
 }
 
 fn main() -> Result<()> {
@@ -27,6 +32,9 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Fuelup::Install(_command) => install(),
+        Commands::Install(_command) => install::install(),
+        Commands::Fuelup(command) => match command {
+            FuelupSubcommand::Update => self_update(),
+        },
     }
 }

@@ -126,7 +126,7 @@ main() {
 get_architecture() {
     local _ostype _cputype
     _ostype="$(uname -s)"
-    _arch="$(uname -m)"
+    _cputype="$(uname -m)"
 
     case "$_ostype" in
     Linux)
@@ -140,19 +140,19 @@ get_architecture() {
         ;;
     esac
 
-    case "$_arch" in
+    case "$_cputype" in
     x86_64 | x86-64 | x64 | amd64)
-        _arch="x86_64"
+        _cputype="x86_64"
         ;;
     aarch64 | arm64)
-        _arch="aarch64"
+        _cputype="aarch64"
         ;;
     *)
         err "unsupported cpu type: $_cputype"
         ;;
     esac
 
-    _arch="${_arch}-${_ostype}"
+    _arch="${_cputype}-${_ostype}"
 
     RETVAL="$_arch"
 }

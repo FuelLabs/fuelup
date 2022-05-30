@@ -10,7 +10,6 @@ main() {
     need_cmd mkdir
     need_cmd rm
     need_cmd rmdir
-    need_cmd jq
 
     check_cargo_bin forc
     check_cargo_bin forc-fmt

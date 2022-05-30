@@ -61,7 +61,7 @@ pub fn self_update() -> Result<()> {
         Err(_) => bail!("Failed to fetch latest fuelup release tag from GitHub API"),
     };
 
-    if &fuelup_release_latest_tag.split_at(1).1 == &current_version {
+    if fuelup_release_latest_tag.split_at(1).1 == current_version {
         info!("fuelup unchanged - at latest version ({})", current_version);
         return Ok(());
     }

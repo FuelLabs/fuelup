@@ -10,7 +10,6 @@ main() {
     need_cmd mkdir
     need_cmd rm
     need_cmd rmdir
-    need_cmd jq
 
     check_cargo_bin forc
     check_cargo_bin forc-fmt
@@ -25,8 +24,7 @@ main() {
     mkdir -p "$FUELUP_DIR/bin"
 
     local _fuelup_version
-    _fuelup_version="$(curl -s https://api.github.com/repos/FuelLabs/fuelup/releases/latest | jq -r ".tag_name")"
-    _fuelup_version="$(echo "${_fuelup_version}" | cut -c 2-)"
+    _fuelup_version="$(curl -s https://api.github.com/repos/FuelLabs/fuelup/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)"
     local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/v${_fuelup_version}/fuelup-${_fuelup_version}-${_arch}.tar.gz"
 
     local _dir

@@ -79,9 +79,9 @@ main() {
     done
 
     if $_ansi_escapes_are_valid; then
-        printf "\33[1minfo:\33[0m downloading installer\n" 1>&2
+        printf "\33[1minfo:\33[0m downloading fuelup %s\n" $_fuelup_version 1>&2
     else
-        printf '%s\n' 'info: downloading installer' 1>&2
+        printf 'info: downloading fuelup %s\n' $_fuelup_version 1>&2
     fi
 
     ensure downloader "$_fuelup_url" "$_file" "$_arch"
@@ -226,8 +226,8 @@ downloader() {
         fi
         if [ -n "$_err" ]; then
             echo "$_err" >&2
-            if echo "$_err" | grep -q 404$; then
-                err "installer for platform '$3' not found, this may be unsupported"
+            if echo "$_err" | grep -q 404; then
+		err "fuelup was not found - either the release is not ready yet or the tag is invalid. You can check if the release is available here: https://github.com/FuelLabs/fuelup/releases"
             fi
         fi
 

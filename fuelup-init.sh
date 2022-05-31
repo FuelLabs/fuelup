@@ -77,9 +77,9 @@ main() {
     done
 
     if $_ansi_escapes_are_valid; then
-        printf "\33[1minfo:\33[0m downloading fuelup %s\n" $_fuelup_version 1>&2
+        printf "\33[1minfo:\33[0m downloading fuelup %s\n" "$_fuelup_version" 1>&2
     else
-        printf 'info: downloading fuelup %s\n' $_fuelup_version 1>&2
+        printf 'info: downloading fuelup %s\n' "$_fuelup_version" 1>&2
     fi
 
     ensure downloader "$_fuelup_url" "$_file" "$_arch"

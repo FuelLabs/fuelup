@@ -16,6 +16,8 @@ pub enum FuelupCommand {
 #[derive(Debug, Parser)]
 struct UpdateCommand {}
 
+pub const FUELUP_VERSION: &str = concat!("v", clap::crate_version!());
+
 fn fuelup_bin_tarball_name(version: &str) -> Result<String> {
     let architecture = match std::env::consts::ARCH {
         "aarch64" | "x86_64" => std::env::consts::ARCH,
@@ -44,17 +46,6 @@ fn fuelup_bin_tarball_name(version: &str) -> Result<String> {
 }
 
 pub fn self_update() -> Result<()> {
-    let proc = std::process::Command::new("fuelup")
-        .arg("--version")
-        .output()
-        .expect("Could not run fuelup.");
-
-    let stdout = String::from_utf8_lossy(&proc.stdout);
-    let current_version = stdout
-        .split_whitespace()
-        .nth(1)
-        .expect("failed to parse current version from `fuelup --version` output");
-
     let fuelup_release_latest_tag = match get_latest_tag(&format!(
         "{}{}/{}",
         GITHUB_API_REPOS_BASE_URL, "fuelup", RELEASES_LATEST
@@ -63,8 +54,8 @@ pub fn self_update() -> Result<()> {
         Err(_) => bail!("Failed to fetch latest fuelup release tag from GitHub API"),
     };
 
-    if fuelup_release_latest_tag.split_at(1).1 == current_version {
-        info!("fuelup unchanged - at latest version ({})", current_version);
+    if fuelup_release_latest_tag == FUELUP_VERSION {
+        info!("fuelup unchanged - at latest version ({})", FUELUP_VERSION);
         return Ok(());
     }
 

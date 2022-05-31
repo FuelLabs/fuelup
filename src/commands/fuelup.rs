@@ -50,7 +50,10 @@ pub fn self_update() -> Result<()> {
         .expect("Could not run fuelup.");
 
     let stdout = String::from_utf8_lossy(&proc.stdout);
-    let current_version = stdout.split_whitespace().nth(1).unwrap();
+    let current_version = stdout
+        .split_whitespace()
+        .nth(1)
+        .expect("failed to parse current version from `fuelup --version` output");
 
     let fuelup_release_latest_tag = match get_latest_tag(&format!(
         "{}{}/{}",

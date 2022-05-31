@@ -90,7 +90,7 @@ main() {
     ensure chmod u+x "$FUELUP_DIR/bin/fuelup"
 
     if [ ! -x "$FUELUP_DIR/bin/fuelup" ]; then
-        printf '%s\n' "Cannot execute $_FUELUP_DIR/bin/fuelup." 1>&2
+        printf '%s\n' "Cannot execute $FUELUP_DIR/bin/fuelup." 1>&2
         printf '%s\n' "Please copy the file to a location where you can execute binaries and run ./fuelup." 1>&2
         exit 1
     fi

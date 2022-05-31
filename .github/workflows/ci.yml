@@ -32,7 +32,7 @@ jobs:
           SHELLCHECK_OPTS: -e SC3043 # exclude 'local' is undefined
           SHFMT_OPTS: -i 4 -ci
         with:
-          sh_checker_comment: true
+          sh_checker_comment: false
           sh_checker_exclude: "src .github"
 
   cargo-clippy:

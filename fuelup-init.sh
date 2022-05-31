@@ -15,7 +15,7 @@ main() {
     check_cargo_bin forc-fmt
     check_cargo_bin forc-explore
     check_cargo_bin forc-lsp
-    check_cargo_bin fuel-core 
+    check_cargo_bin fuel-core
 
     get_architecture || return 1
     local _arch="$RETVAL"
@@ -35,9 +35,9 @@ main() {
     if [ -t 2 ]; then
         if [ "${TERM+set}" = 'set' ]; then
             case "$TERM" in
-                xterm*|rxvt*|urxvt*|linux*|vt*)
+                xterm* | rxvt* | urxvt* | linux* | vt*)
                     _ansi_escapes_are_valid=true
-                ;;
+                    ;;
             esac
         fi
     fi
@@ -68,9 +68,9 @@ main() {
                             # we don't need /dev/tty
                             need_tty=no
                             ;;
-                        *)
-                            ;;
-                        esac
+                        *) ;;
+
+                    esac
                 done
                 ;;
         esac
@@ -127,27 +127,27 @@ get_architecture() {
     _cputype="$(uname -m)"
 
     case "$_ostype" in
-    Linux)
-        _ostype="unknown-linux-gnu"
-        ;;
-    Darwin)
-        _ostype="apple-darwin"
-        ;;
-    *)
-        err "unsupported os type: $_ostype"
-        ;;
+        Linux)
+            _ostype="unknown-linux-gnu"
+            ;;
+        Darwin)
+            _ostype="apple-darwin"
+            ;;
+        *)
+            err "unsupported os type: $_ostype"
+            ;;
     esac
 
     case "$_cputype" in
-    x86_64 | x86-64 | x64 | amd64)
-        _cputype="x86_64"
-        ;;
-    aarch64 | arm64)
-        _cputype="aarch64"
-        ;;
-    *)
-        err "unsupported cpu type: $_cputype"
-        ;;
+        x86_64 | x86-64 | x64 | amd64)
+            _cputype="x86_64"
+            ;;
+        aarch64 | arm64)
+            _cputype="aarch64"
+            ;;
+        *)
+            err "unsupported cpu type: $_cputype"
+            ;;
     esac
 
     _arch="${_cputype}-${_ostype}"
@@ -157,7 +157,7 @@ get_architecture() {
 
 check_cargo_bin() {
     if which "${1}" | grep -q "[.cargo]"; then
-      warn "$1 is already installed via cargo and is in use by your system. You should update your PATH, or execute 'cargo uninstall $1'"
+        warn "$1 is already installed via cargo and is in use by your system. You should update your PATH, or execute 'cargo uninstall $1'"
     fi
 }
 
@@ -295,29 +295,29 @@ check_help_for() {
 
     case "$_arch" in
 
-    *darwin*)
-        if check_cmd sw_vers; then
-            case $(sw_vers -productVersion) in
-            10.*)
-                # If we're running on macOS, older than 10.13, then we always
-                # fail to find these options to force fallback
-                if [ "$(sw_vers -productVersion | cut -d. -f2)" -lt 13 ]; then
-                    # Older than 10.13
-                    echo "Warning: Detected macOS platform older than 10.13"
-                    return 1
-                fi
-                ;;
-            11.*)
-                # We assume Big Sur will be OK for now
-                ;;
-            *)
-                # Unknown product version, warn and continue
-                echo "Warning: Detected unknown macOS major version: $(sw_vers -productVersion)"
-                echo "Warning TLS capabilities detection may fail"
-                ;;
-            esac
-        fi
-        ;;
+        *darwin*)
+            if check_cmd sw_vers; then
+                case $(sw_vers -productVersion) in
+                    10.*)
+                        # If we're running on macOS, older than 10.13, then we always
+                        # fail to find these options to force fallback
+                        if [ "$(sw_vers -productVersion | cut -d. -f2)" -lt 13 ]; then
+                            # Older than 10.13
+                            echo "Warning: Detected macOS platform older than 10.13"
+                            return 1
+                        fi
+                        ;;
+                    11.*)
+                        # We assume Big Sur will be OK for now
+                        ;;
+                    *)
+                        # Unknown product version, warn and continue
+                        echo "Warning: Detected unknown macOS major version: $(sw_vers -productVersion)"
+                        echo "Warning TLS capabilities detection may fail"
+                        ;;
+                esac
+            fi
+            ;;
 
     esac
 
@@ -398,7 +398,7 @@ err() {
 }
 
 warn() {
-  say "warning: ${1}" >&2
+    say "warning: ${1}" >&2
 }
 
 # This is just for indicating that commands' results are being

@@ -133,3 +133,25 @@ pub fn download_file_and_unpack(
 
     Ok(())
 }
+
+pub fn unpack_extracted_bins(dir: &std::path::PathBuf) -> Result<()> {
+    for entry in std::fs::read_dir(&dir)? {
+        let sub_path = entry?.path();
+
+        if sub_path.is_dir() {
+            for bin in std::fs::read_dir(&sub_path)? {
+                let bin_file = bin?;
+                info!(
+                    "Unpacking and moving {} to {}",
+                    &bin_file.file_name().to_string_lossy(),
+                    dir.display()
+                );
+                fs::copy(&bin_file.path(), dir.join(&bin_file.file_name()))?;
+            }
+
+            fs::remove_dir_all(sub_path)?;
+        }
+    }
+
+    Ok(())
+}

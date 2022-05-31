@@ -21,7 +21,7 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-  sh-checker:
+  shellcheck-and-shfmt:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1

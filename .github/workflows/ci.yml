@@ -28,7 +28,6 @@ jobs:
       - name: Run shellcheck and shfmt
         uses: luizm/action-sh-checker@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SHELLCHECK_OPTS: -e SC3043 # exclude 'local' is undefined
           SHFMT_OPTS: -i 4 -ci
         with:

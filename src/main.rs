@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::Parser;
 use fuelup::commands::install;
 
-use fuelup::commands::fuelup::{self_update, FuelupSubcommand};
+use fuelup::commands::fuelup::{self_update, FuelupCommand};
 use fuelup::commands::install::InstallCommand;
 
 #[derive(Debug, Parser)]
@@ -18,7 +18,7 @@ enum Commands {
     Install(InstallCommand),
     /// Manage your fuelup installation.
     #[clap(name = "self", subcommand)]
-    Fuelup(FuelupSubcommand),
+    Fuelup(FuelupCommand),
 }
 
 fn main() -> Result<()> {
@@ -34,7 +34,7 @@ fn main() -> Result<()> {
     match cli.command {
         Commands::Install(_command) => install::install(),
         Commands::Fuelup(command) => match command {
-            FuelupSubcommand::Update => self_update(),
+            FuelupCommand::Update => self_update(),
         },
     }
 }

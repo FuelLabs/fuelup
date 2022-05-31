@@ -8,7 +8,7 @@ use crate::{
 };
 
 #[derive(Debug, Parser)]
-pub enum FuelupSubcommand {
+pub enum FuelupCommand {
     /// Updates fuelup
     Update,
 }

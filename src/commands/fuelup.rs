@@ -18,8 +18,7 @@ struct UpdateCommand {}
 
 fn fuelup_bin_tarball_name(version: &str) -> Result<String> {
     let architecture = match std::env::consts::ARCH {
-        "aarch64" => "aarch64",
-        "x86_64" => "x86_64",
+        "aarch64" | "x86_64" => std::env::consts::ARCH,
         unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
     };
 

@@ -93,33 +93,15 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
 
 pub fn download_file(url: &str, path: &PathBuf) -> Result<File> {
     let handle = ureq::builder().user_agent("fuelup").build();
+    let resp = handle.get(url).call()?;
+
+    let mut data = Vec::new();
+    resp.into_reader().read_to_end(&mut data)?;
+
     let mut file = OpenOptions::new().write(true).create(true).open(&path)?;
-
-    match handle.get(url).call() {
-        Ok(response) => {
-            let mut data = Vec::new();
-            response.into_reader().read_to_end(&mut data)?;
-
-            if let Err(e) = file.write_all(&data) {
-                error!(
-                    "Something went wrong writing data to {}: {}",
-                    path.display(),
-                    e
-                )
-            };
-        }
-        Err(ureq::Error::Status(404, _)) => {
-            // We've reached download_file stage, which means the tag must be correct.
-            error!(
-                "Failed to download from {} - the release is not ready yet.",
-                &url
-            );
-        }
-        Err(e) => {
-            // handle other status code and non-status code errors
-            error!("{}", e.to_string());
-        }
-    }
+    if let Err(e) = file.write_all(&data) {
+        error!("Something went wrong writing to {}: {}", path.display(), e)
+    };
 
     Ok(file)
 }

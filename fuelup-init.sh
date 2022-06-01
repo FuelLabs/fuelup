@@ -115,10 +115,25 @@ main() {
     ignore rmdir "$_dir/fuelup-${_fuelup_version}-${_arch}"
     ignore rmdir "$_dir"
 
-    printf '\n'
-    printf '%s\n' "fuelup ${_fuelup_version} has been installed in $FUELUP_DIR/bin. To fetch the latest forc and fuel-core binaries, run 'fuelup install'." 1>&2
-
+    post_setup_message
     return "$_retval"
+}
+
+post_setup_message() {
+    cat 1>&2 <<EOF
+
+fuelup v${_fuelup_version} has been installed in $FUELUP_DIR/bin. You might have to add $FUELUP_DIR/bin to path:
+
+bash/zsh:
+
+export PATH=\$HOME/.fuelup/bin:\$PATH
+
+fish:
+
+fish_add_path ~/.fuelup/bin
+
+To fetch the latest forc and fuel-core binaries, run 'fuelup install'.
+EOF
 }
 
 get_architecture() {

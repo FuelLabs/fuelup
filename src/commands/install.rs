@@ -1,3 +1,4 @@
+use std::fmt::Write;
 use std::fs;
 
 use anyhow::{bail, Result};
@@ -51,8 +52,16 @@ pub fn install() -> Result<()> {
         &forc_release_latest_tag,
         &forc_bin_tarball_name,
     ) {
-        Ok(()) => installed_bins_message.push_str(&format!("forc {}", &forc_release_latest_tag)),
-        Err(_) => errored_bins_message.push_str(&format!("forc {}", &forc_release_latest_tag)),
+        Ok(()) => write!(
+            &mut installed_bins_message,
+            "forc {}",
+            &forc_release_latest_tag
+        )?,
+        Err(_) => write!(
+            &mut errored_bins_message,
+            "forc {}",
+            &forc_release_latest_tag
+        )?,
     };
 
     info!("Fetching fuel-core {}", &fuel_core_release_latest_tag);
@@ -63,15 +72,23 @@ pub fn install() -> Result<()> {
     ) {
         Ok(()) => {
             if !installed_bins_message.is_empty() {
-                installed_bins_message.push_str(", ")
-            }
-            installed_bins_message.push_str(&format!("fuel-core {}", &fuel_core_release_latest_tag))
+                write!(&mut installed_bins_message, ", ")?
+            };
+            write!(
+                &mut installed_bins_message,
+                "fuel-core {}",
+                &fuel_core_release_latest_tag
+            )?;
         }
         Err(_) => {
             if !errored_bins_message.is_empty() {
-                errored_bins_message.push_str(", ")
+                write!(&mut errored_bins_message, ", ")?
             }
-            errored_bins_message.push_str(&format!("fuel-core {}", &fuel_core_release_latest_tag))
+            write!(
+                &mut errored_bins_message,
+                "fuel-core {}",
+                &fuel_core_release_latest_tag
+            )?;
         }
     };
 

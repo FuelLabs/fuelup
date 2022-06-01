@@ -36,7 +36,7 @@ jobs:
           publish_dir: ${{ env.FUELUP_INIT_DIR }}
           destination_dir: ./
 
-      - name: Get latest tag
+      - name: Get latest tag and copy into fuelup-version
         run: |
           mkdir -p ${{ env.FUELUP_VERSION_DIR }}
           echo ${GITHUB_REF#refs/tags/} >> fuelup-version

@@ -77,9 +77,9 @@ main() {
     done
 
     if $_ansi_escapes_are_valid; then
-        printf "\33[1minfo:\33[0m downloading fuelup %s\n" $_fuelup_version 1>&2
+        printf "\33[1minfo:\33[0m downloading fuelup %s\n" "$_fuelup_version" 1>&2
     else
-        printf 'info: downloading fuelup %s\n' $_fuelup_version 1>&2
+        printf 'info: downloading fuelup %s\n' "$_fuelup_version" 1>&2
     fi
 
     ensure downloader "$_fuelup_url" "$_file" "$_arch"
@@ -90,7 +90,7 @@ main() {
     ensure chmod u+x "$FUELUP_DIR/bin/fuelup"
 
     if [ ! -x "$FUELUP_DIR/bin/fuelup" ]; then
-        printf '%s\n' "Cannot execute $_FUELUP_DIR/bin/fuelup." 1>&2
+        printf '%s\n' "Cannot execute $FUELUP_DIR/bin/fuelup." 1>&2
         printf '%s\n' "Please copy the file to a location where you can execute binaries and run ./fuelup." 1>&2
         exit 1
     fi
@@ -115,10 +115,25 @@ main() {
     ignore rmdir "$_dir/fuelup-${_fuelup_version}-${_arch}"
     ignore rmdir "$_dir"
 
-    printf '\n'
-    printf '%s\n' "fuelup ${_fuelup_version} has been installed in $FUELUP_DIR/bin. To fetch the latest forc and fuel-core binaries, run 'fuelup install'." 1>&2
-
+    post_setup_message
     return "$_retval"
+}
+
+post_setup_message() {
+    cat 1>&2 <<EOF
+
+fuelup v${_fuelup_version} has been installed in $FUELUP_DIR/bin. You might have to add $FUELUP_DIR/bin to path:
+
+bash/zsh:
+
+export PATH=\$HOME/.fuelup/bin:\$PATH
+
+fish:
+
+fish_add_path ~/.fuelup/bin
+
+To fetch the latest forc and fuel-core binaries, run 'fuelup install'.
+EOF
 }
 
 get_architecture() {
@@ -225,7 +240,7 @@ downloader() {
         if [ -n "$_err" ]; then
             echo "$_err" >&2
             if echo "$_err" | grep -q 404; then
-		err "fuelup ${_fuelup_version} was not found - either the release is not ready yet or the tag is invalid. You can check if the release is available here: https://github.com/FuelLabs/fuelup/releases/${_fuelup_version}"
+                err "fuelup ${_fuelup_version} was not found - either the release is not ready yet or the tag is invalid. You can check if the release is available here: https://github.com/FuelLabs/fuelup/releases/${_fuelup_version}"
             fi
         fi
 

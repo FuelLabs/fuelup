@@ -10,7 +10,12 @@ main() {
     need_cmd mkdir
     need_cmd rm
     need_cmd rmdir
-    need_cmd jq
+
+    check_cargo_bin forc
+    check_cargo_bin forc-fmt
+    check_cargo_bin forc-explore
+    check_cargo_bin forc-lsp
+    check_cargo_bin fuel-core
 
     get_architecture || return 1
     local _arch="$RETVAL"
@@ -18,24 +23,74 @@ main() {
 
     mkdir -p "$FUELUP_DIR/bin"
 
-    local _fuelup_version=$(curl -s https://api.github.com/repos/FuelLabs/fuelup/releases/latest | jq -r ".tag_name")
-    _fuelup_version=${_fuelup_version:1}
+    local _fuelup_version
+    _fuelup_version="$(curl -s https://api.github.com/repos/FuelLabs/fuelup/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)"
     local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/v${_fuelup_version}/fuelup-${_fuelup_version}-${_arch}.tar.gz"
 
     local _dir
-
     _dir="$(ensure mktemp -d)"
     local _file="${_dir}/fuelup.tar.gz"
 
+    local _ansi_escapes_are_valid=false
+    if [ -t 2 ]; then
+        if [ "${TERM+set}" = 'set' ]; then
+            case "$TERM" in
+                xterm* | rxvt* | urxvt* | linux* | vt*)
+                    _ansi_escapes_are_valid=true
+                    ;;
+            esac
+        fi
+    fi
+
+    # check if we have to use /dev/tty to prompt the user
+    local need_tty=yes
+    for arg in "$@"; do
+        case "$arg" in
+            --help)
+                usage
+                exit 0
+                ;;
+            *)
+                OPTIND=1
+                if [ "${arg%%--*}" = "" ]; then
+                    # Long option (other than --help);
+                    # don't attempt to interpret it.
+                    continue
+                fi
+                while getopts :hy sub_arg "$arg"; do
+                    case "$sub_arg" in
+                        h)
+                            usage
+                            exit 0
+                            ;;
+                        y)
+                            # user wants to skip the prompt --
+                            # we don't need /dev/tty
+                            need_tty=no
+                            ;;
+                        *) ;;
+
+                    esac
+                done
+                ;;
+        esac
+    done
+
+    if $_ansi_escapes_are_valid; then
+        printf "\33[1minfo:\33[0m downloading fuelup %s\n" "$_fuelup_version" 1>&2
+    else
+        printf 'info: downloading fuelup %s\n' "$_fuelup_version" 1>&2
+    fi
+
     ensure downloader "$_fuelup_url" "$_file" "$_arch"
 
-    ignore tar -xvf "$_file" -C "$_dir"
+    ignore tar -xf "$_file" -C "$_dir"
 
     ensure mv "$_dir/fuelup-${_fuelup_version}-${_arch}/fuelup" "$FUELUP_DIR/bin/fuelup"
     ensure chmod u+x "$FUELUP_DIR/bin/fuelup"
 
     if [ ! -x "$FUELUP_DIR/bin/fuelup" ]; then
-        printf '%s\n' "Cannot execute $_FUELUP_DIR/bin/fuelup." 1>&2
+        printf '%s\n' "Cannot execute $FUELUP_DIR/bin/fuelup." 1>&2
         printf '%s\n' "Please copy the file to a location where you can execute binaries and run ./fuelup." 1>&2
         exit 1
     fi
@@ -60,41 +115,50 @@ main() {
     ignore rmdir "$_dir/fuelup-${_fuelup_version}-${_arch}"
     ignore rmdir "$_dir"
 
+    printf '\n'
+    printf '%s\n' "fuelup ${_fuelup_version} has been installed in $FUELUP_DIR/bin. To fetch the latest forc and fuel-core binaries, run 'fuelup install'." 1>&2
+
     return "$_retval"
 }
 
 get_architecture() {
     local _ostype _cputype
     _ostype="$(uname -s)"
-    _arch="$(uname -m)"
+    _cputype="$(uname -m)"
 
     case "$_ostype" in
-    Linux)
-        _ostype="unknown-linux-gnu"
-        ;;
-    Darwin)
-        _ostype="apple-darwin"
-        ;;
-    *)
-        err "unsupported os type: $_ostype"
-        ;;
+        Linux)
+            _ostype="unknown-linux-gnu"
+            ;;
+        Darwin)
+            _ostype="apple-darwin"
+            ;;
+        *)
+            err "unsupported os type: $_ostype"
+            ;;
     esac
 
-    case "$_arch" in
-    x86_64 | x86-64 | x64 | amd64)
-        _arch="x86_64"
-        ;;
-    aarch64 | arm64)
-        _arch="aarch64"
-        ;;
-    *)
-        err "unsupported cpu type: $_cputype"
-        ;;
+    case "$_cputype" in
+        x86_64 | x86-64 | x64 | amd64)
+            _cputype="x86_64"
+            ;;
+        aarch64 | arm64)
+            _cputype="aarch64"
+            ;;
+        *)
+            err "unsupported cpu type: $_cputype"
+            ;;
     esac
 
-    _arch="${_arch}-${_ostype}"
+    _arch="${_cputype}-${_ostype}"
 
     RETVAL="$_arch"
+}
+
+check_cargo_bin() {
+    if which "${1}" | grep -q "[.cargo]"; then
+        warn "$1 is already installed via cargo and is in use by your system. You should update your PATH, or execute 'cargo uninstall $1'"
+    fi
 }
 
 assert_nz() {
@@ -160,8 +224,8 @@ downloader() {
         fi
         if [ -n "$_err" ]; then
             echo "$_err" >&2
-            if echo "$_err" | grep -q 404$; then
-                err "installer for platform '$3' not found, this may be unsupported"
+            if echo "$_err" | grep -q 404; then
+                err "fuelup ${_fuelup_version} was not found - either the release is not ready yet or the tag is invalid. You can check if the release is available here: https://github.com/FuelLabs/fuelup/releases/${_fuelup_version}"
             fi
         fi
 
@@ -231,34 +295,34 @@ check_help_for() {
 
     case "$_arch" in
 
-    *darwin*)
-        if check_cmd sw_vers; then
-            case $(sw_vers -productVersion) in
-            10.*)
-                # If we're running on macOS, older than 10.13, then we always
-                # fail to find these options to force fallback
-                if [ "$(sw_vers -productVersion | cut -d. -f2)" -lt 13 ]; then
-                    # Older than 10.13
-                    echo "Warning: Detected macOS platform older than 10.13"
-                    return 1
-                fi
-                ;;
-            11.*)
-                # We assume Big Sur will be OK for now
-                ;;
-            *)
-                # Unknown product version, warn and continue
-                echo "Warning: Detected unknown macOS major version: $(sw_vers -productVersion)"
-                echo "Warning TLS capabilities detection may fail"
-                ;;
-            esac
-        fi
-        ;;
+        *darwin*)
+            if check_cmd sw_vers; then
+                case $(sw_vers -productVersion) in
+                    10.*)
+                        # If we're running on macOS, older than 10.13, then we always
+                        # fail to find these options to force fallback
+                        if [ "$(sw_vers -productVersion | cut -d. -f2)" -lt 13 ]; then
+                            # Older than 10.13
+                            echo "Warning: Detected macOS platform older than 10.13"
+                            return 1
+                        fi
+                        ;;
+                    11.*)
+                        # We assume Big Sur will be OK for now
+                        ;;
+                    *)
+                        # Unknown product version, warn and continue
+                        echo "Warning: Detected unknown macOS major version: $(sw_vers -productVersion)"
+                        echo "Warning TLS capabilities detection may fail"
+                        ;;
+                esac
+            fi
+            ;;
 
     esac
 
     for _arg in "$@"; do
-        if ! "$_cmd" --help $_category | grep -q -- "$_arg"; then
+        if ! "$_cmd" --help "$_category" | grep -q -- "$_arg"; then
             return 1
         fi
     done
@@ -331,6 +395,10 @@ get_strong_ciphersuites_for() {
 err() {
     say "$1" >&2
     exit 1
+}
+
+warn() {
+    say "warning: ${1}" >&2
 }
 
 # This is just for indicating that commands' results are being

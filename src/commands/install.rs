@@ -5,7 +5,7 @@ use clap::Parser;
 use tracing::{error, info};
 
 use crate::constants::{FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL};
-use crate::download::{download_file_and_unpack, fuelup_bin_dir};
+use crate::download::{download_file_and_unpack, fuelup_bin_dir, unpack_extracted_bins};
 use crate::{
     constants::{FUEL_CORE_REPO, GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_REPO},
     download::{forc_bin_tarball_name, fuel_core_bin_tarball_name, get_latest_tag},
@@ -15,7 +15,7 @@ use crate::{
 pub struct InstallCommand {}
 
 pub fn install() -> Result<()> {
-    info!("\nDownloading the Forc toolchain\n");
+    info!("\nDownloading the Fuel toolchain\n");
 
     let forc_release_latest_tag = match get_latest_tag(&format!(
         "{}{}/{}",
@@ -75,25 +75,12 @@ pub fn install() -> Result<()> {
         }
     };
 
-    for entry in std::fs::read_dir(&fuelup_bin_dir)? {
-        let sub_path = entry?.path();
+    unpack_extracted_bins(&fuelup_bin_dir)?;
 
-        if sub_path.is_dir() {
-            for bin in std::fs::read_dir(&sub_path)? {
-                let bin_file = bin?;
-                info!(
-                    "Unpacking and moving {} to {}",
-                    &bin_file.file_name().to_string_lossy(),
-                    fuelup_bin_dir.display()
-                );
-                fs::copy(&bin_file.path(), fuelup_bin_dir.join(&bin_file.file_name()))?;
-            }
-
-            fs::remove_dir_all(sub_path)?;
-        }
-    }
-
-    info!("\nInstalled: {}\n", installed_bins_message);
+    info!(
+        "\n\nInstalled: forc {}, fuel-core {}",
+        forc_release_latest_tag, fuel_core_release_latest_tag
+    );
 
     if errored_bins_message.is_empty() {
         info!("The Fuel toolchain is installed and up to date\n");

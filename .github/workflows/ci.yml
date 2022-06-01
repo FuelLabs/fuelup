@@ -65,7 +65,6 @@ jobs:
           command: test
           args: --locked
 
-
   lint-toml-files:
     needs: cancel-previous-runs
     runs-on: ubuntu-latest

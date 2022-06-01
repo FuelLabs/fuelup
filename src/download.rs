@@ -2,10 +2,11 @@ use anyhow::{bail, Result};
 use dirs::home_dir;
 use flate2::read::GzDecoder;
 use serde::{Deserialize, Serialize};
-use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use std::time::Duration;
+use std::{fs, thread};
 use tar::Archive;
 use tracing::{error, info};
 
@@ -91,37 +92,41 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
     Ok(())
 }
 
-pub fn download_file(url: &str, path: &PathBuf) -> Result<File> {
+pub fn download_file(url: &str, path: &PathBuf) -> Result<(), anyhow::Error> {
     let handle = ureq::builder().user_agent("fuelup").build();
     let mut file = OpenOptions::new().write(true).create(true).open(&path)?;
 
-    match handle.get(url).call() {
-        Ok(response) => {
-            let mut data = Vec::new();
-            response.into_reader().read_to_end(&mut data)?;
+    for _ in 1..4 {
+        match handle.get(url).call() {
+            Ok(response) => {
+                let mut data = Vec::new();
+                response.into_reader().read_to_end(&mut data)?;
 
-            if let Err(e) = file.write_all(&data) {
-                error!(
-                    "Something went wrong writing data to {}: {}",
-                    path.display(),
-                    e
-                )
-            };
-        }
-        Err(ureq::Error::Status(404, _)) => {
-            // We've reached download_file stage, which means the tag must be correct.
-            error!(
-                "Failed to download from {} - the release is not ready yet.",
-                &url
-            );
-        }
-        Err(e) => {
-            // handle other status code and non-status code errors
-            error!("{}", e.to_string());
+                if let Err(e) = file.write_all(&data) {
+                    error!(
+                        "Something went wrong writing data to {}: {}",
+                        path.display(),
+                        e
+                    )
+                };
+                return Ok(());
+            }
+            Err(ureq::Error::Status(404, r)) => {
+                // We've reached download_file stage, which means the tag must be correct.
+                error!("Failed to download from {}", &url);
+                let retry: Option<u64> = r.header("retry-after").and_then(|h| h.parse().ok());
+                let retry = retry.unwrap_or(3);
+                info!("Retrying..");
+                thread::sleep(Duration::from_secs(retry));
+            }
+            Err(e) => {
+                // handle other status code and non-status code errors
+                bail!("Unexpected error: {}", e.to_string());
+            }
         }
     }
 
-    Ok(file)
+    bail!("Could not download file");
 }
 
 pub fn download_file_and_unpack(
@@ -138,11 +143,10 @@ pub fn download_file_and_unpack(
     let tarball_path = fuelup_bin_dir.join(tarball_name);
 
     if download_file(&tarball_url, &tarball_path).is_err() {
-        error!(
-            "Failed to download from {} and write to path {}",
-            &tarball_url,
-            &tarball_path.display()
-        );
+        bail!(format!(
+            "Failed to download {} - the release might not be ready yet.",
+            &tarball_name
+        ));
     };
 
     unpack(&tarball_path, &fuelup_bin_dir)?;

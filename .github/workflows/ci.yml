@@ -21,6 +21,19 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
+  check-fuelup-init:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Run shellcheck and shfmt
+        uses: luizm/action-sh-checker@master
+        env:
+          SHELLCHECK_OPTS: -e SC3043 # exclude 'local' is undefined
+          SHFMT_OPTS: -i 4 -ci
+        with:
+          sh_checker_comment: false
+          sh_checker_exclude: "src .github"
+
   cargo-clippy:
     needs: cancel-previous-runs
     runs-on: ubuntu-latest

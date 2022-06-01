@@ -77,9 +77,9 @@ main() {
     done
 
     if $_ansi_escapes_are_valid; then
-        printf "\33[1minfo:\33[0m downloading fuelup %s\n" $_fuelup_version 1>&2
+        printf "\33[1minfo:\33[0m downloading fuelup %s\n" "$_fuelup_version" 1>&2
     else
-        printf 'info: downloading fuelup %s\n' $_fuelup_version 1>&2
+        printf 'info: downloading fuelup %s\n' "$_fuelup_version" 1>&2
     fi
 
     ensure downloader "$_fuelup_url" "$_file" "$_arch"
@@ -90,7 +90,7 @@ main() {
     ensure chmod u+x "$FUELUP_DIR/bin/fuelup"
 
     if [ ! -x "$FUELUP_DIR/bin/fuelup" ]; then
-        printf '%s\n' "Cannot execute $_FUELUP_DIR/bin/fuelup." 1>&2
+        printf '%s\n' "Cannot execute $FUELUP_DIR/bin/fuelup." 1>&2
         printf '%s\n' "Please copy the file to a location where you can execute binaries and run ./fuelup." 1>&2
         exit 1
     fi
@@ -225,7 +225,7 @@ downloader() {
         if [ -n "$_err" ]; then
             echo "$_err" >&2
             if echo "$_err" | grep -q 404; then
-		err "fuelup ${_fuelup_version} was not found - either the release is not ready yet or the tag is invalid. You can check if the release is available here: https://github.com/FuelLabs/fuelup/releases/${_fuelup_version}"
+                err "fuelup ${_fuelup_version} was not found - either the release is not ready yet or the tag is invalid. You can check if the release is available here: https://github.com/FuelLabs/fuelup/releases/${_fuelup_version}"
             fi
         fi
 

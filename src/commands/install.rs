@@ -52,7 +52,10 @@ pub fn install() -> Result<()> {
         &forc_bin_tarball_name,
     ) {
         Ok(()) => installed_bins_message.push_str(&format!("forc {}", &forc_release_latest_tag)),
-        Err(_) => errored_bins_message.push_str(&format!("forc {}", &forc_release_latest_tag)),
+        Err(e) => {
+            error!("{}", e.to_string());
+            errored_bins_message.push_str(&format!("forc {}", &forc_release_latest_tag));
+        }
     };
 
     info!("Fetching fuel-core {}", &fuel_core_release_latest_tag);
@@ -67,7 +70,8 @@ pub fn install() -> Result<()> {
             }
             installed_bins_message.push_str(&format!("fuel-core {}", &fuel_core_release_latest_tag))
         }
-        Err(_) => {
+        Err(e) => {
+            error!("{}", e.to_string());
             if !errored_bins_message.is_empty() {
                 errored_bins_message.push_str(", ")
             }
@@ -77,18 +81,17 @@ pub fn install() -> Result<()> {
 
     unpack_extracted_bins(&fuelup_bin_dir)?;
 
-    info!(
-        "\n\nInstalled: forc {}, fuel-core {}",
-        forc_release_latest_tag, fuel_core_release_latest_tag
-    );
-
     if errored_bins_message.is_empty() {
-        info!("The Fuel toolchain is installed and up to date\n");
+        info!("\nInstalled: {}", installed_bins_message);
+        info!("\nThe Fuel toolchain is installed and up to date");
     } else if installed_bins_message.is_empty() {
-        error!("fuelup failed to install: {}", errored_bins_message)
+        error!(
+            "\nfuelup failed to install: {}\n\nYou might need to run `fuelup install` again.",
+            errored_bins_message
+        )
     } else {
         info!(
-            "The Fuel toolchain is partially installed.\nfuelup failed to install: {}\nYou might need to run `fuelup install` again.",
+            "\nThe Fuel toolchain is partially installed.\nfuelup failed to install: {}\n\nYou might need to run `fuelup install` again.",
             errored_bins_message
         );
     };

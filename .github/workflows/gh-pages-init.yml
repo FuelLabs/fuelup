@@ -38,6 +38,7 @@ jobs:
 
       - name: Get latest tag
         run: |
+          mkdir -p ${{ env.FUELUP_VERSION_DIR }}
           echo ${GITHUB_REF#refs/tags/} >> fuelup-version
           cp fuelup-version ${{ env.FUELUP_VERSION_DIR }}
         if: startsWith(github.ref, 'refs/tags')

@@ -93,7 +93,7 @@ main() {
                 err "Failed to detect shell; please add ${FUELUP_DIR}/bin to your PATH manually."
                 ;;
         esac
-        preinstall_confirmation "$SHELL_PROFILE"
+        preinstall_confirmation
         read -r answer </dev/tty
         allow_modify=$(echo "$answer" | cut -c1-1)
         case $allow_modify in
@@ -165,7 +165,7 @@ main() {
 preinstall_confirmation() {
     cat 1>&2 <<EOF
 
-fuelup uses $HOME/.fuelup as its home directory to manage the Fuel toolchain, and will install binaries there.
+fuelup uses $FUELUP_DIR as its home directory to manage the Fuel toolchain, and will install binaries there.
 
 To use the toolchain, you will have to configure your PATH, which tells your machine where to locate fuelup and the Fuel toolchain.
 

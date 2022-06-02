@@ -94,7 +94,7 @@ main() {
                 ;;
         esac
         preinstall_confirmation "$SHELL_PROFILE"
-        read -r answer < /dev/tty
+        read -r answer </dev/tty
         allow_modify=$(echo "$answer" | cut -c1-1)
         case $allow_modify in
             "y" | "Y")
@@ -151,10 +151,10 @@ main() {
     printf '%s\n' "fuelup ${_fuelup_version} has been installed in $FUELUP_DIR/bin. To fetch the latest forc and fuel-core binaries, run 'fuelup install'." 1>&2
 
     if [ "$allow_modify" = "yes" ]; then
-	if [[ ":$PATH:" == *":${FUELUP_DIR}/bin:"* ]]; then
+        if [[ ":$PATH:" == *":${FUELUP_DIR}/bin:"* ]]; then
             printf "\n%s/bin already exists in your PATH.\n" "$FUELUP_DIR"
         else
-            echo "export PATH="\$PATH:"$FUELUP_DIR"/bin:\$PATH"" >> "$SHELL_PROFILE"
+            echo "export PATH="\$PATH:"$FUELUP_DIR"/bin:\$PATH"" >>"$SHELL_PROFILE"
             printf "\n%s added to PATH.\n" "$FUELUP_DIR"
         fi
     fi

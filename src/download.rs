@@ -92,11 +92,14 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
     Ok(())
 }
 
-pub fn download_file(url: &str, path: &PathBuf) -> Result<(), anyhow::Error> {
+pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
+    const RETRY_ATTEMPTS: u8 = 4;
+    const RETRY_DELAY_SECS: u64 = 3;
+
     let handle = ureq::builder().user_agent("fuelup").build();
     let mut file = OpenOptions::new().write(true).create(true).open(&path)?;
 
-    for _ in 1..4 {
+    for _ in 1..RETRY_ATTEMPTS {
         match handle.get(url).call() {
             Ok(response) => {
                 let mut data = Vec::new();
@@ -115,7 +118,7 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<(), anyhow::Error> {
                 // We've reached download_file stage, which means the tag must be correct.
                 error!("Failed to download from {}", &url);
                 let retry: Option<u64> = r.header("retry-after").and_then(|h| h.parse().ok());
-                let retry = retry.unwrap_or(3);
+                let retry = retry.unwrap_or(RETRY_DELAY_SECS);
                 info!("Retrying..");
                 thread::sleep(Duration::from_secs(retry));
             }
@@ -143,10 +146,10 @@ pub fn download_file_and_unpack(
     let tarball_path = fuelup_bin_dir.join(tarball_name);
 
     if download_file(&tarball_url, &tarball_path).is_err() {
-        bail!(format!(
+        bail!(
             "Failed to download {} - the release might not be ready yet.",
             &tarball_name
-        ));
+        );
     };
 
     unpack(&tarball_path, &fuelup_bin_dir)?;

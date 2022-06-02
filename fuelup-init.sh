@@ -95,7 +95,7 @@ main() {
                 ;;
         esac
         preinstall_confirmation $SHELL_PROFILE
-        read -r answer
+        read -r answer < /dev/tty
         allow_modify=$(echo "$answer" | cut -c1-1)
         case $allow_modify in
             "y" | "Y")

@@ -137,9 +137,9 @@ main() {
             err "Unable to run interactively. Run with -y to accept defaults, --help for additional options"
         fi
 
-        ignore "$FUELUP_DIR/bin/fuelup" "$@" </dev/tty
+        ignore "$FUELUP_DIR/bin/fuelup" "install" </dev/tty
     else
-        ignore "$FUELUP_DIR/bin/fuelup" "$@"
+        ignore "$FUELUP_DIR/bin/fuelup" "install"
     fi
 
     local _retval=$?
@@ -464,4 +464,5 @@ warn() {
 ignore() {
     "$@"
 }
+
 main "$@" || exit 1

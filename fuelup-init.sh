@@ -44,12 +44,12 @@ main() {
 
     # check if we have to use /dev/tty to prompt the user
     local need_tty=yes
-    # always prompt PATH modification, unless --no-modify provided
+    # always prompt PATH modification, unless --no-modify-path provided
     local prompt_modify=yes
 
     for arg in "$@"; do
         case "$arg" in
-            --no-modify)
+            --no-modify-path)
                 prompt_modify=no
                 ;;
             *)

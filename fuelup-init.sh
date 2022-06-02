@@ -154,6 +154,7 @@ main() {
         if [[ ":$PATH:" == *":${FUELUP_DIR}/bin:"* ]]; then
             printf "\n%s/bin already exists in your PATH.\n" "$FUELUP_DIR"
         else
+	    # shellcheck disable=2140
             echo "export PATH="\$PATH:"$FUELUP_DIR"/bin:\$PATH"" >>"$SHELL_PROFILE"
             printf "\n%s added to PATH.\n" "$FUELUP_DIR"
         fi

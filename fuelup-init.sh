@@ -463,5 +463,4 @@ warn() {
 ignore() {
     "$@"
 }
-
 main "$@" || exit 1

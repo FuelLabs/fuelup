@@ -151,6 +151,7 @@ main() {
     printf '%s\n' "fuelup ${_fuelup_version} has been installed in $FUELUP_DIR/bin. To fetch the latest forc and fuel-core binaries, run 'fuelup install'." 1>&2
 
     if [ "$allow_modify" = "yes" ]; then
+	# shellcheck disable=3014
         if [[ ":$PATH:" == *":${FUELUP_DIR}/bin:"* ]]; then
             printf "\n%s/bin already exists in your PATH.\n" "$FUELUP_DIR"
         else

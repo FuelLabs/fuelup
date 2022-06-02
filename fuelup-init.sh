@@ -93,7 +93,7 @@ main() {
                 err "Failed to detect shell; please add ${FUELUP_DIR}/bin to your PATH manually."
                 ;;
         esac
-        preinstall_confirmation $SHELL_PROFILE
+        preinstall_confirmation "$SHELL_PROFILE"
         read -r answer < /dev/tty
         allow_modify=$(echo "$answer" | cut -c1-1)
         case $allow_modify in
@@ -150,11 +150,11 @@ main() {
     printf '\n'
     printf '%s\n' "fuelup ${_fuelup_version} has been installed in $FUELUP_DIR/bin. To fetch the latest forc and fuel-core binaries, run 'fuelup install'." 1>&2
 
-    if [ "$allow_modify" == "yes" ]; then
-        if [ $(echo $PATH | grep "$FUELUP_DIR/bin") ]; then
+    if [ "$allow_modify" = "yes" ]; then
+	if [[ ":$PATH:" == *":${FUELUP_DIR}/bin:"* ]]; then
             printf "\n%s/bin already exists in your PATH.\n" "$FUELUP_DIR"
         else
-            echo "export PATH="\$PATH:$FUELUP_DIR/bin:\$PATH"" >>$SHELL_PROFILE
+            echo "export PATH="\$PATH:"$FUELUP_DIR"/bin:\$PATH"" >> "$SHELL_PROFILE"
             printf "\n%s added to PATH.\n" "$FUELUP_DIR"
         fi
     fi

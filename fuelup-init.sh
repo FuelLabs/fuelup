@@ -44,7 +44,6 @@ main() {
 
     # check if we have to use /dev/tty to prompt the user
     local need_tty=yes
-
     # always prompt PATH modification, unless --no-modify provided
     local prompt_modify=yes
 

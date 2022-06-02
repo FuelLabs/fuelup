@@ -155,7 +155,7 @@ main() {
             printf "\n%s/bin already exists in your PATH.\n" "$FUELUP_DIR"
         else
             echo "export PATH=\"\$HOME/.fuelup/bin:\$PATH"\" >>"$SHELL_PROFILE"
-            printf "\n%s added to PATH.\n" "$FUELUP_DIR"
+            printf "\n%s added to PATH. Run 'source %s' or start a new terminal session to use fuelup.\n" "$FUELUP_DIR" "$SHELL_PROFILE"
         fi
     fi
 

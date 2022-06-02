@@ -44,11 +44,14 @@ main() {
 
     # check if we have to use /dev/tty to prompt the user
     local need_tty=yes
+
+    # always prompt PATH modification, unless --no-modify provided
+    local prompt_modify=yes
+
     for arg in "$@"; do
         case "$arg" in
-            --help)
-                usage
-                exit 0
+            --no-modify)
+		prompt_modify=no
                 ;;
             *)
                 OPTIND=1
@@ -75,6 +78,36 @@ main() {
                 ;;
         esac
     done
+
+    if [ "$prompt_modify" = "yes" ]; then
+	    case $SHELL in
+		*/bash)
+		    SHELL_PROFILE=$HOME/.bashrc
+		    ;;
+		*/zsh)
+		    SHELL_PROFILE=$HOME/.zshrc
+		    ;;
+		*/fish)
+		    SHELL_PROFILE=$HOME/.config/fish/config.fish
+		    ;;
+		*)
+		    err "Failed to detect shell; please add ${FUELUP_DIR}/bin to your PATH manually."
+	    esac
+        preinstall_confirmation $SHELL_PROFILE
+        read -r answer
+	allow_modify=$(echo "$answer" | cut -c1-1)
+	case $allow_modify in
+	    "y"|"Y")
+		allow_modify=yes
+		printf "\nfuelup will modify your PATH variable for you.\n\n"
+	        ;;
+	    *)
+		allow_modify=no
+		printf "\nfuelup will not modify your PATH variable for you.\n\n"
+		;;
+	esac
+    fi
+
 
     if $_ansi_escapes_are_valid; then
         printf "\33[1minfo:\33[0m downloading fuelup %s\n" "$_fuelup_version" 1>&2
@@ -118,8 +151,33 @@ main() {
     printf '\n'
     printf '%s\n' "fuelup ${_fuelup_version} has been installed in $FUELUP_DIR/bin. To fetch the latest forc and fuel-core binaries, run 'fuelup install'." 1>&2
 
+    if [ "$allow_modify" == "yes" ]; then
+	    if [ $(echo $PATH | grep "$FUELUP_DIR/bin") ]; then
+		printf "\n%s/bin already exists in your PATH.\n" "$FUELUP_DIR"
+	    else
+		echo "export PATH="\$PATH:$FUELUP_DIR/bin:\$PATH"" >> $SHELL_PROFILE
+		printf "\n%s added to PATH.\n" "$FUELUP_DIR"
+	    fi
+    fi
+
     return "$_retval"
 }
+
+preinstall_confirmation() {
+    cat 1>&2 <<EOF
+
+fuelup uses $HOME/.fuelup as its home directory to manage the Fuel toolchain, and will install binaries there.
+
+To use the toolchain, you will have to configure your PATH, which tells your machine where to locate fuelup and the Fuel toolchain.
+
+If permitted, fuelup-init will configure your PATH for you:
+
+echo "export PATH="\$PATH:$FUELUP_DIR/bin:\$PATH"" >> $1
+
+Would you like fuelup-init to modify your PATH variable for you? (N/y)
+EOF
+}
+
 
 get_architecture() {
     local _ostype _cputype

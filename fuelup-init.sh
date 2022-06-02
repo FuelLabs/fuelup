@@ -154,8 +154,7 @@ main() {
         if echo "$PATH" | grep -q "$FUELUP_DIR/bin"; then
             printf "\n%s/bin already exists in your PATH.\n" "$FUELUP_DIR"
         else
-            # shellcheck disable=2140
-            echo "export PATH="\$PATH:"$FUELUP_DIR"/bin:\$PATH"" >>"$SHELL_PROFILE"
+            echo "export PATH=\"\$HOME/.fuelup/bin:\$PATH"\" >>"$SHELL_PROFILE"
             printf "\n%s added to PATH.\n" "$FUELUP_DIR"
         fi
     fi
@@ -172,7 +171,7 @@ To use the toolchain, you will have to configure your PATH, which tells your mac
 
 If permitted, fuelup-init will configure your PATH for you:
 
-echo "export PATH="\$PATH:$FUELUP_DIR/bin:\$PATH"" >> $1
+echo "export PATH="\$HOME/.fuelup/bin:\$PATH"" >> $SHELL_PROFILE
 
 Would you like fuelup-init to modify your PATH variable for you? (N/y)
 EOF

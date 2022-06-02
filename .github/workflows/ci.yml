@@ -28,7 +28,7 @@ jobs:
       - name: Run shellcheck and shfmt
         uses: luizm/action-sh-checker@master
         env:
-          SHELLCHECK_OPTS: -e SC3043,SC3010 # exclude POSIX sh incompatibilities
+          SHELLCHECK_OPTS: -e SC3043 # exclude 'local' is undefined
           SHFMT_OPTS: -i 4 -ci
         with:
           sh_checker_comment: false

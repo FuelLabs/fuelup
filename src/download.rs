@@ -193,8 +193,6 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg) -> Result<()> {
         &download_cfg.release_url, &download_cfg.version, &tarball_name
     );
 
-    println!("{}", &tarball_url);
-
     info!("Fetching binary from {}", &tarball_url);
 
     let fuelup_bin_dir = fuelup_bin_dir();

@@ -5,14 +5,34 @@ use clap::Parser;
 use tracing::info;
 
 use crate::constants::{FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL};
-use crate::download::{download_file_and_unpack, fuelup_bin_dir, unpack_extracted_bins};
+use crate::download::{
+    download_file_and_unpack, fuelup_bin_dir, unpack_extracted_bins, DownloadCfg,
+};
 use crate::{
     constants::{FUEL_CORE_REPO, GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_REPO},
-    download::{forc_bin_tarball_name, fuel_core_bin_tarball_name, get_latest_tag},
+    download::get_latest_tag,
 };
 
 #[derive(Debug, Parser)]
 pub struct InstallCommand {}
+
+pub fn install_component(name: &str, version: Option<String>) -> Result<()> {
+    info!("\nDownloading the Fuel toolchain\n");
+
+    let fuelup_bin_dir = fuelup_bin_dir();
+    if !fuelup_bin_dir.is_dir() {
+        fs::create_dir_all(&fuelup_bin_dir)?;
+    }
+
+    let download_cfg = DownloadCfg::new(name, version)?;
+
+    info!("Fetching {} {}", &download_cfg.name, &download_cfg.version);
+    download_file_and_unpack(&download_cfg)?;
+
+    unpack_extracted_bins(&fuelup_bin_dir)?;
+
+    Ok(())
+}
 
 pub fn install() -> Result<()> {
     info!("\nDownloading the Fuel toolchain\n");

@@ -9,7 +9,10 @@ use std::path::{Path, PathBuf};
 use tar::Archive;
 use tracing::{error, info};
 
-use crate::constants::FUELUP_DIR;
+use crate::constants::{
+    FUELUP_DIR, FUEL_CORE_RELEASE_DOWNLOAD_URL, FUEL_CORE_REPO, GITHUB_API_REPOS_BASE_URL,
+    RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL, SWAY_REPO,
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
@@ -18,47 +21,90 @@ struct LatestReleaseApiResponse {
     name: String,
 }
 
-pub fn forc_bin_tarball_name() -> Result<String> {
-    let os = match std::env::consts::OS {
-        "macos" => "darwin",
-        "linux" => "linux",
-        unsupported_os => bail!("Unsupported os: {}", unsupported_os),
-    };
-    let architecture = match std::env::consts::ARCH {
-        "aarch64" => "arm64",
-        "x86_64" => "amd64",
-        unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
-    };
-
-    Ok(format!("forc-binaries-{}_{}.tar.gz", os, architecture))
+pub struct DownloadCfg {
+    pub name: String,
+    pub version: String,
+    release_url: String,
 }
 
-pub fn fuel_core_bin_tarball_name(version: &str) -> Result<String> {
-    let architecture = match std::env::consts::ARCH {
-        "aarch64" => "aarch64",
-        "x86_64" => "x86_64",
-        unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
-    };
+impl DownloadCfg {
+    pub fn new(name: &str, version: Option<String>) -> Result<Self> {
+        Ok(Self {
+            name: name.to_string(),
+            version: match version {
+                Some(version) => version,
+                None => {
+                    let latest_tag_url = match name {
+                        "forc" => format!(
+                            "{}{}/{}",
+                            GITHUB_API_REPOS_BASE_URL, SWAY_REPO, RELEASES_LATEST
+                        ),
 
-    let vendor = match std::env::consts::OS {
-        "macos" => "apple",
-        _ => "unknown",
-    };
+                        "fuel-core" => format!(
+                            "{}{}/{}",
+                            GITHUB_API_REPOS_BASE_URL, FUEL_CORE_REPO, RELEASES_LATEST
+                        ),
+                    };
+                    if let Ok(result) = get_latest_tag(&latest_tag_url) {
+                        result
+                    } else {
+                        bail!("Error getting latest tag");
+                    }
+                }
+            },
+            release_url: match name {
+                "forc" => SWAY_RELEASE_DOWNLOAD_URL.to_string(),
+                "fuel-core" => FUEL_CORE_RELEASE_DOWNLOAD_URL.to_string(),
+            },
+        })
+    }
+}
 
-    let os = match std::env::consts::OS {
-        "macos" => "darwin",
-        "linux" => "linux-gnu",
-        unsupported_os => bail!("Unsupported os: {}", unsupported_os),
-    };
+fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
+    match download_cfg.name.as_ref() {
+        "forc" => {
+            let os = match std::env::consts::OS {
+                "macos" => "darwin",
+                "linux" => "linux",
+                unsupported_os => bail!("Unsupported os: {}", unsupported_os),
+            };
+            let architecture = match std::env::consts::ARCH {
+                "aarch64" => "arm64",
+                "x86_64" => "amd64",
+                unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
+            };
 
-    Ok(format!(
-        "fuel-core-{}-{}-{}-{}.tar.gz",
-        // strip the 'v' from the version string to match the file name of the releases
-        &version[1..version.len()],
-        architecture,
-        vendor,
-        os
-    ))
+            Ok(format!("forc-binaries-{}_{}.tar.gz", os, architecture))
+        }
+
+        "fuel-core" => {
+            let architecture = match std::env::consts::ARCH {
+                "aarch64" => "aarch64",
+                "x86_64" => "x86_64",
+                unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
+            };
+
+            let vendor = match std::env::consts::OS {
+                "macos" => "apple",
+                _ => "unknown",
+            };
+
+            let os = match std::env::consts::OS {
+                "macos" => "darwin",
+                "linux" => "linux-gnu",
+                unsupported_os => bail!("Unsupported os: {}", unsupported_os),
+            };
+
+            Ok(format!(
+                "fuel-core-{}-{}-{}-{}.tar.gz",
+                // strip the 'v' from the version string to match the file name of the releases
+                &version[1..version.len()],
+                architecture,
+                vendor,
+                os
+            ))
+        }
+    }
 }
 
 pub fn get_latest_tag(github_api_url: &str) -> Result<String> {
@@ -88,6 +134,7 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
         );
     };
 
+    fs::remove_file(&tar_path)?;
     Ok(())
 }
 
@@ -106,17 +153,13 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<File> {
     Ok(file)
 }
 
-pub fn download_file_and_unpack(
-    github_release_url: &str,
-    tag: &str,
-    tarball_name: &str,
-) -> Result<()> {
+pub fn download_file_and_unpack(download_cfg: &DownloadCfg) -> Result<()> {
+    let tarball_name = tarball_name(download_cfg);
     let tarball_url = format!("{}/{}/{}", &github_release_url, &tag, &tarball_name);
 
     info!("Fetching binary from {}", &tarball_url);
 
     let fuelup_bin_dir = fuelup_bin_dir();
-
     let tarball_path = fuelup_bin_dir.join(tarball_name);
 
     if download_file(&tarball_url, &tarball_path).is_err() {
@@ -128,8 +171,6 @@ pub fn download_file_and_unpack(
     };
 
     unpack(&tarball_path, &fuelup_bin_dir)?;
-
-    fs::remove_file(&tarball_path)?;
 
     Ok(())
 }

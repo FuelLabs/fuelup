@@ -10,8 +10,8 @@ use tar::Archive;
 use tracing::{error, info};
 
 use crate::constants::{
-    FUELUP_DIR, FUEL_CORE_RELEASE_DOWNLOAD_URL, FUEL_CORE_REPO, GITHUB_API_REPOS_BASE_URL,
-    RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL, SWAY_REPO,
+    FUELUP_DIR, FUELUP_RELEASE_DOWNLOAD_URL, FUEL_CORE_RELEASE_DOWNLOAD_URL, FUEL_CORE_REPO,
+    GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL, SWAY_REPO,
 };
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -39,11 +39,15 @@ impl DownloadCfg {
                             "{}{}/{}",
                             GITHUB_API_REPOS_BASE_URL, SWAY_REPO, RELEASES_LATEST
                         ),
-
                         "fuel-core" => format!(
                             "{}{}/{}",
                             GITHUB_API_REPOS_BASE_URL, FUEL_CORE_REPO, RELEASES_LATEST
                         ),
+                        "fuelup" => format!(
+                            "{}{}/{}",
+                            GITHUB_API_REPOS_BASE_URL, "fuelup", RELEASES_LATEST
+                        ),
+                        _ => bail!("Unrecognized component: {}", name),
                     };
                     if let Ok(result) = get_latest_tag(&latest_tag_url) {
                         result
@@ -55,12 +59,14 @@ impl DownloadCfg {
             release_url: match name {
                 "forc" => SWAY_RELEASE_DOWNLOAD_URL.to_string(),
                 "fuel-core" => FUEL_CORE_RELEASE_DOWNLOAD_URL.to_string(),
+                "fuelup" => FUELUP_RELEASE_DOWNLOAD_URL.to_string(),
+                _ => bail!("Unrecognized component: {}", name),
             },
         })
     }
 }
 
-fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
+pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
     match download_cfg.name.as_ref() {
         "forc" => {
             let os = match std::env::consts::OS {
@@ -98,12 +104,39 @@ fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
             Ok(format!(
                 "fuel-core-{}-{}-{}-{}.tar.gz",
                 // strip the 'v' from the version string to match the file name of the releases
-                &version[1..version.len()],
+                &download_cfg.version[1..download_cfg.version.len()].to_string(),
                 architecture,
                 vendor,
                 os
             ))
         }
+        "fuelup" => {
+            let architecture = match std::env::consts::ARCH {
+                "aarch64" | "x86_64" => std::env::consts::ARCH,
+                unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
+            };
+
+            let vendor = match std::env::consts::OS {
+                "macos" => "apple",
+                _ => "unknown",
+            };
+
+            let os = match std::env::consts::OS {
+                "macos" => "darwin",
+                "linux" => "linux-gnu",
+                unsupported_os => bail!("Unsupported os: {}", unsupported_os),
+            };
+
+            Ok(format!(
+                "fuelup-{}-{}-{}-{}.tar.gz",
+                // strip the 'v' from the version string to match the file name of the releases
+                &download_cfg.version[1..download_cfg.version.len()].to_string(),
+                architecture,
+                vendor,
+                os
+            ))
+        }
+        _ => bail!("Unrecognized component: {}", download_cfg.name),
     }
 }
 
@@ -154,8 +187,13 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<File> {
 }
 
 pub fn download_file_and_unpack(download_cfg: &DownloadCfg) -> Result<()> {
-    let tarball_name = tarball_name(download_cfg);
-    let tarball_url = format!("{}/{}/{}", &github_release_url, &tag, &tarball_name);
+    let tarball_name = tarball_name(download_cfg)?;
+    let tarball_url = format!(
+        "{}/{}/{}",
+        &download_cfg.release_url, &download_cfg.version, &tarball_name
+    );
+
+    println!("{}", &tarball_url);
 
     info!("Fetching binary from {}", &tarball_url);
 

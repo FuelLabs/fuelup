@@ -32,7 +32,7 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Install(_command) => install::install(),
+        Commands::Install(command) => install::exec(command),
         Commands::Fuelup(command) => match command {
             FuelupCommand::Update => self_update(),
         },

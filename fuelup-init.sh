@@ -90,7 +90,7 @@ main() {
                 SHELL_PROFILE=$HOME/.config/fish/config.fish
                 ;;
             *)
-                err "Failed to detect shell; please add ${FUELUP_DIR}/bin to your PATH manually."
+                warn "Failed to detect shell; please add ${FUELUP_DIR}/bin to your PATH manually."
                 ;;
         esac
         preinstall_confirmation

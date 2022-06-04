@@ -126,7 +126,7 @@ fuelup v${_fuelup_version} has been installed in $FUELUP_DIR/bin. You might have
 
 bash/zsh:
 
-export PATH=\$HOME/.fuelup/bin:\$PATH
+export PATH="\${HOME}/.fuelup/bin:\${PATH}"
 
 fish:
 

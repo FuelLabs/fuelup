@@ -93,19 +93,24 @@ main() {
                 warn "Failed to detect shell; please add ${FUELUP_DIR}/bin to your PATH manually."
                 ;;
         esac
-        preinstall_confirmation
-        read -r answer </dev/tty
-        allow_modify=$(echo "$answer" | cut -c1-1)
-        case $allow_modify in
-            "y" | "Y")
-                allow_modify=yes
-                printf "\nfuelup will modify your PATH variable for you.\n\n"
-                ;;
-            *)
-                allow_modify=no
-                printf "\nfuelup will not modify your PATH variable for you.\n\n"
-                ;;
-        esac
+
+        if [ -n "$SHELL_PROFILE" ]; then
+            preinstall_confirmation
+            read -r answer </dev/tty
+            allow_modify=$(echo "$answer" | cut -c1-1)
+            case $allow_modify in
+                "y" | "Y")
+                    allow_modify=yes
+                    printf "\nfuelup will modify your PATH variable for you.\n\n"
+                    ;;
+                *)
+                    allow_modify=no
+                    printf "\nfuelup will not modify your PATH variable for you.\n\n"
+                    ;;
+            esac
+        else
+            allow_modify=no
+        fi
     fi
 
     if $_ansi_escapes_are_valid; then

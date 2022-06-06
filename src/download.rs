@@ -155,3 +155,34 @@ pub fn unpack_extracted_bins(dir: &std::path::PathBuf) -> Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile;
+
+    #[test]
+    fn test_unpack_extracted_bins() {
+        let fuelup_bin_dir = tempfile::Builder::new()
+            .prefix("mock-fuelup-bin")
+            .tempdir()
+            .unwrap();
+        let mock_bin_dir = fuelup_bin_dir.path().join("forc-mock");
+        let mock_bin_file_1 = mock_bin_dir.join("forc-mock-exec-1");
+        let mock_bin_file_2 = mock_bin_dir.join("forc-mock-exec-2");
+
+        fs::create_dir(&mock_bin_dir).unwrap();
+        fs::File::create(mock_bin_file_1).unwrap();
+        fs::File::create(mock_bin_file_2).unwrap();
+
+        assert!(mock_bin_dir.exists());
+        assert!(!fuelup_bin_dir.path().join("forc-mock-exec-1").exists());
+        assert!(!fuelup_bin_dir.path().join("forc-mock-exec-2").exists());
+
+        unpack_extracted_bins(&fuelup_bin_dir.path().to_path_buf()).unwrap();
+
+        assert!(!mock_bin_dir.exists());
+        assert!(fuelup_bin_dir.path().join("forc-mock-exec-1").exists());
+        assert!(fuelup_bin_dir.path().join("forc-mock-exec-2").exists());
+    }
+}

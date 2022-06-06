@@ -162,6 +162,8 @@ main() {
             echo "export PATH=\"\$HOME/.fuelup/bin:\$PATH"\" >>"$SHELL_PROFILE"
             printf "\n%s added to PATH. Run 'source %s' or start a new terminal session to use fuelup.\n" "$FUELUP_DIR" "$SHELL_PROFILE"
         fi
+    else
+	add_path_message	
     fi
 
     return "$_retval"
@@ -179,6 +181,21 @@ If permitted, fuelup-init will configure your PATH for you:
 echo "export PATH="\$HOME/.fuelup/bin:\$PATH"" >> $SHELL_PROFILE
 
 Would you like fuelup-init to modify your PATH variable for you? (N/y)
+EOF
+}
+
+add_path_message() {
+    cat 1>&2 <<EOF
+
+You might have to add $FUELUP_DIR/bin to path:
+
+bash/zsh:
+
+export PATH="\${HOME}/.fuelup/bin:\${PATH}"
+
+fish:
+
+fish_add_path ~/.fuelup/bin
 EOF
 }
 

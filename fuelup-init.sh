@@ -172,13 +172,13 @@ main() {
 preinstall_confirmation() {
     cat 1>&2 <<EOF
 
-fuelup uses $FUELUP_DIR as its home directory to manage the Fuel toolchain, and will install binaries there.
+fuelup uses "$FUELUP_DIR" as its home directory to manage the Fuel toolchain, and will install binaries there.
 
 To use the toolchain, you will have to configure your PATH, which tells your machine where to locate fuelup and the Fuel toolchain.
 
-If permitted, fuelup-init will configure your PATH for you:
+If permitted, fuelup-init will configure your PATH for you by running the following:
 
-echo "export PATH="\$HOME/.fuelup/bin:\$PATH"" >> $SHELL_PROFILE
+    echo "export PATH="\$HOME/.fuelup/bin:\$PATH"" >> $SHELL_PROFILE
 
 Would you like fuelup-init to modify your PATH variable for you? (N/y)
 EOF

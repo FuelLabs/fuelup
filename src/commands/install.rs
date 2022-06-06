@@ -1,5 +1,6 @@
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Result};
 use clap::Parser;
+use regex::Regex;
 use std::collections::HashSet;
 use std::fmt::Write;
 use std::fs;
@@ -10,8 +11,16 @@ use crate::download::{
 };
 
 #[derive(Debug, Parser)]
+#[clap(override_usage = "\
+    fuelup install <COMPONENT>[@<VERSION>] ...")]
 pub struct InstallCommand {
-    names: Vec<String>,
+    /// Reference to a forc component to add as a dependency
+    ///
+    /// You can reference components by:{n}
+    /// - `<name>`, like `fuelup install forc` (latest version will be used){n}
+    /// - `<name>@<version>`, like `cargo add forc@0.14.5`{n}
+    #[clap(multiple_values = true, takes_value = true)]
+    components: Vec<String>,
 }
 
 pub const POSSIBLE_COMPONENTS: [&str; 3] = ["forc", "fuel-core", "fuelup"];
@@ -45,24 +54,52 @@ pub fn install_all() -> Result<()> {
     Ok(())
 }
 
+pub fn parse_component(component: &str) -> Result<(String, Option<String>)> {
+    if component.contains('@') {
+        let filtered = component.split('@').collect::<Vec<&str>>();
+        let re = Regex::new(r"^\d+\.\d+\.\d+$").unwrap();
+
+        if filtered.len() != 2 {
+            bail!("Invalid format for installing component with version: {}. Installing component with version must be in the format <name>@<version> eg. forc@0.14.5", component);
+        }
+
+        let name = filtered[0];
+        let version = filtered[1];
+
+        if !re.is_match(version) {
+            bail!("Invalid format for version: {}. Version must be in the format <major>.<minor>.<patch>", version);
+        }
+
+        return Ok((name.to_string(), Some(version.to_string())));
+    } else {
+        return Ok((component.to_string(), None));
+    };
+}
+
 pub fn exec(command: InstallCommand) -> Result<()> {
-    let InstallCommand { names } = command;
+    let InstallCommand { components } = command;
 
     let mut errored_bins = String::new();
     let mut installed_bins = String::new();
     let mut download_msg = String::new();
+    let mut to_download: Vec<DownloadCfg> = Vec::new();
 
-    if names.is_empty() {
+    for component in components.iter() {
+        let (name, version) = parse_component(component)?;
+        let download_cfg = DownloadCfg::new(&name, version)?;
+        to_download.push(download_cfg);
+    }
+
+    if components.is_empty() {
         for name in POSSIBLE_COMPONENTS.iter() {
             write!(download_msg, "{} ", name)?;
         }
-        info!("Downloading: {}", download_msg);
         install_all()?
     } else {
         let mut waiting_to_download = HashSet::new();
-        let mut to_download = Vec::new();
 
-        for name in names.iter() {
+        let temp_components = vec!["forc".to_string(), "fuel".to_string()];
+        for name in temp_components.iter() {
             if !waiting_to_download.contains(&name) && POSSIBLE_COMPONENTS.contains(&name.as_str())
             {
                 to_download.push(name);
@@ -98,4 +135,46 @@ pub fn exec(command: InstallCommand) -> Result<()> {
     };
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_component() {
+        assert_eq!(("forc".to_string(), None), parse_component("forc").unwrap());
+        assert_eq!(
+            ("forc".to_string(), Some("0.14.5".to_string())),
+            parse_component("forc@0.14.5").unwrap()
+        );
+
+    }
+
+    #[test]
+    fn test_parse_component_invalid_component() {
+        let invalid_component_msg = |c: &str| {
+            format!("Invalid format for installing component with version: {}. Installing component with version must be in the format <name>@<version> eg. forc@0.14.5", c)
+        };
+
+        assert_eq!(
+            invalid_component_msg("forc@0.1@fuel-core@0.8"),
+            parse_component("forc@0.1@fuel-core@0.8").unwrap_err().to_string()
+        );
+    }
+
+    #[test]
+    fn test_parse_component_invalid_version() {
+        let invalid_version_msg = |v: &str| format!(
+            "Invalid format for version: {}. Version must be in the format <major>.<minor>.<patch>",
+           v 
+        );
+        assert_eq!(
+            invalid_version_msg("14"),
+            parse_component("forc@14").unwrap_err().to_string()
+        );
+        assert_eq!(invalid_version_msg("14.0"), parse_component("forc@14.0").unwrap_err().to_string());
+        assert_eq!(invalid_version_msg(".14.5"), parse_component("forc@.14.5").unwrap_err().to_string());
+        assert_eq!(invalid_version_msg(".14."), parse_component("forc@.14.").unwrap_err().to_string());
+    }
 }

@@ -15,7 +15,7 @@ struct UpdateCommand {}
 pub const FUELUP_VERSION: &str = concat!("v", clap::crate_version!());
 
 pub fn self_update() -> Result<()> {
-    install::install_one("fuelup", None);
+    install::install_one("fuelup", None)?;
 
     Ok(())
 }

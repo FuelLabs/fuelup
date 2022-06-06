@@ -163,7 +163,7 @@ main() {
             printf "\n%s added to PATH. Run 'source %s' or start a new terminal session to use fuelup.\n" "$FUELUP_DIR" "$SHELL_PROFILE"
         fi
     else
-	add_path_message	
+        add_path_message
     fi
 
     return "$_retval"
@@ -234,7 +234,7 @@ get_architecture() {
 }
 
 check_cargo_bin() {
-    if which "${1}" | grep -q "[.cargo]"; then
+    if which "${1}" 2>/dev/null | grep -q "[.cargo]"; then
         warn "$1 is already installed via cargo and is in use by your system. You should update your PATH, or execute 'cargo uninstall $1'"
     fi
 }

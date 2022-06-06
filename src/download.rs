@@ -199,11 +199,7 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg) -> Result<()> {
     let tarball_path = fuelup_bin_dir.join(tarball_name);
 
     if download_file(&tarball_url, &tarball_path).is_err() {
-        error!(
-            "Failed to download from {} and write to path {}",
-            &tarball_url,
-            &tarball_path.display()
-        );
+        error!("Failed to download from {}.", &tarball_url,);
     };
 
     unpack(&tarball_path, &fuelup_bin_dir)?;

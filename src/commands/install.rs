@@ -74,7 +74,7 @@ pub fn exec(command: InstallCommand) -> Result<()> {
 
     if components.is_empty() {
         for component in POSSIBLE_COMPONENTS.iter() {
-            write!(download_msg, "{} ", name)?;
+            write!(download_msg, "{} ", component)?;
         }
 
         info!("Downloading: {}", download_msg);

@@ -71,7 +71,6 @@ pub fn exec(command: InstallCommand) -> Result<()> {
     let mut errored_bins = String::new();
     let mut installed_bins = String::new();
     let mut download_msg = String::new();
-    let mut to_download: Vec<DownloadCfg> = Vec::new();
 
     if components.is_empty() {
         for name in POSSIBLE_COMPONENTS.iter() {
@@ -87,16 +86,23 @@ pub fn exec(command: InstallCommand) -> Result<()> {
             };
         }
     } else {
+        let mut to_download: Vec<DownloadCfg> = Vec::new();
+
         for component in components.iter() {
             let (name, version) = parse_component(component)?;
             let download_cfg = DownloadCfg::new(&name, version)?;
 
-            if !to_download.contains(&download_cfg)
-                && POSSIBLE_COMPONENTS.contains(&download_cfg.name.as_ref())
+            if to_download
+                .iter()
+                .map(|t| t.name.clone())
+                .collect::<String>()
+                .contains(&download_cfg.name)
             {
-                to_download.push(download_cfg);
-                write!(download_msg, "{} ", name)?;
+                bail!("{} was given as an input twice", &download_cfg.name);
             }
+
+            to_download.push(download_cfg);
+            write!(download_msg, "{} ", name)?;
         }
 
         info!("Downloading: {}", download_msg);

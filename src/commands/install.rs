@@ -5,8 +5,9 @@ use std::fmt::Write;
 use std::fs;
 use tracing::{error, info};
 
-use crate::download::{
-    download_file_and_unpack, fuelup_bin_dir, unpack_extracted_bins, DownloadCfg,
+use crate::{
+    constants::POSSIBLE_COMPONENTS,
+    download::{download_file_and_unpack, fuelup_bin_dir, unpack_extracted_bins, DownloadCfg},
 };
 
 #[derive(Debug, Parser)]
@@ -21,8 +22,6 @@ pub struct InstallCommand {
     #[clap(multiple_values = true)]
     components: Vec<String>,
 }
-
-pub const POSSIBLE_COMPONENTS: [&str; 3] = ["forc", "fuel-core", "fuelup"];
 
 pub fn install_one(download_cfg: DownloadCfg) -> Result<DownloadCfg> {
     let fuelup_bin_dir = fuelup_bin_dir();

@@ -73,15 +73,17 @@ pub fn exec(command: InstallCommand) -> Result<()> {
     let mut download_msg = String::new();
 
     if components.is_empty() {
+        let mut cfgs: Vec<DownloadCfg> = Vec::new();
+
         for component in POSSIBLE_COMPONENTS.iter() {
             write!(download_msg, "{} ", component)?;
+            let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
+            cfgs.push(download_cfg);
         }
 
         info!("Downloading: {}", download_msg);
-        for component in POSSIBLE_COMPONENTS.iter() {
-            let download_cfg: DownloadCfg =
-                DownloadCfg::new(component, None).expect("Failed to create download config");
-            match install_one(download_cfg) {
+        for cfg in cfgs {
+            match install_one(cfg) {
                 Ok(cfg) => writeln!(installed_bins, "- {} {}", cfg.name, cfg.version)?,
                 Err(e) => writeln!(errored_bins, "- {}", e)?,
             };

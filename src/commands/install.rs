@@ -78,6 +78,7 @@ pub fn exec(command: InstallCommand) -> Result<()> {
             write!(download_msg, "{} ", name)?;
         }
 
+        info!("Downloading: {}", download_msg);
         for component in ["forc", "fuel-core", "fuelup"].iter() {
             let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
             match install_one(download_cfg) {

@@ -1,7 +1,8 @@
 use anyhow::Result;
 use clap::Parser;
-use fuelup::commands::install;
+use fuelup::commands::{check, install};
 
+use fuelup::commands::check::CheckCommand;
 use fuelup::commands::fuelup::{self_update, FuelupCommand};
 use fuelup::commands::install::InstallCommand;
 
@@ -19,6 +20,8 @@ enum Commands {
     /// Manage your fuelup installation.
     #[clap(name = "self", subcommand)]
     Fuelup(FuelupCommand),
+    /// Check for updates to Fuel toolchains and fuelup
+    Check(CheckCommand),
 }
 
 fn main() -> Result<()> {
@@ -36,5 +39,6 @@ fn main() -> Result<()> {
         Commands::Fuelup(command) => match command {
             FuelupCommand::Update => self_update(),
         },
+        Commands::Check(_command) => check::exec(),
     }
 }

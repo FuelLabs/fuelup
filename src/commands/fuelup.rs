@@ -1,6 +1,8 @@
 use anyhow::Result;
 use clap::Parser;
 
+use crate::download::DownloadCfg;
+
 use super::install;
 
 #[derive(Debug, Parser)]
@@ -15,7 +17,8 @@ struct UpdateCommand {}
 pub const FUELUP_VERSION: &str = concat!("v", clap::crate_version!());
 
 pub fn self_update() -> Result<()> {
-    install::install_one("fuelup", None)?;
+    let download_cfg = DownloadCfg::new("fuelup", None)?;
+    install::install_one(download_cfg)?;
 
     Ok(())
 }

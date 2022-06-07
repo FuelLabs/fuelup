@@ -73,7 +73,7 @@ pub fn exec(command: InstallCommand) -> Result<()> {
     let mut download_msg = String::new();
 
     if components.is_empty() {
-        for name in POSSIBLE_COMPONENTS.iter() {
+        for component in POSSIBLE_COMPONENTS.iter() {
             write!(download_msg, "{} ", name)?;
         }
 

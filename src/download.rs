@@ -10,8 +10,9 @@ use tar::Archive;
 use tracing::{error, info};
 
 use crate::constants::{
-    FUELUP_DIR, FUELUP_RELEASE_DOWNLOAD_URL, FUEL_CORE_RELEASE_DOWNLOAD_URL, FUEL_CORE_REPO,
-    GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL, SWAY_REPO,
+    FUELUP_DIR, FUELUP_RELEASE_DOWNLOAD_URL, FUELUP_REPO, FUEL_CORE_RELEASE_DOWNLOAD_URL,
+    FUEL_CORE_REPO, GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL,
+    SWAY_REPO,
 };
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -52,7 +53,7 @@ impl DownloadCfg {
                         ),
                         "fuelup" => format!(
                             "{}{}/{}",
-                            GITHUB_API_REPOS_BASE_URL, "fuelup", RELEASES_LATEST
+                            GITHUB_API_REPOS_BASE_URL, FUELUP_REPO, RELEASES_LATEST
                         ),
                         _ => bail!("Unrecognized component: {}", name),
                     };

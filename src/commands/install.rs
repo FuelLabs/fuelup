@@ -78,8 +78,9 @@ pub fn exec(command: InstallCommand) -> Result<()> {
         }
 
         info!("Downloading: {}", download_msg);
-        for component in ["forc", "fuel-core", "fuelup"].iter() {
-            let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
+        for component in POSSIBLE_COMPONENTS.iter() {
+            let download_cfg: DownloadCfg =
+                DownloadCfg::new(component, None).expect("Failed to create download config");
             match install_one(download_cfg) {
                 Ok(cfg) => writeln!(installed_bins, "- {} {}", cfg.name, cfg.version)?,
                 Err(e) => writeln!(errored_bins, "- {}", e)?,

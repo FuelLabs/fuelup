@@ -46,7 +46,7 @@ pub fn install_one(download_cfg: DownloadCfg) -> Result<DownloadCfg> {
 pub fn parse_component(component: &str) -> Result<(String, Option<String>)> {
     if component.contains('@') {
         let filtered = component.split('@').collect::<Vec<&str>>();
-        let semver_regex = Regex::new(r"^\d+\.\d+\.\d+$").unwrap();
+        let semver_regex = Regex::new(r"^[v]?\d+\.\d+\.\d+$").unwrap();
 
         if filtered.len() != 2 {
             bail!("Invalid format for installing component with version: {}. Installing component with version must be in the format <name>@<version> eg. forc@0.14.5", component);
@@ -111,13 +111,10 @@ pub fn exec(command: InstallCommand) -> Result<()> {
         info!("\nInstalled:\n{}", installed_bins);
         info!("\nThe Fuel toolchain is installed and up to date");
     } else if installed_bins.is_empty() {
-        error!(
-            "\nfuelup failed to install:\n{}\nYou might need to run `fuelup install` again.",
-            errored_bins
-        )
+        error!("\nfuelup failed to install:\n{}", errored_bins)
     } else {
         info!(
-            "\nThe Fuel toolchain is partially installed.\nfuelup failed to install: {}\n\nYou might need to run `fuelup install` again.",
+            "\nThe Fuel toolchain is partially installed.\nfuelup failed to install: {}",
             errored_bins
         );
     };
@@ -135,6 +132,10 @@ mod tests {
         assert_eq!(
             ("forc".to_string(), Some("0.14.5".to_string())),
             parse_component("forc@0.14.5").unwrap()
+        );
+        assert_eq!(
+            ("forc".to_string(), Some("v0.14.5".to_string())),
+            parse_component("forc@v0.14.5").unwrap()
         );
     }
 
@@ -164,8 +165,16 @@ mod tests {
             parse_component("forc@14").unwrap_err().to_string()
         );
         assert_eq!(
+            invalid_version_msg("v14"),
+            parse_component("forc@v14").unwrap_err().to_string()
+        );
+        assert_eq!(
             invalid_version_msg("14.0"),
             parse_component("forc@14.0").unwrap_err().to_string()
+        );
+        assert_eq!(
+            invalid_version_msg("v14.0"),
+            parse_component("forc@v14.0").unwrap_err().to_string()
         );
         assert_eq!(
             invalid_version_msg(".14.5"),

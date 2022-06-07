@@ -33,7 +33,13 @@ impl DownloadCfg {
         Ok(Self {
             name: name.to_string(),
             version: match version {
-                Some(version) => "v".to_string() + &version,
+                Some(version) => {
+                    if version.starts_with('v') {
+                        version
+                    } else {
+                        "v".to_string() + &version
+                    }
+                }
                 None => {
                     let latest_tag_url = match name {
                         "forc" => format!(
@@ -200,7 +206,7 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg) -> Result<()> {
     let tarball_path = fuelup_bin_dir.join(tarball_name);
 
     if download_file(&tarball_url, &tarball_path).is_err() {
-        error!("Failed to download from {}.", &tarball_url,);
+        error!("Failed to download from {}", &tarball_url,);
     };
 
     unpack(&tarball_path, &fuelup_bin_dir)?;

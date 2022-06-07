@@ -21,6 +21,7 @@ struct LatestReleaseApiResponse {
     name: String,
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct DownloadCfg {
     pub name: String,
     pub version: String,
@@ -32,7 +33,7 @@ impl DownloadCfg {
         Ok(Self {
             name: name.to_string(),
             version: match version {
-                Some(version) => version,
+                Some(version) => "v".to_string() + &version,
                 None => {
                     let latest_tag_url = match name {
                         "forc" => format!(

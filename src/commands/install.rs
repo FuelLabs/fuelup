@@ -17,7 +17,7 @@ pub struct InstallCommand {
     ///
     /// You can reference components by:{n}
     /// - `<name>`, like `fuelup install forc` (latest version will be used){n}
-    /// - `<name>@<version>`, like `cargo add forc@0.14.5`{n}
+    /// - `<name>@<version>`, like `fuelup install forc@0.14.5`{n}
     #[clap(multiple_values = true)]
     components: Vec<String>,
 }

@@ -98,7 +98,10 @@ pub fn exec(command: InstallCommand) -> Result<()> {
                 .collect::<String>()
                 .contains(&download_cfg.name)
             {
-                bail!("{} was given as an input twice", &download_cfg.name);
+                bail!(
+                    "Invalid command due to duplicate input: {}",
+                    &download_cfg.name
+                );
             }
 
             to_download.push(download_cfg);
@@ -147,7 +150,8 @@ mod tests {
 
     #[test]
     fn test_duplicate_inputs() {
-        let invalid_component_msg = |c: &str| format!("{} was given as an input twice", c);
+        let invalid_component_msg =
+            |c: &str| format!("Invalid command due to duplicate input: {}", c);
 
         assert_eq!(
             invalid_component_msg("forc"),

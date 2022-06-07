@@ -132,7 +132,6 @@ pub fn exec(command: InstallCommand) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
     #[test]
     fn test_parse_component() {
         assert_eq!(("forc".to_string(), None), parse_component("forc").unwrap());
@@ -143,6 +142,20 @@ mod tests {
         assert_eq!(
             ("forc".to_string(), Some("v0.14.5".to_string())),
             parse_component("forc@v0.14.5").unwrap()
+        );
+    }
+
+    #[test]
+    fn test_duplicate_inputs() {
+        let invalid_component_msg = |c: &str| format!("{} was given as an input twice", c);
+
+        assert_eq!(
+            invalid_component_msg("forc"),
+            exec(InstallCommand {
+                components: vec!["forc".to_string(), "forc".to_string()]
+            })
+            .unwrap_err()
+            .to_string()
         );
     }
 

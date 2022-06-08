@@ -41,7 +41,7 @@ pub fn install_one(download_cfg: DownloadCfg) -> Result<DownloadCfg> {
     Ok(download_cfg)
 }
 
-pub fn parse_component(component: &str) -> Result<(String, Option<String>)> {
+pub fn parse_component(component: &str) -> Result<(String, Option<Version>)> {
     if component.contains('@') {
         let split = component.split('@').collect::<Vec<&str>>();
 
@@ -56,14 +56,13 @@ pub fn parse_component(component: &str) -> Result<(String, Option<String>)> {
             version = &version[1..version.len()]
         }
 
-        if let Err(e) = Version::parse(version) {
-            bail!(
+        match Version::parse(version) {
+            Ok(v) => Ok((name.to_string(), Some(v))),
+            Err(e) => bail!(
                 "Error parsing version {} - {}. Version input must be in the format <major>.<minor>.<patch>",
                 version, e
             )
-        };
-
-        Ok((name.to_string(), Some(version.to_string())))
+        }
     } else {
         Ok((component.to_string(), None))
     }
@@ -151,11 +150,17 @@ mod tests {
             parse_component(component::FORC).unwrap()
         );
         assert_eq!(
-            (component::FORC.to_string(), Some("0.14.5".to_string())),
+            (
+                component::FORC.to_string(),
+                Some(Version::parse("0.14.5").unwrap())
+            ),
             parse_component("forc@0.14.5").unwrap()
         );
         assert_eq!(
-            (component::FORC.to_string(), Some("0.14.5".to_string())),
+            (
+                component::FORC.to_string(),
+                Some(Version::parse("0.14.5").unwrap())
+            ),
             parse_component("forc@v0.14.5").unwrap()
         );
     }

@@ -1,6 +1,7 @@
 use anyhow::{bail, Result};
 use dirs::home_dir;
 use flate2::read::GzDecoder;
+use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::{File, OpenOptions};
@@ -25,7 +26,7 @@ struct LatestReleaseApiResponse {
 #[derive(Debug, PartialEq, Eq)]
 pub struct DownloadCfg {
     pub name: String,
-    pub version: String,
+    pub version: Version,
     release_url: String,
 }
 
@@ -36,17 +37,11 @@ pub mod component {
 }
 
 impl DownloadCfg {
-    pub fn new(name: &str, version: Option<String>) -> Result<DownloadCfg> {
+    pub fn new(name: &str, version: Option<Version>) -> Result<DownloadCfg> {
         Ok(Self {
             name: name.to_string(),
             version: match version {
-                Some(version) => {
-                    if version.starts_with('v') {
-                        version
-                    } else {
-                        "v".to_string() + &version
-                    }
-                }
+                Some(version) => version,
                 None => {
                     let latest_tag_url = match name {
                         component::FORC => format!(
@@ -116,8 +111,7 @@ pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
 
             Ok(format!(
                 "fuel-core-{}-{}-{}-{}.tar.gz",
-                // strip the 'v' from the version string to match the file name of the releases
-                &download_cfg.version[1..download_cfg.version.len()].to_string(),
+                &download_cfg.version.to_string(),
                 architecture,
                 vendor,
                 os
@@ -142,8 +136,7 @@ pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
 
             Ok(format!(
                 "fuelup-{}-{}-{}-{}.tar.gz",
-                // strip the 'v' from the version string to match the file name of the releases
-                &download_cfg.version[1..download_cfg.version.len()].to_string(),
+                &download_cfg.version.to_string(),
                 architecture,
                 vendor,
                 os
@@ -153,7 +146,7 @@ pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
     }
 }
 
-pub fn get_latest_tag(github_api_url: &str) -> Result<String> {
+pub fn get_latest_tag(github_api_url: &str) -> Result<Version> {
     let handle = ureq::builder().user_agent("fuelup").build();
     let resp = handle.get(github_api_url).call()?;
 
@@ -161,7 +154,10 @@ pub fn get_latest_tag(github_api_url: &str) -> Result<String> {
     resp.into_reader().read_to_end(&mut data)?;
 
     let response: LatestReleaseApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
-    Ok(response.tag_name)
+
+    let version = Version::parse(&response.tag_name[1..response.tag_name.len()])?;
+
+    Ok(version)
 }
 
 pub fn fuelup_bin_dir() -> PathBuf {
@@ -202,7 +198,7 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<File> {
 pub fn download_file_and_unpack(download_cfg: &DownloadCfg) -> Result<()> {
     let tarball_name = tarball_name(download_cfg)?;
     let tarball_url = format!(
-        "{}/{}/{}",
+        "{}/v{}/{}",
         &download_cfg.release_url, &download_cfg.version, &tarball_name
     );
 

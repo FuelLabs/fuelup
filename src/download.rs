@@ -1,6 +1,7 @@
 use anyhow::{bail, Result};
 use dirs::home_dir;
 use flate2::read::GzDecoder;
+use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::fs::{File, OpenOptions};
@@ -25,33 +26,33 @@ struct LatestReleaseApiResponse {
 #[derive(Debug, PartialEq, Eq)]
 pub struct DownloadCfg {
     pub name: String,
-    pub version: String,
+    pub version: Version,
     release_url: String,
 }
 
+pub mod component {
+    pub const FORC: &str = "forc";
+    pub const FUEL_CORE: &str = "fuel-core";
+    pub const FUELUP: &str = "fuelup";
+}
+
 impl DownloadCfg {
-    pub fn new(name: &str, version: Option<String>) -> Result<DownloadCfg> {
+    pub fn new(name: &str, version: Option<Version>) -> Result<DownloadCfg> {
         Ok(Self {
             name: name.to_string(),
             version: match version {
-                Some(version) => {
-                    if version.starts_with('v') {
-                        version
-                    } else {
-                        "v".to_string() + &version
-                    }
-                }
+                Some(version) => version,
                 None => {
                     let latest_tag_url = match name {
-                        "forc" => format!(
+                        component::FORC => format!(
                             "{}{}/{}",
                             GITHUB_API_REPOS_BASE_URL, SWAY_REPO, RELEASES_LATEST
                         ),
-                        "fuel-core" => format!(
+                        component::FUEL_CORE => format!(
                             "{}{}/{}",
                             GITHUB_API_REPOS_BASE_URL, FUEL_CORE_REPO, RELEASES_LATEST
                         ),
-                        "fuelup" => format!(
+                        component::FUELUP => format!(
                             "{}{}/{}",
                             GITHUB_API_REPOS_BASE_URL, FUELUP_REPO, RELEASES_LATEST
                         ),
@@ -65,9 +66,9 @@ impl DownloadCfg {
                 }
             },
             release_url: match name {
-                "forc" => SWAY_RELEASE_DOWNLOAD_URL.to_string(),
-                "fuel-core" => FUEL_CORE_RELEASE_DOWNLOAD_URL.to_string(),
-                "fuelup" => FUELUP_RELEASE_DOWNLOAD_URL.to_string(),
+                component::FORC => SWAY_RELEASE_DOWNLOAD_URL.to_string(),
+                component::FUEL_CORE => FUEL_CORE_RELEASE_DOWNLOAD_URL.to_string(),
+                component::FUELUP => FUELUP_RELEASE_DOWNLOAD_URL.to_string(),
                 _ => bail!("Unrecognized component: {}", name),
             },
         })
@@ -76,7 +77,7 @@ impl DownloadCfg {
 
 pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
     match download_cfg.name.as_ref() {
-        "forc" => {
+        component::FORC => {
             let os = match std::env::consts::OS {
                 "macos" => "darwin",
                 "linux" => "linux",
@@ -91,10 +92,9 @@ pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
             Ok(format!("forc-binaries-{}_{}.tar.gz", os, architecture))
         }
 
-        "fuel-core" => {
+        component::FUEL_CORE => {
             let architecture = match std::env::consts::ARCH {
-                "aarch64" => "aarch64",
-                "x86_64" => "x86_64",
+                "aarch64" | "x86_64" => std::env::consts::ARCH,
                 unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
             };
 
@@ -111,14 +111,13 @@ pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
 
             Ok(format!(
                 "fuel-core-{}-{}-{}-{}.tar.gz",
-                // strip the 'v' from the version string to match the file name of the releases
-                &download_cfg.version[1..download_cfg.version.len()].to_string(),
+                &download_cfg.version.to_string(),
                 architecture,
                 vendor,
                 os
             ))
         }
-        "fuelup" => {
+        component::FUELUP => {
             let architecture = match std::env::consts::ARCH {
                 "aarch64" | "x86_64" => std::env::consts::ARCH,
                 unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
@@ -137,8 +136,7 @@ pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
 
             Ok(format!(
                 "fuelup-{}-{}-{}-{}.tar.gz",
-                // strip the 'v' from the version string to match the file name of the releases
-                &download_cfg.version[1..download_cfg.version.len()].to_string(),
+                &download_cfg.version.to_string(),
                 architecture,
                 vendor,
                 os
@@ -148,7 +146,7 @@ pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
     }
 }
 
-pub fn get_latest_tag(github_api_url: &str) -> Result<String> {
+pub fn get_latest_tag(github_api_url: &str) -> Result<Version> {
     let handle = ureq::builder().user_agent("fuelup").build();
     let resp = handle.get(github_api_url).call()?;
 
@@ -156,7 +154,10 @@ pub fn get_latest_tag(github_api_url: &str) -> Result<String> {
     resp.into_reader().read_to_end(&mut data)?;
 
     let response: LatestReleaseApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
-    Ok(response.tag_name)
+
+    let version = Version::parse(&response.tag_name[1..response.tag_name.len()])?;
+
+    Ok(version)
 }
 
 pub fn fuelup_bin_dir() -> PathBuf {
@@ -197,7 +198,7 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<File> {
 pub fn download_file_and_unpack(download_cfg: &DownloadCfg) -> Result<()> {
     let tarball_name = tarball_name(download_cfg)?;
     let tarball_url = format!(
-        "{}/{}/{}",
+        "{}/v{}/{}",
         &download_cfg.release_url, &download_cfg.version, &tarball_name
     );
 

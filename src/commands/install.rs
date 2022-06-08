@@ -58,8 +58,8 @@ pub fn parse_component(component: &str) -> Result<(String, Option<String>)> {
 
         if let Err(e) = Version::parse(version) {
             bail!(
-                "Error parsing version: {}. Version input must be in the format <major>.<minor>.<patch>",
-                e
+                "Error parsing version {} - {}. Version input must be in the format <major>.<minor>.<patch>",
+                version, e
             )
         };
 
@@ -155,7 +155,7 @@ mod tests {
             parse_component("forc@0.14.5").unwrap()
         );
         assert_eq!(
-            (component::FORC.to_string(), Some("v0.14.5".to_string())),
+            (component::FORC.to_string(), Some("0.14.5".to_string())),
             parse_component("forc@v0.14.5").unwrap()
         );
     }
@@ -191,34 +191,46 @@ mod tests {
 
     #[test]
     fn test_parse_component_invalid_version() {
-        let invalid_version_msg = |v: &str| {
+        let invalid_version_msg = |version: &str, version_type: &str| {
             format!(
-            "Invalid format for version: {}. Version must be in the format <major>.<minor>.<patch>",v 
-        )
+            "Error parsing version {} - unexpected end of input while parsing {} version number. Version input must be in the format <major>.<minor>.<patch>",
+            version, version_type
+            )
+        };
+
+        let unexpected_char_msg = |version: &str| {
+            format!(
+                "Error parsing version {} - unexpected character '.' while parsing major version number. Version input must be in the format <major>.<minor>.<patch>",
+                version
+                )
         };
         assert_eq!(
-            invalid_version_msg("14"),
-            parse_component("forc@14").unwrap_err().to_string()
+            invalid_version_msg("1", "major"),
+            parse_component("forc@1").unwrap_err().to_string()
         );
         assert_eq!(
-            invalid_version_msg("v14"),
-            parse_component("forc@v14").unwrap_err().to_string()
+            invalid_version_msg("1", "major"),
+            parse_component("forc@v1").unwrap_err().to_string()
         );
         assert_eq!(
-            invalid_version_msg("14.0"),
-            parse_component("forc@14.0").unwrap_err().to_string()
+            invalid_version_msg("1.0", "minor"),
+            parse_component("forc@1.0").unwrap_err().to_string()
         );
         assert_eq!(
-            invalid_version_msg("v14.0"),
-            parse_component("forc@v14.0").unwrap_err().to_string()
+            invalid_version_msg("1.0", "minor"),
+            parse_component("forc@v1.0").unwrap_err().to_string()
         );
         assert_eq!(
-            invalid_version_msg(".14.5"),
-            parse_component("forc@.14.5").unwrap_err().to_string()
+            invalid_version_msg("1.0.", "patch"),
+            parse_component("forc@1.0.").unwrap_err().to_string()
         );
         assert_eq!(
-            invalid_version_msg(".14."),
-            parse_component("forc@.14.").unwrap_err().to_string()
+            unexpected_char_msg(".1"),
+            parse_component("forc@.1").unwrap_err().to_string()
+        );
+        assert_eq!(
+            unexpected_char_msg(".1."),
+            parse_component("forc@.1.").unwrap_err().to_string()
         );
     }
 }

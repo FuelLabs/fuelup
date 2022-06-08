@@ -29,6 +29,12 @@ pub struct DownloadCfg {
     release_url: String,
 }
 
+pub mod component {
+    pub const FORC: &str = "forc";
+    pub const FUEL_CORE: &str = "fuel-core";
+    pub const FUELUP: &str = "fuelup";
+}
+
 impl DownloadCfg {
     pub fn new(name: &str, version: Option<String>) -> Result<DownloadCfg> {
         Ok(Self {
@@ -43,15 +49,15 @@ impl DownloadCfg {
                 }
                 None => {
                     let latest_tag_url = match name {
-                        "forc" => format!(
+                        component::FORC => format!(
                             "{}{}/{}",
                             GITHUB_API_REPOS_BASE_URL, SWAY_REPO, RELEASES_LATEST
                         ),
-                        "fuel-core" => format!(
+                        component::FUEL_CORE => format!(
                             "{}{}/{}",
                             GITHUB_API_REPOS_BASE_URL, FUEL_CORE_REPO, RELEASES_LATEST
                         ),
-                        "fuelup" => format!(
+                        component::FUELUP => format!(
                             "{}{}/{}",
                             GITHUB_API_REPOS_BASE_URL, FUELUP_REPO, RELEASES_LATEST
                         ),
@@ -65,9 +71,9 @@ impl DownloadCfg {
                 }
             },
             release_url: match name {
-                "forc" => SWAY_RELEASE_DOWNLOAD_URL.to_string(),
-                "fuel-core" => FUEL_CORE_RELEASE_DOWNLOAD_URL.to_string(),
-                "fuelup" => FUELUP_RELEASE_DOWNLOAD_URL.to_string(),
+                component::FORC => SWAY_RELEASE_DOWNLOAD_URL.to_string(),
+                component::FUEL_CORE => FUEL_CORE_RELEASE_DOWNLOAD_URL.to_string(),
+                component::FUELUP => FUELUP_RELEASE_DOWNLOAD_URL.to_string(),
                 _ => bail!("Unrecognized component: {}", name),
             },
         })
@@ -76,7 +82,7 @@ impl DownloadCfg {
 
 pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
     match download_cfg.name.as_ref() {
-        "forc" => {
+        component::FORC => {
             let os = match std::env::consts::OS {
                 "macos" => "darwin",
                 "linux" => "linux",
@@ -91,7 +97,7 @@ pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
             Ok(format!("forc-binaries-{}_{}.tar.gz", os, architecture))
         }
 
-        "fuel-core" => {
+        component::FUEL_CORE => {
             let architecture = match std::env::consts::ARCH {
                 "aarch64" | "x86_64" => std::env::consts::ARCH,
                 unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
@@ -117,7 +123,7 @@ pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
                 os
             ))
         }
-        "fuelup" => {
+        component::FUELUP => {
             let architecture = match std::env::consts::ARCH {
                 "aarch64" | "x86_64" => std::env::consts::ARCH,
                 unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),

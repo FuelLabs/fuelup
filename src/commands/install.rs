@@ -6,7 +6,7 @@ use std::fs;
 use tracing::{error, info};
 
 use crate::download::{
-    download_file_and_unpack, fuelup_bin_dir, unpack_extracted_bins, DownloadCfg,
+    component, download_file_and_unpack, fuelup_bin_dir, unpack_extracted_bins, DownloadCfg,
 };
 
 #[derive(Debug, Parser)]
@@ -21,8 +21,6 @@ pub struct InstallCommand {
     #[clap(multiple_values = true)]
     components: Vec<String>,
 }
-
-pub const POSSIBLE_COMPONENTS: [&str; 3] = ["forc", "fuel-core", "fuelup"];
 
 pub fn install_one(download_cfg: DownloadCfg) -> Result<DownloadCfg> {
     let fuelup_bin_dir = fuelup_bin_dir();
@@ -75,7 +73,7 @@ pub fn exec(command: InstallCommand) -> Result<()> {
     if components.is_empty() {
         let mut cfgs: Vec<DownloadCfg> = Vec::new();
 
-        for component in POSSIBLE_COMPONENTS.iter() {
+        for component in [component::FORC, component::FUEL_CORE, component::FUELUP].iter() {
             write!(download_msg, "{} ", component)?;
             let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
             cfgs.push(download_cfg);
@@ -137,16 +135,21 @@ pub fn exec(command: InstallCommand) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
+    use crate::download::component;
+
     use super::*;
     #[test]
     fn test_parse_component() {
-        assert_eq!(("forc".to_string(), None), parse_component("forc").unwrap());
         assert_eq!(
-            ("forc".to_string(), Some("0.14.5".to_string())),
+            (component::FORC.to_string(), None),
+            parse_component(component::FORC).unwrap()
+        );
+        assert_eq!(
+            (component::FORC.to_string(), Some("0.14.5".to_string())),
             parse_component("forc@0.14.5").unwrap()
         );
         assert_eq!(
-            ("forc".to_string(), Some("v0.14.5".to_string())),
+            (component::FORC.to_string(), Some("v0.14.5".to_string())),
             parse_component("forc@v0.14.5").unwrap()
         );
     }
@@ -157,9 +160,9 @@ mod tests {
             |c: &str| format!("Invalid command due to duplicate input: {}", c);
 
         assert_eq!(
-            invalid_component_msg("forc"),
+            invalid_component_msg(component::FORC),
             exec(InstallCommand {
-                components: vec!["forc".to_string(), "forc".to_string()]
+                components: vec![component::FORC.to_string(), component::FORC.to_string()]
             })
             .unwrap_err()
             .to_string()

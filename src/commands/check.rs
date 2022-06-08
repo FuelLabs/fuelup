@@ -1,5 +1,6 @@
 use anyhow::Result;
 use clap::Parser;
+use semver::Version;
 use tracing::info;
 
 use crate::{
@@ -12,20 +13,21 @@ pub struct CheckCommand {}
 
 pub fn exec() -> Result<()> {
     for component in POSSIBLE_COMPONENTS.iter() {
-        let mut latest_version = String::new();
+        let mut latest_version: String = String::new();
         match std::process::Command::new(component)
             .arg("--version")
             .output()
         {
             Ok(o) => {
-                let version = "v".to_owned()
-                    + String::from_utf8_lossy(&o.stdout)
+                let version = Version::parse(
+                    String::from_utf8_lossy(&o.stdout)
                         .split_whitespace()
-                        .collect::<Vec<&str>>()[1];
+                        .collect::<Vec<&str>>()[1],
+                )?;
 
                 let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
                 if component == &"forc" {
-                    latest_version = download_cfg.version.clone();
+                    latest_version = download_cfg.version.to_string();
                 }
 
                 if version == download_cfg.version {
@@ -48,12 +50,13 @@ pub fn exec() -> Result<()> {
                     .output()
                 {
                     Ok(o) => {
-                        let plugin_version = "v".to_owned()
-                            + String::from_utf8_lossy(&o.stdout)
+                        let plugin_version = Version::parse(
+                            String::from_utf8_lossy(&o.stdout)
                                 .split_whitespace()
-                                .collect::<Vec<&str>>()[1];
+                                .collect::<Vec<&str>>()[1],
+                        )?;
 
-                        if plugin_version == latest_version {
+                        if plugin_version == Version::parse(&latest_version)? {
                             info!(" - {} - up to date: {}", plugin_component, latest_version);
                         } else {
                             info!(

@@ -29,7 +29,7 @@ pub fn exec() -> Result<()> {
                 )?;
 
                 let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
-                if component == "forc" {
+                if component == component::FORC {
                     latest_version = download_cfg.version.to_string();
                 }
 
@@ -45,7 +45,7 @@ pub fn exec() -> Result<()> {
             Err(_) => info!("{} not found", component),
         };
 
-        if component == "forc" {
+        if component == component::FORC {
             for plugin in [plugin::FMT, plugin::LSP, plugin::EXPLORE] {
                 let plugin_component = component.to_owned() + "-" + plugin;
                 match std::process::Command::new(&plugin_component)

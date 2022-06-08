@@ -93,8 +93,7 @@ pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
 
         "fuel-core" => {
             let architecture = match std::env::consts::ARCH {
-                "aarch64" => "aarch64",
-                "x86_64" => "x86_64",
+                "aarch64" | "x86_64" => std::env::consts::ARCH,
                 unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
             };
 

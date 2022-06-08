@@ -12,7 +12,7 @@ use crate::{
 pub struct CheckCommand {}
 
 pub fn exec() -> Result<()> {
-    for component in POSSIBLE_COMPONENTS.iter() {
+    for component in POSSIBLE_COMPONENTS {
         let mut latest_version: String = String::new();
         match std::process::Command::new(component)
             .arg("--version")
@@ -26,7 +26,7 @@ pub fn exec() -> Result<()> {
                 )?;
 
                 let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
-                if component == &"forc" {
+                if component == "forc" {
                     latest_version = download_cfg.version.to_string();
                 }
 
@@ -42,9 +42,9 @@ pub fn exec() -> Result<()> {
             Err(_) => info!("{} not found", component),
         };
 
-        if component == &"forc" {
+        if component == "forc" {
             for plugin in SUPPORTED_PLUGINS {
-                let plugin_component = component.clone().to_owned() + "-" + plugin;
+                let plugin_component = component.to_owned() + "-" + plugin;
                 match std::process::Command::new(&plugin_component)
                     .arg("--version")
                     .output()

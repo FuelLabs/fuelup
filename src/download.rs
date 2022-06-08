@@ -60,7 +60,7 @@ impl DownloadCfg {
                     if let Ok(result) = get_latest_tag(&latest_tag_url) {
                         result
                     } else {
-                        bail!("Error getting latest tag");
+                        bail!("Error getting latest tag for component: {}", name);
                     }
                 }
             },

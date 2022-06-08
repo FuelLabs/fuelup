@@ -12,6 +12,3 @@ pub const FUELUP_RELEASE_DOWNLOAD_URL: &str =
     "https://github.com/FuelLabs/fuelup/releases/download";
 pub const FUEL_CORE_RELEASE_DOWNLOAD_URL: &str =
     "https://github.com/FuelLabs/fuel-core/releases/download";
-
-pub const POSSIBLE_COMPONENTS: [&str; 3] = ["forc", "fuel-core", "fuelup"];
-pub const SUPPORTED_PLUGINS: [&str; 3] = ["fmt", "explore", "lsp"];

@@ -3,16 +3,19 @@ use clap::Parser;
 use semver::Version;
 use tracing::info;
 
-use crate::{
-    constants::{POSSIBLE_COMPONENTS, SUPPORTED_PLUGINS},
-    download::DownloadCfg,
-};
+use crate::download::{component, DownloadCfg};
 
 #[derive(Debug, Parser)]
 pub struct CheckCommand {}
 
+pub mod plugin {
+    pub const FMT: &str = "fmt";
+    pub const LSP: &str = "lsp";
+    pub const EXPLORE: &str = "explore";
+}
+
 pub fn exec() -> Result<()> {
-    for component in POSSIBLE_COMPONENTS {
+    for component in [component::FORC, component::FUEL_CORE, component::FUELUP] {
         let mut latest_version: String = String::new();
         match std::process::Command::new(component)
             .arg("--version")
@@ -43,7 +46,7 @@ pub fn exec() -> Result<()> {
         };
 
         if component == "forc" {
-            for plugin in SUPPORTED_PLUGINS {
+            for plugin in [plugin::FMT, plugin::LSP, plugin::EXPLORE] {
                 let plugin_component = component.to_owned() + "-" + plugin;
                 match std::process::Command::new(&plugin_component)
                     .arg("--version")

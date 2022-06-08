@@ -45,8 +45,8 @@ pub fn exec() -> Result<()> {
 
         if component == &"forc" {
             for plugin in SUPPORTED_PLUGINS {
-                match std::process::Command::new(component)
-                    .arg(plugin)
+                let plugin_component = component.clone().to_owned() + "-" + plugin;
+                match std::process::Command::new(&plugin_component)
                     .arg("--version")
                     .output()
                 {
@@ -57,18 +57,15 @@ pub fn exec() -> Result<()> {
                                 .collect::<Vec<&str>>()[1];
 
                         if plugin_version == latest_version {
-                            info!(
-                                " - {}-{} - up to date: {}",
-                                component, plugin, latest_version
-                            );
+                            info!(" - {} - up to date: {}", plugin_component, latest_version);
                         } else {
                             info!(
-                                " - {}-{} - update available: {} -> {}",
-                                component, plugin, plugin_version, latest_version
+                                " - {} - update available: {} -> {}",
+                                plugin_component, plugin_version, latest_version
                             );
                         }
                     }
-                    Err(_) => info!(" - {} not found", component),
+                    Err(_) => info!(" - {} not found", plugin_component),
                 }
             }
         }

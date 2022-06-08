@@ -1,6 +1,6 @@
 use anyhow::{bail, Result};
 use clap::Parser;
-use regex::Regex;
+use semver::Version;
 use std::fmt::Write;
 use std::fs;
 use tracing::{error, info};
@@ -43,19 +43,25 @@ pub fn install_one(download_cfg: DownloadCfg) -> Result<DownloadCfg> {
 
 pub fn parse_component(component: &str) -> Result<(String, Option<String>)> {
     if component.contains('@') {
-        let filtered = component.split('@').collect::<Vec<&str>>();
-        let semver_regex = Regex::new(r"^[v]?\d+\.\d+\.\d+$").unwrap();
+        let split = component.split('@').collect::<Vec<&str>>();
 
-        if filtered.len() != 2 {
+        if split.len() != 2 {
             bail!("Invalid format for installing component with version: {}. Installing component with version must be in the format <name>@<version> eg. forc@0.14.5", component);
         }
 
-        let name = filtered[0];
-        let version = filtered[1];
+        let name = split[0];
+        let mut version = split[1];
 
-        if !semver_regex.is_match(version) {
-            bail!("Invalid format for version: {}. Version must be in the format <major>.<minor>.<patch>", version);
+        if version.starts_with('v') {
+            version = &version[1..version.len()]
         }
+
+        if let Err(e) = Version::parse(version) {
+            bail!(
+                "Error parsing version: {}. Version input must be in the format <major>.<minor>.<patch>",
+                e
+            )
+        };
 
         Ok((name.to_string(), Some(version.to_string())))
     } else {

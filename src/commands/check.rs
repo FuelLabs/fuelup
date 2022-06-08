@@ -23,10 +23,7 @@ pub fn exec() -> Result<()> {
                         .split_whitespace()
                         .collect::<Vec<&str>>()[1];
 
-                let download_cfg: DownloadCfg =
-                    DownloadCfg::new(component, None).unwrap_or_else(|_| {
-                        panic!("Could not create download config for {}", component)
-                    });
+                let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
                 if component == &"forc" {
                     latest_version = download_cfg.version.clone();
                 }

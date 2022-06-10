@@ -1,6 +1,5 @@
 use anyhow::{bail, Result};
 use clap::Parser;
-use semver::Version;
 use std::fmt::Write;
 use std::fs;
 use tracing::{error, info};
@@ -17,7 +16,6 @@ pub struct InstallCommand {
     ///
     /// You can reference components by:{n}
     /// - `<name>`, like `fuelup install forc` (latest version will be used){n}
-    /// - `<name>@<version>`, like `fuelup install forc@0.14.5`{n}
     #[clap(multiple_values = true)]
     components: Vec<String>,
 }
@@ -39,33 +37,6 @@ pub fn install_one(download_cfg: DownloadCfg) -> Result<DownloadCfg> {
     };
 
     Ok(download_cfg)
-}
-
-pub fn parse_component(component: &str) -> Result<(String, Option<Version>)> {
-    if component.contains('@') {
-        let split = component.split('@').collect::<Vec<&str>>();
-
-        if split.len() != 2 {
-            bail!("Invalid format for installing component with version: {}. Installing component with version must be in the format <name>@<version> eg. forc@0.14.5", component);
-        }
-
-        let name = split[0];
-        let mut version = split[1];
-
-        if version.starts_with('v') {
-            version = &version[1..version.len()]
-        }
-
-        match Version::parse(version) {
-            Ok(v) => Ok((name.to_string(), Some(v))),
-            Err(e) => bail!(
-                "Error parsing version {} - {}. Version input must be in the format <major>.<minor>.<patch>",
-                version, e
-            )
-        }
-    } else {
-        Ok((component.to_string(), None))
-    }
 }
 
 pub fn exec(command: InstallCommand) -> Result<()> {
@@ -95,8 +66,7 @@ pub fn exec(command: InstallCommand) -> Result<()> {
         let mut to_download: Vec<DownloadCfg> = Vec::new();
 
         for component in components.iter() {
-            let (name, version) = parse_component(component)?;
-            let download_cfg = DownloadCfg::new(&name, version)?;
+            let download_cfg = DownloadCfg::new(&component, None)?;
 
             if to_download
                 .iter()
@@ -111,7 +81,7 @@ pub fn exec(command: InstallCommand) -> Result<()> {
             }
 
             to_download.push(download_cfg);
-            write!(download_msg, "{} ", name)?;
+            write!(download_msg, "{} ", component)?;
         }
 
         info!("Downloading: {}", download_msg);
@@ -140,30 +110,7 @@ pub fn exec(command: InstallCommand) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use crate::download::component;
-
     use super::*;
-    #[test]
-    fn test_parse_component() {
-        assert_eq!(
-            (component::FORC.to_string(), None),
-            parse_component(component::FORC).unwrap()
-        );
-        assert_eq!(
-            (
-                component::FORC.to_string(),
-                Some(Version::parse("0.14.5").unwrap())
-            ),
-            parse_component("forc@0.14.5").unwrap()
-        );
-        assert_eq!(
-            (
-                component::FORC.to_string(),
-                Some(Version::parse("0.14.5").unwrap())
-            ),
-            parse_component("forc@v0.14.5").unwrap()
-        );
-    }
 
     #[test]
     fn test_duplicate_inputs() {
@@ -177,65 +124,6 @@ mod tests {
             })
             .unwrap_err()
             .to_string()
-        );
-    }
-
-    #[test]
-    fn test_parse_component_invalid_component() {
-        let invalid_component_msg = |c: &str| {
-            format!("Invalid format for installing component with version: {}. Installing component with version must be in the format <name>@<version> eg. forc@0.14.5", c)
-        };
-
-        assert_eq!(
-            invalid_component_msg("forc@0.1@fuel-core@0.8"),
-            parse_component("forc@0.1@fuel-core@0.8")
-                .unwrap_err()
-                .to_string()
-        );
-    }
-
-    #[test]
-    fn test_parse_component_invalid_version() {
-        let invalid_version_msg = |version: &str, version_type: &str| {
-            format!(
-            "Error parsing version {} - unexpected end of input while parsing {} version number. Version input must be in the format <major>.<minor>.<patch>",
-            version, version_type
-            )
-        };
-
-        let unexpected_char_msg = |version: &str| {
-            format!(
-                "Error parsing version {} - unexpected character '.' while parsing major version number. Version input must be in the format <major>.<minor>.<patch>",
-                version
-                )
-        };
-        assert_eq!(
-            invalid_version_msg("1", "major"),
-            parse_component("forc@1").unwrap_err().to_string()
-        );
-        assert_eq!(
-            invalid_version_msg("1", "major"),
-            parse_component("forc@v1").unwrap_err().to_string()
-        );
-        assert_eq!(
-            invalid_version_msg("1.0", "minor"),
-            parse_component("forc@1.0").unwrap_err().to_string()
-        );
-        assert_eq!(
-            invalid_version_msg("1.0", "minor"),
-            parse_component("forc@v1.0").unwrap_err().to_string()
-        );
-        assert_eq!(
-            invalid_version_msg("1.0.", "patch"),
-            parse_component("forc@1.0.").unwrap_err().to_string()
-        );
-        assert_eq!(
-            unexpected_char_msg(".1"),
-            parse_component("forc@.1").unwrap_err().to_string()
-        );
-        assert_eq!(
-            unexpected_char_msg(".1."),
-            parse_component("forc@.1.").unwrap_err().to_string()
         );
     }
 }

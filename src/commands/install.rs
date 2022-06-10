@@ -66,7 +66,7 @@ pub fn exec(command: InstallCommand) -> Result<()> {
         let mut to_download: Vec<DownloadCfg> = Vec::new();
 
         for component in components.iter() {
-            let download_cfg = DownloadCfg::new(&component, None)?;
+            let download_cfg = DownloadCfg::new(component, None)?;
 
             if to_download
                 .iter()

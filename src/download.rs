@@ -155,7 +155,9 @@ pub fn get_latest_tag(github_api_url: &str) -> Result<Version> {
 
     let response: LatestReleaseApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
 
-    let version = Version::parse(&response.tag_name[1..response.tag_name.len()])?;
+    // Given a semver version with preceding 'v' (e.g. `v1.2.3`), take the slice after 'v' (e.g. `1.2.3`).
+    let version_str = &response.tag_name["v".len()..];
+    let version = Version::parse(version_str)?;
 
     Ok(version)
 }

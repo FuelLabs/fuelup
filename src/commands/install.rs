@@ -9,8 +9,6 @@ use crate::download::{
 };
 
 #[derive(Debug, Parser)]
-#[clap(override_usage = "\
-    fuelup install <COMPONENT>[@<VERSION>] ...")]
 pub struct InstallCommand {
     /// Reference to a forc component to add as a dependency
     ///

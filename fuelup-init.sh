@@ -57,6 +57,7 @@ main() {
                     # don't attempt to interpret it.
                     continue
                 fi
+                ;;
         esac
     done
 

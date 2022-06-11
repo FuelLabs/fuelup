@@ -57,11 +57,14 @@ pub fn install() -> Result<()> {
             "forc {}",
             &forc_release_latest_tag
         )?,
-        Err(_) => write!(
-            &mut errored_bins_message,
-            "forc {}",
-            &forc_release_latest_tag
-        )?,
+        Err(e) => {
+            error!("{}", e.to_string());
+            write!(
+                &mut errored_bins_message,
+                "forc {}",
+                &forc_release_latest_tag
+            )?
+        }
     };
 
     info!("Fetching fuel-core {}", &fuel_core_release_latest_tag);
@@ -80,7 +83,8 @@ pub fn install() -> Result<()> {
                 &fuel_core_release_latest_tag
             )?;
         }
-        Err(_) => {
+        Err(e) => {
+            error!("{}", e.to_string());
             if !errored_bins_message.is_empty() {
                 write!(&mut errored_bins_message, ", ")?
             }

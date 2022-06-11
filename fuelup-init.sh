@@ -42,8 +42,6 @@ main() {
         fi
     fi
 
-    # check if we have to use /dev/tty to prompt the user
-    local need_tty=yes
     # always prompt PATH modification, unless --no-modify-path provided
     local prompt_modify=yes
 
@@ -59,22 +57,6 @@ main() {
                     # don't attempt to interpret it.
                     continue
                 fi
-                while getopts :hy sub_arg "$arg"; do
-                    case "$sub_arg" in
-                        h)
-                            usage
-                            exit 0
-                            ;;
-                        y)
-                            # user wants to skip the prompt --
-                            # we don't need /dev/tty
-                            need_tty=no
-                            ;;
-                        *) ;;
-
-                    esac
-                done
-                ;;
         esac
     done
 
@@ -132,19 +114,7 @@ main() {
         exit 1
     fi
 
-    if [ "$need_tty" = "yes" ] && [ ! -t 0 ]; then
-        # The installer is going to want to ask for confirmation by
-        # reading stdin.  This script was piped into `sh` though and
-        # doesn't have stdin to pass to its children. Instead we're going
-        # to explicitly connect /dev/tty to the installer's stdin.
-        if [ ! -t 1 ]; then
-            err "Unable to run interactively. Run with -y to accept defaults, --help for additional options"
-        fi
-
-        ignore "$FUELUP_DIR/bin/fuelup" "install" </dev/tty
-    else
-        ignore "$FUELUP_DIR/bin/fuelup" "install"
-    fi
+    ignore "$FUELUP_DIR/bin/fuelup" "install"
 
     local _retval=$?
 

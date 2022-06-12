@@ -2,10 +2,10 @@ use anyhow::{bail, Result};
 use flate2::read::GzDecoder;
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use std::{env, fs};
 use tar::Archive;
 use tracing::{error, info};
 
@@ -13,6 +13,7 @@ use crate::constants::{
     FUELUP_RELEASE_DOWNLOAD_URL, FUELUP_REPO, FUEL_CORE_RELEASE_DOWNLOAD_URL, FUEL_CORE_REPO,
     GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL, SWAY_REPO,
 };
+use crate::file::hard_or_symlink_file;
 use crate::path::fuelup_bin_dir;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -192,7 +193,7 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<File> {
     Ok(file)
 }
 
-pub fn download_file_and_unpack(download_cfg: &DownloadCfg) -> Result<()> {
+pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &PathBuf) -> Result<()> {
     let tarball_name = tarball_name(download_cfg)?;
     let tarball_url = format!(
         "{}/v{}/{}",
@@ -201,14 +202,13 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg) -> Result<()> {
 
     info!("Fetching binary from {}", &tarball_url);
 
-    let fuelup_bin_dir = fuelup_bin_dir();
-    let tarball_path = fuelup_bin_dir.join(tarball_name);
+    let tarball_path = dst_dir_path.join(tarball_name);
 
     if download_file(&tarball_url, &tarball_path).is_err() {
         error!("Failed to download from {}", &tarball_url,);
     };
 
-    unpack(&tarball_path, &fuelup_bin_dir)?;
+    unpack(&tarball_path, &dst_dir_path)?;
 
     Ok(())
 }
@@ -220,12 +220,20 @@ pub fn unpack_extracted_bins(dir: &std::path::PathBuf) -> Result<()> {
         if sub_path.is_dir() {
             for bin in std::fs::read_dir(&sub_path)? {
                 let bin_file = bin?;
+                let bin_file_name = bin_file.file_name();
                 info!(
                     "Unpacking and moving {} to {}",
-                    &bin_file.file_name().to_string_lossy(),
+                    &bin_file_name.to_string_lossy(),
                     dir.display()
                 );
-                fs::copy(&bin_file.path(), dir.join(&bin_file.file_name()))?;
+                if fs::copy(&bin_file.path(), dir.join(&bin_file.file_name())).is_ok() {
+                    let home_dir = dirs::home_dir().unwrap();
+                    let fuelup_bin_path = home_dir.join(".fuelup/bin/fuelup");
+                    //let bin_path = dir.join(bin_file_name);
+                    let bin_path = home_dir.join(".fuelup/bin").join(bin_file_name);
+
+                    hard_or_symlink_file(&fuelup_bin_path, &bin_path)?;
+                };
             }
 
             fs::remove_dir_all(sub_path)?;

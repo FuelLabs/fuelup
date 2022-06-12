@@ -1,5 +1,4 @@
 use anyhow::{bail, Result};
-use dirs::home_dir;
 use flate2::read::GzDecoder;
 use semver::Version;
 use serde::{Deserialize, Serialize};
@@ -11,10 +10,10 @@ use tar::Archive;
 use tracing::{error, info};
 
 use crate::constants::{
-    FUELUP_DIR, FUELUP_RELEASE_DOWNLOAD_URL, FUELUP_REPO, FUEL_CORE_RELEASE_DOWNLOAD_URL,
-    FUEL_CORE_REPO, GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL,
-    SWAY_REPO,
+    FUELUP_RELEASE_DOWNLOAD_URL, FUELUP_REPO, FUEL_CORE_RELEASE_DOWNLOAD_URL, FUEL_CORE_REPO,
+    GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL, SWAY_REPO,
 };
+use crate::path::fuelup_bin_dir;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
@@ -160,10 +159,6 @@ pub fn get_latest_tag(github_api_url: &str) -> Result<Version> {
     let version = Version::parse(version_str)?;
 
     Ok(version)
-}
-
-pub fn fuelup_bin_dir() -> PathBuf {
-    home_dir().unwrap().join(FUELUP_DIR).join("bin")
 }
 
 fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {

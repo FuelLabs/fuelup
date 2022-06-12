@@ -12,19 +12,13 @@ pub mod toolchain {
 pub fn install(command: InstallCommand) -> Result<()> {
     let InstallCommand { name } = command;
 
-    let toolchain = Toolchain::from(&name, None)?;
+    let toolchain = Toolchain::new(&name, None)?;
 
     let mut errored_bins = String::new();
     let mut installed_bins = String::new();
     let mut download_msg = String::new();
 
     let mut cfgs: Vec<DownloadCfg> = Vec::new();
-    let home_dir = dirs::home_dir().unwrap();
-    let build_dir = env::current_dir()?.join("target/debug/fuelup");
-    let src_forc_latest = home_dir.join(".fuelup/bin/fuelup");
-    let dest_forc_latest = home_dir.join(".fuelup/bin/fuelup");
-
-    //hard_or_symlink_file(&build_dir, &dest_forc_latest)?;
 
     for component in [component::FORC, component::FUEL_CORE].iter() {
         write!(download_msg, "{} ", component)?;
@@ -34,7 +28,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
 
     info!("Downloading: {}", download_msg);
     for cfg in cfgs {
-        match install_one(toolchain, cfg) {
+        match toolchain.add_component(cfg) {
             Ok(cfg) => writeln!(installed_bins, "- {} {}", cfg.name, cfg.version)?,
             Err(e) => writeln!(errored_bins, "- {}", e)?,
         };

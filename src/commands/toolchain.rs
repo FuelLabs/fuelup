@@ -19,7 +19,7 @@ pub enum ToolchainCommand {
 #[derive(Debug, Parser)]
 pub struct InstallCommand {
     /// Toolchain name [possible values: latest]
-    name: String,
+    pub name: String,
 }
 
 pub fn exec(command: ToolchainCommand) -> Result<()> {

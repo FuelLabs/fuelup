@@ -3,8 +3,10 @@ use clap::Parser;
 
 use crate::{
     download::{component, DownloadCfg},
-    ops::fuelup_component,
+    toolchain::Toolchain,
 };
+
+use super::toolchain::toolchain;
 
 #[derive(Debug, Parser)]
 pub enum FuelupCommand {
@@ -19,7 +21,8 @@ pub const FUELUP_VERSION: &str = concat!("v", clap::crate_version!());
 
 pub fn self_update() -> Result<()> {
     let download_cfg = DownloadCfg::new(component::FUELUP, None)?;
-    fuelup_component::install_one(download_cfg)?;
+    let toolchain = Toolchain::new(toolchain::LATEST, None)?;
+    toolchain.add_component(download_cfg);
 
     Ok(())
 }

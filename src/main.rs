@@ -71,7 +71,6 @@ fn run() -> Result<()> {
     match process_name.as_deref() {
         Some("fuelup") => fuelup_cli()?,
         Some(n) => {
-            println!("{:?}", n);
             if is_supported_component(n) {
                 proxy_run(n);
             }

@@ -1,12 +1,10 @@
+use crate::download::{component, DownloadCfg};
+use crate::ops::fuelup_component::install_one;
+use crate::toolchain::Toolchain;
 use anyhow::{bail, Result};
 use clap::Parser;
-use std::fmt::Write;
+use std::{env, fmt::Write};
 use tracing::{error, info};
-
-use crate::{
-    commands::install::install_one,
-    download::{component, DownloadCfg},
-};
 
 pub mod toolchain {
     pub const LATEST: &str = "latest";
@@ -24,16 +22,7 @@ pub enum ToolchainCommand {
 #[derive(Debug, Parser)]
 pub struct InstallCommand {
     /// Toolchain name [possible values: latest]
-    toolchain: String,
-}
-
-#[derive(Debug)]
-pub enum ToolchainName {
-    LATEST,
-}
-
-pub struct Toolchain {
-    pub name: ToolchainName,
+    name: String,
 }
 
 pub fn exec(command: ToolchainCommand) -> Result<()> {
@@ -45,23 +34,23 @@ pub fn exec(command: ToolchainCommand) -> Result<()> {
 }
 
 pub fn install(command: InstallCommand) -> Result<()> {
-    let InstallCommand { toolchain } = command;
+    let InstallCommand { name } = command;
 
-    if ![toolchain::LATEST].contains(&toolchain.as_ref()) {
-        bail!(
-            "Invalid toolchain: {} [possible values: {}]",
-            toolchain,
-            toolchain::LATEST
-        );
-    }
+    let toolchain = Toolchain::from(&name)?;
 
     let mut errored_bins = String::new();
     let mut installed_bins = String::new();
     let mut download_msg = String::new();
 
     let mut cfgs: Vec<DownloadCfg> = Vec::new();
+    let home_dir = dirs::home_dir().unwrap();
+    let build_dir = env::current_dir()?.join("target/debug/fuelup");
+    let src_forc_latest = home_dir.join(".fuelup/bin/fuelup");
+    let dest_forc_latest = home_dir.join(".fuelup/bin/fuelup");
 
-    for component in [component::FORC, component::FUEL_CORE, component::FUELUP].iter() {
+    //hard_or_symlink_file(&build_dir, &dest_forc_latest)?;
+
+    for component in [component::FORC, component::FUEL_CORE].iter() {
         write!(download_msg, "{} ", component)?;
         let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
         cfgs.push(download_cfg);

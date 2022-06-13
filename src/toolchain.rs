@@ -1,11 +1,9 @@
 use anyhow::{bail, Result};
-use std::{fs, ops::Deref, path::PathBuf, str::FromStr};
+use std::{fs, path::PathBuf};
 use tracing::info;
 
-use crate::{
-    download::{component, download_file_and_unpack, unpack_extracted_bins, DownloadCfg},
-    path::{fuelup_bin_dir, FUELUP_DIR},
-};
+use crate::download::{download_file_and_unpack, unpack_extracted_bins, DownloadCfg};
+use crate::path::FUELUP_DIR;
 
 pub mod toolchain {
     pub const LATEST: &str = "latest";

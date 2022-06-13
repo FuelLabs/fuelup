@@ -22,7 +22,7 @@ pub const FUELUP_VERSION: &str = concat!("v", clap::crate_version!());
 pub fn self_update() -> Result<()> {
     let download_cfg = DownloadCfg::new(component::FUELUP, None)?;
     let toolchain = Toolchain::new(toolchain::LATEST, None)?;
-    toolchain.add_component(download_cfg);
+    toolchain.add_component(download_cfg)?;
 
     Ok(())
 }

@@ -11,9 +11,6 @@ use std::{env, io, panic};
 use fuelup::commands::fuelup::{self_update, FuelupCommand};
 use fuelup::commands::toolchain::ToolchainCommand;
 
-mod file;
-mod path;
-
 #[derive(Debug, Parser)]
 #[clap(name = "fuelup", about = "Fuel Toolchain Manager", version)]
 struct Cli {
@@ -36,10 +33,12 @@ fn is_supported_component(component: &str) -> bool {
 }
 
 /// Runs forc or fuel-core in proxy mode
-fn proxy_run(arg0: &str) {
+fn proxy_run(arg0: &str) -> Result<ExitCode> {
     let cmd_args: Vec<_> = env::args_os().skip(1).collect();
 
-    direct_proxy(arg0, &cmd_args);
+    direct_proxy(arg0, &cmd_args)?;
+
+    Ok(ExitCode::SUCCESS)
 }
 
 fn direct_proxy(arg0: &str, args: &[OsString]) -> io::Result<ExitCode> {
@@ -72,7 +71,7 @@ fn run() -> Result<()> {
         Some("fuelup") => fuelup_cli()?,
         Some(n) => {
             if is_supported_component(n) {
-                proxy_run(n);
+                proxy_run(n)?;
             }
         }
         None => panic!("Unknown exe"),

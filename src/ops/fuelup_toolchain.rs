@@ -2,7 +2,7 @@ use crate::commands::toolchain::InstallCommand;
 use crate::download::{component, DownloadCfg};
 use crate::toolchain::Toolchain;
 use anyhow::Result;
-use std::{env, fmt::Write};
+use std::fmt::Write;
 use tracing::{error, info};
 
 pub mod toolchain {

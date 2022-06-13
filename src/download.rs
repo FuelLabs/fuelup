@@ -246,7 +246,7 @@ mod tests {
     use super::*;
     use tempfile;
 
-    pub(crate) fn with_toolchain_bin_dir<F>(f: F) -> Result<()>
+    pub(crate) fn with_toolchain_dir<F>(f: F) -> Result<()>
     where
         F: FnOnce(tempfile::TempDir) -> Result<()>,
     {
@@ -256,29 +256,27 @@ mod tests {
 
     #[test]
     fn test_unpack_extracted_bins() -> Result<()> {
-        with_toolchain_bin_dir(|dir| {
-            let mock_bin_dir = tempfile::tempdir_in(&dir).unwrap();
+        with_toolchain_dir(|dir| {
+            let mock_bin_dir = dir.path().join("bin");
+            let extracted_bins_dir = mock_bin_dir.join("forc-binaries");
+            fs::create_dir(&mock_bin_dir).unwrap();
+            fs::create_dir(&extracted_bins_dir).unwrap();
 
-            let mock_bin_file_1 = mock_bin_dir.path().join("forc-mock-exec-1");
-            let mock_bin_file_2 = mock_bin_dir.path().join("forc-mock-exec-2");
+            let mock_bin_file_1 = extracted_bins_dir.join("forc-mock-exec-1");
+            let mock_bin_file_2 = extracted_bins_dir.join("forc-mock-exec-2");
 
             fs::File::create(mock_bin_file_1).unwrap();
             fs::File::create(mock_bin_file_2).unwrap();
 
-            assert!(mock_bin_dir.path().exists());
+            assert!(extracted_bins_dir.exists());
             assert!(!dir.path().join("forc-mock-exec-1").exists());
             assert!(!dir.path().join("forc-mock-exec-2").exists());
 
-            unpack_extracted_bins(&dir.path().to_path_buf()).unwrap();
+            unpack_extracted_bins(&mock_bin_dir.to_path_buf()).unwrap();
 
-            assert!(!mock_bin_dir.path().exists());
-
-            for entry in std::fs::read_dir(&dir)? {
-                let sub_path = entry?.path();
-                println!("{}", sub_path.display());
-            }
-            assert!(dir.path().join("forc-mock-exec-1").exists());
-            assert!(dir.path().join("forc-mock-exec-2").exists());
+            assert!(!extracted_bins_dir.exists());
+            assert!(mock_bin_dir.join("forc-mock-exec-1").exists());
+            assert!(mock_bin_dir.join("forc-mock-exec-2").exists());
             Ok(())
         })
     }

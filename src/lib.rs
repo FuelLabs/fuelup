@@ -4,4 +4,5 @@ pub mod download;
 pub mod file;
 pub mod ops;
 pub mod path;
+pub mod settings;
 pub mod toolchain;

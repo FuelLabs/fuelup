@@ -10,13 +10,12 @@ main() {
     need_cmd mkdir
     need_cmd rm
     need_cmd rmdir
-    need_cmd jq
 
     check_cargo_bin forc
     check_cargo_bin forc-fmt
     check_cargo_bin forc-explore
     check_cargo_bin forc-lsp
-    check_cargo_bin fuel-core 
+    check_cargo_bin fuel-core
 
     get_architecture || return 1
     local _arch="$RETVAL"
@@ -25,8 +24,7 @@ main() {
     mkdir -p "$FUELUP_DIR/bin"
 
     local _fuelup_version
-    _fuelup_version="$(curl -s https://api.github.com/repos/FuelLabs/fuelup/releases/latest | jq -r ".tag_name")"
-    _fuelup_version="$(echo "${_fuelup_version}" | cut -c 2-)"
+    _fuelup_version="$(curl -s https://api.github.com/repos/FuelLabs/fuelup/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)"
     local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/v${_fuelup_version}/fuelup-${_fuelup_version}-${_arch}.tar.gz"
 
     local _dir
@@ -37,20 +35,20 @@ main() {
     if [ -t 2 ]; then
         if [ "${TERM+set}" = 'set' ]; then
             case "$TERM" in
-                xterm*|rxvt*|urxvt*|linux*|vt*)
+                xterm* | rxvt* | urxvt* | linux* | vt*)
                     _ansi_escapes_are_valid=true
-                ;;
+                    ;;
             esac
         fi
     fi
 
-    # check if we have to use /dev/tty to prompt the user
-    local need_tty=yes
+    # always prompt PATH modification, unless --no-modify-path provided
+    local prompt_modify=yes
+
     for arg in "$@"; do
         case "$arg" in
-            --help)
-                usage
-                exit 0
+            --no-modify-path)
+                prompt_modify=no
                 ;;
             *)
                 OPTIND=1
@@ -59,29 +57,49 @@ main() {
                     # don't attempt to interpret it.
                     continue
                 fi
-                while getopts :hy sub_arg "$arg"; do
-                    case "$sub_arg" in
-                        h)
-                            usage
-                            exit 0
-                            ;;
-                        y)
-                            # user wants to skip the prompt --
-                            # we don't need /dev/tty
-                            need_tty=no
-                            ;;
-                        *)
-                            ;;
-                        esac
-                done
                 ;;
         esac
     done
 
+    if [ "$prompt_modify" = "yes" ]; then
+        case $SHELL in
+            */bash)
+                SHELL_PROFILE=$HOME/.bashrc
+                ;;
+            */zsh)
+                SHELL_PROFILE=$HOME/.zshrc
+                ;;
+            */fish)
+                SHELL_PROFILE=$HOME/.config/fish/config.fish
+                ;;
+            *)
+                warn "Failed to detect shell; please add ${FUELUP_DIR}/bin to your PATH manually."
+                ;;
+        esac
+
+        if [ -n "$SHELL_PROFILE" ]; then
+            preinstall_confirmation
+            read -r answer </dev/tty
+            allow_modify=$(echo "$answer" | cut -c1-1)
+            case $allow_modify in
+                "y" | "Y")
+                    allow_modify=yes
+                    printf "\nfuelup will modify your PATH variable for you.\n\n"
+                    ;;
+                *)
+                    allow_modify=no
+                    printf "\nfuelup will not modify your PATH variable for you.\n\n"
+                    ;;
+            esac
+        else
+            allow_modify=no
+        fi
+    fi
+
     if $_ansi_escapes_are_valid; then
-        printf "\33[1minfo:\33[0m downloading installer\n" 1>&2
+        printf "\33[1minfo:\33[0m downloading fuelup %s\n" "$_fuelup_version" 1>&2
     else
-        printf '%s\n' 'info: downloading installer' 1>&2
+        printf 'info: downloading fuelup %s\n' "$_fuelup_version" 1>&2
     fi
 
     ensure downloader "$_fuelup_url" "$_file" "$_arch"
@@ -92,24 +110,12 @@ main() {
     ensure chmod u+x "$FUELUP_DIR/bin/fuelup"
 
     if [ ! -x "$FUELUP_DIR/bin/fuelup" ]; then
-        printf '%s\n' "Cannot execute $_FUELUP_DIR/bin/fuelup." 1>&2
+        printf '%s\n' "Cannot execute $FUELUP_DIR/bin/fuelup." 1>&2
         printf '%s\n' "Please copy the file to a location where you can execute binaries and run ./fuelup." 1>&2
         exit 1
     fi
 
-    if [ "$need_tty" = "yes" ] && [ ! -t 0 ]; then
-        # The installer is going to want to ask for confirmation by
-        # reading stdin.  This script was piped into `sh` though and
-        # doesn't have stdin to pass to its children. Instead we're going
-        # to explicitly connect /dev/tty to the installer's stdin.
-        if [ ! -t 1 ]; then
-            err "Unable to run interactively. Run with -y to accept defaults, --help for additional options"
-        fi
-
-        ignore "$FUELUP_DIR/bin/fuelup" "$@" </dev/tty
-    else
-        ignore "$FUELUP_DIR/bin/fuelup" "$@"
-    fi
+    ignore "$FUELUP_DIR/bin/fuelup" "install"
 
     local _retval=$?
 
@@ -120,46 +126,87 @@ main() {
     printf '\n'
     printf '%s\n' "fuelup ${_fuelup_version} has been installed in $FUELUP_DIR/bin. To fetch the latest forc and fuel-core binaries, run 'fuelup install'." 1>&2
 
+    if [ "$allow_modify" = "yes" ]; then
+        if echo "$PATH" | grep -q "$FUELUP_DIR/bin"; then
+            printf "\n%s/bin already exists in your PATH.\n" "$FUELUP_DIR"
+        else
+            echo "export PATH=\"\$HOME/.fuelup/bin:\$PATH"\" >>"$SHELL_PROFILE"
+            printf "\n%s added to PATH. Run 'source %s' or start a new terminal session to use fuelup.\n" "$FUELUP_DIR" "$SHELL_PROFILE"
+        fi
+    else
+        add_path_message
+    fi
+
     return "$_retval"
+}
+
+preinstall_confirmation() {
+    cat 1>&2 <<EOF
+
+fuelup uses "$FUELUP_DIR" as its home directory to manage the Fuel toolchain, and will install binaries there.
+
+To use the toolchain, you will have to configure your PATH, which tells your machine where to locate fuelup and the Fuel toolchain.
+
+If permitted, fuelup-init will configure your PATH for you by running the following:
+
+    echo "export PATH="\$HOME/.fuelup/bin:\$PATH"" >> $SHELL_PROFILE
+
+Would you like fuelup-init to modify your PATH variable for you? (N/y)
+EOF
+}
+
+add_path_message() {
+    cat 1>&2 <<EOF
+
+You might have to add $FUELUP_DIR/bin to path:
+
+bash/zsh:
+
+export PATH="\${HOME}/.fuelup/bin:\${PATH}"
+
+fish:
+
+fish_add_path ~/.fuelup/bin
+EOF
 }
 
 get_architecture() {
     local _ostype _cputype
     _ostype="$(uname -s)"
-    _arch="$(uname -m)"
+    _cputype="$(uname -m)"
 
     case "$_ostype" in
-    Linux)
-        _ostype="unknown-linux-gnu"
-        ;;
-    Darwin)
-        _ostype="apple-darwin"
-        ;;
-    *)
-        err "unsupported os type: $_ostype"
-        ;;
+        Linux)
+            _ostype="unknown-linux-gnu"
+            ;;
+        Darwin)
+            _ostype="apple-darwin"
+            ;;
+        *)
+            err "unsupported os type: $_ostype"
+            ;;
     esac
 
-    case "$_arch" in
-    x86_64 | x86-64 | x64 | amd64)
-        _arch="x86_64"
-        ;;
-    aarch64 | arm64)
-        _arch="aarch64"
-        ;;
-    *)
-        err "unsupported cpu type: $_cputype"
-        ;;
+    case "$_cputype" in
+        x86_64 | x86-64 | x64 | amd64)
+            _cputype="x86_64"
+            ;;
+        aarch64 | arm64)
+            _cputype="aarch64"
+            ;;
+        *)
+            err "unsupported cpu type: $_cputype"
+            ;;
     esac
 
-    _arch="${_arch}-${_ostype}"
+    _arch="${_cputype}-${_ostype}"
 
     RETVAL="$_arch"
 }
 
 check_cargo_bin() {
-    if which "${1}" | grep -q "[.cargo]"; then
-      warn "$1 is already installed via cargo and is in use by your system. You should update your PATH, or execute 'cargo uninstall $1'"
+    if which "${1}" 2>/dev/null | grep -q "[.cargo]"; then
+        warn "$1 is already installed via cargo and is in use by your system. You should update your PATH, or execute 'cargo uninstall $1'"
     fi
 }
 
@@ -226,8 +273,8 @@ downloader() {
         fi
         if [ -n "$_err" ]; then
             echo "$_err" >&2
-            if echo "$_err" | grep -q 404$; then
-                err "installer for platform '$3' not found, this may be unsupported"
+            if echo "$_err" | grep -q 404; then
+                err "fuelup ${_fuelup_version} was not found - either the release is not ready yet or the tag is invalid. You can check if the release is available here: https://github.com/FuelLabs/fuelup/releases/${_fuelup_version}"
             fi
         fi
 
@@ -297,29 +344,29 @@ check_help_for() {
 
     case "$_arch" in
 
-    *darwin*)
-        if check_cmd sw_vers; then
-            case $(sw_vers -productVersion) in
-            10.*)
-                # If we're running on macOS, older than 10.13, then we always
-                # fail to find these options to force fallback
-                if [ "$(sw_vers -productVersion | cut -d. -f2)" -lt 13 ]; then
-                    # Older than 10.13
-                    echo "Warning: Detected macOS platform older than 10.13"
-                    return 1
-                fi
-                ;;
-            11.*)
-                # We assume Big Sur will be OK for now
-                ;;
-            *)
-                # Unknown product version, warn and continue
-                echo "Warning: Detected unknown macOS major version: $(sw_vers -productVersion)"
-                echo "Warning TLS capabilities detection may fail"
-                ;;
-            esac
-        fi
-        ;;
+        *darwin*)
+            if check_cmd sw_vers; then
+                case $(sw_vers -productVersion) in
+                    10.*)
+                        # If we're running on macOS, older than 10.13, then we always
+                        # fail to find these options to force fallback
+                        if [ "$(sw_vers -productVersion | cut -d. -f2)" -lt 13 ]; then
+                            # Older than 10.13
+                            echo "Warning: Detected macOS platform older than 10.13"
+                            return 1
+                        fi
+                        ;;
+                    11.*)
+                        # We assume Big Sur will be OK for now
+                        ;;
+                    *)
+                        # Unknown product version, warn and continue
+                        echo "Warning: Detected unknown macOS major version: $(sw_vers -productVersion)"
+                        echo "Warning TLS capabilities detection may fail"
+                        ;;
+                esac
+            fi
+            ;;
 
     esac
 
@@ -400,7 +447,7 @@ err() {
 }
 
 warn() {
-  say "warning: ${1}" >&2
+    say "warning: ${1}" >&2
 }
 
 # This is just for indicating that commands' results are being

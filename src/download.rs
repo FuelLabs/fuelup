@@ -267,7 +267,7 @@ mod tests {
 
         unpack_extracted_bins(
             &fuelup_bin_dir.path().to_path_buf(),
-            &fuelup_bin_dir.as_ref().to_path_buf(),
+            &fuelup_bin_dir.as_ref(),
         )
         .unwrap();
 

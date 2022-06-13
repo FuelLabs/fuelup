@@ -248,13 +248,9 @@ mod tests {
 
     #[test]
     fn test_unpack_extracted_bins() -> Result<()> {
-        let toolchain_bin_dir = tempfile::Builder::new()
-            .prefix("mock-toolchain-bin")
-            .tempdir()
-            .unwrap();
-        let mock_bin_dir = tempfile::Builder::new()
-            .tempdir_in(&toolchain_bin_dir)
-            .unwrap();
+        let toolchain_bin_dir = tempfile::tempdir().unwrap();
+        let mock_bin_dir = tempfile::tempdir_in(&toolchain_bin_dir).unwrap();
+
         let mock_bin_file_1 = mock_bin_dir.path().join("forc-mock-exec-1");
         let mock_bin_file_2 = mock_bin_dir.path().join("forc-mock-exec-2");
 
@@ -268,10 +264,14 @@ mod tests {
         unpack_extracted_bins(&toolchain_bin_dir.as_ref().to_path_buf()).unwrap();
 
         assert!(!mock_bin_dir.path().exists());
+
+        for entry in std::fs::read_dir(&toolchain_bin_dir)? {
+            let sub_path = entry?.path();
+            println!("{}", sub_path.display());
+        }
         assert!(toolchain_bin_dir.path().join("forc-mock-exec-1").exists());
         assert!(toolchain_bin_dir.path().join("forc-mock-exec-2").exists());
 
-        toolchain_bin_dir.close()?;
         Ok(())
     }
 }

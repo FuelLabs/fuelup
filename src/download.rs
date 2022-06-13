@@ -192,7 +192,7 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<File> {
     Ok(file)
 }
 
-pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &PathBuf) -> Result<()> {
+pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path) -> Result<()> {
     let tarball_name = tarball_name(download_cfg)?;
     let tarball_url = format!(
         "{}/v{}/{}",
@@ -207,7 +207,7 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &PathB
         error!("Failed to download from {}", &tarball_url,);
     };
 
-    unpack(&tarball_path, &dst_dir_path)?;
+    unpack(&tarball_path, dst_dir_path)?;
 
     Ok(())
 }

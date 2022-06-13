@@ -5,7 +5,7 @@ use std::{fs, path::PathBuf};
 use tracing::info;
 
 use crate::download::{download_file_and_unpack, unpack_extracted_bins, DownloadCfg};
-use crate::path::{toolchain_bin_dir, FUELUP_DIR};
+use crate::path::toolchain_bin_dir;
 
 pub enum ToolchainName {
     Latest,
@@ -70,8 +70,7 @@ impl Toolchain {
             None => TargetTriple::from_host()?,
         };
         let path = match ToolchainName::from_str(name)? {
-            ToolchainName::Latest => toolchain_bin_dir(&format!("{}-{}", name, target.to_string())),
-            _ => bail!("Unknown toolchain: {}", name),
+            ToolchainName::Latest => toolchain_bin_dir(&format!("{}-{}", name, target)),
         };
         Ok(Self {
             name: name.to_string(),

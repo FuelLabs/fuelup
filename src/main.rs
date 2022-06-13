@@ -1,6 +1,5 @@
 use anyhow::Result;
 use clap::Parser;
-use dirs::home_dir;
 use fuelup::commands::toolchain;
 use fuelup::download::component;
 use fuelup::toolchain::Toolchain;
@@ -35,8 +34,7 @@ fn is_supported_component(component: &str) -> bool {
 }
 
 fn get_toolchain() -> Toolchain {
-    let toolchain = Toolchain::new("latest", None).unwrap();
-    toolchain
+    Toolchain::new("latest", None).unwrap()
 }
 
 /// Runs forc or fuel-core in proxy mode
@@ -103,7 +101,7 @@ fn main() {
 
     tracing_subscriber::fmt().event_format(format).init();
 
-    if let Err(_) = run() {
+    if run().is_err() {
         std::process::exit(1);
     }
 }

@@ -228,7 +228,7 @@ pub fn unpack_extracted_bins(dir: &std::path::PathBuf) -> Result<()> {
                 );
                 if fs::copy(&bin_file.path(), dir.join(&bin_file.file_name())).is_ok() {
                     let fuelup_bin_path = fuelup_bin_dir().join("fuelup");
-                    let bin_path = fuelup_bin_dir().join("bin_file_path");
+                    let bin_path = fuelup_bin_dir().join(bin_file.file_name());
 
                     hard_or_symlink_file(&fuelup_bin_path, &bin_path)?;
                 };

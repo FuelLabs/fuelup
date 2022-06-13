@@ -2,6 +2,8 @@ use anyhow::Result;
 use clap::Parser;
 use dirs::home_dir;
 use fuelup::commands::toolchain;
+use fuelup::download::component;
+use fuelup::toolchain::Toolchain;
 use std::ffi::OsString;
 use std::os::unix::prelude::CommandExt;
 use std::path::PathBuf;
@@ -32,20 +34,23 @@ fn is_supported_component(component: &str) -> bool {
     ["forc", "fuel-core", "forc-fmt", "forc-lsp", "forc-explore"].contains(&component)
 }
 
-/// Runs forc or fuel-core in proxy mode
-fn proxy_run(arg0: &str) -> Result<ExitCode> {
-    let cmd_args: Vec<_> = env::args_os().skip(1).collect();
+fn get_toolchain() -> Toolchain {
+    let toolchain = Toolchain::new("latest", None).unwrap();
+    toolchain
+}
 
-    direct_proxy(arg0, &cmd_args)?;
+/// Runs forc or fuel-core in proxy mode
+fn proxy_run(proc_name: &str) -> Result<ExitCode> {
+    let cmd_args: Vec<_> = env::args_os().skip(1).collect();
+    let toolchain = get_toolchain();
+
+    direct_proxy(proc_name, &cmd_args, toolchain)?;
 
     Ok(ExitCode::SUCCESS)
 }
 
-fn direct_proxy(arg0: &str, args: &[OsString]) -> io::Result<ExitCode> {
-    let bin_path = home_dir()
-        .unwrap()
-        .join(".fuelup/toolchains/latest-x86_64-apple-darwin/bin")
-        .join(arg0);
+fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: Toolchain) -> io::Result<ExitCode> {
+    let bin_path = toolchain.path.join(proc_name);
     let mut cmd = Command::new(bin_path);
 
     cmd.args(args);
@@ -68,7 +73,7 @@ fn run() -> Result<()> {
         .map(String::from);
 
     match process_name.as_deref() {
-        Some("fuelup") => fuelup_cli()?,
+        Some(component::FUELUP) => fuelup_cli()?,
         Some(n) => {
             if is_supported_component(n) {
                 proxy_run(n)?;

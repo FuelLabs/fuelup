@@ -1,14 +1,27 @@
 use anyhow::{bail, Result};
+use std::fmt;
+use std::str::FromStr;
 use std::{fs, path::PathBuf};
 use tracing::info;
 
 use crate::download::{download_file_and_unpack, unpack_extracted_bins, DownloadCfg};
-use crate::path::FUELUP_DIR;
+use crate::path::{toolchain_bin_dir, FUELUP_DIR};
 
-pub mod toolchain {
-    pub const LATEST: &str = "latest";
+pub enum ToolchainName {
+    Latest,
 }
 
+impl FromStr for ToolchainName {
+    type Err = anyhow::Error;
+    fn from_str(s: &str) -> Result<Self> {
+        match s {
+            "latest" => Ok(Self::Latest),
+            _ => bail!("Unknown name for toolchain: {}", s),
+        }
+    }
+}
+
+#[derive(Debug)]
 pub struct Toolchain {
     pub name: String,
     pub path: PathBuf,
@@ -17,6 +30,12 @@ pub struct Toolchain {
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct TargetTriple(String);
+
+impl fmt::Display for TargetTriple {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
 
 impl TargetTriple {
     pub fn new(name: &str) -> Self {
@@ -50,13 +69,8 @@ impl Toolchain {
             Some(t) => TargetTriple(t),
             None => TargetTriple::from_host()?,
         };
-        let path = match name {
-            toolchain::LATEST => dirs::home_dir()
-                .unwrap()
-                .join(FUELUP_DIR)
-                .join("toolchains")
-                .join("latest-x86_64-apple-darwin")
-                .join("bin"),
+        let path = match ToolchainName::from_str(name)? {
+            ToolchainName::Latest => toolchain_bin_dir(&format!("{}-{}", name, target.to_string())),
             _ => bail!("Unknown toolchain: {}", name),
         };
         Ok(Self {

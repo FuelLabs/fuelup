@@ -43,15 +43,11 @@ fn is_supported_plugin(plugin: &str) -> bool {
 fn proxy_run(arg0: &str) -> Result<ExitCode> {
     let cmd_args: Vec<_> = env::args_os().skip(1).collect();
     let settings_file = SettingsFile::new(settings_file());
-    let toolchain = settings_file.with(|s| {
-        Ok(Toolchain::from_settings(
-            &s.default_toolchain.clone().unwrap(),
-        )?)
-    })?;
+    let toolchain =
+        settings_file.with(|s| Toolchain::from_settings(&s.default_toolchain.clone().unwrap()))?;
 
     if !cmd_args.is_empty() && is_supported_plugin(&cmd_args[0].to_string_lossy()) {
         let plugin = &format!("{}-{}", arg0, &cmd_args[0].to_string_lossy());
-        println!("{:?} {:?}", plugin, &cmd_args);
         direct_proxy(plugin, &cmd_args[1..], toolchain)?;
     } else {
         direct_proxy(arg0, &cmd_args, toolchain)?;

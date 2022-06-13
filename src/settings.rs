@@ -60,17 +60,9 @@ impl SettingsFile {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Settings {
     pub default_toolchain: Option<String>,
-}
-
-impl Default for Settings {
-    fn default() -> Self {
-        Self {
-            default_toolchain: None,
-        }
-    }
 }
 
 fn get_value(table: &mut toml::value::Table, key: &str, path: &str) -> Result<toml::Value> {

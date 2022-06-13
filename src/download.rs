@@ -14,7 +14,6 @@ use crate::constants::{
     GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL, SWAY_REPO,
 };
 use crate::file::hard_or_symlink_file;
-use crate::path::fuelup_bin_dir;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
@@ -213,7 +212,7 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path)
     Ok(())
 }
 
-pub fn unpack_extracted_bins(src_dir: &PathBuf, dst_dir: &PathBuf) -> Result<()> {
+pub fn unpack_extracted_bins(src_dir: &PathBuf, dst_dir: &Path) -> Result<()> {
     for entry in std::fs::read_dir(&src_dir)? {
         let sub_path = entry?.path();
 

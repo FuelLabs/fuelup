@@ -213,8 +213,8 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path)
     Ok(())
 }
 
-pub fn unpack_extracted_bins(dir: &std::path::PathBuf) -> Result<()> {
-    for entry in std::fs::read_dir(&dir)? {
+pub fn unpack_extracted_bins(src_dir: &PathBuf, dst_dir: &PathBuf) -> Result<()> {
+    for entry in std::fs::read_dir(&src_dir)? {
         let sub_path = entry?.path();
 
         if sub_path.is_dir() {
@@ -224,11 +224,11 @@ pub fn unpack_extracted_bins(dir: &std::path::PathBuf) -> Result<()> {
                 info!(
                     "Unpacking and moving {} to {}",
                     &bin_file_name.to_string_lossy(),
-                    dir.display()
+                    dst_dir.display()
                 );
-                if fs::copy(&bin_file.path(), dir.join(&bin_file.file_name())).is_ok() {
-                    let fuelup_bin_path = fuelup_bin_dir().join("fuelup");
-                    let bin_path = fuelup_bin_dir().join(bin_file.file_name());
+                if fs::copy(&bin_file.path(), dst_dir.join(&bin_file.file_name())).is_ok() {
+                    let fuelup_bin_path = dst_dir.join("fuelup");
+                    let bin_path = dst_dir.join(bin_file.file_name());
 
                     hard_or_symlink_file(&fuelup_bin_path, &bin_path)?;
                 };
@@ -266,7 +266,11 @@ mod tests {
         assert!(!fuelup_bin_dir.path().join("forc-mock-exec-1").exists());
         assert!(!fuelup_bin_dir.path().join("forc-mock-exec-2").exists());
 
-        unpack_extracted_bins(&fuelup_bin_dir.path().to_path_buf()).unwrap();
+        unpack_extracted_bins(
+            &fuelup_bin_dir.path().to_path_buf(),
+            &fuelup_bin_dir.as_ref().to_path_buf(),
+        )
+        .unwrap();
 
         assert!(!mock_bin_dir.exists());
         assert!(fuelup_bin_dir.path().join("forc-mock-exec-1").exists());

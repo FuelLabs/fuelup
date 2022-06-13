@@ -247,24 +247,31 @@ mod tests {
     use tempfile;
 
     #[test]
-    fn test_unpack_extracted_bins() {
-        let toolchain_bin_dir = tempfile::Builder::new().prefix("bin").tempdir().unwrap();
-        let mock_bin_dir = toolchain_bin_dir.path().join("forc-mock");
-        let mock_bin_file_1 = mock_bin_dir.join("forc-mock-exec-1");
-        let mock_bin_file_2 = mock_bin_dir.join("forc-mock-exec-2");
+    fn test_unpack_extracted_bins() -> Result<()> {
+        let toolchain_bin_dir = tempfile::Builder::new()
+            .prefix("mock-toolchain-bin")
+            .tempdir()
+            .unwrap();
+        let mock_bin_dir = tempfile::Builder::new()
+            .tempdir_in(&toolchain_bin_dir)
+            .unwrap();
+        let mock_bin_file_1 = mock_bin_dir.path().join("forc-mock-exec-1");
+        let mock_bin_file_2 = mock_bin_dir.path().join("forc-mock-exec-2");
 
-        fs::create_dir(&mock_bin_dir).unwrap();
         fs::File::create(mock_bin_file_1).unwrap();
         fs::File::create(mock_bin_file_2).unwrap();
 
-        assert!(mock_bin_dir.exists());
+        assert!(mock_bin_dir.path().exists());
         assert!(!toolchain_bin_dir.path().join("forc-mock-exec-1").exists());
         assert!(!toolchain_bin_dir.path().join("forc-mock-exec-2").exists());
 
         unpack_extracted_bins(&toolchain_bin_dir.as_ref().to_path_buf()).unwrap();
 
-        assert!(!mock_bin_dir.exists());
+        assert!(!mock_bin_dir.path().exists());
         assert!(toolchain_bin_dir.path().join("forc-mock-exec-1").exists());
         assert!(toolchain_bin_dir.path().join("forc-mock-exec-2").exists());
+
+        toolchain_bin_dir.close()?;
+        Ok(())
     }
 }

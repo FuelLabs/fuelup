@@ -253,10 +253,12 @@ mod tests {
             .tempdir()
             .unwrap();
         let mock_bin_dir = fuelup_bin_dir.path().join("forc-mock");
+        let mock_fuelup = mock_bin_dir.join("fuelup");
         let mock_bin_file_1 = mock_bin_dir.join("forc-mock-exec-1");
         let mock_bin_file_2 = mock_bin_dir.join("forc-mock-exec-2");
 
         fs::create_dir(&mock_bin_dir).unwrap();
+        fs::File::create(mock_fuelup).unwrap();
         fs::File::create(mock_bin_file_1).unwrap();
         fs::File::create(mock_bin_file_2).unwrap();
 

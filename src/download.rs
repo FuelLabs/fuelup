@@ -14,6 +14,7 @@ use crate::constants::{
     GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL, SWAY_REPO,
 };
 use crate::file::hard_or_symlink_file;
+use crate::path::fuelup_bin_dir;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
@@ -226,10 +227,8 @@ pub fn unpack_extracted_bins(dir: &std::path::PathBuf) -> Result<()> {
                     dir.display()
                 );
                 if fs::copy(&bin_file.path(), dir.join(&bin_file.file_name())).is_ok() {
-                    let home_dir = dirs::home_dir().unwrap();
-                    let fuelup_bin_path = home_dir.join(".fuelup/bin/fuelup");
-                    //let bin_path = dir.join(bin_file_name);
-                    let bin_path = home_dir.join(".fuelup/bin").join(bin_file_name);
+                    let fuelup_bin_path = fuelup_bin_dir().join("fuelup");
+                    let bin_path = fuelup_bin_dir().join("bin_file_path");
 
                     hard_or_symlink_file(&fuelup_bin_path, &bin_path)?;
                 };

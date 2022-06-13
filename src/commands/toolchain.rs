@@ -3,10 +3,6 @@ use clap::Parser;
 
 use crate::ops::fuelup_toolchain;
 
-pub mod toolchain {
-    pub const LATEST: &str = "latest";
-}
-
 #[derive(Debug, Parser)]
 pub enum ToolchainCommand {
     /// Install or update a given toolchain

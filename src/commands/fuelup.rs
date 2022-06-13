@@ -6,8 +6,6 @@ use crate::{
     toolchain::Toolchain,
 };
 
-use super::toolchain::toolchain;
-
 #[derive(Debug, Parser)]
 pub enum FuelupCommand {
     /// Updates fuelup
@@ -21,7 +19,7 @@ pub const FUELUP_VERSION: &str = concat!("v", clap::crate_version!());
 
 pub fn self_update() -> Result<()> {
     let download_cfg = DownloadCfg::new(component::FUELUP, None)?;
-    let toolchain = Toolchain::new(toolchain::LATEST, None)?;
+    let toolchain = Toolchain::new("latest", None)?;
     toolchain.add_component(download_cfg)?;
 
     Ok(())

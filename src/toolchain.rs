@@ -79,6 +79,16 @@ impl Toolchain {
         })
     }
 
+    pub fn from_settings(toolchain: &str) -> Result<Self> {
+        let split = toolchain.split_once('-').unwrap();
+        let name = split.0.to_string();
+        let target = TargetTriple(split.1.to_string());
+        let path = match ToolchainName::from_str(&name)? {
+            ToolchainName::Latest => toolchain_bin_dir(&format!("{}-{}", name, target)),
+        };
+        Ok(Self { name, path, target })
+    }
+
     pub fn add_component(&self, download_cfg: DownloadCfg) -> Result<DownloadCfg> {
         if !self.path.is_dir() {
             fs::create_dir_all(&self.path).expect("Unable to create fuelup directory");

@@ -1,5 +1,7 @@
 use crate::commands::toolchain::InstallCommand;
 use crate::download::{component, DownloadCfg};
+use crate::path::settings_file;
+use crate::settings::SettingsFile;
 use crate::toolchain::Toolchain;
 use anyhow::Result;
 use std::fmt::Write;
@@ -13,6 +15,16 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let InstallCommand { name } = command;
 
     let toolchain = Toolchain::new(&name, None)?;
+
+    let settings = SettingsFile::new(settings_file());
+    settings.with_mut(|s| {
+        s.default_toolchain = Some(format!(
+            "{}-{}",
+            toolchain.name.clone(),
+            &toolchain.target.to_string()
+        ));
+        Ok(())
+    })?;
 
     let mut errored_bins = String::new();
     let mut installed_bins = String::new();

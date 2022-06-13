@@ -2,6 +2,8 @@ use anyhow::Result;
 use clap::Parser;
 use fuelup::commands::toolchain;
 use fuelup::download::component;
+use fuelup::path::settings_file;
+use fuelup::settings::SettingsFile;
 use fuelup::toolchain::Toolchain;
 use std::ffi::OsString;
 use std::os::unix::prelude::CommandExt;
@@ -33,16 +35,27 @@ fn is_supported_component(component: &str) -> bool {
     ["forc", "fuel-core", "forc-fmt", "forc-lsp", "forc-explore"].contains(&component)
 }
 
-fn get_toolchain() -> Toolchain {
-    Toolchain::new("latest", None).unwrap()
+fn is_supported_plugin(plugin: &str) -> bool {
+    ["fmt", "lsp", "explore"].contains(&plugin)
 }
 
 /// Runs forc or fuel-core in proxy mode
-fn proxy_run(proc_name: &str) -> Result<ExitCode> {
+fn proxy_run(arg0: &str) -> Result<ExitCode> {
     let cmd_args: Vec<_> = env::args_os().skip(1).collect();
-    let toolchain = get_toolchain();
+    let settings_file = SettingsFile::new(settings_file());
+    let toolchain = settings_file.with(|s| {
+        Ok(Toolchain::from_settings(
+            &s.default_toolchain.clone().unwrap(),
+        )?)
+    })?;
 
-    direct_proxy(proc_name, &cmd_args, toolchain)?;
+    if !cmd_args.is_empty() && is_supported_plugin(&cmd_args[0].to_string_lossy()) {
+        let plugin = &format!("{}-{}", arg0, &cmd_args[0].to_string_lossy());
+        println!("{:?} {:?}", plugin, &cmd_args);
+        direct_proxy(plugin, &cmd_args[1..], toolchain)?;
+    } else {
+        direct_proxy(arg0, &cmd_args, toolchain)?;
+    }
 
     Ok(ExitCode::SUCCESS)
 }

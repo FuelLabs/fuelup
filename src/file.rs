@@ -3,31 +3,37 @@ use std::fs;
 use std::io;
 use std::path::Path;
 
-pub(crate) fn hardlink(src: &Path, dest: &Path) -> io::Result<()> {
-    let _ = fs::remove_file(dest);
-    fs::hard_link(src, dest)
+pub(crate) fn hardlink(original: &Path, link: &Path) -> io::Result<()> {
+    let _ = fs::remove_file(link);
+    fs::hard_link(original, link)
 }
 
-pub(crate) fn hard_or_symlink_file(src: &Path, dest: &Path) -> Result<()> {
-    if hardlink_file(src, dest).is_err() {
-        symlink_file(src, dest)?;
+pub(crate) fn hard_or_symlink_file(original: &Path, link: &Path) -> Result<()> {
+    if hardlink_file(original, link).is_err() {
+        symlink_file(original, link)?;
     }
     Ok(())
 }
 
-pub fn hardlink_file(src: &Path, dest: &Path) -> Result<()> {
-    hardlink(src, dest).with_context(|| {
+pub fn hardlink_file(original: &Path, link: &Path) -> Result<()> {
+    hardlink(original, link).with_context(|| {
         format!(
             "Could not create link: {}->{}",
-            src.display(),
-            dest.display()
+            original.display(),
+            link.display()
         )
     })
 }
 
 #[cfg(unix)]
-fn symlink_file(src: &Path, dest: &Path) -> Result<()> {
-    std::os::unix::fs::symlink(src, dest).with_context(|| "Could not create link".to_string())
+fn symlink_file(original: &Path, link: &Path) -> Result<()> {
+    std::os::unix::fs::symlink(original, link).with_context(|| {
+        format!(
+            "Could not create link: {}->{}",
+            original.display(),
+            link.display()
+        )
+    })
 }
 
 pub fn is_file<P: AsRef<Path>>(path: P) -> bool {

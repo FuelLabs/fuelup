@@ -16,7 +16,13 @@ pub(crate) fn hard_or_symlink_file(src: &Path, dest: &Path) -> Result<()> {
 }
 
 pub fn hardlink_file(src: &Path, dest: &Path) -> Result<()> {
-    hardlink(src, dest).with_context(|| "Could not create link".to_string())
+    hardlink(src, dest).with_context(|| {
+        format!(
+            "Could not create link: {}->{}",
+            src.display(),
+            dest.display()
+        )
+    })
 }
 
 #[cfg(unix)]

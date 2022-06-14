@@ -270,8 +270,8 @@ mod tests {
             fs::File::create(mock_bin_file_2).unwrap();
 
             assert!(extracted_bins_dir.exists());
-            assert!(!dir.path().join("forc-mock-exec-1").to_owned().exists());
-            assert!(!dir.path().join("forc-mock-exec-2").to_owned().exists());
+            assert!(!dir.path().join("forc-mock-exec-1").metadata().is_ok());
+            assert!(!dir.path().join("forc-mock-exec-2").metadata().is_ok());
 
             unpack_and_link_bins(&mock_bin_dir.to_path_buf(), mock_fuelup_dir.path()).unwrap();
 

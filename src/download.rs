@@ -257,9 +257,8 @@ mod tests {
     #[test]
     fn test_unpack_extracted_bins() -> Result<()> {
         with_toolchain_dir(|dir| {
-            let mock_bin_dir = dir.path().join("bin");
+            let mock_bin_dir = tempfile::tempdir_in(&dir).unwrap().into_path();
             let extracted_bins_dir = mock_bin_dir.join("forc-binaries");
-            fs::create_dir(&mock_bin_dir).unwrap();
             fs::create_dir(&extracted_bins_dir).unwrap();
 
             let mock_bin_file_1 = extracted_bins_dir.join("forc-mock-exec-1");

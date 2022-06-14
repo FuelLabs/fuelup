@@ -4,7 +4,7 @@ use std::str::FromStr;
 use std::{fs, path::PathBuf};
 use tracing::info;
 
-use crate::download::{download_file_and_unpack, unpack_and_link_bins, DownloadCfg};
+use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::path::{fuelup_bin_dir, toolchain_bin_dir};
 
 pub enum ToolchainName {
@@ -100,8 +100,8 @@ impl Toolchain {
             bail!("{} {}", &download_cfg.name, &download_cfg.version)
         };
 
-        if unpack_and_link_bins(&self.path, &fuelup_bin_dir()).is_err() {
-            bail!("{} {}", &download_cfg.name, &download_cfg.version)
+        if let Ok(downloaded) = unpack_bins(&self.path, &fuelup_bin_dir()) {
+            link_to_fuelup(downloaded)?;
         };
 
         Ok(download_cfg)

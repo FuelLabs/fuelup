@@ -14,6 +14,7 @@ use crate::constants::{
     GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL, SWAY_REPO,
 };
 use crate::file::hard_or_symlink_file;
+use crate::path::fuelup_bin_dir;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
@@ -212,7 +213,17 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path)
     Ok(())
 }
 
-pub fn unpack_and_link_bins(dir: &PathBuf, dst_dir: &Path) -> Result<()> {
+pub fn link_to_fuelup(bins: Vec<PathBuf>) -> Result<()> {
+    let fuelup_bin_dir = fuelup_bin_dir();
+    for path in bins {
+        let fuelup_bin_path = fuelup_bin_dir.join("fuelup");
+        hard_or_symlink_file(&fuelup_bin_path, &path)?;
+    }
+    Ok(())
+}
+
+pub fn unpack_bins(dir: &PathBuf, dst_dir: &Path) -> Result<Vec<PathBuf>> {
+    let mut downloaded: Vec<PathBuf> = Vec::new();
     for entry in std::fs::read_dir(&dir)? {
         let sub_path = entry?.path();
 
@@ -226,10 +237,7 @@ pub fn unpack_and_link_bins(dir: &PathBuf, dst_dir: &Path) -> Result<()> {
                     dir.display()
                 );
                 if fs::copy(bin_file.path(), dir.join(&bin_file_name)).is_ok() {
-                    let fuelup_bin_path = dst_dir.join("fuelup");
-                    let bin_path = dst_dir.join(bin_file_name);
-
-                    hard_or_symlink_file(&fuelup_bin_path, &bin_path)?;
+                    downloaded.push(dst_dir.join(bin_file_name));
                 };
             }
 
@@ -237,7 +245,7 @@ pub fn unpack_and_link_bins(dir: &PathBuf, dst_dir: &Path) -> Result<()> {
         }
     }
 
-    Ok(())
+    Ok(downloaded)
 }
 
 #[cfg(test)]
@@ -273,7 +281,7 @@ mod tests {
             assert!(dir.path().join("forc-mock-exec-1").metadata().is_err());
             assert!(dir.path().join("forc-mock-exec-2").metadata().is_err());
 
-            unpack_and_link_bins(&mock_bin_dir, &mock_fuelup_dir.into_path()).unwrap();
+            unpack_bins(&mock_bin_dir, &mock_fuelup_dir.into_path()).unwrap();
 
             assert!(!extracted_bins_dir.exists());
             assert!(mock_bin_dir.join("forc-mock-exec-1").metadata().is_ok());

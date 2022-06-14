@@ -9,21 +9,13 @@ pub fn fuelup_dir() -> PathBuf {
 }
 
 pub fn fuelup_bin_dir() -> PathBuf {
-    dirs::home_dir().unwrap().join(FUELUP_DIR).join("bin")
+    fuelup_dir().join("bin")
 }
 
 pub fn settings_file() -> PathBuf {
-    dirs::home_dir()
-        .unwrap()
-        .join(FUELUP_DIR)
-        .join("settings.toml")
+    fuelup_dir().join("settings.toml")
 }
 
 pub fn toolchain_bin_dir(toolchain: &str) -> PathBuf {
-    dirs::home_dir()
-        .unwrap()
-        .join(FUELUP_DIR)
-        .join("toolchains")
-        .join(toolchain)
-        .join("bin")
+    fuelup_dir().join("toolchains").join(toolchain).join("bin")
 }

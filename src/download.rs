@@ -250,7 +250,7 @@ mod tests {
     where
         F: FnOnce(tempfile::TempDir) -> Result<()>,
     {
-        let toolchain_bin_dir = tempfile::tempdir().unwrap();
+        let toolchain_bin_dir = tempfile::tempdir()?;
         f(toolchain_bin_dir)
     }
 
@@ -269,14 +269,14 @@ mod tests {
             fs::File::create(mock_bin_file_2).unwrap();
 
             assert!(extracted_bins_dir.exists());
-            assert!(!dir.path().join("forc-mock-exec-1").exists());
-            assert!(!dir.path().join("forc-mock-exec-2").exists());
+            assert!(!dir.path().join("forc-mock-exec-1").to_owned().exists());
+            assert!(!dir.path().join("forc-mock-exec-2").to_owned().exists());
 
             unpack_extracted_bins(&mock_bin_dir.to_path_buf()).unwrap();
 
             assert!(!extracted_bins_dir.exists());
-            assert!(mock_bin_dir.join("forc-mock-exec-1").exists());
-            assert!(mock_bin_dir.join("forc-mock-exec-2").exists());
+            assert!(mock_bin_dir.join("forc-mock-exec-1").to_owned().exists());
+            assert!(mock_bin_dir.join("forc-mock-exec-2").to_owned().exists());
             Ok(())
         })
     }

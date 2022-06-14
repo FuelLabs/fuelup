@@ -24,7 +24,7 @@ fn run() -> Result<()> {
                 proxy_cli::proxy_run(n)?;
             }
         }
-        None => panic!("Unknown exe"),
+        None => panic!("fuelup does not understand this command"),
     }
     Ok(())
 }

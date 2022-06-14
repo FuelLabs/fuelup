@@ -1,8 +1,9 @@
 use anyhow::Result;
 use clap::Parser;
 
-use crate::commands::fuelup::{self_update, FuelupCommand};
-use crate::commands::toolchain;
+use crate::commands::{fuelup, toolchain};
+
+use crate::commands::fuelup::FuelupCommand;
 use crate::commands::toolchain::ToolchainCommand;
 
 #[derive(Debug, Parser)]
@@ -27,7 +28,7 @@ pub fn fuelup_cli() -> Result<()> {
 
     match cli.command {
         Commands::Fuelup(command) => match command {
-            FuelupCommand::Update => self_update(),
+            FuelupCommand::Update => fuelup::exec(),
         },
         Commands::Toolchain(command) => toolchain::exec(command),
     }

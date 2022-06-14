@@ -18,7 +18,7 @@ enum Commands {
     #[clap(name = "self", subcommand)]
     Fuelup(FuelupCommand),
     /// Install new toolchains or modify/query installed toolchains
-    #[clap(subcommand, alias = "install")]
+    #[clap(subcommand)]
     Toolchain(ToolchainCommand),
 }
 

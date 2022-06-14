@@ -42,13 +42,13 @@ main() {
         fi
     fi
 
-    # check if we have to use /dev/tty to prompt the user
-    local need_tty=yes
+    # always prompt PATH modification, unless --no-modify-path provided
+    local prompt_modify=yes
+
     for arg in "$@"; do
         case "$arg" in
-            --help)
-                usage
-                exit 0
+            --no-modify-path)
+                prompt_modify=no
                 ;;
             *)
                 OPTIND=1
@@ -57,24 +57,44 @@ main() {
                     # don't attempt to interpret it.
                     continue
                 fi
-                while getopts :hy sub_arg "$arg"; do
-                    case "$sub_arg" in
-                        h)
-                            usage
-                            exit 0
-                            ;;
-                        y)
-                            # user wants to skip the prompt --
-                            # we don't need /dev/tty
-                            need_tty=no
-                            ;;
-                        *) ;;
-
-                    esac
-                done
                 ;;
         esac
     done
+
+    if [ "$prompt_modify" = "yes" ]; then
+        case $SHELL in
+            */bash)
+                SHELL_PROFILE=$HOME/.bashrc
+                ;;
+            */zsh)
+                SHELL_PROFILE=$HOME/.zshrc
+                ;;
+            */fish)
+                SHELL_PROFILE=$HOME/.config/fish/config.fish
+                ;;
+            *)
+                warn "Failed to detect shell; please add ${FUELUP_DIR}/bin to your PATH manually."
+                ;;
+        esac
+
+        if [ -n "$SHELL_PROFILE" ]; then
+            preinstall_confirmation
+            read -r answer </dev/tty
+            allow_modify=$(echo "$answer" | cut -c1-1)
+            case $allow_modify in
+                "y" | "Y")
+                    allow_modify=yes
+                    printf "\nfuelup will modify your PATH variable for you.\n\n"
+                    ;;
+                *)
+                    allow_modify=no
+                    printf "\nfuelup will not modify your PATH variable for you.\n\n"
+                    ;;
+            esac
+        else
+            allow_modify=no
+        fi
+    fi
 
     if $_ansi_escapes_are_valid; then
         printf "\33[1minfo:\33[0m downloading fuelup %s\n" "$_fuelup_version" 1>&2
@@ -95,19 +115,7 @@ main() {
         exit 1
     fi
 
-    if [ "$need_tty" = "yes" ] && [ ! -t 0 ]; then
-        # The installer is going to want to ask for confirmation by
-        # reading stdin.  This script was piped into `sh` though and
-        # doesn't have stdin to pass to its children. Instead we're going
-        # to explicitly connect /dev/tty to the installer's stdin.
-        if [ ! -t 1 ]; then
-            err "Unable to run interactively. Run with -y to accept defaults, --help for additional options"
-        fi
-
-        ignore "$FUELUP_DIR/bin/fuelup" "$@" </dev/tty
-    else
-        ignore "$FUELUP_DIR/bin/fuelup" "$@"
-    fi
+    ignore "$FUELUP_DIR/bin/fuelup" "install"
 
     local _retval=$?
 
@@ -115,14 +123,42 @@ main() {
     ignore rmdir "$_dir/fuelup-${_fuelup_version}-${_arch}"
     ignore rmdir "$_dir"
 
-    post_setup_message
+    printf '\n'
+    printf '%s\n' "fuelup ${_fuelup_version} has been installed in $FUELUP_DIR/bin. To fetch the latest forc and fuel-core binaries, run 'fuelup install'." 1>&2
+
+    if [ "$allow_modify" = "yes" ]; then
+        if echo "$PATH" | grep -q "$FUELUP_DIR/bin"; then
+            printf "\n%s/bin already exists in your PATH.\n" "$FUELUP_DIR"
+        else
+            echo "export PATH=\"\$HOME/.fuelup/bin:\$PATH"\" >>"$SHELL_PROFILE"
+            printf "\n%s added to PATH. Run 'source %s' or start a new terminal session to use fuelup.\n" "$FUELUP_DIR" "$SHELL_PROFILE"
+        fi
+    else
+        add_path_message
+    fi
+
     return "$_retval"
 }
 
-post_setup_message() {
+preinstall_confirmation() {
     cat 1>&2 <<EOF
 
-fuelup v${_fuelup_version} has been installed in $FUELUP_DIR/bin. You might have to add $FUELUP_DIR/bin to path:
+fuelup uses "$FUELUP_DIR" as its home directory to manage the Fuel toolchain, and will install binaries there.
+
+To use the toolchain, you will have to configure your PATH, which tells your machine where to locate fuelup and the Fuel toolchain.
+
+If permitted, fuelup-init will configure your PATH for you by running the following:
+
+    echo "export PATH="\$HOME/.fuelup/bin:\$PATH"" >> $SHELL_PROFILE
+
+Would you like fuelup-init to modify your PATH variable for you? (N/y)
+EOF
+}
+
+add_path_message() {
+    cat 1>&2 <<EOF
+
+You might have to add $FUELUP_DIR/bin to path:
 
 bash/zsh:
 
@@ -131,8 +167,6 @@ export PATH="\${HOME}/.fuelup/bin:\${PATH}"
 fish:
 
 fish_add_path ~/.fuelup/bin
-
-To fetch the latest forc and fuel-core binaries, run 'fuelup install'.
 EOF
 }
 
@@ -171,7 +205,7 @@ get_architecture() {
 }
 
 check_cargo_bin() {
-    if which "${1}" | grep -q "[.cargo]"; then
+    if which "${1}" 2>/dev/null | grep -q "[.cargo]"; then
         warn "$1 is already installed via cargo and is in use by your system. You should update your PATH, or execute 'cargo uninstall $1'"
     fi
 }

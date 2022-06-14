@@ -2,10 +2,11 @@ use anyhow::{bail, Result};
 use flate2::read::GzDecoder;
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use std::fs;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use std::time::Duration;
+use std::{fs, thread};
 use tar::Archive;
 use tracing::{error, info};
 
@@ -178,19 +179,44 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
     Ok(())
 }
 
-pub fn download_file(url: &str, path: &PathBuf) -> Result<File> {
+pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
+    const RETRY_ATTEMPTS: u8 = 4;
+    const RETRY_DELAY_SECS: u64 = 3;
+
     let handle = ureq::builder().user_agent("fuelup").build();
-    let resp = handle.get(url).call()?;
-
-    let mut data = Vec::new();
-    resp.into_reader().read_to_end(&mut data)?;
-
     let mut file = OpenOptions::new().write(true).create(true).open(&path)?;
-    if let Err(e) = file.write_all(&data) {
-        error!("Something went wrong writing to {}: {}", path.display(), e)
-    };
 
-    Ok(file)
+    for _ in 1..RETRY_ATTEMPTS {
+        match handle.get(url).call() {
+            Ok(response) => {
+                let mut data = Vec::new();
+                response.into_reader().read_to_end(&mut data)?;
+
+                if let Err(e) = file.write_all(&data) {
+                    error!(
+                        "Something went wrong writing data to {}: {}",
+                        path.display(),
+                        e
+                    )
+                };
+                return Ok(());
+            }
+            Err(ureq::Error::Status(404, r)) => {
+                // We've reached download_file stage, which means the tag must be correct.
+                error!("Failed to download from {}", &url);
+                let retry: Option<u64> = r.header("retry-after").and_then(|h| h.parse().ok());
+                let retry = retry.unwrap_or(RETRY_DELAY_SECS);
+                info!("Retrying..");
+                thread::sleep(Duration::from_secs(retry));
+            }
+            Err(e) => {
+                // handle other status code and non-status code errors
+                bail!("Unexpected error: {}", e.to_string());
+            }
+        }
+    }
+
+    bail!("Could not download file");
 }
 
 pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path) -> Result<()> {
@@ -202,10 +228,13 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path)
 
     info!("Fetching binary from {}", &tarball_url);
 
-    let tarball_path = dst_dir_path.join(tarball_name);
+    let tarball_path = dst_dir_path.join(&tarball_name);
 
     if download_file(&tarball_url, &tarball_path).is_err() {
-        error!("Failed to download from {}", &tarball_url,);
+        bail!(
+            "Failed to download {} - the release might not be ready yet.",
+            &tarball_name
+        );
     };
 
     unpack(&tarball_path, dst_dir_path)?;

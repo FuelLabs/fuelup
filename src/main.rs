@@ -1,7 +1,6 @@
 use anyhow::Result;
-use clap::Parser;
-use fuelup::commands::toolchain;
 use fuelup::download::component;
+use fuelup::fuelup_cli;
 use fuelup::path::settings_file;
 use fuelup::settings::SettingsFile;
 use fuelup::toolchain::Toolchain;
@@ -10,26 +9,6 @@ use std::os::unix::prelude::CommandExt;
 use std::path::PathBuf;
 use std::process::{Command, ExitCode, Stdio};
 use std::{env, io, panic};
-
-use fuelup::commands::fuelup::{self_update, FuelupCommand};
-use fuelup::commands::toolchain::ToolchainCommand;
-
-#[derive(Debug, Parser)]
-#[clap(name = "fuelup", about = "Fuel Toolchain Manager", version)]
-struct Cli {
-    #[clap(subcommand)]
-    command: Commands,
-}
-
-#[derive(Debug, Parser)]
-enum Commands {
-    /// Manage your fuelup installation.
-    #[clap(name = "self", subcommand)]
-    Fuelup(FuelupCommand),
-    /// Install new toolchains or modify/query installed toolchains
-    #[clap(subcommand, alias = "install")]
-    Toolchain(ToolchainCommand),
-}
 
 fn is_supported_component(component: &str) -> bool {
     ["forc", "fuel-core", "forc-fmt", "forc-lsp", "forc-explore"].contains(&component)
@@ -80,7 +59,7 @@ fn run() -> Result<()> {
         .map(String::from);
 
     match process_name.as_deref() {
-        Some(component::FUELUP) => fuelup_cli()?,
+        Some(component::FUELUP) => fuelup_cli::fuelup_cli()?,
         Some(n) => {
             if is_supported_component(n) {
                 proxy_run(n)?;
@@ -89,17 +68,6 @@ fn run() -> Result<()> {
         None => panic!("Unknown exe"),
     }
     Ok(())
-}
-
-fn fuelup_cli() -> Result<()> {
-    let cli = Cli::parse();
-
-    match cli.command {
-        Commands::Fuelup(command) => match command {
-            FuelupCommand::Update => self_update(),
-        },
-        Commands::Toolchain(command) => toolchain::exec(command),
-    }
 }
 
 fn main() {

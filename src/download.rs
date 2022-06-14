@@ -226,9 +226,9 @@ pub fn unpack_extracted_bins(dir: &PathBuf) -> Result<()> {
                     &bin_file_name.to_string_lossy(),
                     dir.display()
                 );
-                if fs::copy(&bin_file.path(), dir.join(&bin_file.file_name())).is_ok() {
+                if fs::copy(bin_file.path(), dir.join(&bin_file_name)).is_ok() {
                     let fuelup_bin_path = fuelup_bin_dir().join("fuelup");
-                    let bin_path = dir.join(bin_file.file_name());
+                    let bin_path = fuelup_bin_dir().join(bin_file_name);
 
                     hard_or_symlink_file(&fuelup_bin_path, &bin_path)?;
                 };
@@ -275,8 +275,8 @@ mod tests {
             unpack_extracted_bins(&mock_bin_dir.to_path_buf()).unwrap();
 
             assert!(!extracted_bins_dir.exists());
-            assert!(mock_bin_dir.join("forc-mock-exec-1").to_owned().exists());
-            assert!(mock_bin_dir.join("forc-mock-exec-2").to_owned().exists());
+            assert!(mock_bin_dir.join("forc-mock-exec-1").metadata().is_ok());
+            assert!(mock_bin_dir.join("forc-mock-exec-2").metadata().is_ok());
             Ok(())
         })
     }

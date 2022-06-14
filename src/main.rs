@@ -1,52 +1,11 @@
 use anyhow::Result;
 use fuelup::download::component;
-use fuelup::fuelup_cli;
-use fuelup::path::settings_file;
-use fuelup::settings::SettingsFile;
-use fuelup::toolchain::Toolchain;
-use std::ffi::OsString;
-use std::os::unix::prelude::CommandExt;
+use fuelup::{fuelup_cli, proxy_cli};
+use std::panic;
 use std::path::PathBuf;
-use std::process::{Command, ExitCode, Stdio};
-use std::{env, io, panic};
 
 fn is_supported_component(component: &str) -> bool {
     ["forc", "fuel-core", "forc-fmt", "forc-lsp", "forc-explore"].contains(&component)
-}
-
-fn is_supported_plugin(plugin: &str) -> bool {
-    ["fmt", "lsp", "explore"].contains(&plugin)
-}
-
-/// Runs forc or fuel-core in proxy mode
-fn proxy_run(arg0: &str) -> Result<ExitCode> {
-    let cmd_args: Vec<_> = env::args_os().skip(1).collect();
-    let settings_file = SettingsFile::new(settings_file());
-    let toolchain =
-        settings_file.with(|s| Toolchain::from_settings(&s.default_toolchain.clone().unwrap()))?;
-
-    if !cmd_args.is_empty() && is_supported_plugin(&cmd_args[0].to_string_lossy()) {
-        let plugin = &format!("{}-{}", arg0, &cmd_args[0].to_string_lossy());
-        direct_proxy(plugin, &cmd_args[1..], toolchain)?;
-    } else {
-        direct_proxy(arg0, &cmd_args, toolchain)?;
-    }
-
-    Ok(ExitCode::SUCCESS)
-}
-
-fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: Toolchain) -> io::Result<ExitCode> {
-    let bin_path = toolchain.path.join(proc_name);
-    let mut cmd = Command::new(bin_path);
-
-    cmd.args(args);
-    cmd.stdin(Stdio::inherit());
-
-    return exec(&mut cmd);
-
-    fn exec(cmd: &mut Command) -> io::Result<ExitCode> {
-        Err(cmd.exec())
-    }
 }
 
 fn run() -> Result<()> {
@@ -62,7 +21,7 @@ fn run() -> Result<()> {
         Some(component::FUELUP) => fuelup_cli::fuelup_cli()?,
         Some(n) => {
             if is_supported_component(n) {
-                proxy_run(n)?;
+                proxy_cli::proxy_run(n)?;
             }
         }
         None => panic!("Unknown exe"),

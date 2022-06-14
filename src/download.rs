@@ -14,7 +14,6 @@ use crate::constants::{
     GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL, SWAY_REPO,
 };
 use crate::file::hard_or_symlink_file;
-use crate::path::fuelup_bin_dir;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
@@ -213,7 +212,7 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path)
     Ok(())
 }
 
-pub fn unpack_and_link_bins(dir: &PathBuf) -> Result<()> {
+pub fn unpack_and_link_bins(dir: &PathBuf, dst_dir: &Path) -> Result<()> {
     for entry in std::fs::read_dir(&dir)? {
         let sub_path = entry?.path();
 
@@ -227,8 +226,8 @@ pub fn unpack_and_link_bins(dir: &PathBuf) -> Result<()> {
                     dir.display()
                 );
                 if fs::copy(bin_file.path(), dir.join(&bin_file_name)).is_ok() {
-                    let fuelup_bin_path = fuelup_bin_dir().join("fuelup");
-                    let bin_path = fuelup_bin_dir().join(bin_file_name);
+                    let fuelup_bin_path = dst_dir.join("fuelup");
+                    let bin_path = dst_dir.join(bin_file_name);
 
                     hard_or_symlink_file(&fuelup_bin_path, &bin_path)?;
                 };
@@ -261,7 +260,7 @@ mod tests {
             let mock_bin_dir = tempfile::tempdir_in(&dir).unwrap().into_path();
             let extracted_bins_dir = mock_bin_dir.join("forc-binaries");
             let mock_fuelup_dir = tempfile::tempdir_in(home_dir().unwrap()).unwrap();
-            let _mock_fuelup_bin_dir = tempfile::tempdir_in(mock_fuelup_dir).unwrap();
+            let _mock_fuelup_bin_dir = tempfile::tempdir_in(&mock_fuelup_dir).unwrap();
             fs::create_dir(&extracted_bins_dir).unwrap();
 
             let mock_bin_file_1 = extracted_bins_dir.join("forc-mock-exec-1");
@@ -274,7 +273,7 @@ mod tests {
             assert!(!dir.path().join("forc-mock-exec-1").to_owned().exists());
             assert!(!dir.path().join("forc-mock-exec-2").to_owned().exists());
 
-            unpack_and_link_bins(&mock_bin_dir.to_path_buf()).unwrap();
+            unpack_and_link_bins(&mock_bin_dir.to_path_buf(), mock_fuelup_dir.path()).unwrap();
 
             assert!(!extracted_bins_dir.exists());
             assert!(mock_bin_dir.join("forc-mock-exec-1").metadata().is_ok());

@@ -10,6 +10,7 @@ use std::{fs, thread};
 use tar::Archive;
 use tracing::{error, info};
 
+use crate::component;
 use crate::constants::{
     FUELUP_RELEASE_DOWNLOAD_URL, FUELUP_REPO, FUEL_CORE_RELEASE_DOWNLOAD_URL, FUEL_CORE_REPO,
     GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL, SWAY_REPO,
@@ -29,12 +30,6 @@ pub struct DownloadCfg {
     pub name: String,
     pub version: Version,
     release_url: String,
-}
-
-pub mod component {
-    pub const FORC: &str = "forc";
-    pub const FUEL_CORE: &str = "fuel-core";
-    pub const FUELUP: &str = "fuelup";
 }
 
 impl DownloadCfg {

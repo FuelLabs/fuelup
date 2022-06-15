@@ -1,7 +1,8 @@
 use anyhow::{bail, Result};
 
 use crate::{
-    download::{component, download_file_and_unpack, unpack_bins, DownloadCfg},
+    component,
+    download::{download_file_and_unpack, unpack_bins, DownloadCfg},
     path::fuelup_bin_dir,
 };
 

@@ -1,4 +1,5 @@
 pub mod commands;
+pub mod component;
 pub mod constants;
 pub mod download;
 pub mod file;

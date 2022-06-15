@@ -1,12 +1,8 @@
 use anyhow::{bail, Result};
-use fuelup::download::component;
+use fuelup::component;
 use fuelup::{fuelup_cli, proxy_cli};
 use std::panic;
 use std::path::PathBuf;
-
-fn is_supported_component(component: &str) -> bool {
-    ["forc", "fuel-core", "forc-fmt", "forc-lsp", "forc-explore"].contains(&component)
-}
 
 fn run() -> Result<()> {
     let arg0 = std::env::args().next().map(PathBuf::from);
@@ -20,7 +16,7 @@ fn run() -> Result<()> {
     match process_name.as_deref() {
         Some(component::FUELUP) => fuelup_cli::fuelup_cli()?,
         Some(n) => {
-            if is_supported_component(n) {
+            if component::SUPPORTED.contains(&n) {
                 if proxy_cli::proxy_run(n).is_err() {
                     bail!(
                         "fuelup invoked with unexpected command or component {:?}",

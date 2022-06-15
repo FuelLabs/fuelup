@@ -1,5 +1,6 @@
 use crate::commands::toolchain::InstallCommand;
-use crate::download::{component, DownloadCfg};
+use crate::component;
+use crate::download::DownloadCfg;
 use crate::path::settings_file;
 use crate::settings::SettingsFile;
 use crate::toolchain::Toolchain;

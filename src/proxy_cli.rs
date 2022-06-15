@@ -4,13 +4,10 @@ use std::os::unix::prelude::CommandExt;
 use std::process::{Command, ExitCode, Stdio};
 use std::{env, io};
 
+use crate::component;
 use crate::path::settings_file;
 use crate::settings::SettingsFile;
 use crate::toolchain::Toolchain;
-
-fn is_supported_plugin(plugin: &str) -> bool {
-    ["fmt", "lsp", "explore"].contains(&plugin)
-}
 
 /// Runs forc or fuel-core in proxy mode
 pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
@@ -19,7 +16,10 @@ pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
     let toolchain =
         settings_file.with(|s| Toolchain::from_settings(&s.default_toolchain.clone().unwrap()))?;
 
-    if !cmd_args.is_empty() && is_supported_plugin(&cmd_args[0].to_string_lossy()) {
+    if !cmd_args.is_empty()
+        && component::SUPPORTED_PLUGINS
+            .contains(&cmd_args[0].to_str().expect("Failed to parse cmd args"))
+    {
         let plugin = &format!("{}-{}", arg0, &cmd_args[0].to_string_lossy());
         direct_proxy(plugin, &cmd_args[1..], toolchain)?;
     } else {

@@ -115,7 +115,7 @@ main() {
         exit 1
     fi
 
-    ignore "$FUELUP_DIR/bin/fuelup" "toolchain install latest"
+    ignore "$FUELUP_DIR/bin/fuelup" "install"
 
     local _retval=$?
 

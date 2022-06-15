@@ -251,7 +251,7 @@ pub fn link_to_fuelup(bins: Vec<PathBuf>) -> Result<()> {
     Ok(())
 }
 
-pub fn unpack_bins(dir: &PathBuf, dst_dir: &Path) -> Result<Vec<PathBuf>> {
+pub fn unpack_bins(dir: &Path, dst_dir: &Path) -> Result<Vec<PathBuf>> {
     let mut downloaded: Vec<PathBuf> = Vec::new();
     for entry in std::fs::read_dir(&dir)? {
         let sub_path = entry?.path();

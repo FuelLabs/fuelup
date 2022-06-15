@@ -41,10 +41,6 @@ fn symlink_file(_original: &Path, _link: &Path) -> Result<()> {
     bail!("Symbolic link currently only supported on Unix");
 }
 
-pub fn is_file<P: AsRef<Path>>(path: P) -> bool {
-    fs::metadata(path).ok().as_ref().map(fs::Metadata::is_file) == Some(true)
-}
-
 pub fn read_file(name: &'static str, path: &Path) -> Result<String> {
     fs::read_to_string(path).with_context(|| format!("Failed to read {}", name))
 }

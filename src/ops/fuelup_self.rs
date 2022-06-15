@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::Result;
 
 use crate::{
     component,
@@ -9,13 +9,9 @@ use crate::{
 pub fn self_update() -> Result<()> {
     let download_cfg = DownloadCfg::new(component::FUELUP, None)?;
     let fuelup_bin_dir = fuelup_bin_dir();
-    if download_file_and_unpack(&download_cfg, &fuelup_bin_dir).is_err() {
-        bail!("{} {}", &download_cfg.name, &download_cfg.version)
-    };
 
-    if unpack_bins(&fuelup_bin_dir, &fuelup_bin_dir).is_err() {
-        bail!("{} {}", &download_cfg.name, &download_cfg.version)
-    };
+    download_file_and_unpack(&download_cfg, &fuelup_bin_dir)?;
+    unpack_bins(&fuelup_bin_dir, &fuelup_bin_dir)?;
 
     Ok(())
 }

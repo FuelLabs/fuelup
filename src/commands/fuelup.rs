@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use clap::Parser;
 
 use crate::ops::fuelup_self::self_update;
@@ -13,7 +13,9 @@ pub enum FuelupCommand {
 struct UpdateCommand {}
 
 pub fn exec() -> Result<()> {
-    self_update()?;
+    if let Err(e) = self_update() {
+        bail!("fuelup failed to update itself: {}", e)
+    };
 
     Ok(())
 }

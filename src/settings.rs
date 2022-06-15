@@ -65,14 +65,14 @@ pub struct Settings {
     pub default_toolchain: Option<String>,
 }
 
-fn get_value(table: &mut toml::value::Table, key: &str, path: &str) -> Result<toml::Value> {
+fn take_value(table: &mut toml::value::Table, key: &str, path: &str) -> Result<toml::Value> {
     table
         .remove(key)
         .ok_or_else(|| anyhow!(format!("missing key: '{}'", path.to_owned() + key)))
 }
 
 fn get_opt_string(table: &mut toml::value::Table, key: &str, path: &str) -> Result<Option<String>> {
-    if let Ok(v) = get_value(table, key, path) {
+    if let Ok(v) = take_value(table, key, path) {
         if let toml::Value::String(s) = v {
             Ok(Some(s))
         } else {

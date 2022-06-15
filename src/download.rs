@@ -244,8 +244,8 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path)
 
 pub fn link_to_fuelup(bins: Vec<PathBuf>) -> Result<()> {
     let fuelup_bin_dir = fuelup_bin_dir();
+    let fuelup_bin_path = fuelup_bin_dir.join("fuelup");
     for path in bins {
-        let fuelup_bin_path = fuelup_bin_dir.join("fuelup");
         hard_or_symlink_file(&fuelup_bin_path, &path)?;
     }
     Ok(())

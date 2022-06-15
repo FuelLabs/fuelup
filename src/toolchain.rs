@@ -96,8 +96,13 @@ impl Toolchain {
 
         info!("Fetching {} {}", &download_cfg.name, &download_cfg.version);
 
-        if download_file_and_unpack(&download_cfg, &self.path).is_err() {
-            bail!("{} {}", &download_cfg.name, &download_cfg.version)
+        if let Err(e) = download_file_and_unpack(&download_cfg, &self.path) {
+            bail!(
+                "Could not add component {}({}): {}",
+                &download_cfg.name,
+                &download_cfg.version,
+                e
+            )
         };
 
         if let Ok(downloaded) = unpack_bins(&self.path, &fuelup_bin_dir()) {

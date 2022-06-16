@@ -3,6 +3,7 @@ use fuelup::component;
 use fuelup::{fuelup_cli, proxy_cli};
 use std::panic;
 use std::path::PathBuf;
+use tracing::error;
 
 fn run() -> Result<()> {
     let arg0 = std::env::args().next().map(PathBuf::from);
@@ -16,7 +17,7 @@ fn run() -> Result<()> {
     match process_name.as_deref() {
         Some(component::FUELUP) => {
             if let Err(e) = fuelup_cli::fuelup_cli() {
-                bail!("{}", e);
+                error!("{}", e);
             }
         }
         Some(n) => {

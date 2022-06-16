@@ -1,4 +1,3 @@
-use std::path::Path;
 use std::{cell::RefCell, path::PathBuf};
 
 use anyhow::{anyhow, bail, Result};
@@ -29,7 +28,7 @@ impl SettingsFile {
         {
             let mut b = self.cache.borrow_mut();
             if b.is_none() {
-                *b = Some(if Path::is_file(&self.path) {
+                *b = Some(if self.path.is_file() {
                     let content = file::read_file("settings", &self.path)?;
                     Settings::parse(&content)?
                 } else {

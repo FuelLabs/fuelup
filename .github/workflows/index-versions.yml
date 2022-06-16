@@ -1,0 +1,16 @@
+name: Index Version Sets
+
+on: 
+  workflow_dispatch:
+    inputs:
+      fuel-core-version:
+        description: 'The latest version for fuel-core binary'     
+        required: true
+
+jobs:
+  index-version-sets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish fuel-core version (latest)
+        run: |
+          echo "fuel-core verfsion: ${{ github.event.inputs.fuel-core-version }}"

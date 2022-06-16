@@ -1,9 +1,7 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use clap::Parser;
 
-use crate::download::DownloadCfg;
-
-use super::install;
+use crate::ops::fuelup_self::self_update;
 
 #[derive(Debug, Parser)]
 pub enum FuelupCommand {
@@ -14,11 +12,10 @@ pub enum FuelupCommand {
 #[derive(Debug, Parser)]
 struct UpdateCommand {}
 
-pub const FUELUP_VERSION: &str = concat!("v", clap::crate_version!());
-
-pub fn self_update() -> Result<()> {
-    let download_cfg = DownloadCfg::new("fuelup", None)?;
-    install::install_one(download_cfg)?;
+pub fn exec() -> Result<()> {
+    if let Err(e) = self_update() {
+        bail!("fuelup failed to update itself: {}", e)
+    };
 
     Ok(())
 }

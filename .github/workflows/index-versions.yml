@@ -13,4 +13,4 @@ jobs:
     steps:
       - name: Publish fuel-core version (latest)
         run: |
-          echo "fuel-core verfsion: ${{ github.event.inputs.fuel-core-version }}"
+          echo "fuel-core version: ${{ github.event.inputs.fuel-core-version }}"

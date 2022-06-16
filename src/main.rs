@@ -20,13 +20,16 @@ fn run() -> Result<()> {
                 error!("{}", e);
             }
         }
-        Some(n) => {
-            if component::SUPPORTED_COMPONENTS.contains(&n) && proxy_cli::proxy_run(n).is_err() {
-                bail!(
-                    "fuelup invoked with unexpected command or component {:?}",
-                    n
-                )
+        Some(n) if component::SUPPORTED_COMPONENTS.contains(&n) => {
+            if let Err(e) = proxy_cli::proxy_run(n) {
+                bail!("{}", e);
             }
+        }
+        Some(n) => {
+            bail!(
+                "fuelup invoked with unexpected command or component {:?}",
+                n
+            )
         }
         None => panic!("fuelup does not understand this command"),
     }

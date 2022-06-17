@@ -15,14 +15,10 @@ fn run() -> Result<()> {
         .map(String::from);
 
     match process_name.as_deref() {
-        Some(component::FUELUP) => {
-            if let Err(e) = fuelup_cli::fuelup_cli() {
-                error!("{}", e);
-            }
-        }
+        Some(component::FUELUP) => fuelup_cli::fuelup_cli()?,
         Some(n) if component::SUPPORTED_COMPONENTS.contains(&n) => {
             if let Err(e) = proxy_cli::proxy_run(n) {
-                bail!("{}", e);
+                error!("{}", e);
             }
         }
         Some(n) => {

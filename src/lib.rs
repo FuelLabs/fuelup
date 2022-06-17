@@ -1,3 +1,4 @@
+pub mod colors;
 pub mod commands;
 pub mod component;
 pub mod constants;

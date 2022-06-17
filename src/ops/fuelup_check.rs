@@ -1,6 +1,8 @@
+use crate::colors::print_with_color;
 use anyhow::Result;
 use clap::Parser;
 use semver::Version;
+use termcolor::Color;
 use tracing::info;
 
 use crate::{component, download::DownloadCfg};
@@ -34,12 +36,13 @@ pub fn check() -> Result<()> {
                 }
 
                 if version == download_cfg.version {
-                    info!("{} - up to date: {}", component, version);
+                    print!("{} - ", component);
+                    print_with_color("Up to date", Color::Green);
+                    println!(": {}", version);
                 } else {
-                    info!(
-                        "{} - update available: {} -> {}",
-                        component, version, download_cfg.version
-                    );
+                    print!("{} - ", component);
+                    print_with_color("update available", Color::Yellow);
+                    println!("{} -> {}", version, download_cfg.version);
                 }
             }
             Err(_) => info!("{} not found", component),
@@ -53,19 +56,20 @@ pub fn check() -> Result<()> {
                     .output()
                 {
                     Ok(o) => {
-                        let plugin_version = Version::parse(
+                        let version = Version::parse(
                             String::from_utf8_lossy(&o.stdout)
                                 .split_whitespace()
                                 .collect::<Vec<&str>>()[1],
                         )?;
 
-                        if plugin_version == Version::parse(&latest_version)? {
-                            info!(" - {} - up to date: {}", plugin_component, latest_version);
+                        if version == Version::parse(&latest_version)? {
+                            print!(" - {} - ", plugin_component);
+                            print_with_color("Up to date", Color::Green);
+                            println!(": {}", version);
                         } else {
-                            info!(
-                                " - {} - update available: {} -> {}",
-                                plugin_component, plugin_version, latest_version
-                            );
+                            print!(" - {} - ", plugin_component);
+                            print_with_color("update available", Color::Yellow);
+                            println!("{} -> {}", version, latest_version);
                         }
                     }
                     Err(_) => info!(" - {} not found", plugin_component),

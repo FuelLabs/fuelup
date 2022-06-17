@@ -37,11 +37,11 @@ pub fn check() -> Result<()> {
 
                 if version == download_cfg.version {
                     print!("{} - ", component);
-                    print_with_color("Up to date", Color::Green);
+                    print_with_color("Up to date ", Color::Green);
                     println!(": {}", version);
                 } else {
                     print!("{} - ", component);
-                    print_with_color("update available", Color::Yellow);
+                    print_with_color("update available ", Color::Yellow);
                     println!("{} -> {}", version, download_cfg.version);
                 }
             }
@@ -64,11 +64,11 @@ pub fn check() -> Result<()> {
 
                         if version == Version::parse(&latest_version)? {
                             print!(" - {} - ", plugin_component);
-                            print_with_color("Up to date", Color::Green);
+                            print_with_color("Up to date ", Color::Green);
                             println!(": {}", version);
                         } else {
                             print!(" - {} - ", plugin_component);
-                            print_with_color("update available", Color::Yellow);
+                            print_with_color("update available ", Color::Yellow);
                             println!("{} -> {}", version, latest_version);
                         }
                     }

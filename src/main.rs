@@ -22,7 +22,7 @@ fn run() -> Result<()> {
         }
         Some(n) if component::SUPPORTED_COMPONENTS.contains(&n) => {
             if let Err(e) = proxy_cli::proxy_run(n) {
-                bail!("{}", e);
+                error!("{}", e);
             }
         }
         Some(n) => {

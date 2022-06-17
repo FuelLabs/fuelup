@@ -2,15 +2,19 @@ name: Index Version Sets
 
 on: 
   workflow_dispatch:
-    inputs:
-      fuel-core-version:
-        description: 'The latest version for fuel-core binary'     
-        required: true
+  # schedule:
+    # Run at minute 0 and 30 every hour
+    # - cron: '0,30 * * * *'
 
 jobs:
   index-version-sets:
     runs-on: ubuntu-latest
     steps:
-      - name: Publish fuel-core version (latest)
+      - name: Get latest versions from GitHub API
         run: |
-          echo "fuel-core version: ${{ github.event.inputs.fuel-core-version }}"
+          FORC_LATEST_VERSION="$(curl -s https://api.github.com/repos/FuelLabs/sway/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)"
+          FUEL_CORE_LATEST_VERSION="$(curl -s https://api.github.com/repos/FuelLabs/fuel-core/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)"
+
+          echo "${FORC_LATEST_VERSION}"
+          echo "${FUEL_CORE_LATEST_VERSION}"
+

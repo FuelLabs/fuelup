@@ -41,7 +41,7 @@ pub fn check() -> Result<()> {
                     println!(": {}", version);
                 } else {
                     print!("{} - ", component);
-                    print_with_color("update available ", Color::Yellow);
+                    print_with_color("Update available ", Color::Yellow);
                     println!("{} -> {}", version, download_cfg.version);
                 }
             }
@@ -68,7 +68,7 @@ pub fn check() -> Result<()> {
                             println!(": {}", version);
                         } else {
                             print!(" - {} - ", plugin_component);
-                            print_with_color("update available ", Color::Yellow);
+                            print_with_color("Update available ", Color::Yellow);
                             println!("{} -> {}", version, latest_version);
                         }
                     }

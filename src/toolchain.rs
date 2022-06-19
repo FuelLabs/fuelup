@@ -1,5 +1,6 @@
 use anyhow::{bail, Result};
 use std::fmt;
+use std::path::Path;
 use std::str::FromStr;
 use std::{fs, path::PathBuf};
 use tracing::info;
@@ -25,7 +26,6 @@ impl FromStr for ToolchainName {
 pub struct Toolchain {
     pub name: String,
     pub path: PathBuf,
-    pub target: TargetTriple,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -69,13 +69,18 @@ impl Toolchain {
             Some(t) => TargetTriple(t),
             None => TargetTriple::from_host()?,
         };
-        let path = match ToolchainName::from_str(name)? {
-            ToolchainName::Latest => toolchain_bin_dir(&format!("{}-{}", name, target)),
+        let name = match ToolchainName::from_str(name)? {
+            ToolchainName::Latest => format!("{}-{}", name, target),
         };
+        let path = toolchain_bin_dir(&name);
+        Ok(Self { name, path })
+    }
+
+    pub fn from(name: &str) -> Result<Self> {
+        let path = toolchain_bin_dir(name);
         Ok(Self {
             name: name.to_string(),
             path,
-            target,
         })
     }
 
@@ -86,7 +91,21 @@ impl Toolchain {
         let path = match ToolchainName::from_str(&name)? {
             ToolchainName::Latest => toolchain_bin_dir(&format!("{}-{}", name, target)),
         };
-        Ok(Self { name, path, target })
+        Ok(Self { name, path })
+    }
+
+    pub fn from_path(&self, path: &Path) -> Result<Self> {
+        // load either nromal toolchain or custom
+        let name = path.file_name().unwrap();
+
+        if !path.join("bin").is_dir() {
+            bail!("Invalid toolchain path");
+        }
+
+        Ok(Self {
+            name: name.to_string_lossy().to_string(),
+            path: path.to_path_buf(),
+        })
     }
 
     pub fn add_component(&self, download_cfg: DownloadCfg) -> Result<DownloadCfg> {

@@ -13,5 +13,7 @@ pub mod plugin {
 }
 
 pub fn exec() -> Result<()> {
-    fuelup_check::check()
+    fuelup_check::check()?;
+
+    Ok(())
 }

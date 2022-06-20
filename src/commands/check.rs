@@ -7,7 +7,7 @@ use crate::ops::fuelup_check;
 pub struct CheckCommand {
     /// Whether to explicitly show versioning of forc plugins, which is normally shown together
     /// with forc.
-    #[clap(long)]
+    #[clap(long, short)]
     pub verbose: bool,
 }
 

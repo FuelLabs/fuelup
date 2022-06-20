@@ -85,9 +85,10 @@ pub fn check() -> Result<()> {
                 println!("{} -> {}", version, latest_versions[component::FUELUP]);
             }
         }
-        Err(_) => {
-            print_bold(&format!("  {}", component::FUELUP))?;
-            info!(" not found");
+        Err(e) => {
+            // Unclear how we might run into this if we run it from fuelup - print errors anyway.
+            print_bold(&format!("  {} : ", component::FUELUP))?;
+            info!("execution error - {}", e);
         }
     };
     Ok(())

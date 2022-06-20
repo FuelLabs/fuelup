@@ -39,7 +39,7 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
             }
         }
         Err(e) => {
-            print!("    - {} : ", plugin);
+            print!("    - {} - ", plugin);
             if plugin_executable.exists() {
                 info!("execution error - {}", e);
             } else {
@@ -90,7 +90,7 @@ pub fn check(command: CheckCommand) -> Result<()> {
                         }
                     }
                     Err(e) => {
-                        print_bold(&format!("  {} : ", component))?;
+                        print_bold(&format!("  {} - ", component))?;
                         if component_executable.exists() {
                             info!("execution error - {}", e);
                         } else {
@@ -130,7 +130,7 @@ pub fn check(command: CheckCommand) -> Result<()> {
         }
         Err(e) => {
             // Unclear how we might run into this if we run it from fuelup - print errors anyway
-            print_bold(&format!("  {} : ", component::FUELUP))?;
+            print_bold(&format!("  {} - ", component::FUELUP))?;
             info!("execution error - {}", e);
         }
     };

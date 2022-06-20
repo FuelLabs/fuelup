@@ -24,12 +24,7 @@ impl Config {
             let toolchains: Vec<String> = fs::read_dir(&self.toolchains_dir)?
                 .filter_map(io::Result::ok)
                 .filter(|e| e.file_type().map(|f| f.is_dir()).unwrap_or(false))
-                .map(|e| {
-                    e.file_name()
-                        .into_string()
-                        .ok()
-                        .unwrap_or_else(|| "".to_string())
-                })
+                .map(|e| e.file_name().into_string().ok().unwrap_or_default())
                 .collect();
             Ok(toolchains)
         } else {

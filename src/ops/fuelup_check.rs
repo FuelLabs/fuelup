@@ -1,16 +1,16 @@
 use std::collections::HashMap;
+use std::io::Write;
 
 use crate::{
     commands::check::CheckCommand,
     component::SUPPORTED_PLUGINS,
     config::Config,
-    fmt::{print_bold, print_boldln, print_with_color},
+    fmt::{bold, with_color_maybe_bold},
     toolchain::Toolchain,
 };
 use anyhow::Result;
 use semver::Version;
 use termcolor::Color;
-use tracing::info;
 
 use crate::{component, download::DownloadCfg};
 
@@ -27,23 +27,21 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
                     .collect::<Vec<&str>>()[1],
             )?;
 
+            bold(|s| write!(s, "    - {} - ", plugin))?;
             if &version == latest_version {
-                print!("    - {} - ", plugin);
-                print_with_color("Up to date ", Color::Green).expect("Internal printing error");
+                with_color_maybe_bold(|s| write!(s, "Up to date"), Color::Green, true)?;
                 println!(": {}", version);
             } else {
-                print!("    - {} - ", plugin);
-                print_with_color("Update available ", Color::Yellow)
-                    .expect("Internal printing error");
+                with_color_maybe_bold(|s| write!(s, "Update available "), Color::Green, true)?;
                 println!("{} -> {}", version, latest_version);
             }
         }
         Err(e) => {
-            print!("    - {} - ", plugin);
+            bold(|s| write!(s, "    - {} - ", plugin))?;
             if plugin_executable.exists() {
-                info!("execution error - {}", e);
+                println!("execution error - {}", e);
             } else {
-                info!("not found");
+                println!("not found");
             }
         }
     }
@@ -65,7 +63,7 @@ pub fn check(command: CheckCommand) -> Result<()> {
 
     for toolchain in toolchains {
         if let Ok(toolchain) = Toolchain::from(&toolchain) {
-            print_boldln(&toolchain.name)?;
+            bold(|s| writeln!(s, "{}", &toolchain.name))?;
             for component in [component::FORC, component::FUEL_CORE] {
                 let component_executable = toolchain.path.join(component);
 
@@ -80,21 +78,28 @@ pub fn check(command: CheckCommand) -> Result<()> {
                                 .collect::<Vec<&str>>()[1],
                         )?;
 
-                        print_bold(&format!("  {} - ", component))?;
+                        bold(|s| write!(s, "  {} - ", &component))?;
                         if version == latest_versions[component] {
-                            print_with_color("Up to date ", Color::Green)?;
-                            println!(": {}", version);
+                            with_color_maybe_bold(
+                                |s| writeln!(s, "Up to date : {}", version),
+                                Color::Green,
+                                true,
+                            )?;
                         } else {
-                            print_with_color("Update available : ", Color::Yellow)?;
-                            println!("{} -> {}", version, latest_versions[component]);
+                            with_color_maybe_bold(
+                                |s| write!(s, "Update available"),
+                                Color::Yellow,
+                                true,
+                            )?;
+                            println!(" : {} -> {}", version, latest_versions[component]);
                         }
                     }
                     Err(e) => {
-                        print_bold(&format!("  {} - ", component))?;
+                        bold(|s| write!(s, "  {} - ", &component))?;
                         if component_executable.exists() {
-                            info!("execution error - {}", e);
+                            println!("execution error - {}", e);
                         } else {
-                            info!("not found");
+                            println!("not found");
                         }
                     }
                 };
@@ -119,19 +124,19 @@ pub fn check(command: CheckCommand) -> Result<()> {
                     .collect::<Vec<&str>>()[1],
             )?;
 
-            print_bold(&format!("{} - ", component::FUELUP))?;
+            bold(|s| write!(s, "{} - ", component::FUELUP))?;
             if version == latest_versions[component::FUELUP] {
-                print_with_color("Up to date ", Color::Green)?;
+                with_color_maybe_bold(|s| write!(s, "Up to date "), Color::Green, true)?;
                 println!(": {}", version);
             } else {
-                print_with_color("Update available : ", Color::Yellow)?;
+                with_color_maybe_bold(|s| write!(s, "Update available : "), Color::Yellow, true)?;
                 println!("{} -> {}", version, latest_versions[component::FUELUP]);
             }
         }
         Err(e) => {
             // Unclear how we might run into this if we run it from fuelup - print errors anyway
-            print_bold(&format!("  {} - ", component::FUELUP))?;
-            info!("execution error - {}", e);
+            bold(|s| write!(s, "  {} - ", component::FUELUP))?;
+            println!("execution error - {}", e);
         }
     };
     Ok(())

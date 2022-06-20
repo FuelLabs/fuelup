@@ -2,26 +2,63 @@ use std::collections::HashMap;
 
 use crate::{
     colors::{print_bold, print_boldln, print_with_color},
+    commands::check::CheckCommand,
+    component::SUPPORTED_PLUGINS,
     config::Config,
     toolchain::Toolchain,
 };
 use anyhow::Result;
-use clap::Parser;
 use semver::Version;
 use termcolor::Color;
 use tracing::info;
 
 use crate::{component, download::DownloadCfg};
 
-#[derive(Debug, Parser)]
-pub struct CheckCommand {}
+fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -> Result<()> {
+    let plugin_executable = toolchain.path.join(&plugin);
+    match std::process::Command::new(&plugin_executable)
+        .arg("--version")
+        .output()
+    {
+        Ok(o) => {
+            let version = Version::parse(
+                String::from_utf8_lossy(&o.stdout)
+                    .split_whitespace()
+                    .collect::<Vec<&str>>()[1],
+            )?;
 
-pub fn check() -> Result<()> {
+            if &version == latest_version {
+                print!("    - {} - ", plugin);
+                print_with_color("Up to date ", Color::Green).expect("Internal printing error");
+                println!(": {}", version);
+            } else {
+                print!("    - {} - ", plugin);
+                print_with_color("Update available ", Color::Yellow)
+                    .expect("Internal printing error");
+                println!("{} -> {}", version, latest_version);
+            }
+        }
+        Err(e) => {
+            print!("    - {} : ", plugin);
+            if plugin_executable.exists() {
+                info!("execution error - {}", e);
+            } else {
+                info!("not found");
+            }
+        }
+    }
+    Ok(())
+}
+
+pub fn check(command: CheckCommand) -> Result<()> {
+    let CheckCommand { verbose } = command;
+
     let cfg = Config::from_env()?;
     let toolchains = cfg.list_toolchains()?;
     let mut latest_versions: HashMap<String, Version> = HashMap::new();
+    let components = Vec::from([component::FORC, component::FUEL_CORE, component::FUELUP]);
 
-    for component in [component::FORC, component::FUEL_CORE, component::FUELUP] {
+    for component in components {
         let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
         latest_versions.insert(component.to_string(), download_cfg.version);
     }
@@ -61,6 +98,12 @@ pub fn check() -> Result<()> {
                         }
                     }
                 };
+
+                if verbose && component == component::FORC {
+                    for plugin in SUPPORTED_PLUGINS {
+                        check_plugin(&toolchain, plugin, &latest_versions[component::FORC])?;
+                    }
+                }
             }
         }
     }
@@ -86,7 +129,7 @@ pub fn check() -> Result<()> {
             }
         }
         Err(e) => {
-            // Unclear how we might run into this if we run it from fuelup - print errors anyway.
+            // Unclear how we might run into this if we run it from fuelup - print errors anyway
             print_bold(&format!("  {} : ", component::FUELUP))?;
             info!("execution error - {}", e);
         }

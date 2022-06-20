@@ -30,7 +30,7 @@ pub fn fuelup_cli() -> Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Check(_command) => check::exec(),
+        Commands::Check(command) => check::exec(command),
         Commands::Fuelup(command) => match command {
             FuelupCommand::Update => fuelup::exec(),
         },

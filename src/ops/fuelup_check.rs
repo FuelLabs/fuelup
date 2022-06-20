@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::{
     colors::{print_bold, print_boldln, print_with_color},
     config::Config,
@@ -17,6 +19,12 @@ pub struct CheckCommand {}
 pub fn check() -> Result<()> {
     let cfg = Config::from_env()?;
     let toolchains = cfg.list_toolchains()?;
+    let mut latest_versions: HashMap<String, Version> = HashMap::new();
+
+    for component in [component::FORC, component::FUEL_CORE, component::FUELUP] {
+        let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
+        latest_versions.insert(component.to_string(), download_cfg.version);
+    }
 
     for toolchain in toolchains {
         if let Ok(toolchain) = Toolchain::from(&toolchain) {
@@ -35,22 +43,21 @@ pub fn check() -> Result<()> {
                                 .collect::<Vec<&str>>()[1],
                         )?;
 
-                        let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
                         if component == component::FORC {
                             print_bold(&format!(
-                                "  {} (plugins: forc-explore, forc-fmt, forc-lsp) - ",
+                                "  {}, forc-explore, forc-fmt, forc-lsp - ",
                                 component
                             ))?;
                         } else {
                             print_bold(&format!("  {} - ", component))?;
                         }
 
-                        if version == download_cfg.version {
+                        if version == latest_versions[component] {
                             print_with_color("Up to date ", Color::Green)?;
                             println!(": {}", version);
                         } else {
-                            print_with_color("Update available ", Color::Yellow)?;
-                            println!("{} -> {}", version, download_cfg.version);
+                            print_with_color("Update available : ", Color::Yellow)?;
+                            println!("{} -> {}", version, latest_versions[component]);
                         }
                     }
                     Err(_) => {
@@ -67,7 +74,6 @@ pub fn check() -> Result<()> {
         .output()
     {
         Ok(o) => {
-            let download_cfg: DownloadCfg = DownloadCfg::new(component::FUELUP, None)?;
             let version = Version::parse(
                 String::from_utf8_lossy(&o.stdout)
                     .split_whitespace()
@@ -75,12 +81,12 @@ pub fn check() -> Result<()> {
             )?;
 
             print_bold(&format!("{} - ", component::FUELUP))?;
-            if version == download_cfg.version {
+            if version == latest_versions[component::FUELUP] {
                 print_with_color("Up to date ", Color::Green)?;
                 println!(": {}", version);
             } else {
-                print_with_color("Update available ", Color::Yellow)?;
-                println!("{} -> {}", version, download_cfg.version);
+                print_with_color("Update available : ", Color::Yellow)?;
+                println!("{} -> {}", version, latest_versions[component::FUELUP]);
             }
         }
         Err(_) => {

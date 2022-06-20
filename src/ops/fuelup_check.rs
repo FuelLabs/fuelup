@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 use crate::{
-    colors::{print_bold, print_boldln, print_with_color},
     commands::check::CheckCommand,
     component::SUPPORTED_PLUGINS,
     config::Config,
+    fmt::{print_bold, print_boldln, print_with_color},
     toolchain::Toolchain,
 };
 use anyhow::Result;

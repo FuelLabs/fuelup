@@ -1,10 +1,10 @@
-pub mod colors;
 pub mod commands;
 pub mod component;
 pub mod config;
 pub mod constants;
 pub mod download;
 pub mod file;
+pub mod fmt;
 pub mod fuelup_cli;
 pub mod ops;
 pub mod path;

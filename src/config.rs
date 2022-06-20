@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use anyhow::Result;
 use std::io;
 
-use crate::path::fuelup_dir;
+use crate::path::toolchain_dir;
 
 pub struct Config {
     toolchains_dir: PathBuf,
@@ -12,11 +12,9 @@ pub struct Config {
 
 impl Config {
     pub(crate) fn from_env() -> Result<Self> {
-        let fuelup_dir = fuelup_dir();
-
-        let toolchains_dir = fuelup_dir.join("toolchains");
-
-        Ok(Self { toolchains_dir })
+        Ok(Self {
+            toolchains_dir: toolchain_dir(),
+        })
     }
 
     pub(crate) fn list_toolchains(&self) -> Result<Vec<String>> {

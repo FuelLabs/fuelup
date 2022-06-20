@@ -27,17 +27,17 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
                     .collect::<Vec<&str>>()[1],
             )?;
 
-            bold(|s| write!(s, "    - {} - ", plugin))?;
+            bold(|s| write!(s, "    - {} - ", plugin));
             if &version == latest_version {
-                with_color_maybe_bold(|s| write!(s, "Up to date"), Color::Green, true)?;
+                with_color_maybe_bold(|s| write!(s, "Up to date"), Color::Green, true);
                 println!(": {}", version);
             } else {
-                with_color_maybe_bold(|s| write!(s, "Update available "), Color::Green, true)?;
+                with_color_maybe_bold(|s| write!(s, "Update available "), Color::Green, true);
                 println!("{} -> {}", version, latest_version);
             }
         }
         Err(e) => {
-            bold(|s| write!(s, "    - {} - ", plugin))?;
+            bold(|s| write!(s, "    - {} - ", plugin));
             if plugin_executable.exists() {
                 println!("execution error - {}", e);
             } else {
@@ -63,7 +63,7 @@ pub fn check(command: CheckCommand) -> Result<()> {
 
     for toolchain in toolchains {
         if let Ok(toolchain) = Toolchain::from(&toolchain) {
-            bold(|s| writeln!(s, "{}", &toolchain.name))?;
+            bold(|s| writeln!(s, "{}", &toolchain.name));
             for component in [component::FORC, component::FUEL_CORE] {
                 let component_executable = toolchain.path.join(component);
 
@@ -78,24 +78,24 @@ pub fn check(command: CheckCommand) -> Result<()> {
                                 .collect::<Vec<&str>>()[1],
                         )?;
 
-                        bold(|s| write!(s, "  {} - ", &component))?;
+                        bold(|s| write!(s, "  {} - ", &component));
                         if version == latest_versions[component] {
                             with_color_maybe_bold(
                                 |s| writeln!(s, "Up to date : {}", version),
                                 Color::Green,
                                 true,
-                            )?;
+                            );
                         } else {
                             with_color_maybe_bold(
                                 |s| write!(s, "Update available"),
                                 Color::Yellow,
                                 true,
-                            )?;
+                            );
                             println!(" : {} -> {}", version, latest_versions[component]);
                         }
                     }
                     Err(e) => {
-                        bold(|s| write!(s, "  {} - ", &component))?;
+                        bold(|s| write!(s, "  {} - ", &component));
                         if component_executable.exists() {
                             println!("execution error - {}", e);
                         } else {
@@ -124,18 +124,18 @@ pub fn check(command: CheckCommand) -> Result<()> {
                     .collect::<Vec<&str>>()[1],
             )?;
 
-            bold(|s| write!(s, "{} - ", component::FUELUP))?;
+            bold(|s| write!(s, "{} - ", component::FUELUP));
             if version == latest_versions[component::FUELUP] {
-                with_color_maybe_bold(|s| write!(s, "Up to date "), Color::Green, true)?;
+                with_color_maybe_bold(|s| write!(s, "Up to date "), Color::Green, true);
                 println!(": {}", version);
             } else {
-                with_color_maybe_bold(|s| write!(s, "Update available : "), Color::Yellow, true)?;
+                with_color_maybe_bold(|s| write!(s, "Update available : "), Color::Yellow, true);
                 println!("{} -> {}", version, latest_versions[component::FUELUP]);
             }
         }
         Err(e) => {
             // Unclear how we might run into this if we run it from fuelup - print errors anyway
-            bold(|s| write!(s, "  {} - ", component::FUELUP))?;
+            bold(|s| write!(s, "  {} - ", component::FUELUP));
             println!("execution error - {}", e);
         }
     };

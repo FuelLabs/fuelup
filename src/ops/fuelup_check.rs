@@ -27,17 +27,21 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
                     .collect::<Vec<&str>>()[1],
             )?;
 
-            bold(|s| write!(s, "    - {} - ", plugin));
+            print!("    - ");
+            bold(|s| write!(s, "{}", plugin));
+            print!(" - ");
             if &version == latest_version {
                 with_color_maybe_bold(|s| write!(s, "Up to date"), Color::Green, true);
-                println!(": {}", version);
+                println!(" : {}", version);
             } else {
-                with_color_maybe_bold(|s| write!(s, "Update available "), Color::Green, true);
-                println!("{} -> {}", version, latest_version);
+                with_color_maybe_bold(|s| write!(s, "Update available"), Color::Yellow, true);
+                println!(" : {} -> {}", version, latest_version);
             }
         }
         Err(e) => {
-            bold(|s| write!(s, "    - {} - ", plugin));
+            print!("    - ");
+            bold(|s| write!(s, "{}", plugin));
+            print!(" - ");
             if plugin_executable.exists() {
                 println!("execution error - {}", e);
             } else {
@@ -80,11 +84,8 @@ pub fn check(command: CheckCommand) -> Result<()> {
 
                         bold(|s| write!(s, "  {} - ", &component));
                         if version == latest_versions[component] {
-                            with_color_maybe_bold(
-                                |s| writeln!(s, "Up to date : {}", version),
-                                Color::Green,
-                                true,
-                            );
+                            with_color_maybe_bold(|s| write!(s, "Up to date"), Color::Green, true);
+                            println!(" : {}", version);
                         } else {
                             with_color_maybe_bold(
                                 |s| write!(s, "Update available"),
@@ -95,7 +96,9 @@ pub fn check(command: CheckCommand) -> Result<()> {
                         }
                     }
                     Err(e) => {
-                        bold(|s| write!(s, "  {} - ", &component));
+                        print!("  ");
+                        bold(|s| write!(s, "{}", &component));
+                        print!(" - ");
                         if component_executable.exists() {
                             println!("execution error - {}", e);
                         } else {
@@ -126,11 +129,11 @@ pub fn check(command: CheckCommand) -> Result<()> {
 
             bold(|s| write!(s, "{} - ", component::FUELUP));
             if version == latest_versions[component::FUELUP] {
-                with_color_maybe_bold(|s| write!(s, "Up to date "), Color::Green, true);
-                println!(": {}", version);
+                with_color_maybe_bold(|s| write!(s, "Up to date"), Color::Green, true);
+                println!(" : {}", version);
             } else {
-                with_color_maybe_bold(|s| write!(s, "Update available : "), Color::Yellow, true);
-                println!("{} -> {}", version, latest_versions[component::FUELUP]);
+                with_color_maybe_bold(|s| write!(s, "Update available"), Color::Yellow, true);
+                println!(" : {} -> {}", version, latest_versions[component::FUELUP]);
             }
         }
         Err(e) => {

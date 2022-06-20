@@ -32,7 +32,7 @@ pub fn check() -> Result<()> {
             for component in [component::FORC, component::FUEL_CORE] {
                 let component_executable = toolchain.path.join(component);
 
-                match std::process::Command::new(component_executable)
+                match std::process::Command::new(&component_executable)
                     .arg("--version")
                     .output()
                 {
@@ -43,15 +43,7 @@ pub fn check() -> Result<()> {
                                 .collect::<Vec<&str>>()[1],
                         )?;
 
-                        if component == component::FORC {
-                            print_bold(&format!(
-                                "  {}, forc-explore, forc-fmt, forc-lsp - ",
-                                component
-                            ))?;
-                        } else {
-                            print_bold(&format!("  {} - ", component))?;
-                        }
-
+                        print_bold(&format!("  {} - ", component))?;
                         if version == latest_versions[component] {
                             print_with_color("Up to date ", Color::Green)?;
                             println!(": {}", version);
@@ -60,9 +52,13 @@ pub fn check() -> Result<()> {
                             println!("{} -> {}", version, latest_versions[component]);
                         }
                     }
-                    Err(_) => {
-                        print_bold(&format!("  {}", component))?;
-                        info!(" not found");
+                    Err(e) => {
+                        print_bold(&format!("  {} : ", component))?;
+                        if component_executable.exists() {
+                            info!("execution error - {}", e);
+                        } else {
+                            info!("not found");
+                        }
                     }
                 };
             }

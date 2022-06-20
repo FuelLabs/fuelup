@@ -95,9 +95,9 @@ impl Toolchain {
     }
 
     pub fn from_path(&self, path: &Path) -> Result<Self> {
-        // load either nromal toolchain or custom
         let name = path.file_name().unwrap();
 
+        // Minimally check that there's a /bin directory
         if !path.join("bin").is_dir() {
             bail!("Invalid toolchain path");
         }

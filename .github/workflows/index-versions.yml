@@ -5,16 +5,25 @@ on:
   # schedule:
     # Run at minute 0 and 30 every hour
     # - cron: '0,30 * * * *'
+env:
+  CHANNEL_LATEST_DIR: ./channel-fuel-latest.toml.d/
 
 jobs:
   index-version-sets:
     runs-on: ubuntu-latest
     steps:
-      - name: Get latest versions from GitHub API
+      - uses: actions/checkout@v2
+
+      - name: Get latest version (forc) and publish if needed
         run: |
-          FORC_LATEST_VERSION="$(curl -s https://api.github.com/repos/FuelLabs/sway/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)"
-          FUEL_CORE_LATEST_VERSION="$(curl -s https://api.github.com/repos/FuelLabs/fuel-core/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)"
+          mkdir -p ${{ env.CHANNEL_LATEST_DIR }}
+          ./.github/workflows/index-versions.sh
+          cp channel-fuel-latest.toml ${{ env.CHANNEL_LATEST_DIR }}
 
-          echo "${FORC_LATEST_VERSION}"
-          echo "${FUEL_CORE_LATEST_VERSION}"
-
+      - name: Deploy latest fuelup version
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          keep_files: true
+          publish_dir: ${{ env.CHANNEL_LATEST_DIR }}
+          destination_dir: ./

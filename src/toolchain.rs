@@ -76,12 +76,12 @@ impl Toolchain {
         Ok(Self { name, path })
     }
 
-    pub fn from(name: &str) -> Result<Self> {
+    pub fn from(name: &str) -> Self {
         let path = toolchain_bin_dir(name);
-        Ok(Self {
+        Self {
             name: name.to_string(),
             path,
-        })
+        }
     }
 
     pub fn from_settings(toolchain: &str) -> Result<Self> {

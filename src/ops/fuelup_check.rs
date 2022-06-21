@@ -66,47 +66,46 @@ pub fn check(command: CheckCommand) -> Result<()> {
     }
 
     for toolchain in toolchains {
-        if let Ok(toolchain) = Toolchain::from(&toolchain) {
-            bold(|s| writeln!(s, "{}", &toolchain.name));
-            for component in [component::FORC, component::FUEL_CORE] {
-                let component_executable = toolchain.path.join(component);
+        let toolchain = Toolchain::from(&toolchain);
+        bold(|s| writeln!(s, "{}", &toolchain.name));
+        for component in [component::FORC, component::FUEL_CORE] {
+            let component_executable = toolchain.path.join(component);
 
-                match std::process::Command::new(&component_executable)
-                    .arg("--version")
-                    .output()
-                {
-                    Ok(o) => {
-                        let version = Version::parse(
-                            String::from_utf8_lossy(&o.stdout)
-                                .split_whitespace()
-                                .collect::<Vec<&str>>()[1],
-                        )?;
+            match std::process::Command::new(&component_executable)
+                .arg("--version")
+                .output()
+            {
+                Ok(o) => {
+                    let version = Version::parse(
+                        String::from_utf8_lossy(&o.stdout)
+                            .split_whitespace()
+                            .collect::<Vec<&str>>()[1],
+                    )?;
 
-                        bold(|s| write!(s, "  {} - ", &component));
-                        if version == latest_versions[component] {
-                            colored_bold(Color::Green, |s| write!(s, "Up to date"));
-                            println!(" : {}", version);
-                        } else {
-                            colored_bold(Color::Yellow, |s| write!(s, "Update available"));
-                            println!(" : {} -> {}", version, latest_versions[component]);
-                        }
+                    bold(|s| write!(s, "  {} - ", &component));
+                    if version == latest_versions[component] {
+                        colored_bold(Color::Green, |s| write!(s, "Up to date"));
+                        println!(" : {}", version);
+                    } else {
+                        colored_bold(Color::Yellow, |s| write!(s, "Update available"));
+                        println!(" : {} -> {}", version, latest_versions[component]);
                     }
-                    Err(e) => {
-                        print!("  ");
-                        bold(|s| write!(s, "{}", &component));
-                        print!(" - ");
-                        if component_executable.exists() {
-                            println!("execution error - {}", e);
-                        } else {
-                            println!("not found");
-                        }
+                }
+                Err(e) => {
+                    print!("  ");
+                    bold(|s| write!(s, "{}", &component));
+                    print!(" - ");
+                    if component_executable.exists() {
+                        println!("execution error - {}", e);
+                    } else {
+                        println!("not found");
                     }
-                };
+                }
+            };
 
-                if verbose && component == component::FORC {
-                    for plugin in SUPPORTED_PLUGINS {
-                        check_plugin(&toolchain, plugin, &latest_versions[component::FORC])?;
-                    }
+            if verbose && component == component::FORC {
+                for plugin in SUPPORTED_PLUGINS {
+                    check_plugin(&toolchain, plugin, &latest_versions[component::FORC])?;
                 }
             }
         }

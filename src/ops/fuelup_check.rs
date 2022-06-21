@@ -58,9 +58,9 @@ pub fn check(command: CheckCommand) -> Result<()> {
     let cfg = Config::from_env()?;
     let toolchains = cfg.list_toolchains()?;
     let mut latest_versions: HashMap<String, Version> = HashMap::new();
-    let components = Vec::from([component::FORC, component::FUEL_CORE, component::FUELUP]);
+    let components = [component::FORC, component::FUEL_CORE, component::FUELUP];
 
-    for component in components {
+    for &component in &components {
         let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
         latest_versions.insert(component.to_string(), download_cfg.version);
     }

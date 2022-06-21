@@ -5,7 +5,7 @@ use crate::{
     commands::check::CheckCommand,
     component::SUPPORTED_PLUGINS,
     config::Config,
-    fmt::{bold, with_color_maybe_bold},
+    fmt::{bold, colored_bold},
     toolchain::Toolchain,
 };
 use anyhow::Result;
@@ -31,10 +31,10 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
             bold(|s| write!(s, "{}", plugin));
             print!(" - ");
             if &version == latest_version {
-                with_color_maybe_bold(|s| write!(s, "Up to date"), Color::Green, true);
+                colored_bold(Color::Green, |s| write!(s, "Up to date"));
                 println!(" : {}", version);
             } else {
-                with_color_maybe_bold(|s| write!(s, "Update available"), Color::Yellow, true);
+                colored_bold(Color::Yellow, |s| write!(s, "Update available"));
                 println!(" : {} -> {}", version, latest_version);
             }
         }
@@ -84,14 +84,10 @@ pub fn check(command: CheckCommand) -> Result<()> {
 
                         bold(|s| write!(s, "  {} - ", &component));
                         if version == latest_versions[component] {
-                            with_color_maybe_bold(|s| write!(s, "Up to date"), Color::Green, true);
+                            colored_bold(Color::Green, |s| write!(s, "Up to date"));
                             println!(" : {}", version);
                         } else {
-                            with_color_maybe_bold(
-                                |s| write!(s, "Update available"),
-                                Color::Yellow,
-                                true,
-                            );
+                            colored_bold(Color::Yellow, |s| write!(s, "Update available"));
                             println!(" : {} -> {}", version, latest_versions[component]);
                         }
                     }
@@ -129,10 +125,10 @@ pub fn check(command: CheckCommand) -> Result<()> {
 
             bold(|s| write!(s, "{} - ", component::FUELUP));
             if version == latest_versions[component::FUELUP] {
-                with_color_maybe_bold(|s| write!(s, "Up to date"), Color::Green, true);
+                colored_bold(Color::Green, |s| write!(s, "Up to date"));
                 println!(" : {}", version);
             } else {
-                with_color_maybe_bold(|s| write!(s, "Update available"), Color::Yellow, true);
+                colored_bold(Color::Yellow, |s| write!(s, "Update available"));
                 println!(" : {} -> {}", version, latest_versions[component::FUELUP]);
             }
         }

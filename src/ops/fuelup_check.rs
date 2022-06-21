@@ -112,32 +112,19 @@ pub fn check(command: CheckCommand) -> Result<()> {
         }
     }
 
-    match std::process::Command::new(component::FUELUP)
-        .arg("--version")
-        .output()
-    {
-        Ok(o) => {
-            let version = Version::parse(
-                String::from_utf8_lossy(&o.stdout)
-                    .split_whitespace()
-                    .nth(1)
-                    .expect("expected version"),
-            )?;
+    const FUELUP_VERSION: &str = clap::crate_version!();
 
-            bold(|s| write!(s, "{} - ", component::FUELUP));
-            if version == latest_versions[component::FUELUP] {
-                colored_bold(Color::Green, |s| write!(s, "Up to date"));
-                println!(" : {}", version);
-            } else {
-                colored_bold(Color::Yellow, |s| write!(s, "Update available"));
-                println!(" : {} -> {}", version, latest_versions[component::FUELUP]);
-            }
-        }
-        Err(e) => {
-            // Unclear how we might run into this if we run it from fuelup - print errors anyway
-            bold(|s| write!(s, "  {} - ", component::FUELUP));
-            println!("execution error - {}", e);
-        }
+    bold(|s| write!(s, "{} - ", component::FUELUP));
+    if FUELUP_VERSION == latest_versions[component::FUELUP].to_string() {
+        colored_bold(Color::Green, |s| write!(s, "Up to date"));
+        println!(" : {}", FUELUP_VERSION);
+    } else {
+        colored_bold(Color::Yellow, |s| write!(s, "Update available"));
+        println!(
+            " : {} -> {}",
+            FUELUP_VERSION,
+            latest_versions[component::FUELUP]
+        );
     };
     Ok(())
 }

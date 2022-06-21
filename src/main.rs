@@ -1,27 +1,42 @@
-use anyhow::Result;
-use clap::Parser;
-use fuelup::commands::install;
+use anyhow::{bail, Result};
+use fuelup::component;
+use fuelup::{fuelup_cli, proxy_cli};
+use std::panic;
+use std::path::PathBuf;
+use tracing::error;
 
-use fuelup::commands::fuelup::{self_update, FuelupCommand};
-use fuelup::commands::install::InstallCommand;
+fn run() -> Result<()> {
+    let arg0 = std::env::args().next().map(PathBuf::from);
 
-#[derive(Debug, Parser)]
-#[clap(name = "fuelup", about = "Fuel Toolchain Manager", version)]
-struct Cli {
-    #[clap(subcommand)]
-    command: Commands,
+    let process_name = arg0
+        .as_ref()
+        .and_then(|a| a.file_stem())
+        .and_then(std::ffi::OsStr::to_str)
+        .map(String::from);
+
+    match process_name.as_deref() {
+        Some(component::FUELUP) => {
+            if let Err(e) = fuelup_cli::fuelup_cli() {
+                error!("{}", e)
+            }
+        }
+        Some(n) if component::SUPPORTED_COMPONENTS.contains(&n) => {
+            if let Err(e) = proxy_cli::proxy_run(n) {
+                error!("{}", e);
+            }
+        }
+        Some(n) => {
+            bail!(
+                "fuelup invoked with unexpected command or component {:?}",
+                n
+            )
+        }
+        None => panic!("fuelup does not understand this command"),
+    }
+    Ok(())
 }
 
-#[derive(Debug, Parser)]
-enum Commands {
-    /// Installs the latest Fuel toolchain.
-    Install(InstallCommand),
-    /// Manage your fuelup installation.
-    #[clap(name = "self", subcommand)]
-    Fuelup(FuelupCommand),
-}
-
-fn main() -> Result<()> {
+fn main() {
     let format = tracing_subscriber::fmt::format()
         .without_time()
         .with_level(false)
@@ -29,12 +44,7 @@ fn main() -> Result<()> {
 
     tracing_subscriber::fmt().event_format(format).init();
 
-    let cli = Cli::parse();
-
-    match cli.command {
-        Commands::Install(_command) => install::install(),
-        Commands::Fuelup(command) => match command {
-            FuelupCommand::Update => self_update(),
-        },
+    if run().is_err() {
+        std::process::exit(1);
     }
 }

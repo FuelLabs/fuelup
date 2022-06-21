@@ -1,3 +1,11 @@
 pub mod commands;
+pub mod component;
 pub mod constants;
 pub mod download;
+pub mod file;
+pub mod fuelup_cli;
+pub mod ops;
+pub mod path;
+pub mod proxy_cli;
+pub mod settings;
+pub mod toolchain;

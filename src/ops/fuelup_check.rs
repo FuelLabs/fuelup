@@ -24,9 +24,9 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
             let version = Version::parse(
                 String::from_utf8_lossy(&o.stdout)
                     .split_whitespace()
-                    .collect::<Vec<&str>>()[1],
+                    .nth(1)
+                    .expect("expected version"),
             )?;
-
             print!("    - ");
             bold(|s| write!(s, "{}", plugin));
             print!(" - ");
@@ -79,7 +79,8 @@ pub fn check(command: CheckCommand) -> Result<()> {
                     let version = Version::parse(
                         String::from_utf8_lossy(&o.stdout)
                             .split_whitespace()
-                            .collect::<Vec<&str>>()[1],
+                            .nth(1)
+                            .expect("expected version"),
                     )?;
 
                     bold(|s| write!(s, "  {} - ", &component));
@@ -119,7 +120,8 @@ pub fn check(command: CheckCommand) -> Result<()> {
             let version = Version::parse(
                 String::from_utf8_lossy(&o.stdout)
                     .split_whitespace()
-                    .collect::<Vec<&str>>()[1],
+                    .nth(1)
+                    .expect("expected version"),
             )?;
 
             bold(|s| write!(s, "{} - ", component::FUELUP));

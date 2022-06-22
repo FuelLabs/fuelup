@@ -1,4 +1,7 @@
-use std::path::PathBuf;
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use dirs;
 
@@ -12,6 +15,10 @@ pub fn fuelup_bin_dir() -> PathBuf {
     fuelup_dir().join("bin")
 }
 
+pub fn fuelup_bin() -> PathBuf {
+    fuelup_bin_dir().join("fuelup")
+}
+
 pub fn settings_file() -> PathBuf {
     fuelup_dir().join("settings.toml")
 }
@@ -22,4 +29,10 @@ pub fn toolchain_dir() -> PathBuf {
 
 pub fn toolchain_bin_dir(toolchain: &str) -> PathBuf {
     toolchain_dir().join(toolchain).join("bin")
+}
+
+pub fn ensure_dir_exists(path: &Path) {
+    if !path.is_dir() {
+        fs::create_dir_all(path).expect(&format!("Failed to create {}", path.display()));
+    }
 }

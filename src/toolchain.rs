@@ -6,7 +6,8 @@ use std::{fs, path::PathBuf};
 use tracing::info;
 
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
-use crate::path::{fuelup_bin_dir, toolchain_bin_dir};
+use crate::ops::fuelup_self::self_update;
+use crate::path::{ensure_dir_exists, fuelup_bin, fuelup_bin_dir, toolchain_bin_dir};
 
 pub enum ToolchainName {
     Latest,
@@ -109,8 +110,16 @@ impl Toolchain {
     }
 
     pub fn add_component(&self, download_cfg: DownloadCfg) -> Result<DownloadCfg> {
-        if !self.path.is_dir() {
-            fs::create_dir_all(&self.path).expect("Unable to create fuelup directory");
+        // First ensure that toolchain path exists
+        ensure_dir_exists(&self.path);
+
+        // Then, ensure that fuelup bin dir exists
+        let fuelup_bin_dir = fuelup_bin_dir();
+        ensure_dir_exists(&fuelup_bin_dir);
+
+        // Ensure that fuelup exists under $HOME/.fuelup/bin
+        if !fuelup_bin().is_file() {
+            self_update()?;
         }
 
         info!("Fetching {} {}", &download_cfg.name, &download_cfg.version);
@@ -124,7 +133,7 @@ impl Toolchain {
             )
         };
 
-        if let Ok(downloaded) = unpack_bins(&self.path, &fuelup_bin_dir()) {
+        if let Ok(downloaded) = unpack_bins(&self.path, &fuelup_bin_dir) {
             link_to_fuelup(downloaded)?;
         };
 

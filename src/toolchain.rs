@@ -119,7 +119,11 @@ impl Toolchain {
 
         // Ensure that fuelup exists under $HOME/.fuelup/bin
         if !fuelup_bin().is_file() {
-            self_update()?;
+            info!("fuelup not found - attempting to self update");
+            match self_update() {
+                Ok(()) => info!("fuelup installed."),
+                Err(e) => bail!("Could not install fuelup: {}", e),
+            };
         }
 
         info!("Fetching {} {}", &download_cfg.name, &download_cfg.version);

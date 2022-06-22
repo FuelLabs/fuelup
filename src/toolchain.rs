@@ -1,8 +1,8 @@
 use anyhow::{bail, Result};
 use std::fmt;
 use std::path::Path;
+use std::path::PathBuf;
 use std::str::FromStr;
-use std::{fs, path::PathBuf};
 use tracing::info;
 
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};

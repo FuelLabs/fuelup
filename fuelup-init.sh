@@ -124,7 +124,7 @@ main() {
     ignore rmdir "$_dir"
 
     printf '\n'
-    printf '%s\n' "fuelup ${_fuelup_version} has been installed in $FUELUP_DIR/bin. To fetch the latest forc and fuel-core binaries, run 'fuelup install'." 1>&2
+    printf '%s\n' "fuelup ${_fuelup_version} has been installed in $FUELUP_DIR/bin. To fetch the latest toolchain containing the forc and fuel-core binaries, run 'fuelup toolchain install latest'." 1>&2
 
     if [ "$allow_modify" = "yes" ]; then
         if echo "$PATH" | grep -q "$FUELUP_DIR/bin"; then

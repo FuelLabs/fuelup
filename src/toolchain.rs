@@ -111,10 +111,10 @@ impl Toolchain {
 
     pub fn add_component(&self, download_cfg: DownloadCfg) -> Result<DownloadCfg> {
         // Pre-install checks: ensuring toolchain dir, fuelup bin dir, and fuelup exist
-        ensure_dir_exists(&self.path);
+        ensure_dir_exists(&self.path)?;
 
         let fuelup_bin_dir = fuelup_bin_dir();
-        ensure_dir_exists(&fuelup_bin_dir);
+        ensure_dir_exists(&fuelup_bin_dir)?;
 
         if !fuelup_bin().is_file() {
             info!("fuelup not found - attempting to self update");

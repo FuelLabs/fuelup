@@ -1,3 +1,4 @@
+use anyhow::{bail, Result};
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -31,8 +32,9 @@ pub fn toolchain_bin_dir(toolchain: &str) -> PathBuf {
     toolchain_dir().join(toolchain).join("bin")
 }
 
-pub fn ensure_dir_exists(path: &Path) {
+pub fn ensure_dir_exists(path: &Path) -> Result<()> {
     if !path.is_dir() {
-        fs::create_dir_all(path).unwrap_or_else(|_| panic!("Failed to create {}", path.display()))
+        fs::create_dir_all(path).or_else(|e| bail!("Failed to create {}: {}", path.display(), e))?
     }
+    Ok(())
 }

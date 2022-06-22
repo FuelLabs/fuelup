@@ -34,7 +34,8 @@ pub fn toolchain_bin_dir(toolchain: &str) -> PathBuf {
 
 pub fn ensure_dir_exists(path: &Path) -> Result<()> {
     if !path.is_dir() {
-        fs::create_dir_all(path).or_else(|e| bail!("Failed to create {}: {}", path.display(), e))?
+        fs::create_dir_all(path)
+            .or_else(|e| bail!("Failed to create directory {}: {}", path.display(), e))?
     }
     Ok(())
 }

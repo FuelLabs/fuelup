@@ -19,11 +19,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
 
     let settings = SettingsFile::new(settings_file());
     settings.with_mut(|s| {
-        s.default_toolchain = Some(format!(
-            "{}-{}",
-            toolchain.name.clone(),
-            &toolchain.target.to_string()
-        ));
+        s.default_toolchain = Some(toolchain.name.clone());
         Ok(())
     })?;
 

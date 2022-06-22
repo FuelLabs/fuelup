@@ -17,7 +17,7 @@ fn run() -> Result<()> {
     match process_name.as_deref() {
         Some(component::FUELUP) => {
             if let Err(e) = fuelup_cli::fuelup_cli() {
-                error!("{}", e)
+                error!("{}", e);
             }
         }
         Some(n) if component::SUPPORTED_COMPONENTS.contains(&n) => {

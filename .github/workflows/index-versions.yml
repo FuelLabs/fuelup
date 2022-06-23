@@ -18,7 +18,7 @@ jobs:
         run: |
           curl -s "https://fuellabs.github.io/fuelup/channel-fuel-latest.toml" -L -o channel-fuel-latest.toml
           mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
-          ./.github/workflows/index-versions.sh
+          ./.github/workflows/scripts/index-versions.sh
           cp channel-fuel-latest.toml ${{ env.LATEST_CHANNEL_DIR }}
 
       - name: Deploy latest

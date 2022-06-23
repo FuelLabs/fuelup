@@ -33,8 +33,7 @@ jobs:
         with:
           sh_checker_comment: false
           sh_checker_exclude: "src .github"
-      - uses: actions/checkout@v3
-        name: Attempt to install fuelup through fuelup-init.sh
+      - name: Attempt to install fuelup through fuelup-init.sh
         run: ./fuelup-init.sh
 
   cargo-clippy:

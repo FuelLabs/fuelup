@@ -1,0 +1,30 @@
+name: Index Version Sets
+
+on:
+  schedule:
+    # Run at minute 0 and 30 every hour
+    - cron: '0,30 * * * *'
+env:
+  LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
+
+jobs:
+  index-version-sets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout master
+        uses: actions/checkout@v3
+
+      - name: Get latest version (forc) and publish if needed
+        run: |
+          curl -s "https://fuellabs.github.io/fuelup/channel-fuel-latest.toml" -L -o channel-fuel-latest.toml
+          mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
+          ./.github/workflows/index-versions.sh
+          cp channel-fuel-latest.toml ${{ env.LATEST_CHANNEL_DIR }}
+
+      - name: Deploy latest
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          keep_files: true
+          publish_dir: ${{ env.LATEST_CHANNEL_DIR }}
+          destination_dir: ./

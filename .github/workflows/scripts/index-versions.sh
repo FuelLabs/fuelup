@@ -61,8 +61,8 @@ create_pkg_in_channel() {
         done
 
         # Only write to file if there's no problem downloading and hashing all the above releases.
-	_package=$(printf "%s\n%s" "${_header}" "${_content}")
-	echo -ne "$_package" >>channel-fuel-latest.toml
+        _package=$(printf "%s\n%s" "${_header}" "${_content}")
+        echo -ne "$_package" >>channel-fuel-latest.toml
     fi
 }
 

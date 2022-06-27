@@ -2,7 +2,7 @@
 set -e
 
 err() {
-    echo -e "\e[31m\e[1merror:\e[0m $*" 1>&2;
+    echo -e "\e[31m\e[1merror:\e[0m $*" 1>&2
 }
 
 status() {
@@ -24,12 +24,12 @@ if [ -z "$MANIFEST" ]; then
 fi
 
 # strip preceeding 'v' if it exists on tag
-REF=${REF/#v}
+REF=${REF/#v/}
 TOML_VERSION=$(dasel -f "$MANIFEST" -r toml 'package.version')
 
 if [ "$TOML_VERSION" != "$REF" ]; then
     err "Crate version $TOML_VERSION, doesn't match tag version $REF"
     exit 1
 else
-  status "Crate version matches tag $TOML_VERSION"
+    status "Crate version matches tag $TOML_VERSION"
 fi

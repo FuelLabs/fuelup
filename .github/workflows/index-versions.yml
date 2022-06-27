@@ -14,7 +14,7 @@ jobs:
       - name: checkout master
         uses: actions/checkout@v3
 
-      - name: Get latest version (forc) and publish if needed
+      - name: Get latest versions and update channel if needed
         run: |
           curl -s "https://fuellabs.github.io/fuelup/channel-fuel-latest.toml" -L -o channel-fuel-latest.toml
           mkdir -p ${{ env.LATEST_CHANNEL_DIR }}

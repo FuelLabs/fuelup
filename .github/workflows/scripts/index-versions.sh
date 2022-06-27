@@ -8,11 +8,14 @@ latest_version() {
 
 add_url_and_hash() {
     _url="https://github.com/FuelLabs/$1/releases/download/v$2/$3"
+    _err=$(curl -sSf "${_url}s" -L -o "${3}" 2>&1)
+    if echo "$_err" | grep -q 404; then
+        printf "Could not download from %s - the release binary might not be ready yet. You can check if a binary is available here: https://github.com/FuelLabs/%s/releases/v%s\n" "${_url}" "${1}" "${2}"
+        exit 1
+    fi
     # shasum generates extra output so we take the first 64 bytes.
-    curl -sSf "${_url}" -L -o "${3}"
     _hash=$(shasum -a 256 "$3" | head -c 64)
-    printf "url = \"%s\"\n" "${_url}" >>channel-fuel-latest.toml
-    printf "hash = \"%s\"\n\n" "${_hash}" >>channel-fuel-latest.toml
+    RETVAL="url = \"${_url}\"\nhash = \"${_hash}\"\n\n"
 }
 
 copy_same_pkg() {
@@ -23,9 +26,8 @@ copy_same_pkg() {
 }
 
 create_new_pkg() {
-    printf "%s: Generating new packages\n" "${1}"
-    printf "[pkg.%s]\n" "${1}" >>channel-fuel-latest.toml
-    printf "version = \"%s\"\n" "${2}" >>channel-fuel-latest.toml
+    _header=$(printf "[pkg.%s]\nversion = \"%s\"\n" "${1}" "${2}")
+    RETVAL="$_header"
 }
 
 create_pkg_in_channel() {
@@ -48,11 +50,19 @@ create_pkg_in_channel() {
     else
         # We need to recreate channel-fuel-latest.toml, generating new URLs and sha256 hashes for the download links.
         printf "%s: new version available: %s -> %s\n" "${1}" "${3}" "${2}"
+        printf "%s: Generating new package\n" "${1}"
         create_new_pkg "$1" "$2"
+        _header="$RETVAL"
+        _content=""
         for target in "${_targets[@]}"; do
-            printf "[pkg.%s.target.%s]\n" "$1" "${target}" >>channel-fuel-latest.toml
+            _content+="[pkg.${1}.target.${target}]\n"
             add_url_and_hash $_repo "$2" "$_tarball_prefix-${target}.tar.gz"
+            _content+="$RETVAL"
         done
+
+        # Only write to file if there's no problem downloading and hashing all the above releases.
+        _package=$(printf "%s\n%s" "${_header}" "${_content}")
+        echo -ne "$_package" >>channel-fuel-latest.toml
     fi
 }
 
@@ -62,8 +72,8 @@ main() {
     latest_version fuel-core
     FUEL_CORE_LATEST_VERSION="$RETVAL"
 
-    FORC_CURRENT_VERSION="$(grep -A1 "\[pkg.forc\]" channel-fuel-latest.toml | grep "version" | cut -d "\"" -f 2- | rev | cut -c 2- | rev)"
-    FUEL_CORE_CURRENT_VERSION="$(grep -A1 "\[pkg.fuel-core\]" channel-fuel-latest.toml | grep "version" | cut -d "\"" -f 2- | rev | cut -c 2- | rev)"
+    FORC_CURRENT_VERSION="$(grep -s -A1 "\[pkg.forc\]" channel-fuel-latest.toml | grep "version" | cut -d "\"" -f 2- | rev | cut -c 2- | rev)"
+    FUEL_CORE_CURRENT_VERSION="$(grep -s -A1 "\[pkg.fuel-core\]" channel-fuel-latest.toml | grep "version" | cut -d "\"" -f 2- | rev | cut -c 2- | rev)"
 
     if [ "${FORC_LATEST_VERSION}" = "${FORC_CURRENT_VERSION}" ] && [ "${FUEL_CORE_LATEST_VERSION}" = "${FUEL_CORE_CURRENT_VERSION}" ]; then
         printf "No new forc and fuel-core versions; exiting\n"
@@ -77,6 +87,8 @@ main() {
     create_pkg_in_channel forc "${FORC_LATEST_VERSION}" "${FORC_CURRENT_VERSION}"
     create_pkg_in_channel fuel-core "${FUEL_CORE_LATEST_VERSION}" "${FUEL_CORE_CURRENT_VERSION}"
 
+    # remove newline at the end
+    truncate -s -1 channel-fuel-latest.toml
     printf "Done.\n"
     exit 0
 }

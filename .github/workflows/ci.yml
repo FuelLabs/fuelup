@@ -32,7 +32,7 @@ jobs:
           SHFMT_OPTS: -i 4 -ci
         with:
           sh_checker_comment: false
-          sh_checker_exclude: "src .github"
+          sh_checker_exclude: "src"
       - name: Attempt to install fuelup through fuelup-init.sh
         run: ./fuelup-init.sh
 

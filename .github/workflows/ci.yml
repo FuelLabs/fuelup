@@ -21,18 +21,18 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-  check-fuelup-init:
+  check-scripts:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Run shellcheck and shfmt
+      - name: Run shellcheck and shfmt on all scripts
         uses: luizm/action-sh-checker@master
         env:
           SHELLCHECK_OPTS: -e SC3043 # exclude 'local' is undefined
           SHFMT_OPTS: -i 4 -ci
         with:
           sh_checker_comment: false
-          sh_checker_exclude: "src .github"
+          sh_checker_exclude: "src"
       - name: Attempt to install fuelup through fuelup-init.sh
         run: ./fuelup-init.sh
 

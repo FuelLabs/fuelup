@@ -21,11 +21,11 @@ jobs:
         with:
           access_token: ${{ github.token }}
 
-  check-fuelup-init:
+  check-scripts:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Run shellcheck and shfmt
+      - name: Run shellcheck and shfmt on all scripts
         uses: luizm/action-sh-checker@master
         env:
           SHELLCHECK_OPTS: -e SC3043 # exclude 'local' is undefined

@@ -274,7 +274,7 @@ downloader() {
         if [ -n "$_err" ]; then
             echo "$_err" >&2
             if echo "$_err" | grep -q 404; then
-                err "fuelup ${_fuelup_version} was not found - either the release is not ready yet or the tag is invalid. You can check if the release is available here: https://github.com/FuelLabs/fuelup/releases/${_fuelup_version}"
+                err "fuelup ${_fuelup_version} was not found - either the release is not ready yet or the tag is invalid. You can check if the release is available here: https://github.com/FuelLabs/fuelup/releases/v${_fuelup_version}"
             fi
         fi
 

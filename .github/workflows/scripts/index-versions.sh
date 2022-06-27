@@ -8,12 +8,12 @@ latest_version() {
 
 add_url_and_hash() {
     _url="https://github.com/FuelLabs/$1/releases/download/v$2/$3"
-    # shasum generates extra output so we take the first 64 bytes.
     _err=$(curl -sSf "${_url}s" -L -o "${3}" 2>&1)
     if echo "$_err" | grep -q 404; then
         printf "Could not download from %s - the release binary might not be ready yet. You can check if a binary is available here: https://github.com/FuelLabs/%s/releases/v%s\n" "${_url}" "${1}" "${2}"
         exit 1
     fi
+    # shasum generates extra output so we take the first 64 bytes.
     _hash=$(shasum -a 256 "$3" | head -c 64)
     RETVAL="url = \"${_url}\"\nhash = \"${_hash}\"\n\n"
 }

@@ -8,6 +8,7 @@ on:
     # - cron: '0,30 * * * *'
 env:
   LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
+  FORC_COMPATIBILITY_DIR: ./forc-compatibility.d/
 
 jobs:
   compare-versions:
@@ -60,13 +61,14 @@ jobs:
       - name: Write incompatible versions if tests fail
         run: |
           echo "Compatibility check failed; updating incompatibility index"
-          echo ${{ needs.compare-versions.outputs.fuel-core-latest-version }} >> forc-${{ needs.compare-versions.outputs.forc-latest-version }}
+          mkdir tmp
+          echo ${{ needs.compare-versions.outputs.fuel-core-latest-version }} >> tmp/forc-${{ needs.compare-versions.outputs.forc-latest-version }}
 
       - name: Deploy incompatible versions 
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./compatibility
+          publish_dir: ./tmp
           destination_dir: ./compatibility
     if: ${{ failure() }}
 

@@ -14,8 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.set-vars.outputs.should_run }}
-      fuel-core-version: ${{ steps.set-vars.outputs.fuel-core-version }}
-      forc-version: ${{ steps.set-vars.outputs.forc-version }}
+      fuel-core-latest-version: ${{ steps.set-vars.outputs.fuel-core-latest-version }}
+      forc-latest-version: ${{ steps.set-vars.outputs.forc-latest-version }}
+      fuel-core-current-version: ${{ steps.set-vars.outputs.fuel-core-current-version }}
+      forc-current-version: ${{ steps.set-vars.outputs.forc-current-version }}
+
     steps:
       - name: checkout master
         uses: actions/checkout@v3
@@ -28,30 +31,61 @@ jobs:
           FUEL_CORE_LATEST_VERSION='v0.9.4'
           FORC_LATEST_VERSION='v0.16.2'
 
-          echo "::set-output name=fuel-core-version::${FUEL_CORE_LATEST_VERSION}"
-          echo "::set-output name=forc-version::${FORC_LATEST_VERSION}"
+          FUEL_CORE_CURRENT_VERSION="$(grep -s -A1 "\[pkg.fuel-core\]" channel-fuel-latest.toml | grep "version" | cut -d "\"" -f 2- | rev | cut -c 2- | rev)"
+          FORC_CURRENT_VERSION="$(grep -s -A1 "\[pkg.forc\]" channel-fuel-latest.toml | grep "version" | cut -d "\"" -f 2- | rev | cut -c 2- | rev)"
+
+          if [ "${FORC_LATEST_VERSION}" = "${FORC_CURRENT_VERSION}" ] && [ "${FUEL_CORE_LATEST_VERSION}" = "${FUEL_CORE_CURRENT_VERSION}" ]; then
+              printf "No new forc and fuel-core versions; exiting\n"
+              exit 0
+          fi
 
           echo "::set-output should_run=true"
+          echo "::set-output name=fuel-core-latest-version::${FUEL_CORE_LATEST_VERSION}"
+          echo "::set-output name=forc-latest-version::${FORC_LATEST_VERSION}"
+          echo "::set-output name=fuel-core-current-version::${FUEL_CORE_CURRENT_VERSION}"
+          echo "::set-output name=forc-current-version::${FORC_CURRENT_VERSION}"
 
   test-compatibility:
     needs: compare-versions
     uses: ./.github/workflows/test-latest-toolchain-compatibility.yml
     with:
-      fuel-core-version: ${{ needs.compare-versions.outputs.fuel-core-version }}
-      forc-version: ${{ needs.compare-versions.outputs.forc-version }}
+      fuel-core-version: ${{ needs.compare-versions.outputs.fuel-core-latest-version }}
+      forc-version: ${{ needs.compare-versions.outputs.forc-latest-version }}
     if: needs.compare-versions.outputs.should_run == false
 
+  index-incompatibility:
+    needs: [compare-versions, test-compatibility]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write incompatible versions if tests fail
+        run: |
+          echo "Compatibility check failed; updating incompatibility index"
+          echo ${{ needs.compare-versions.outputs.fuel-core-latest-version }} >> forc-${{ needs.compare-versions.outputs.forc-latest-version }}
+
+      - name: Deploy incompatible versions 
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./compatibility
+          destination_dir: ./compatibility
+    if: ${{ failure() }}
+
   index-version-sets:
+    needs: compare-versions
     runs-on: ubuntu-latest
     steps:
       - name: checkout master
         uses: actions/checkout@v3
 
-      - name: Get latest versions and update channel if needed
+      - name: Get latest versions and update channel
         run: |
-          curl -s "https://fuellabs.github.io/fuelup/channel-fuel-latest.toml" -L -o channel-fuel-latest.toml
           mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
-          ./.github/workflows/scripts/index-versions.sh
+          ./.github/workflows/scripts/index-versions.sh \
+            ${{ needs.compare-versions.outputs.fuel-core-latest-version }} \
+            ${{ needs.compare-versions.outputs.fuel-core-current-version }} \
+            ${{ needs.compare-versions.outputs.forc-latest-version }} \
+            ${{ needs.compare-versions.outputs.forc-current-version }} \
+
           cp channel-fuel-latest.toml ${{ env.LATEST_CHANNEL_DIR }}
 
       - name: Deploy latest

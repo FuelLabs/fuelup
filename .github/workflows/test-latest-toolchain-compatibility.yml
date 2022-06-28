@@ -16,7 +16,7 @@ jobs:
     outputs:
       fuel-core-image: ${{ steps.get-fuel-core-image.outputs.fuel-core-image }}
     steps:
-      - name: Set Fuel Core latest version
+      - name: Set Fuel Core latest image
         id: get-fuel-core-image
         run: |
           echo ${{ inputs.fuel-core-version }}

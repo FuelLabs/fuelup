@@ -1,11 +1,6 @@
 #!/bin/bash
 set -e
 
-latest_version() {
-    _latest_version="$(curl -s https://api.github.com/repos/FuelLabs/"${1}"/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)"
-    RETVAL="$_latest_version"
-}
-
 add_url_and_hash() {
     _url="https://github.com/FuelLabs/$1/releases/download/v$2/$3"
     _err=$(curl -sSf "${_url}s" -L -o "${3}" 2>&1)
@@ -67,18 +62,11 @@ create_pkg_in_channel() {
 }
 
 main() {
-    latest_version sway
-    FORC_LATEST_VERSION="$RETVAL"
-    latest_version fuel-core
-    FUEL_CORE_LATEST_VERSION="$RETVAL"
-
-    FORC_CURRENT_VERSION="$(grep -s -A1 "\[pkg.forc\]" channel-fuel-latest.toml | grep "version" | cut -d "\"" -f 2- | rev | cut -c 2- | rev)"
-    FUEL_CORE_CURRENT_VERSION="$(grep -s -A1 "\[pkg.fuel-core\]" channel-fuel-latest.toml | grep "version" | cut -d "\"" -f 2- | rev | cut -c 2- | rev)"
-
-    if [ "${FORC_LATEST_VERSION}" = "${FORC_CURRENT_VERSION}" ] && [ "${FUEL_CORE_LATEST_VERSION}" = "${FUEL_CORE_CURRENT_VERSION}" ]; then
-        printf "No new forc and fuel-core versions; exiting\n"
-        exit 0
-    fi
+    echo "$1" "$2"
+    FUEL_CORE_LATEST_VERSION=$1
+    FUEL_CORE_CURRENT_VERSION=$2
+    FORC_LATEST_VERSION=$3
+    FORC_CURRENT_VERSION=$4
 
     mv channel-fuel-latest.toml channel-fuel-latest.tmp.toml
     # Cleanup tmp and downloaded tars/bin folders
@@ -93,4 +81,4 @@ main() {
     exit 0
 }
 
-main || exit 1
+main $@ || exit 1

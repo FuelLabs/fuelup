@@ -27,6 +27,7 @@ jobs:
         # TODO: compare versions here
         # FUEL_CORE_LATEST_VERSION=$(curl -s https://api.github.com/repos/FuelLabs/fuel-core/releases/latest | grep "tag_name" | cut -d "\"" -f4)
         run: |
+          mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
           curl -s "https://fuellabs.github.io/fuelup/channel-fuel-latest.toml" -L -o channel-fuel-latest.toml
           cp channel-fuel-latest.toml ${{ env.LATEST_CHANNEL_DIR }}
 
@@ -40,6 +41,7 @@ jobs:
               printf "No new forc and fuel-core versions; exiting\n"
               exit 0
           fi
+
 
           echo "::set-output should_run=true"
           echo "::set-output name=fuel-core-latest-version::${FUEL_CORE_LATEST_VERSION}"
@@ -83,7 +85,6 @@ jobs:
 
       - name: Get latest versions and update channel
         run: |
-          mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
           ./.github/workflows/scripts/index-versions.sh \
             ${{ needs.compare-versions.outputs.fuel-core-latest-version }} \
             ${{ needs.compare-versions.outputs.fuel-core-current-version }} \

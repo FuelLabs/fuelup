@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+ignore() {
+  "$@"
+}
+
 add_url_and_hash() {
     _url="https://github.com/FuelLabs/$1/releases/download/v$2/$3"
     _err=$(curl -sSf "${_url}s" -L -o "${3}" 2>&1)
@@ -68,16 +72,18 @@ main() {
     FORC_LATEST_VERSION=${3#v}
     FORC_CURRENT_VERSION=${4#v}
 
-    echo ${FUEL_CORE_LATEST_VERSION}
     mv channel-fuel-latest.toml channel-fuel-latest.tmp.toml
-    # Cleanup tmp and downloaded tars/bin folders
-    trap 'rm channel-fuel-latest.tmp.toml *.tar.gz' ERR EXIT
 
     create_pkg_in_channel forc "${FORC_LATEST_VERSION}" "${FORC_CURRENT_VERSION}"
     create_pkg_in_channel fuel-core "${FUEL_CORE_LATEST_VERSION}" "${FUEL_CORE_CURRENT_VERSION}"
 
     # remove newline at the end
     truncate -s -1 channel-fuel-latest.toml
+
+    # Cleanup tmp and downloaded tars/bin folders
+    ignore rm channel-fuel-latest.tmp.toml
+    ignore rm *.tar.gz
+
     printf "Done.\n"
     exit 0
 }

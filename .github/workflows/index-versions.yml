@@ -37,17 +37,17 @@ jobs:
           FUEL_CORE_CURRENT_VERSION="$(grep -s -A1 "\[pkg.fuel-core\]" channel-fuel-latest.toml | grep "version" | cut -d "\"" -f 2- | rev | cut -c 2- | rev)"
           FORC_CURRENT_VERSION="$(grep -s -A1 "\[pkg.forc\]" channel-fuel-latest.toml | grep "version" | cut -d "\"" -f 2- | rev | cut -c 2- | rev)"
 
+          echo "::set-output name=fuel-core-latest-version::${FUEL_CORE_LATEST_VERSION}"
+          echo "::set-output name=forc-latest-version::${FORC_LATEST_VERSION}"
+          echo "::set-output name=fuel-core-current-version::${FUEL_CORE_CURRENT_VERSION}"
+          echo "::set-output name=forc-current-version::${FORC_CURRENT_VERSION}"
+
           if [ "${FORC_LATEST_VERSION}" = "${FORC_CURRENT_VERSION}" ] && [ "${FUEL_CORE_LATEST_VERSION}" = "${FUEL_CORE_CURRENT_VERSION}" ]; then
               printf "No new forc and fuel-core versions; exiting\n"
               exit 0
           fi
 
-
           echo "::set-output should_run=true"
-          echo "::set-output name=fuel-core-latest-version::${FUEL_CORE_LATEST_VERSION}"
-          echo "::set-output name=forc-latest-version::${FORC_LATEST_VERSION}"
-          echo "::set-output name=fuel-core-current-version::${FUEL_CORE_CURRENT_VERSION}"
-          echo "::set-output name=forc-current-version::${FORC_CURRENT_VERSION}"
 
   test-compatibility:
     needs: compare-versions

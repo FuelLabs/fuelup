@@ -20,7 +20,7 @@ jobs:
         id: get-fuel-core-image
         run: |
           echo ${{ inputs.fuel-core-version }}
-          echo "::set-output name=fuel-core-image::ghcr.io/fuellabs/fuel-core:v${{ inputs.fuel-core-version }}"
+          echo "::set-output name=fuel-core-image::ghcr.io/fuellabs/fuel-core:${{ inputs.fuel-core-version }}"
   test-toolchain-compatibility:
     needs: format-fuel-core-image
     runs-on: ubuntu-latest

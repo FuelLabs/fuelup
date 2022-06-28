@@ -27,12 +27,10 @@ jobs:
         # TODO: compare versions here
         # FUEL_CORE_LATEST_VERSION=$(curl -s https://api.github.com/repos/FuelLabs/fuel-core/releases/latest | grep "tag_name" | cut -d "\"" -f4)
         run: |
-          mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
           curl -s "https://fuellabs.github.io/fuelup/channel-fuel-latest.toml" -L -o channel-fuel-latest.toml
-          cp channel-fuel-latest.toml ${{ env.LATEST_CHANNEL_DIR }}
 
-          FUEL_CORE_LATEST_VERSION='0.9.4'
-          FORC_LATEST_VERSION='0.16.2'
+          FUEL_CORE_LATEST_VERSION='v0.9.4'
+          FORC_LATEST_VERSION='v0.16.2'
 
           FUEL_CORE_CURRENT_VERSION="$(grep -s -A1 "\[pkg.fuel-core\]" channel-fuel-latest.toml | grep "version" | cut -d "\"" -f 2- | rev | cut -c 2- | rev)"
           FORC_CURRENT_VERSION="$(grep -s -A1 "\[pkg.forc\]" channel-fuel-latest.toml | grep "version" | cut -d "\"" -f 2- | rev | cut -c 2- | rev)"
@@ -42,7 +40,7 @@ jobs:
           echo "::set-output name=fuel-core-current-version::${FUEL_CORE_CURRENT_VERSION}"
           echo "::set-output name=forc-current-version::${FORC_CURRENT_VERSION}"
 
-          if [ "${FORC_LATEST_VERSION}" = "${FORC_CURRENT_VERSION}" ] && [ "${FUEL_CORE_LATEST_VERSION}" = "${FUEL_CORE_CURRENT_VERSION}" ]; then
+          if [ "${FORC_LATEST_VERSION#v}" = "${FORC_CURRENT_VERSION}" ] && [ "${FUEL_CORE_LATEST_VERSION#v}" = "${FUEL_CORE_CURRENT_VERSION}" ]; then
               printf "No new forc and fuel-core versions; exiting\n"
               exit 0
           fi
@@ -85,6 +83,9 @@ jobs:
 
       - name: Get latest versions and update channel
         run: |
+          mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
+          curl -s "https://fuellabs.github.io/fuelup/channel-fuel-latest.toml" -L -o channel-fuel-latest.toml
+
           ./.github/workflows/scripts/index-versions.sh \
             ${{ needs.compare-versions.outputs.fuel-core-latest-version }} \
             ${{ needs.compare-versions.outputs.fuel-core-current-version }} \

@@ -1,13 +1,46 @@
 name: Index Version Sets
 
 on:
-  schedule:
+  push:
+    branch: bingcicle/test-compatibility
+  # schedule:
     # Run at minute 0 and 30 every hour
-    - cron: '0,30 * * * *'
+    # - cron: '0,30 * * * *'
 env:
   LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
 
 jobs:
+  compare-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.set-vars.outputs.should_run }}
+      fuel-core-version: ${{ steps.set-vars.outputs.fuel-core-version }}
+      forc-version: ${{ steps.set-vars.outputs.forc-version }}
+    steps:
+      - name: checkout master
+        uses: actions/checkout@v3
+      - id: set-vars
+        # TODO: compare versions here
+        # FUEL_CORE_LATEST_VERSION=$(curl -s https://api.github.com/repos/FuelLabs/fuel-core/releases/latest | grep "tag_name" | cut -d "\"" -f4)
+        run: |
+          curl -s "https://fuellabs.github.io/fuelup/channel-fuel-latest.toml" -L -o channel-fuel-latest.toml
+
+          FUEL_CORE_LATEST_VERSION='v0.9.4'
+          FORC_LATEST_VERSION='v0.16.2'
+
+          echo "::set-output name=fuel-core-version::${FUEL_CORE_LATEST_VERSION}"
+          echo "::set-output name=forc-version::${FORC_LATEST_VERSION}"
+
+          echo "::set-output should_run=true"
+
+  test-compatibility:
+    needs: compare-versions
+    uses: ./.github/workflows/test-latest-toolchain-compatibility.yml
+    with:
+      fuel-core-version: ${{ needs.compare-versions.outputs.fuel-core-version }}
+      forc-version: ${{ needs.compare-versions.outputs.forc-version }}
+    if: needs.compare-versions.outputs.should_run == false
+
   index-version-sets:
     runs-on: ubuntu-latest
     steps:

@@ -1,0 +1,42 @@
+name: Test toolchain compatibility (Latest)
+
+on:
+  workflow_call:
+    inputs:
+      fuel-core-version:
+        required: true
+        type: string
+      forc-version:
+        required: true
+        type: string
+
+jobs:
+  format-fuel-core-image:
+    runs-on: ubuntu-latest
+    outputs:
+      fuel-core-image: ${{ steps.get-fuel-core-image.outputs.fuel-core-image }}
+    steps:
+      - name: Set Fuel Core latest version
+        id: get-fuel-core-image
+        run: |
+          echo ${{ inputs.fuel-core-version }}
+          echo "::set-output name=fuel-core-image::ghcr.io/fuellabs/fuel-core:${{ inputs.fuel-core-version }}"
+  test-toolchain-compatibility:
+    needs: format-fuel-core-image
+    runs-on: ubuntu-latest
+    services:
+      fuel-core:
+        image: ${{ needs.format-fuel-core-image.outputs.fuel-core-image }}
+        ports:
+          - 4000:4000
+    steps:
+      - name: Checkout Sway repo
+        uses: actions/checkout@v3
+        with:
+          repository: fuellabs/sway
+          path: . 
+          ref: ${{ inputs.forc-version }}
+
+      - name: Test compatibility (simulate failure)
+        run: |
+          exit 1

@@ -62,12 +62,13 @@ create_pkg_in_channel() {
 }
 
 main() {
-    echo "$1" "$2"
-    FUEL_CORE_LATEST_VERSION=$1
-    FUEL_CORE_CURRENT_VERSION=$2
-    FORC_LATEST_VERSION=$3
-    FORC_CURRENT_VERSION=$4
+    # trim v from tag prefix
+    FUEL_CORE_LATEST_VERSION=${1#v}
+    FUEL_CORE_CURRENT_VERSION=${2#v}
+    FORC_LATEST_VERSION=${3#v}
+    FORC_CURRENT_VERSION=${4#v}
 
+    echo ${FUEL_CORE_LATEST_VERSION}
     mv channel-fuel-latest.toml channel-fuel-latest.tmp.toml
     # Cleanup tmp and downloaded tars/bin folders
     trap 'rm channel-fuel-latest.tmp.toml *.tar.gz' ERR EXIT

@@ -23,9 +23,7 @@ jobs:
       - name: Set Fuel Core latest image
         id: get-fuel-core-image
         run: |
-          echo ${{ inputs.fuel-core-version }}
           echo "::set-output name=fuel-core-image::ghcr.io/fuellabs/fuel-core:${{ inputs.fuel-core-version }}"
-          exit 1
 
   test-toolchain-compatibility:
     needs: format-fuel-core-image
@@ -56,6 +54,7 @@ jobs:
         with:
           command: install
           args: --debug --path ./forc
+        run: exit 1
 
       - name: Install Forc fmt
         uses: actions-rs/cargo@v1

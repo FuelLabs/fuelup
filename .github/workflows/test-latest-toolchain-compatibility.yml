@@ -12,7 +12,7 @@ on:
     outputs:
       incompatible:
         description: "Describes if the forc and fuel-core tested are incompatible"
-          value: ${{ jobs.test-toolchain-compatibility.outputs.incompatible }}
+        value: ${{ jobs.test-toolchain-compatibility.outputs.incompatible }}
 
 jobs:
   format-fuel-core-image:

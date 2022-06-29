@@ -42,7 +42,7 @@ pub fn self_update() -> Result<()> {
         error!("Failed to replace the old fuelup: {}", e);
         if let Err(e) = fs::copy(&fuelup_backup, &fuelup_bin) {
             error!("Could not restore backup fuelup: {}", e);
-            error!("You should re-install fuelup using the script:");
+            error!("You should re-install fuelup using fuelup-init:");
             error!("`curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh`");
         }
     };

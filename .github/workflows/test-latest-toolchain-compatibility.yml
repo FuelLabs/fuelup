@@ -9,7 +9,7 @@ on:
       forc-version:
         required: true
         type: string
-    output:
+    outputs:
       incompatible:
         description: "Describes if the forc and fuel-core tested are incompatible"
           value: ${{ jobs.test-toolchain-compatibility.outputs.incompatible }}

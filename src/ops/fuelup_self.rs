@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use std::{fs, path::Path};
 use tempfile::tempdir_in;
 use tracing::error;
@@ -26,7 +26,8 @@ pub fn self_update() -> Result<()> {
     let fuelup_backup_dir = tempdir_in(&fuelup_bin_dir)?;
 
     if let Err(e) = attempt_install_self(download_cfg, fuelup_new_dir.path()) {
-        error!("Failed to install fuelup: {}", e);
+        // Skip all other steps if downloading fails here.
+        bail!("Failed to install fuelup: {}", e);
     };
 
     let fuelup_backup = fuelup_backup_dir.path().join("fuelup-backup");

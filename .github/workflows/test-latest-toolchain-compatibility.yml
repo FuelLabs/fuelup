@@ -62,29 +62,40 @@ jobs:
           command: install
           args: --debug --path ./forc-plugins/forc-fmt
 
-      - name: Cargo Run E2E Tests
+      - name: Job 1 (E2E tests)
         id: e2e-tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --locked --release --bin test -- --locked
+        run: exit 0
 
-      - name: Build Sway examples
+      - name: Job 2 (Build Sway Examples)
         id: build-examples
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --locked --bin examples-checker build --all-examples
+        run: exit 0 
 
-      - name: Build All Tests
-        run: cd test/src/sdk-harness && bash build.sh --locked && cd ../../../
-
-      - name: Cargo Test sway-lib-std
+      - name: Job 3 (Test sway-lib-std)
         id: test-std-lib
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --manifest-path ./test/src/sdk-harness/Cargo.toml -- --test-threads=1 --nocapture
+        run: exit 0 
+      #- name: Cargo Run E2E Tests
+      #  id: e2e-tests
+      #  uses: actions-rs/cargo@v1
+      #  with:
+      #    command: run
+      #    args: --locked --release --bin test -- --locked
+
+      #- name: Build Sway examples
+      #  id: build-examples
+      #  uses: actions-rs/cargo@v1
+      #  with:
+      #    command: run
+      #    args: --locked --bin examples-checker build --all-examples
+
+      #- name: Build All Tests
+      #  run: cd test/src/sdk-harness && bash build.sh --locked && cd ../../../
+
+      #- name: Cargo Test sway-lib-std
+      #  id: test-std-lib
+      #  uses: actions-rs/cargo@v1
+      #  with:
+      #    command: test
+      #    args: --manifest-path ./test/src/sdk-harness/Cargo.toml -- --test-threads=1 --nocapture
 
       - name: Mark failed
         if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || steps.build-examples.conclusion == 'failure' || steps.test-std-lib.conclusion == 'failure'  )}}

@@ -72,7 +72,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./tmp
           destination_dir: ./incompatible-versions
-    if: ${{ failure() }}
+    if: ${{ failure() && needs.test-compatibility.outputs.incompatible == true }}
 
   index-version-sets:
     needs: [compare-versions, test-compatibility]
@@ -94,7 +94,7 @@ jobs:
 
           cp channel-fuel-latest.toml ${{ env.LATEST_CHANNEL_DIR }}
 
-      - name: Deploy latest
+      - name: Deploy latest channel
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

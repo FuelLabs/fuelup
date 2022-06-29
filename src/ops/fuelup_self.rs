@@ -25,7 +25,7 @@ pub fn self_update() -> Result<()> {
     let fuelup_new_dir = tempdir_in(&fuelup_bin_dir)?;
     let fuelup_backup_dir = tempdir_in(&fuelup_bin_dir)?;
 
-    if let Err(e) = attempt_install_self(download_cfg, &fuelup_new_dir.path()) {
+    if let Err(e) = attempt_install_self(download_cfg, fuelup_new_dir.path()) {
         error!("Failed to install and replace fuelup. {}", e);
     };
 

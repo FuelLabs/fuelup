@@ -33,6 +33,7 @@ pub fn self_update() -> Result<()> {
     if fuelup_bin.exists() {
         // Make a backup of fuelup, fuelup-backup.
         fs::copy(&fuelup_bin, &fuelup_backup).expect("Could not make a fuelup-backup");
+        fs::remove_file(&fuelup_bin)?;
     };
 
     // Copy the new fuelup into the bin folder.

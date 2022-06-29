@@ -41,7 +41,7 @@ pub fn self_update() -> Result<()> {
         fuelup_new_dir.path().join("fuelup").display(),
         &fuelup_bin.display()
     );
-    if let Err(e) = fs::copy(fuelup_new_dir.path().join("fuelup"), &fuelup_bin) {
+    if let Err(e) = fs::rename(fuelup_new_dir.path().join("fuelup"), &fuelup_bin) {
         error!("Failed to replace the old fuelup: {}", e);
 
         // If we have failed to replace the old fuelup for whatever reason, we want the backup.

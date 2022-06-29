@@ -1,4 +1,5 @@
-use std::{env::temp_dir, fs, path::Path};
+use std::{fs, path::Path};
+use tempfile::tempdir;
 use tracing::error;
 
 use anyhow::Result;
@@ -19,7 +20,8 @@ pub fn attempt_install_self(download_cfg: DownloadCfg, dst: &Path) -> Result<()>
 pub fn self_update() -> Result<()> {
     let download_cfg = DownloadCfg::new(component::FUELUP, None)?;
     let fuelup_bin = fuelup_bin();
-    let fuelup_backup = temp_dir().join("fuelup-backup");
+    let temp_dir = tempdir()?;
+    let fuelup_backup = temp_dir.path().join("fuelup-backup");
 
     if fuelup_bin.exists() {
         // Make a backup of fuelup.
@@ -36,10 +38,6 @@ pub fn self_update() -> Result<()> {
             fs::copy(&fuelup_backup, &fuelup_bin).expect("Could not restore fuelup-backup");
         }
     };
-
-    if fuelup_backup.exists() {
-        fs::remove_file(&fuelup_backup).expect("Could not remove fuelup backup");
-    }
 
     Ok(())
 }

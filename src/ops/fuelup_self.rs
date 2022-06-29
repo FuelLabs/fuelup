@@ -33,22 +33,22 @@ pub fn self_update() -> Result<()> {
     if fuelup_bin.exists() {
         // Make a backup of fuelup, fuelup-backup.
         fs::copy(&fuelup_bin, &fuelup_backup).expect("Could not make a fuelup-backup");
+        // On Linux, we have to unlink/remove the original bin first.
         fs::remove_file(&fuelup_bin).expect("Failed to remove fuelup");
     };
 
     // Copy the new fuelup into the bin folder.
     if let Err(e) = fs::copy(fuelup_new_dir.path().join("fuelup"), &fuelup_bin) {
-        // If we have failed to replace the old fuelup for whatever reason, we want the backup.
         error!("Failed to replace the old fuelup: {}", e);
+
+        // If we have failed to replace the old fuelup for whatever reason, we want the backup.
+        // Should this last step fail, we will recommend to re-install fuelup using fuelup-init.
         if let Err(e) = fs::copy(&fuelup_backup, &fuelup_bin) {
             error!("Could not restore backup fuelup: {}", e);
             error!("You should re-install fuelup using fuelup-init:");
             error!("`curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh`");
         }
     };
-
-    // Finally remove backup and the folder.
-    let _ = fs::remove_file(&fuelup_backup);
 
     Ok(())
 }

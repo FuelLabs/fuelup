@@ -1,5 +1,5 @@
 use std::{fs, path::Path};
-use tempfile::tempdir;
+use tempfile::tempdir_in;
 use tracing::error;
 
 use anyhow::Result;
@@ -23,25 +23,22 @@ pub fn self_update() -> Result<()> {
     let fuelup_bin = fuelup_bin();
     let fuelup_bin_dir = fuelup_bin_dir();
 
-    let fuelup_new_dir = fuelup_bin_dir.join("fuelup-new");
-    fs::create_dir(&fuelup_new_dir)?;
-    let fuelup_backup = fuelup_bin_dir.join("fuelup-backup");
-    let fuelup_new = fuelup_new_dir.join("fuelup");
+    let fuelup_new_dir = tempdir_in(&fuelup_bin_dir)?;
 
-    if let Err(e) = attempt_install_self(download_cfg, &fuelup_new_dir) {
+    if let Err(e) = attempt_install_self(download_cfg, &fuelup_new_dir.path()) {
         error!("Failed to install and replace fuelup. {}", e);
     };
 
+    let fuelup_backup = fuelup_bin_dir.join("fuelup-backup");
     if fuelup_bin.exists() {
         // Make a backup of fuelup, fuelup-backup.
         fs::copy(&fuelup_bin, &fuelup_backup).expect("Could not make a fuelup-backup");
     };
 
     // Copy the new fuelup into the bin folder.
-    fs::copy(fuelup_new, &fuelup_bin)?;
+    fs::copy(fuelup_new_dir.path().join("fuelup"), &fuelup_bin)?;
 
     // Finally remove backup and the folder.
-    fs::remove_dir(&fuelup_new_dir)?;
     fs::remove_file(&fuelup_backup)?;
 
     Ok(())

@@ -1,7 +1,7 @@
 use anyhow::{bail, Result};
 use std::{fs, path::Path};
 use tempfile::tempdir_in;
-use tracing::error;
+use tracing::{error, info};
 
 use crate::{
     component,
@@ -39,6 +39,11 @@ pub fn self_update() -> Result<()> {
         fs::remove_file(&fuelup_bin).expect("Failed to remove fuelup");
     };
 
+    info!(
+        "Copying {} to {}",
+        fuelup_new_dir.path().join("fuelup").display(),
+        &fuelup_bin.display()
+    );
     if let Err(e) = fs::copy(fuelup_new_dir.path().join("fuelup"), &fuelup_bin) {
         error!("Failed to replace the old fuelup: {}", e);
 

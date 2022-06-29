@@ -27,6 +27,7 @@ pub fn self_update() -> Result<()> {
 
     if let Err(e) = attempt_install_self(download_cfg, fuelup_new_dir.path()) {
         // Skip all other steps if downloading fails here.
+        // We do not need to handle failure, since this downloads to a tempdir.
         bail!("Failed to install fuelup: {}", e);
     };
 
@@ -38,7 +39,6 @@ pub fn self_update() -> Result<()> {
         fs::remove_file(&fuelup_bin).expect("Failed to remove fuelup");
     };
 
-    // Copy the new fuelup into the bin folder.
     if let Err(e) = fs::copy(fuelup_new_dir.path().join("fuelup"), &fuelup_bin) {
         error!("Failed to replace the old fuelup: {}", e);
 

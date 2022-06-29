@@ -24,6 +24,7 @@ pub fn self_update() -> Result<()> {
     let fuelup_bin_dir = fuelup_bin_dir();
 
     let fuelup_new_dir = fuelup_bin_dir.join("fuelup-new");
+    fs::create_dir(&fuelup_new_dir)?;
     let fuelup_backup = fuelup_bin_dir.join("fuelup-backup");
     let fuelup_new = fuelup_new_dir.join("fuelup");
 

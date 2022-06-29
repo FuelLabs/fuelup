@@ -25,6 +25,7 @@ jobs:
         run: |
           echo ${{ inputs.fuel-core-version }}
           echo "::set-output name=fuel-core-image::ghcr.io/fuellabs/fuel-core:${{ inputs.fuel-core-version }}"
+          exit 1
 
   test-toolchain-compatibility:
     needs: format-fuel-core-image

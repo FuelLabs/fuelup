@@ -21,9 +21,9 @@ pub fn self_update() -> Result<()> {
 
     let fuelup_bin = fuelup_bin();
     let fuelup_bin_dir = fuelup_bin_dir();
+    let fuelup_backup = fuelup_bin_dir.join("fuelup-backup");
 
     let fuelup_new_dir = tempdir_in(&fuelup_bin_dir)?;
-    let fuelup_backup_dir = tempdir_in(&fuelup_bin_dir)?;
 
     if let Err(e) = attempt_install_self(download_cfg, fuelup_new_dir.path()) {
         // Skip all other steps if downloading fails here.
@@ -31,12 +31,9 @@ pub fn self_update() -> Result<()> {
         bail!("Failed to install fuelup: {}", e);
     };
 
-    let fuelup_backup = fuelup_backup_dir.path().join("fuelup-backup");
     if fuelup_bin.exists() {
         // Make a backup of fuelup, fuelup-backup.
-        fs::copy(&fuelup_bin, &fuelup_backup).expect("Could not make a fuelup-backup");
-        // On Linux, we have to unlink/remove the original bin first.
-        fs::remove_file(&fuelup_bin).expect("Failed to remove fuelup");
+        fs::rename(&fuelup_bin, &fuelup_backup).expect("Could not make a fuelup-backup");
     };
 
     info!(
@@ -49,7 +46,7 @@ pub fn self_update() -> Result<()> {
 
         // If we have failed to replace the old fuelup for whatever reason, we want the backup.
         // Should this last step fail, we will recommend to re-install fuelup using fuelup-init.
-        if let Err(e) = fs::copy(&fuelup_backup, &fuelup_bin) {
+        if let Err(e) = fs::rename(&fuelup_backup, &fuelup_bin) {
             error!("Could not restore backup fuelup: {}", e);
             error!("You should re-install fuelup using fuelup-init:");
             error!("`curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh`");

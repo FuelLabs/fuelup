@@ -71,7 +71,7 @@ jobs:
 
       - name: Job 3 (Test sway-lib-std)
         id: test-std-lib
-        run: exit 0 
+        run: exit 1
       #- name: Cargo Run E2E Tests
       #  id: e2e-tests
       #  uses: actions-rs/cargo@v1

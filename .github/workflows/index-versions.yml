@@ -52,7 +52,7 @@ jobs:
     uses: ./.github/workflows/test-latest-toolchain-compatibility.yml
     with:
       fuel-core-version: ${{ needs.compare-versions.outputs.fuel-core-latest-version }}
-      forc-version: v1.0.0
+      forc-version: ${{ needs.compare-versions.outputs.forc-latest-version }}
     if: needs.compare-versions.outputs.should_run == false
 
   index-incompatibility:

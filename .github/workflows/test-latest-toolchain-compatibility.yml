@@ -54,7 +54,6 @@ jobs:
         with:
           command: install
           args: --debug --path ./forc
-        run: exit 1
 
       - name: Install Forc fmt
         uses: actions-rs/cargo@v1

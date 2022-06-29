@@ -71,7 +71,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./tmp
-          destination_dir: ./compatibility
+          destination_dir: ./incompatible-versions
     if: ${{ failure() }}
 
   index-version-sets:

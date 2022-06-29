@@ -54,7 +54,7 @@ pub fn self_update() -> Result<()> {
     };
 
     // Remove backup at the end.
-    let _ = fs::remove_file(fuelup_backup);
+    let _ = fs::remove_file(&fuelup_backup);
 
     Ok(())
 }

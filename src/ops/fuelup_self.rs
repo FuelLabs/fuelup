@@ -19,25 +19,29 @@ pub fn attempt_install_self(download_cfg: DownloadCfg, dst: &Path) -> Result<()>
 
 pub fn self_update() -> Result<()> {
     let download_cfg = DownloadCfg::new(component::FUELUP, None)?;
+
     let fuelup_bin = fuelup_bin();
-    let temp_dir = tempdir()?;
-    let fuelup_backup = temp_dir.path().join("fuelup-backup");
+    let fuelup_bin_dir = fuelup_bin_dir();
+
+    let fuelup_new_dir = fuelup_bin_dir.join("fuelup-new");
+    let fuelup_backup = fuelup_bin_dir.join("fuelup-backup");
+    let fuelup_new = fuelup_new_dir.join("fuelup");
+
+    if let Err(e) = attempt_install_self(download_cfg, &fuelup_new_dir) {
+        error!("Failed to install and replace fuelup. {}", e);
+    };
 
     if fuelup_bin.exists() {
-        // Make a backup of fuelup.
-        fs::copy(&fuelup_bin, &fuelup_backup).expect("Could not make a fuelup backup");
-        // We cannot copy new fuelup over the old; we must unlink it first.
-        fs::remove_file(&fuelup_bin).expect("Could not remove fuelup");
+        // Make a backup of fuelup, fuelup-backup.
+        fs::copy(&fuelup_bin, &fuelup_backup).expect("Could not make a fuelup-backup");
     };
 
-    if let Err(e) = attempt_install_self(download_cfg, &fuelup_bin_dir()) {
-        error!("Failed to install and replace fuelup. {}", e);
+    // Copy the new fuelup into the bin folder.
+    fs::copy(fuelup_new, &fuelup_bin)?;
 
-        // We want to restore the backup fuelup in case download goes wrong.
-        if fuelup_backup.exists() {
-            fs::copy(&fuelup_backup, &fuelup_bin).expect("Could not restore fuelup-backup");
-        }
-    };
+    // Finally remove backup and the folder.
+    fs::remove_dir(&fuelup_new_dir)?;
+    fs::remove_file(&fuelup_backup)?;
 
     Ok(())
 }

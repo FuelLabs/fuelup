@@ -34,7 +34,14 @@ pub fn self_update() -> Result<()> {
 
     if fuelup_bin.exists() {
         // Make a backup of fuelup, fuelup-backup.
-        fs::rename(&fuelup_bin, &fuelup_backup).expect("Could not make a fuelup-backup");
+        if let Err(e) = fs::rename(&fuelup_bin, &fuelup_backup) {
+            bail!(
+                "Failed moving {} to {}: {}",
+                &fuelup_bin.display(),
+                &fuelup_backup.display(),
+                e
+            );
+        }
     };
 
     info!(

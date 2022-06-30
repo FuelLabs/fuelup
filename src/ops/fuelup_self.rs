@@ -37,7 +37,7 @@ pub fn self_update() -> Result<()> {
     };
 
     info!(
-        "Copying {} to {}",
+        "Moving {} to {}",
         fuelup_new_dir.path().join("fuelup").display(),
         &fuelup_bin.display()
     );

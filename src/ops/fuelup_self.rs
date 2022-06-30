@@ -24,8 +24,9 @@ pub fn self_update() -> Result<()> {
     let fuelup_backup = fuelup_bin_dir.join("fuelup-backup");
 
     let fuelup_new_dir = tempdir_in(&fuelup_bin_dir)?;
+    let fuelup_new_dir_path = fuelup_new_dir.path();
 
-    if let Err(e) = attempt_install_self(download_cfg, fuelup_new_dir.path()) {
+    if let Err(e) = attempt_install_self(download_cfg, fuelup_new_dir_path) {
         // Skip all other steps if downloading fails here.
         // We do not need to handle failure, since this downloads to a tempdir.
         bail!("Failed to install fuelup: {}", e);
@@ -38,10 +39,10 @@ pub fn self_update() -> Result<()> {
 
     info!(
         "Moving {} to {}",
-        fuelup_new_dir.path().join("fuelup").display(),
+        fuelup_new_dir_path.join("fuelup").display(),
         &fuelup_bin.display()
     );
-    if let Err(e) = fs::rename(fuelup_new_dir.path().join("fuelup"), &fuelup_bin) {
+    if let Err(e) = fs::rename(fuelup_new_dir_path.join("fuelup"), &fuelup_bin) {
         error!("Failed to replace the old fuelup: {}", e);
         error!("Restoring old fuelup");
 

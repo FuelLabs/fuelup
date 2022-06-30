@@ -97,6 +97,6 @@ jobs:
       #    args: --manifest-path ./test/src/sdk-harness/Cargo.toml -- --test-threads=1 --nocapture
 
       - name: Mark failed
-        if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || steps.build-examples.conclusion == 'failure' || steps.test-std-lib.conclusion == 'failure'  )}}
+        if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || steps.build-examples.conclusion == 'failure' || steps.test-std-lib.conclusion == 'failure') }}
         run: |
           echo "::set-output name=incompatible::true"

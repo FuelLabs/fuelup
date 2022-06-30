@@ -43,13 +43,15 @@ pub fn self_update() -> Result<()> {
     );
     if let Err(e) = fs::rename(fuelup_new_dir.path().join("fuelup"), &fuelup_bin) {
         error!("Failed to replace the old fuelup: {}", e);
+        error!("Restoring old fuelup");
 
         // If we have failed to replace the old fuelup for whatever reason, we want the backup.
-        // Should this last step fail, we will recommend to re-install fuelup using fuelup-init.
+        // Although unlikely, should this last step fail, we will recommend to re-install fuelup using fuelup-init.
         if let Err(e) = fs::rename(&fuelup_backup, &fuelup_bin) {
             error!("Could not restore backup fuelup: {}", e);
             error!("You should re-install fuelup using fuelup-init:");
             error!("`curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh`");
+            std::process::exit(1);
         }
     };
 

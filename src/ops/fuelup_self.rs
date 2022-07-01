@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Result};
 use std::{fs, path::Path};
 use tempfile::tempdir_in;
 use tracing::{error, info};
@@ -50,18 +50,24 @@ pub fn self_update() -> Result<()> {
         fuelup_new.display(),
         &fuelup_bin.display()
     );
-    if let Err(e) = fs::rename(fuelup_new, &fuelup_bin) {
-        error!("Failed to replace the old fuelup: {}", e);
-        error!("Restoring old fuelup");
-
+    if let Err(e) = fs::rename("wot", &fuelup_bin) {
+        error!(
+            "Failed to replace old fuelup with new fuelup. Attempting to restore backup fuelup.",
+        );
         // If we have failed to replace the old fuelup for whatever reason, we want the backup.
         // Although unlikely, should this last step fail, we will recommend to re-install fuelup using fuelup-init.
-        if let Err(e) = fs::rename(&fuelup_backup, &fuelup_bin) {
-            error!("Could not restore backup fuelup: {}", e);
-            error!("You should re-install fuelup using fuelup-init:");
-            error!("`curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh`");
-            std::process::exit(1);
+        if let Err(e) = fs::rename(&"wot", &fuelup_bin) {
+            bail!(
+                "Could not restore backup fuelup. {}
+
+You should re-install fuelup using fuelup-init:
+`curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh`",
+                e
+            );
         }
+
+        error!("Old fuelup restored.");
+        bail!("Failed to replace old fuelup with new fuelup: {}", e);
     };
 
     // Remove backup at the end.

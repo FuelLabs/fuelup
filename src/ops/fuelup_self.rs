@@ -1,4 +1,4 @@
-use anyhow::{anyhow, bail, Result};
+use anyhow::{bail, Result};
 use std::{fs, path::Path};
 use tempfile::tempdir_in;
 use tracing::{error, info};

@@ -52,8 +52,8 @@ pub fn self_update() -> Result<()> {
     );
     if let Err(e) = fs::rename(&fuelup_new, &fuelup_bin) {
         error!(
-            "Failed to replace old fuelup with new fuelup. Attempting to restore backup fuelup.",
-        );
+            "Failed to replace old fuelup with new fuelup: {}. Attempting to restore backup fuelup.",
+        e);
         // If we have failed to replace the old fuelup for whatever reason, we want the backup.
         // Although unlikely, should this last step fail, we will recommend to re-install fuelup using fuelup-init.
         if let Err(e) = fs::rename(&fuelup_backup, &fuelup_bin) {
@@ -66,8 +66,9 @@ You should re-install fuelup using fuelup-init:
             );
         }
 
-        error!("Old fuelup restored.");
-        bail!("Failed to replace old fuelup with new fuelup: {}", e);
+        bail!(
+            "Old fuelup restored because something went wrong replacing old fuelup with new fuelup.",
+        );
     };
 
     // Remove backup at the end.

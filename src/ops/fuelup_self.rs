@@ -25,6 +25,7 @@ pub fn self_update() -> Result<()> {
 
     let fuelup_new_dir = tempdir_in(&fuelup_bin_dir)?;
     let fuelup_new_dir_path = fuelup_new_dir.path();
+    let fuelup_new = fuelup_new_dir_path.join(component::FUELUP);
 
     if let Err(e) = attempt_install_self(download_cfg, fuelup_new_dir_path) {
         // Skip all other steps if downloading fails here.
@@ -46,10 +47,10 @@ pub fn self_update() -> Result<()> {
 
     info!(
         "Moving {} to {}",
-        fuelup_new_dir_path.join("fuelup").display(),
+        fuelup_new.display(),
         &fuelup_bin.display()
     );
-    if let Err(e) = fs::rename(fuelup_new_dir_path.join("fuelup"), &fuelup_bin) {
+    if let Err(e) = fs::rename(fuelup_new, &fuelup_bin) {
         error!("Failed to replace the old fuelup: {}", e);
         error!("Restoring old fuelup");
 

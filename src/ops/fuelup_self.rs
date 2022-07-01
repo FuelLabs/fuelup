@@ -50,13 +50,13 @@ pub fn self_update() -> Result<()> {
         fuelup_new.display(),
         &fuelup_bin.display()
     );
-    if let Err(e) = fs::rename("wot", &fuelup_bin) {
+    if let Err(e) = fs::rename(&fuelup_new, &fuelup_bin) {
         error!(
             "Failed to replace old fuelup with new fuelup. Attempting to restore backup fuelup.",
         );
         // If we have failed to replace the old fuelup for whatever reason, we want the backup.
         // Although unlikely, should this last step fail, we will recommend to re-install fuelup using fuelup-init.
-        if let Err(e) = fs::rename(&"wot", &fuelup_bin) {
+        if let Err(e) = fs::rename(&fuelup_backup, &fuelup_bin) {
             bail!(
                 "Could not restore backup fuelup. {}
 

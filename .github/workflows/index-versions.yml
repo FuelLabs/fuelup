@@ -34,7 +34,7 @@ jobs:
           compare-versions >> out
 
           echo "results:"
-          echo out
+          cat out
           if [ -s out ]; then
             echo "New versions detected, running tests"
             echo "::set-output should_run=true"

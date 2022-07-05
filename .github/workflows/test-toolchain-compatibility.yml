@@ -15,29 +15,7 @@ env:
   LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
 
 jobs:
-  setup-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout fuelup repo
-        uses: actions/checkout@v3
-        with:
-          repository: fuellabs/fuelup
-          path: .
-          ref: gh-pages
-
-      - name: Skip tests if already incompatible
-        run: |
-          FORMATTED_STRING="forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}"
-          if [ -d incompatible-versions ]; then
-            ls incompatible-versions | grep -x $FORMATTED_STRING
-            if [ -s $FORMATTED_STRING ]; then
-              echo "Versions incompatible; skipping tests and exiting"
-              echo "forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}=true" >> $GITHUB_ENV
-            fi
-          fi
-
   test-toolchain-compatibility:
-    needs: setup-tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false 
@@ -111,9 +89,7 @@ jobs:
   index-versions:
     name: Log latest compatible versions that passed tests
     needs: test-toolchain-compatibility
-    if: ${{ always() }}
-    outputs:
-      artifacts-exist: ${{ steps.set-artifacts-exist.outputs.artifacts-exist }}
+    if: ${{ needs.test-toolchain-compatibility.result != "skipped" }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -121,18 +97,8 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           path: versions
-      
-      - name: Check if artifacts exist
-        id: set-artifacts-exist
-        run: |
-          if [ -d versions ]; then
-            echo "::set-output name=artifacts-exist::true"
-          else
-            echo "::set-output name=artifacts-exist::false"
-          fi
 
       - name: Prepare compatible and incompatible versions
-        if: ${{ steps.set-artifacts-exist.outputs.artifacts-exist }}
         id: prep-versions
         working-directory: versions
         run: |
@@ -147,7 +113,6 @@ jobs:
             done
 
       - name: Prepare channel with compatible versions
-        if: ${{ steps.set-artifacts-exist.outputs.artifacts-exist }}
         run: |
             touch channel-fuel-latest.toml
             mkdir -p ${{ env.LATEST_CHANNEL_DIR }}

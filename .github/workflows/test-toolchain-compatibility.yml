@@ -1,14 +1,6 @@
 name: Test toolchain compatibility (Latest)
 
 on:
-  workflow_dispatch:
-    inputs:
-      forc-versions:
-        required: true
-        type: string
-      fuel-core-versions:
-        required: true
-        type: string
   workflow_call:
     inputs:
       forc-versions:
@@ -21,23 +13,10 @@ on:
 env:
   INCOMPATIBLE_DIR: ./incompatible-versions
   LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
-  IS_INCOMPATIBLE: false
 
 jobs:
-  test-toolchain-compatibility:
+  setup-tests:
     runs-on: ubuntu-latest
-    outputs:
-      should-index: ${{ steps.set-should-index.outputs.should-index }}
-    strategy:
-      fail-fast: false 
-      matrix:
-        forc-version: ${{ fromJSON(inputs.forc-versions) }}
-        fuel-core-version: ${{ fromJSON(inputs.fuel-core-versions) }} 
-    services:
-      fuel-core:
-        image: ghcr.io/fuellabs/fuel-core:v${{ matrix.fuel-core-version }}
-        ports:
-          - 4000:4000
     steps:
       - name: Checkout fuelup repo
         uses: actions/checkout@v3
@@ -53,9 +32,24 @@ jobs:
             ls incompatible-versions | grep -x $FORMATTED_STRING
             if [ -s $FORMATTED_STRING ]; then
               echo "Versions incompatible; skipping tests and exiting"
-              echo "IS_INCOMPATIBLE=true" >> $GITHUB_ENV
+              echo "forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}=true" >> $GITHUB_ENV
             fi
           fi
+
+  test-toolchain-compatibility:
+    needs: setup-tests
+    if: ${{ env.forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }} == true }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false 
+      matrix:
+        forc-version: ${{ fromJSON(inputs.forc-versions) }}
+        fuel-core-version: ${{ fromJSON(inputs.fuel-core-versions) }} 
+    services:
+      fuel-core:
+        image: ghcr.io/fuellabs/fuel-core:v${{ matrix.fuel-core-version }}
+        ports:
+          - 4000:4000
 
       - name: Checkout Sway repo
         uses: actions/checkout@v3
@@ -72,7 +66,6 @@ jobs:
       - uses: Swatinem/rust-cache@v1
 
       - name: Cargo Run E2E Tests 
-        if: ${{ env.IS_INCOMPATIBLE != true }}
         id: e2e-tests
         uses: actions-rs/cargo@v1
         with:
@@ -80,11 +73,9 @@ jobs:
           args: --locked --release --bin test -- --locked
 
       - name: Build All Tests
-        if: ${{ env.IS_INCOMPATIBLE != true }}
         run: cd test/src/sdk-harness && bash build.sh --locked && cd ../../../
 
       - name: Cargo Test sway-lib-std
-        if: ${{ env.IS_INCOMPATIBLE != true }}
         id: std-lib-tests
         uses: actions-rs/cargo@v1
         with:
@@ -117,17 +108,12 @@ jobs:
           name: compatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
           path: compatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
 
-      - name: Trigger index-versions
-        if: ${{ steps.upload-success-artifact.conclusion == 'success' || steps.upload-failure-artifact.conclusion == 'success' }}
-        id: set-should-index
-        run: echo "::set-output name=should-index::true"
-
-
-
   index-versions:
     name: Log latest compatible versions that passed tests
     needs: test-toolchain-compatibility
-    if: ${{ always() && needs.test-toolchain-compatibility.outputs.should-index }}
+    if: ${{ always() }}
+    outputs:
+      artifacts-exist: ${{ steps.set-artifacts-exist.outputs.artifacts-exist }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -135,8 +121,19 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           path: versions
+      
+      - name: Check if artifacts exist
+        id: set-artifacts-exist
+        run: |
+          if [ -d versions ]; then
+            echo "::set-output name=artifacts-exist::true"
+          else
+            echo "::set-output name=artifacts-exist::false"
+          fi
 
       - name: Prepare compatible and incompatible versions
+        if: ${{ steps.set-artifacts-exist.outputs.artifacts-exist }}
+        id: prep-versions
         working-directory: versions
         run: |
             COMPATIBLE_VERSIONS=$(ls compatible* -1 | sort -rV | head -n 1)
@@ -150,6 +147,7 @@ jobs:
             done
 
       - name: Prepare channel with compatible versions
+        if: ${{ steps.set-artifacts-exist.outputs.artifacts-exist }}
         run: |
             touch channel-fuel-latest.toml
             mkdir -p ${{ env.LATEST_CHANNEL_DIR }}

@@ -32,20 +32,20 @@ create_pkg_in_channel() {
             ;;
     esac
 
-	# We need to recreate channel-fuel-latest.toml, generating new URLs and sha256 hashes for the download links.
-	printf "%s: Generating new package\n" "${1}"
-	create_new_pkg "$1" "$2"
-	_header="$RETVAL"
-	_content=""
-	for target in "${_targets[@]}"; do
-	    _content+="[pkg.${1}.target.${target}]\n"
-	    add_url_and_hash $_repo "$2" "$_tarball_prefix-${target}.tar.gz"
-	    _content+="$RETVAL"
-	done
+    # We need to recreate channel-fuel-latest.toml, generating new URLs and sha256 hashes for the download links.
+    printf "%s: Generating new package\n" "${1}"
+    create_new_pkg "$1" "$2"
+    _header="$RETVAL"
+    _content=""
+    for target in "${_targets[@]}"; do
+        _content+="[pkg.${1}.target.${target}]\n"
+        add_url_and_hash $_repo "$2" "$_tarball_prefix-${target}.tar.gz"
+        _content+="$RETVAL"
+    done
 
-	# Only write to file if there's no problem downloading and hashing all the above releases.
-	_package=$(printf "%s\n%s" "${_header}" "${_content}")
-	echo -ne "$_package" >>channel-fuel-latest.toml
+    # Only write to file if there's no problem downloading and hashing all the above releases.
+    _package=$(printf "%s\n%s" "${_header}" "${_content}")
+    echo -ne "$_package" >>channel-fuel-latest.toml
 }
 
 main() {

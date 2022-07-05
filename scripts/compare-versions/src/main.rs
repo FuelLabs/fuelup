@@ -1,7 +1,7 @@
 use anyhow::Result;
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, io::Read, str::FromStr};
+use std::{io::Read, str::FromStr};
 use toml_edit::Document;
 
 const GITHUB_API_REPOS_BASE_URL: &str = "https://api.github.com/repos/FuelLabs/";
@@ -10,8 +10,6 @@ const SWAY_REPO: &str = "sway";
 const FUEL_CORE_REPO: &str = "fuel-core";
 const CHANNEL_FUEL_LATEST_TOML_URL: &str =
     "https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/channel-fuel-latest.toml";
-const GH_PAGES_TREES_URL: &str =
-    "https://api.github.com/repos/FuelLabs/fuelup/git/trees/gh-pages?recursive=1";
 
 #[derive(Debug, Serialize, Deserialize)]
 struct WorkflowRunApiResponse {
@@ -36,18 +34,11 @@ struct WorkflowRun {
 
 const MAX_VERSIONS: usize = 3;
 
-fn collect_new_versions(channel: &Document, repo: &str) -> Result<Vec<Version>> {
-    let package_name: &str = match repo {
-        SWAY_REPO => "forc",
-        _ => repo,
-    };
+fn get_workflow_runs(repo: &str) -> Result<WorkflowRunApiResponse> {
     let github_actions_runs_api_url = format!(
         "{}{}/{}?event=release&status=success",
         GITHUB_API_REPOS_BASE_URL, repo, ACTIONS_RUNS
     );
-
-    let latest_indexed_version = parse_latest_indexed_version(channel, package_name);
-
     let handle = ureq::builder().user_agent("fuelup").build();
     let resp = handle
         .get(&github_actions_runs_api_url)
@@ -56,11 +47,22 @@ fn collect_new_versions(channel: &Document, repo: &str) -> Result<Vec<Version>> 
 
     let mut data = Vec::new();
     resp.into_reader().read_to_end(&mut data)?;
-    let response: WorkflowRunApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))
-        .expect(&format!(
+
+    Ok(
+        serde_json::from_str(&String::from_utf8_lossy(&data)).expect(&format!(
             "Failed to deserialize a workflow run for repo {}",
             repo
-        ));
+        )),
+    )
+}
+
+fn collect_new_versions(channel: &Document, repo: &str) -> Result<Vec<Version>> {
+    let package_name: &str = match repo {
+        SWAY_REPO => "forc",
+        _ => repo,
+    };
+    let latest_indexed_version = parse_latest_indexed_version(channel, package_name);
+    let response: WorkflowRunApiResponse = get_workflow_runs(repo)?;
 
     let new_versions: Vec<Version> = response
         .workflow_runs
@@ -91,7 +93,6 @@ fn fmt_versions(forc_versions: &str, fuel_core_versions: &str) -> String {
 }
 
 fn print_selected_versions<'a>(
-    channel: &Document,
     forc_versions: &mut Vec<Version>,
     fuel_core_versions: &mut Vec<Version>,
 ) -> String {
@@ -113,13 +114,6 @@ fn print_selected_versions<'a>(
     output.to_string()
 }
 
-fn format_incompatibilities(artifacts: Vec<String>) -> HashMap<String, String> {
-    let arts = ["incompatible-versions/forc-0.17.0@fuel-core-0.9.4"];
-    let incompatible_versions = HashMap::new();
-
-    incompatible_versions
-}
-
 fn main() -> Result<()> {
     let handle = ureq::builder().user_agent("fuelup").build();
 
@@ -131,6 +125,16 @@ fn main() -> Result<()> {
             eprintln!(
                 "Could not download channel-fuel-latest.toml from {}; re-generating channel.",
                 &CHANNEL_FUEL_LATEST_TOML_URL
+            );
+
+            let sway_runs = get_workflow_runs(SWAY_REPO)?;
+            let fuel_core_runs = get_workflow_runs(FUEL_CORE_REPO)?;
+
+            let latest_sway_version = &sway_runs.workflow_runs[0].head_branch[1..];
+            let latest_fuel_core_version = &fuel_core_runs.workflow_runs[0].head_branch[1..];
+            print_selected_versions(
+                &mut vec![Version::from_str(latest_sway_version).unwrap()],
+                &mut vec![Version::from_str(latest_fuel_core_version).unwrap()],
             );
             std::process::exit(0);
         }
@@ -156,7 +160,7 @@ fn main() -> Result<()> {
         _ => {}
     };
 
-    print_selected_versions(&channel_doc, &mut forc_versions, &mut fuel_core_versions);
+    print_selected_versions(&mut forc_versions, &mut fuel_core_versions);
 
     Ok(())
 }
@@ -190,7 +194,6 @@ hash = "17e255b3f9a293b5f6b991092d43ac19560de9091fcf2913add6958549018b0f"
         assert_eq!(
             expected_str,
             print_selected_versions(
-                &channel_doc,
                 &mut vec![Version::new(0, 17, 0)],
                 &mut vec![Version::new(0, 9, 4)]
             )
@@ -205,7 +208,6 @@ hash = "17e255b3f9a293b5f6b991092d43ac19560de9091fcf2913add6958549018b0f"
         assert_eq!(
             expected_str,
             print_selected_versions(
-                &channel_doc,
                 &mut vec![Version::new(0, 16, 2), Version::new(0, 17, 0)],
                 &mut vec![Version::new(0, 9, 3), Version::new(0, 9, 4)]
             )
@@ -215,10 +217,7 @@ hash = "17e255b3f9a293b5f6b991092d43ac19560de9091fcf2913add6958549018b0f"
     fn test_parse_both_empty() {
         let channel_doc = example_channel().parse::<Document>().expect("Invalid doc");
 
-        assert_eq!(
-            "",
-            print_selected_versions(&channel_doc, &mut vec![], &mut vec![])
-        );
+        assert_eq!("", print_selected_versions(&mut vec![], &mut vec![]));
     }
 
     #[test]
@@ -230,7 +229,6 @@ hash = "17e255b3f9a293b5f6b991092d43ac19560de9091fcf2913add6958549018b0f"
         assert_eq!(
             expected_str,
             print_selected_versions(
-                &channel_doc,
                 &mut vec![Version::new(0, 16, 2), Version::new(0, 17, 0)],
                 &mut vec![]
             )

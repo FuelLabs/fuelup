@@ -12,7 +12,6 @@ jobs:
   compare-versions:
     runs-on: ubuntu-latest
     outputs:
-      should_run: ${{ steps.set-vars.outputs.should_run }}
       forc-versions: ${{ steps.set-vars.outputs.forc-versions }}
       fuel-core-versions: ${{ steps.set-vars.outputs.fuel-core-versions }}
     steps:
@@ -37,7 +36,6 @@ jobs:
           cat out
           if [ -s out ]; then
             echo "New versions detected, running tests"
-            echo "::set-output should_run=true"
 
             FORC_VERSIONS=$(head -n 1 out)
             FUEL_CORE_VERSIONS=$(tail -1 out)
@@ -53,4 +51,4 @@ jobs:
     with:
       forc-versions: ${{ needs.compare-versions.outputs.forc-versions }}
       fuel-core-versions: ${{ needs.compare-versions.outputs.fuel-core-versions }}
-    if: needs.compare-versions.outputs.should_run
+    if: needs.compare-versions.outputs.forc-versions != "" && needs.compare-versions.outputs.fuel-core-versions != ""

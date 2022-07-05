@@ -12,9 +12,9 @@ jobs:
   compare-versions:
     runs-on: ubuntu-latest
     outputs:
-      should_run: ${{ steps.set-should-run.outputs.should_run }}
-      forc-versions: ${{ steps.set-versions.outputs.forc-versions }}
-      fuel-core-versions: ${{ steps.set-versions.outputs.fuel-core-versions }}
+      should_run: ${{ steps.set-vars.outputs.should_run }}
+      forc-versions: ${{ steps.set-vars.outputs.forc-versions }}
+      fuel-core-versions: ${{ steps.set-vars.outputs.fuel-core-versions }}
     steps:
       - name: checkout master
         uses: actions/checkout@v3
@@ -23,16 +23,21 @@ jobs:
           profile: minimal
           toolchain: stable
       - uses: Swatinem/rust-cache@v1
-      - id: set-should-run
-        run: echo "::set-output should_run=true"
-      - id: set-versions
+      - id: set-vars
         run: |
           cargo install --debug --path ./scripts/compare-versions
           compare-versions >> out
-          FORC_VERSIONS=$(head -n 1 out)
-          FUEL_CORE_VERSIONS=$(tail -1 out)
-          echo "::set-output name=forc-versions::${FORC_VERSIONS}"
-          echo "::set-output name=fuel-core-versions::${FUEL_CORE_VERSIONS}"
+          if [ -s out ]; then
+            echo "New versions detected, running tests"
+            echo "::set-output should_run=true"
+
+            FORC_VERSIONS=$(head -n 1 out)
+            FUEL_CORE_VERSIONS=$(tail -1 out)
+            echo "::set-output name=forc-versions::${FORC_VERSIONS}"
+            echo "::set-output name=fuel-core-versions::${FUEL_CORE_VERSIONS}"
+          else
+            echo "No new versions; exiting"
+          fi
 
   test-compatibility:
     needs: compare-versions
@@ -40,3 +45,4 @@ jobs:
     with:
       forc-versions: ${{ needs.compare-versions.outputs.forc-versions }}
       fuel-core-versions: ${{ needs.compare-versions.outputs.fuel-core-versions }}
+    if: needs.compare-versions.outputs.should_run

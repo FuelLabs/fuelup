@@ -40,10 +40,12 @@ jobs:
       - name: Skip tests if already incompatible
         run: |
           FORMATTED_STRING="forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}"
-          ls incompatible-versions | grep -x $FORMATTED_STRING
-          if [ -s $FORMATTED_STRING ]; then
-            echo "Versions incompatible; skipping tests and exiting"
-            echo "IS_INCOMPATIBLE=true" >> $GITHUB_ENV
+          if [ -d incompatible-versions ]; then
+            ls incompatible-versions | grep -x $FORMATTED_STRING
+            if [ -s $FORMATTED_STRING ]; then
+              echo "Versions incompatible; skipping tests and exiting"
+              echo "IS_INCOMPATIBLE=true" >> $GITHUB_ENV
+            fi
           fi
 
       - name: Checkout Sway repo

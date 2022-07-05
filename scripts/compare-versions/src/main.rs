@@ -144,11 +144,20 @@ fn main() -> Result<()> {
         .parse::<Document>()
         .expect("invalid channel.toml parsed");
 
-    let mut forc_versions = collect_new_versions(&channel_doc, SWAY_REPO).unwrap();
-    let mut fuel_core_versions = collect_new_versions(&channel_doc, FUEL_CORE_REPO).unwrap();
+    let forc_versions = collect_new_versions(&channel_doc, SWAY_REPO).unwrap();
+    let fuel_core_versions = collect_new_versions(&channel_doc, FUEL_CORE_REPO).unwrap();
 
-    let latest_forc_indexed_version = parse_latest_indexed_version(&channel_doc, "forc");
-    let latest_fuel_core_indexed_version = parse_latest_indexed_version(&channel_doc, "fuel-core");
+    select_versions(&channel_doc, forc_versions, fuel_core_versions);
+    Ok(())
+}
+
+fn select_versions(
+    channel: &Document,
+    mut forc_versions: Vec<Version>,
+    mut fuel_core_versions: Vec<Version>,
+) -> String {
+    let latest_forc_indexed_version = parse_latest_indexed_version(channel, "forc");
+    let latest_fuel_core_indexed_version = parse_latest_indexed_version(channel, "fuel-core");
 
     match (forc_versions.is_empty(), fuel_core_versions.is_empty()) {
         (true, false) => forc_versions.push(latest_forc_indexed_version),
@@ -157,12 +166,10 @@ fn main() -> Result<()> {
             forc_versions.push(latest_forc_indexed_version);
             fuel_core_versions.push(latest_fuel_core_indexed_version);
         }
-        _ => {}
+        _ => return "".to_string(),
     };
 
-    print_selected_versions(&mut forc_versions, &mut fuel_core_versions);
-
-    Ok(())
+    print_selected_versions(&mut forc_versions, &mut fuel_core_versions)
 }
 
 #[cfg(test)]
@@ -189,35 +196,23 @@ hash = "17e255b3f9a293b5f6b991092d43ac19560de9091fcf2913add6958549018b0f"
     #[test]
     fn test_parse_one_each() {
         let channel_doc = example_channel().parse::<Document>().expect("Invalid doc");
-        let expected_str = "[\"0.17.0\"]\n[\"0.9.4\"]";
+        let expected_str = "[\"0.17.0\",\"0.16.2\"]\n[\"0.9.5\",\"0.9.4\"]";
 
         assert_eq!(
             expected_str,
-            print_selected_versions(
-                &mut vec![Version::new(0, 17, 0)],
-                &mut vec![Version::new(0, 9, 4)]
+            select_versions(
+                &channel_doc,
+                vec![Version::new(0, 17, 0)],
+                vec![Version::new(0, 9, 5)]
             )
         )
     }
 
-    #[test]
-    fn test_parse_two_each() {
-        let channel_doc = example_channel().parse::<Document>().expect("Invalid doc");
-        let expected_str = "[\"0.16.2\",\"0.17.0\"]\n[\"0.9.3\",\"0.9.4\"]";
-
-        assert_eq!(
-            expected_str,
-            print_selected_versions(
-                &mut vec![Version::new(0, 16, 2), Version::new(0, 17, 0)],
-                &mut vec![Version::new(0, 9, 3), Version::new(0, 9, 4)]
-            )
-        )
-    }
     #[test]
     fn test_parse_both_empty() {
         let channel_doc = example_channel().parse::<Document>().expect("Invalid doc");
 
-        assert_eq!("", print_selected_versions(&mut vec![], &mut vec![]));
+        assert_eq!("", select_versions(&channel_doc, vec![], vec![]));
     }
 
     #[test]
@@ -228,9 +223,10 @@ hash = "17e255b3f9a293b5f6b991092d43ac19560de9091fcf2913add6958549018b0f"
 
         assert_eq!(
             expected_str,
-            print_selected_versions(
-                &mut vec![Version::new(0, 16, 2), Version::new(0, 17, 0)],
-                &mut vec![]
+            select_versions(
+                &channel_doc,
+                vec![Version::new(0, 16, 2), Version::new(0, 17, 0)],
+                vec![]
             )
         );
     }

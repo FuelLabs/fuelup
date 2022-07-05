@@ -15,7 +15,31 @@ env:
   LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
 
 jobs:
+  setup-test:
+    runs-on: ubuntu-latest
+    outputs:
+      is-incompatible: ${{ steps.set-is-incompatible.outputs.is-incompatible }}
+    steps:
+      - name: Checkout fuelup repo
+        uses: actions/checkout@v3
+        with:
+          repository: fuellabs/fuelup
+          path: .
+          ref: gh-pages
+        
+      - name: Skip tests if already incompatible
+        id: set-is-incompatible
+        run: |
+          FORMATTED_STRING="forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}"
+          ls incompatible-versions | grep -x $FORMATTED_STRING
+          if [ -s $FORMATTED_STRING ]; then
+            echo "Versions incompatible; skipping tests and exiting"
+            echo "::set-output name=is-incompatible::true"
+          fi
+
   test-toolchain-compatibility:
+    needs: setup-test
+    if: ${{ needs.setup-test.outputs.is-incompatible }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false 
@@ -27,6 +51,7 @@ jobs:
         image: ghcr.io/fuellabs/fuel-core:v${{ matrix.fuel-core-version }}
         ports:
           - 4000:4000
+
     steps:
       - name: Checkout Sway repo
         uses: actions/checkout@v3

@@ -51,4 +51,4 @@ jobs:
     with:
       forc-versions: ${{ needs.compare-versions.outputs.forc-versions }}
       fuel-core-versions: ${{ needs.compare-versions.outputs.fuel-core-versions }}
-    if: needs.compare-versions.outputs.forc-versions != "" && needs.compare-versions.outputs.fuel-core-versions != ""
+    if: ${{ needs.compare-versions.outputs.forc-versions != "" && needs.compare-versions.outputs.fuel-core-versions != "" }}

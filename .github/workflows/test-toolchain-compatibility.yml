@@ -35,22 +35,37 @@ jobs:
           path: . 
           ref: v${{ matrix.forc-version }}
 
-      - name: Test compatibility (simulate failure)
-        id: test-compatibility
-        run: |
-          if [ "${{ matrix.fuel-core-version }}" = "0.9.4" ]; then
-            exit 1
-          else
-            exit 0
-          fi
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - uses: Swatinem/rust-cache@v1
+
+      - name: Cargo Run E2E Tests 
+        id: e2e-tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --locked --release --bin test -- --locked
+
+      - name: Build All Tests
+        run: cd test/src/sdk-harness && bash build.sh --locked && cd ../../../
+
+      - name: Cargo Test sway-lib-std
+        id: std-lib-tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --manifest-path ./test/src/sdk-harness/Cargo.toml -- --test-threads=1 --nocapture
 
       - name: Create failure artifact
-        if: ${{ failure() && steps.test-compatibility.conclusion == 'failure' }}
+        if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || steps.std-lib-tests.conclusion == 'failure' )}}
         run: |
           touch incompatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
 
       - name: Upload failure artifact
-        if: ${{ failure() && steps.test-compatibility.conclusion == 'failure' }}
+        if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || steps.std-lib-tests.conclusion == 'failure' ) }}
         uses: actions/upload-artifact@v3
         with:
           name: incompatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}

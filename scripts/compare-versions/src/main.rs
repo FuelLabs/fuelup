@@ -63,7 +63,7 @@ fn collect_new_versions(channel: &Document, repo: &str) -> Result<Vec<Version>> 
         .collect();
 
     // In case something went wrong above, we only want a maximum of 3 versions each so that we do not start too many CI jobs.
-    Ok(new_versions[..MAX_VERSIONS].to_vec())
+    Ok(new_versions[..std::cmp::min(new_versions.len(), MAX_VERSIONS)].to_vec())
 }
 
 fn parse_latest_indexed_version(channel: &Document, package: &str) -> Version {
@@ -109,6 +109,7 @@ fn print_selected_versions<'a>(
         fuel_core_versions_str.trim_end_matches(','),
     );
 
+    print!("{}", output);
     output.to_string()
 }
 

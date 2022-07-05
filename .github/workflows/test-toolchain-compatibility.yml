@@ -26,6 +26,8 @@ env:
 jobs:
   test-toolchain-compatibility:
     runs-on: ubuntu-latest
+    outputs:
+      should-index: ${{ steps.set-should-index.outputs.should-index }}
     strategy:
       fail-fast: false 
       matrix:
@@ -36,7 +38,6 @@ jobs:
         image: ghcr.io/fuellabs/fuel-core:v${{ matrix.fuel-core-version }}
         ports:
           - 4000:4000
-
     steps:
       - name: Checkout fuelup repo
         uses: actions/checkout@v3
@@ -97,28 +98,36 @@ jobs:
 
       - name: Upload failure artifact
         if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || steps.std-lib-tests.conclusion == 'failure' ) }}
+        id: upload-failure-artifact
         uses: actions/upload-artifact@v3
         with:
           name: incompatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
           path: incompatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
 
-      - name: Log success 
+      - name: Create success artifact
         if: ${{ success() }}
         run: |
           touch compatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
 
       - name: Upload success artifact
         if: ${{ success() }}
+        id: upload-success-artifact
         uses: actions/upload-artifact@v3
         with:
           name: compatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
           path: compatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
 
+      - name: Trigger index-versions
+        if: ${{ steps.upload-success-artifact.conclusion == 'success' || steps.upload-failure-artifact.conclusion == 'success' }}
+        id: set-should-index
+        run: echo "::set-output name=should-index::true"
+
+
 
   index-versions:
     name: Log latest compatible versions that passed tests
     needs: test-toolchain-compatibility
-    if: ${{ always() }}
+    if: ${{ always() && needs.test-toolchain-compatibility.outputs.should-index }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

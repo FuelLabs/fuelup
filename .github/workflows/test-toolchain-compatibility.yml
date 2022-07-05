@@ -1,6 +1,14 @@
 name: Test toolchain compatibility (Latest)
 
 on:
+  workflow_dispatch:
+    inputs:
+      forc-versions:
+        required: true
+        type: string
+      fuel-core-versions:
+        required: true
+        type: string
   workflow_call:
     inputs:
       forc-versions:

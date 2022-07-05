@@ -89,7 +89,7 @@ jobs:
   index-versions:
     name: Log latest compatible versions that passed tests
     needs: test-toolchain-compatibility
-    if: ${{ needs.test-toolchain-compatibility.result != "skipped" }}
+    if: needs.test-toolchain-compatibility.result != "skipped"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

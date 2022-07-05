@@ -1,19 +1,31 @@
 use anyhow::Result;
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use std::{io::Read, str::FromStr};
+use std::{collections::HashMap, io::Read, str::FromStr};
 use toml_edit::Document;
 
-pub const GITHUB_API_REPOS_BASE_URL: &str = "https://api.github.com/repos/FuelLabs/";
-pub const ACTIONS_RUNS: &str = "actions/runs";
-pub const SWAY_REPO: &str = "sway";
-pub const FUEL_CORE_REPO: &str = "fuel-core";
-pub const CHANNEL_FUEL_LATEST_TOML_URL: &str =
+const GITHUB_API_REPOS_BASE_URL: &str = "https://api.github.com/repos/FuelLabs/";
+const ACTIONS_RUNS: &str = "actions/runs";
+const SWAY_REPO: &str = "sway";
+const FUEL_CORE_REPO: &str = "fuel-core";
+const CHANNEL_FUEL_LATEST_TOML_URL: &str =
     "https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/channel-fuel-latest.toml";
+const GH_PAGES_TREES_URL: &str =
+    "https://api.github.com/repos/FuelLabs/fuelup/git/trees/gh-pages?recursive=1";
 
 #[derive(Debug, Serialize, Deserialize)]
 struct WorkflowRunApiResponse {
     workflow_runs: Vec<WorkflowRun>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct TreeApiResponse {
+    tree: Vec<File>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct File {
+    path: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -83,19 +95,6 @@ fn print_selected_versions<'a>(
     forc_versions: &mut Vec<Version>,
     fuel_core_versions: &mut Vec<Version>,
 ) -> String {
-    let latest_forc_indexed_version = parse_latest_indexed_version(channel, "forc");
-    let latest_fuel_core_indexed_version = parse_latest_indexed_version(channel, "fuel-core");
-
-    match (forc_versions.is_empty(), fuel_core_versions.is_empty()) {
-        (true, true) => return "".to_string(),
-        (true, false) => forc_versions.push(latest_forc_indexed_version),
-        (false, true) => fuel_core_versions.push(latest_fuel_core_indexed_version),
-        (false, false) => {
-            forc_versions.push(latest_forc_indexed_version);
-            fuel_core_versions.push(latest_fuel_core_indexed_version);
-        }
-    };
-
     let forc_versions_str = forc_versions
         .iter()
         .map(|v| "\"".to_owned() + &v.to_string() + "\",")
@@ -110,26 +109,52 @@ fn print_selected_versions<'a>(
     );
 
     print!("{}", output);
+    // Return output solely for testing purposes
     output.to_string()
+}
+
+fn format_incompatibilities(artifacts: Vec<String>) -> HashMap<String, String> {
+    let arts = ["incompatible-versions/forc-0.17.0@fuel-core-0.9.4"];
+    let incompatible_versions = HashMap::new();
+
+    incompatible_versions
 }
 
 fn main() -> Result<()> {
     let handle = ureq::builder().user_agent("fuelup").build();
-    let toml_resp = handle
-        .get(&CHANNEL_FUEL_LATEST_TOML_URL)
-        .call()
-        .expect(&format!(
-            "Could not download channel-fuel-latest.toml from {}",
-            &CHANNEL_FUEL_LATEST_TOML_URL,
-        ))
-        .into_string()
-        .expect("Could not convert channel to string");
+
+    let toml_resp = match handle.get(&CHANNEL_FUEL_LATEST_TOML_URL).call() {
+        Ok(r) => r
+            .into_string()
+            .expect("Could not convert channel to string"),
+        Err(_) => {
+            eprintln!(
+                "Could not download channel-fuel-latest.toml from {}; re-generating channel.",
+                &CHANNEL_FUEL_LATEST_TOML_URL
+            );
+            std::process::exit(0);
+        }
+    };
+
     let channel_doc = toml_resp
         .parse::<Document>()
         .expect("invalid channel.toml parsed");
 
     let mut forc_versions = collect_new_versions(&channel_doc, SWAY_REPO).unwrap();
     let mut fuel_core_versions = collect_new_versions(&channel_doc, FUEL_CORE_REPO).unwrap();
+
+    let latest_forc_indexed_version = parse_latest_indexed_version(&channel_doc, "forc");
+    let latest_fuel_core_indexed_version = parse_latest_indexed_version(&channel_doc, "fuel-core");
+
+    match (forc_versions.is_empty(), fuel_core_versions.is_empty()) {
+        (true, false) => forc_versions.push(latest_forc_indexed_version),
+        (false, true) => fuel_core_versions.push(latest_fuel_core_indexed_version),
+        (false, false) => {
+            forc_versions.push(latest_forc_indexed_version);
+            fuel_core_versions.push(latest_fuel_core_indexed_version);
+        }
+        _ => {}
+    };
 
     print_selected_versions(&channel_doc, &mut forc_versions, &mut fuel_core_versions);
 

@@ -17,7 +17,6 @@ env:
 
 jobs:
   test-toolchain-compatibility:
-    if: ${{ needs.setup-test.outputs.is-compatible != false }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false 

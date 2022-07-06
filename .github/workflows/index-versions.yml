@@ -33,13 +33,14 @@ jobs:
         run: |
           compare-versions >> out
 
-          echo -e "versions:\n"
-          cat out
           if [ -s out ]; then
             echo -e "\nNew versions detected, running tests"
 
             FORC_VERSIONS=$(head -n 1 out)
             FUEL_CORE_VERSIONS=$(tail -1 out)
+
+            echo $FORC_VERSIONS
+            echo $FUEL_CORE_VERSIONS
 
             echo "::set-output name=should-run::true"
             echo "::set-output name=forc-versions::${FORC_VERSIONS}"

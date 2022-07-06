@@ -68,10 +68,13 @@ jobs:
           command: test
           args: --manifest-path ./test/src/sdk-harness/Cargo.toml -- --test-threads=1 --nocapture
 
+      # We have to explicitly check for:
+      # 1) e2e-tests.concluion == 'failure'
+      # 2) std-lib-tests.conclusion == 'failure'
+      # So that we create failure artifacts if and only if tests fail, and not the setup.
       - name: Create failure artifact
         if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || steps.std-lib-tests.conclusion == 'failure' )}}
-        run: |
-          touch incompatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
+        run: touch incompatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
 
       - name: Upload failure artifact
         if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || steps.std-lib-tests.conclusion == 'failure' ) }}
@@ -81,10 +84,10 @@ jobs:
           name: incompatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
           path: incompatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
 
+      # Success artifacts are created if everything above passed. This marks the 2 versions as compatible.
       - name: Create success artifact
         if: ${{ success() }}
-        run: |
-          touch compatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
+        run: touch compatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
 
       - name: Upload success artifact
         if: ${{ success() }}
@@ -95,7 +98,7 @@ jobs:
           path: compatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
 
   index-versions:
-    name: Log latest compatible versions that passed tests
+    name: Index versions compatibilities
     needs: test-toolchain-compatibility
     if: needs.test-toolchain-compatibility.result != 'skipped'
     runs-on: ubuntu-latest
@@ -106,6 +109,9 @@ jobs:
         with:
           path: versions
 
+      # Here, we decide which versions to mark as compatible or incompatible.
+      # Compatible: the uploaded artifact starting with the name 'compatible*' and is at the top when sorted.
+      # Incompatible: all the uploaded artifacts that has 'incompatible' in file names, followed by their versions.
       - name: Prepare compatible and incompatible versions
         id: prep-versions
         working-directory: versions
@@ -120,12 +126,14 @@ jobs:
               touch ${{ env.INCOMPATIBLE_DIR }}/$version
             done
 
+      # Run index-versions.sh here which generates the channel TOML file with download links and hashes for forc and fuel-core.
       - name: Prepare channel with compatible versions
         run: |
             touch channel-fuel-latest.toml
             mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
             ./.github/workflows/scripts/index-versions.sh ${{ env.LATEST_COMPATIBLE_FORC }} ${{ env.LATEST_COMPATIBLE_FUEL_CORE }}
             cp channel-fuel-latest.toml ${{ env.LATEST_CHANNEL_DIR }}
+        if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
 
       - name: Deploy latest channel
         uses: peaceiris/actions-gh-pages@v3

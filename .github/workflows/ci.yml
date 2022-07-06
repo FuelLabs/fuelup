@@ -33,8 +33,8 @@ jobs:
         with:
           sh_checker_comment: false
           sh_checker_exclude: "src"
-      - name: Attempt fuelup installation through fuelup-init
-        if: github.event_name != 'release'
+      - name: Attempt to install fuelup through fuelup-init.sh
+        if: github.event_name != 'release' && github.event.action != 'published'
         run: ./fuelup-init.sh
 
   cargo-clippy:
@@ -252,19 +252,19 @@ jobs:
           asset_name: ${{ env.ZIP_FILE_NAME }}
           asset_content_type: application/gzipa
 
-  check-fuelup-init-post-release:
-    name: Try installing fuelup via fuelup-init post-release
-    needs: build-release
-    runs-on: ${{ matrix.job.os }}
+  post-release-checks:
+    name: Try fuelup install with fuelup-init
     strategy:
       matrix:
         job:
           - os: ubuntu-latest
           - os: macos-latest
+    runs-on: ${{ matrix.job.os }}
+    if: github.event_name == 'release' && github.event.action == 'published'
+    needs: [cancel-previous-runs, build-release]
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
 
-      - name: Use fuelup-init
-        run: |
-          ./fuelup-init.sh
+      - name: Run fuelup-init
+        run: ./fuelup-init.sh

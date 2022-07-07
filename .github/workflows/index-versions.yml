@@ -45,12 +45,17 @@ jobs:
             while read line
             do
               if [ -d gh-pages/incompatible-versions ] && [ -e gh-pages/incompatible-versions/$line ]; then
-                echo "incompatible: $line"
+                # If an incompatible set is already published onto gh-pages, we do not add it to the matrix input for testing.
+                echo "incompatible versions: $line"
               else
                 if [ -n "$VERSIONS" ]; then
                   VERSIONS+=','
                 fi
 
+                # Next 4 lines is simply splitting the lines received from compare-versions into a JSON object.
+                # example line: forc-0.17.0@fuel-core-0.9.4
+                # result:
+                # {"forc-version":"0.17.0","fuel-core-version":"0.9.4"}
                 FORC_VERSION="$(echo $line | cut -d '@' -f1 | cut -d '-' -f2-)"
                 FUEL_CORE_VERSION="$(echo $line | cut -d '@' -f2- | cut -d '-' -f3-)"
                 JSON_FMT='{"forc-version":"%s","fuel-core-version":"%s"}'

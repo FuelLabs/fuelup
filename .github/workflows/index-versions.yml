@@ -10,11 +10,10 @@ env:
 
 jobs:
   compare-versions:
+    name: Compare versions for testing
     runs-on: ubuntu-latest
     outputs:
-      should-run: ${{ steps.set-vars.outputs.should-run }}
-      forc-versions: ${{ steps.set-vars.outputs.forc-versions }}
-      fuel-core-versions: ${{ steps.set-vars.outputs.fuel-core-versions }}
+      version-matrix: ${{ steps.set-version-matrix.outputs.version-matrix }}
     steps:
       - name: checkout master
         uses: actions/checkout@v3
@@ -22,6 +21,14 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
+
+      - name: Checkout fuelup gh-pages
+        uses: actions/checkout@v3
+        with:
+          repository: fuellabs/fuelup
+          path: .
+          ref: gh-pages
+
       - uses: Swatinem/rust-cache@v1
       - name: Install compare-versions script
         uses: actions-rs/cargo@v1
@@ -29,30 +36,38 @@ jobs:
           command: install
           args: --debug --path ./scripts/compare-versions
       - name: Compare versions and set variables for tests if needed
-        id: set-vars
+        id: set-version-matrix
         run: |
           compare-versions >> out
 
           if [ -s out ]; then
-            echo -e "\nNew versions detected, running tests"
+            VERSIONS=''
+            while read line
+            do
+              if [ -d incompatible-versions ] && [ -e incompatible-versions/$line ]; then
+                echo "incompatible: $line"
+              else
+                if [ -n "$VERSIONS" ]; then
+                  VERSIONS+=','
+                fi
 
-            FORC_VERSIONS=$(head -n 1 out)
-            FUEL_CORE_VERSIONS=$(tail -1 out)
+                FORC_VERSION="$(echo $line | cut -d '@' -f1 | cut -d '-' -f2-)"
+                FUEL_CORE_VERSION="$(echo $line | cut -d '@' -f2- | cut -d '-' -f3-)"
+                JSON_FMT='{"forc-version":"%s","fuel-core-version":"%s"}'
+                VERSIONS+=$(printf "$JSON_FMT" "$FORC_VERSION" "$FUEL_CORE_VERSION")
+              fi
+            done < "./out"
 
-            echo $FORC_VERSIONS
-            echo $FUEL_CORE_VERSIONS
+            echo $VERSIONS
 
-            echo "::set-output name=should-run::true"
-            echo "::set-output name=forc-versions::${FORC_VERSIONS}"
-            echo "::set-output name=fuel-core-versions::${FUEL_CORE_VERSIONS}"
+            echo "::set-output name=version-matrix::{\"job\":[$VERSIONS]}"
           else
-            echo -e "\nNo new versions; exiting"
+            echo -e "\nNo new and untested versions; exiting"
           fi
 
   test-compatibility:
     needs: compare-versions
+    if: ${{ needs.compare-versions.outputs.version-matrix != '{\"job\":['']}' }}
     uses: ./.github/workflows/test-toolchain-compatibility.yml
     with:
-      forc-versions: ${{ needs.compare-versions.outputs.forc-versions }}
-      fuel-core-versions: ${{ needs.compare-versions.outputs.fuel-core-versions }}
-    if: needs.compare-versions.outputs.should-run
+      version-matrix: ${{ needs.compare-versions.outputs.version-matrix }}

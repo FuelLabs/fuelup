@@ -3,18 +3,12 @@ name: Test toolchain compatibility (Latest)
 on:
   workflow_dispatch:
     inputs:
-      forc-versions:
-        required: true
-        type: string
-      fuel-core-versions:
+      version-matrix:
         required: true
         type: string
   workflow_call:
     inputs:
-      forc-versions:
-        required: true
-        type: string
-      fuel-core-versions:
+      version-matrix:
         required: true
         type: string
 
@@ -27,40 +21,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false 
-      matrix:
-        forc-version: ${{ fromJSON(inputs.forc-versions) }}
-        fuel-core-version: ${{ fromJSON(inputs.fuel-core-versions) }} 
+      matrix: ${{ fromJSON(inputs.version-matrix) }}
     services:
       fuel-core:
-        image: ghcr.io/fuellabs/fuel-core:v${{ matrix.fuel-core-version }}
+        image: ghcr.io/fuellabs/fuel-core:v${{ matrix.job.fuel-core-version }}
         ports:
           - 4000:4000
 
     steps:
-      - name: Checkout fuelup gh-pages
-        uses: actions/checkout@v3
-        with:
-          repository: fuellabs/fuelup
-          path: .
-          ref: gh-pages
-
-      - name: Check incompatible versions
-        id: check-incompatibility
-        run: |
-          ls
-          if [ -d incompatible-versions ]; then
-            if [ -e incompatible-versions/forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }} ]; then
-              echo "::set-output name=skip_tests::yes"
-            fi
-          fi
-
       - name: Checkout Sway repo
-        if: ${{ steps.check-incompatibility.outputs.skip_tests != 'yes' }}
         uses: actions/checkout@v3
         with:
           repository: fuellabs/sway
           path: . 
-          ref: v${{ matrix.forc-version }}
+          ref: v${{ matrix.job.forc-version }}
 
       - uses: actions-rs/toolchain@v1
         with:
@@ -70,7 +44,6 @@ jobs:
       - uses: Swatinem/rust-cache@v1
 
       - name: Cargo Run E2E Tests 
-        if: ${{ steps.check-incompatibility.outputs.skip_tests != 'yes' }}
         id: e2e-tests
         uses: actions-rs/cargo@v1
         with:
@@ -78,11 +51,9 @@ jobs:
           args: --locked --release --bin test -- --locked
 
       - name: Build All Tests
-        if: ${{ steps.check-incompatibility.outputs.skip_tests != 'yes' }}
         run: cd test/src/sdk-harness && bash build.sh --locked && cd ../../../
 
       - name: Cargo Test sway-lib-std
-        if: ${{ steps.check-incompatibility.outputs.skip_tests != 'yes' }}
         id: std-lib-tests
         uses: actions-rs/cargo@v1
         with:
@@ -95,28 +66,28 @@ jobs:
       # So that we create failure artifacts if and only if tests fail, and not the setup.
       - name: Create failure artifact
         if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || steps.std-lib-tests.conclusion == 'failure' )}}
-        run: touch incompatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
+        run: touch incompatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
 
       - name: Upload failure artifact
         if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || steps.std-lib-tests.conclusion == 'failure' ) }}
         id: upload-failure-artifact
         uses: actions/upload-artifact@v3
         with:
-          name: incompatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
-          path: incompatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
+          name: incompatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
+          path: incompatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
 
       # Success artifacts are created if everything above passed. This marks the 2 versions as compatible.
       - name: Create success artifact
         if: ${{ success() }}
-        run: touch compatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
+        run: touch compatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
 
       - name: Upload success artifact
         if: ${{ success() }}
         id: upload-success-artifact
         uses: actions/upload-artifact@v3
         with:
-          name: compatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
-          path: compatible-forc-${{ matrix.forc-version }}@fuel-core-${{ matrix.fuel-core-version }}
+          name: compatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
+          path: compatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
 
   index-versions:
     name: Index versions compatibilities

@@ -13,6 +13,7 @@ jobs:
     name: Check versions
     runs-on: ubuntu-latest
     outputs:
+      should-run: ${{ steps.set-version-matrix.outputs.should-run }}
       version-matrix: ${{ steps.set-version-matrix.outputs.version-matrix }}
     steps:
       - name: checkout master
@@ -39,15 +40,15 @@ jobs:
         id: set-version-matrix
         run: |
           compare-versions >> out
-
+          VERSIONS=''
           if [ -s out ]; then
-            VERSIONS=''
             while read line
             do
               if [ -d gh-pages/incompatible-versions ] && [ -e gh-pages/incompatible-versions/$line ]; then
                 # If an incompatible set is already published onto gh-pages, we do not add it to the matrix input for testing.
                 echo "incompatible versions: $line"
               else
+                echo "::set-output name=should-run::true"
                 if [ -n "$VERSIONS" ]; then
                   VERSIONS+=','
                 fi
@@ -67,14 +68,13 @@ jobs:
 
             echo "::set-output name=version-matrix::{\"job\":[$VERSIONS]}"
           else
-            echo "::set-output name=version-matrix::{\"job\":[]}"
             echo -e "\nNo new and untested versions; exiting"
           fi
 
   test-compatibility:
     name: Test compatibility
     needs: compare-versions
-    if: ${{ needs.compare-versions.outputs.version-matrix != '{\"job\":[]}' }}
+    if: ${{ needs.compare-versions.outputs.should-run == 'true' }}
     uses: ./.github/workflows/test-toolchain-compatibility.yml
     with:
       version-matrix: ${{ needs.compare-versions.outputs.version-matrix }}

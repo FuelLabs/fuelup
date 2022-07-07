@@ -88,29 +88,26 @@ fn parse_latest_indexed_version(channel: &Document, package: &str) -> Version {
     .expect(&format!("Could not create version from {}", package))
 }
 
-fn fmt_versions(forc_versions: &str, fuel_core_versions: &str) -> String {
-    format!("[{}]\n[{}]", forc_versions, fuel_core_versions)
+fn fmt_versions(forc_version: &str, fuel_core_version: &str) -> String {
+    format!("forc-{}@fuel-core-{}", forc_version, fuel_core_version)
 }
 
 fn print_selected_versions<'a>(
-    forc_versions: &mut Vec<Version>,
-    fuel_core_versions: &mut Vec<Version>,
+    forc_versions: &[Version],
+    fuel_core_versions: &[Version],
 ) -> String {
-    let forc_versions_str = forc_versions
-        .iter()
-        .map(|v| "\"".to_owned() + &v.to_string() + "\",")
-        .collect::<String>();
-    let fuel_core_versions_str = fuel_core_versions
-        .iter()
-        .map(|v| "\"".to_owned() + &v.to_string() + "\",")
-        .collect::<String>();
-    let output = fmt_versions(
-        forc_versions_str.trim_end_matches(','),
-        fuel_core_versions_str.trim_end_matches(','),
-    );
+    let mut output = String::new();
+
+    for forc in forc_versions {
+        for fuel_core in fuel_core_versions {
+            let formatted_versions = fmt_versions(&forc.to_string(), &fuel_core.to_string());
+            output.push_str(&formatted_versions);
+            output.push_str("\n");
+        }
+    }
 
     print!("{}", output);
-    // Return output solely for testing purposes
+    // Return output for testing purposes
     output.to_string()
 }
 
@@ -130,12 +127,11 @@ fn main() -> Result<()> {
             let sway_runs = get_workflow_runs(SWAY_REPO)?;
             let fuel_core_runs = get_workflow_runs(FUEL_CORE_REPO)?;
 
-            let latest_sway_version = &sway_runs.workflow_runs[0].head_branch[1..];
-            let latest_fuel_core_version = &fuel_core_runs.workflow_runs[0].head_branch[1..];
-            print_selected_versions(
-                &mut vec![Version::from_str(latest_sway_version).unwrap()],
-                &mut vec![Version::from_str(latest_fuel_core_version).unwrap()],
-            );
+            let latest_sway_version =
+                Version::from_str(&sway_runs.workflow_runs[0].head_branch[1..]).unwrap();
+            let latest_fuel_core_version =
+                Version::from_str(&fuel_core_runs.workflow_runs[0].head_branch[1..]).unwrap();
+            print_selected_versions(&[latest_sway_version], &[latest_fuel_core_version]);
             std::process::exit(0);
         }
     };
@@ -176,8 +172,8 @@ fn select_versions(
 mod tests {
     use super::*;
 
-    fn example_channel() -> String {
-        r#"
+    fn example_channel() -> Document {
+        let channel_toml_str = r#"
 [pkg.forc]
 version = "0.16.2"
 [pkg.forc.target.darwin_amd64]
@@ -190,13 +186,14 @@ version = "0.9.4"
 url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.9.4/fuel-core-0.9.4-aarch64-apple-darwin.tar.gz"
 hash = "17e255b3f9a293b5f6b991092d43ac19560de9091fcf2913add6958549018b0f"
 "#
-        .to_string()
+        .to_string();
+        channel_toml_str.parse::<Document>().unwrap()
     }
 
     #[test]
     fn test_parse_one_each() {
-        let channel_doc = example_channel().parse::<Document>().expect("Invalid doc");
-        let expected_str = "[\"0.17.0\",\"0.16.2\"]\n[\"0.9.5\",\"0.9.4\"]";
+        let channel_doc = example_channel();
+        let expected_str = "forc-0.17.0@fuel-core-0.9.5\nforc-0.17.0@fuel-core-0.9.4\nforc-0.16.2@fuel-core-0.9.5\nforc-0.16.2@fuel-core-0.9.4\n";
 
         assert_eq!(
             expected_str,
@@ -210,16 +207,14 @@ hash = "17e255b3f9a293b5f6b991092d43ac19560de9091fcf2913add6958549018b0f"
 
     #[test]
     fn test_parse_both_empty() {
-        let channel_doc = example_channel().parse::<Document>().expect("Invalid doc");
-
+        let channel_doc = example_channel();
         assert_eq!("", select_versions(&channel_doc, vec![], vec![]));
     }
 
     #[test]
-    fn test_parse_empty_version() {
-        let channel_doc = example_channel().parse::<Document>().expect("Invalid doc");
-
-        let expected_str = "[\"0.16.2\",\"0.17.0\"]\n[\"0.9.4\"]";
+    fn test_parse_empty_fuel_core_version() {
+        let channel_doc = example_channel();
+        let expected_str = "forc-0.16.2@fuel-core-0.9.4\nforc-0.17.0@fuel-core-0.9.4\n";
 
         assert_eq!(
             expected_str,

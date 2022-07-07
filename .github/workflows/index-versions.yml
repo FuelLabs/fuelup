@@ -67,6 +67,7 @@ jobs:
 
             echo "::set-output name=version-matrix::{\"job\":[$VERSIONS]}"
           else
+            echo "::set-output name=version-matrix::{\"job\":[]}"
             echo -e "\nNo new and untested versions; exiting"
           fi
 

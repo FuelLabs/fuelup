@@ -22,6 +22,7 @@ jobs:
           access_token: ${{ github.token }}
 
   check-scripts:
+    needs: cancel-previous-runs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -35,6 +36,7 @@ jobs:
           sh_checker_exclude: "src"
 
   try-run-fuelup-init:
+    needs: cancel-previous-runs
     name: Try fuelup installation with fuelup-init
     strategy:
       matrix:

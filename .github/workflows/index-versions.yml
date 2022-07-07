@@ -1,4 +1,4 @@
-name: Check versions and maybe start tests
+name: Check Versions
 
 on:
   push
@@ -10,7 +10,7 @@ env:
 
 jobs:
   compare-versions:
-    name: Compare versions for testing
+    name: Check versions
     runs-on: ubuntu-latest
     outputs:
       version-matrix: ${{ steps.set-version-matrix.outputs.version-matrix }}
@@ -71,6 +71,7 @@ jobs:
           fi
 
   test-compatibility:
+    name: Test compatibility
     needs: compare-versions
     if: ${{ needs.compare-versions.outputs.version-matrix != '{\"job\":['']}' }}
     uses: ./.github/workflows/test-toolchain-compatibility.yml

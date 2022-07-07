@@ -63,7 +63,7 @@ jobs:
               fi
             done < "./out"
 
-            echo $VERSIONS
+            echo "Testing with versions: $VERSIONS"
 
             echo "::set-output name=version-matrix::{\"job\":[$VERSIONS]}"
           else
@@ -73,7 +73,7 @@ jobs:
   test-compatibility:
     name: Test compatibility
     needs: compare-versions
-    if: ${{ needs.compare-versions.outputs.version-matrix != '{\"job\":['']}' }}
+    if: ${{ needs.compare-versions.outputs.version-matrix != '{\"job\":[]}' }}
     uses: ./.github/workflows/test-toolchain-compatibility.yml
     with:
       version-matrix: ${{ needs.compare-versions.outputs.version-matrix }}

@@ -22,6 +22,7 @@ jobs:
           access_token: ${{ github.token }}
 
   check-scripts:
+    needs: cancel-previous-runs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -33,6 +34,19 @@ jobs:
         with:
           sh_checker_comment: false
           sh_checker_exclude: "src"
+
+  try-run-fuelup-init:
+    needs: cancel-previous-runs
+    if: github.event_name != 'release' || github.event.action != 'published'
+    name: Try fuelup installation with fuelup-init
+    strategy:
+      matrix:
+        job:
+          - os: ubuntu-latest
+          - os: macos-latest
+    runs-on: ${{ matrix.job.os }}
+    steps:
+      - uses: actions/checkout@v3
       - name: Attempt to install fuelup through fuelup-init.sh
         run: ./fuelup-init.sh
 
@@ -250,3 +264,19 @@ jobs:
           asset_path: ./${{ env.ZIP_FILE_NAME }}
           asset_name: ${{ env.ZIP_FILE_NAME }}
           asset_content_type: application/gzipa
+
+  post-release-checks:
+    name: Do post-release checks
+    needs: [cancel-previous-runs, build-release]
+    if: github.event_name == 'release' && github.event.action == 'published'
+    strategy:
+      matrix:
+        job:
+          - os: ubuntu-latest
+          - os: macos-latest
+    runs-on: ${{ matrix.job.os }}
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+      - name: Try fuelup installation with fuelup-init
+        run: ./fuelup-init.sh

@@ -278,6 +278,5 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
-
       - name: Try fuelup installation with fuelup-init
         run: ./fuelup-init.sh

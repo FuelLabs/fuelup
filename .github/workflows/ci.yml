@@ -37,6 +37,7 @@ jobs:
 
   try-run-fuelup-init:
     needs: cancel-previous-runs
+    if: github.event_name != 'release' || github.event.action != 'published'
     name: Try fuelup installation with fuelup-init
     strategy:
       matrix:
@@ -47,7 +48,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Attempt to install fuelup through fuelup-init.sh
-        if: github.event_name != 'release' || github.event.action != 'published'
         run: ./fuelup-init.sh
 
   cargo-clippy:

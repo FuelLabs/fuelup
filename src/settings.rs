@@ -95,7 +95,7 @@ impl Settings {
     }
 
     pub(crate) fn parse(toml: &str) -> Result<Self> {
-        let document = toml.parse::<Document>().expect("Invalid doc");
+        let document = toml.parse::<Document>().expect("Invalid toml document");
         Self::from_toml(document)
     }
 

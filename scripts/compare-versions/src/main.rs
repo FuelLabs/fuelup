@@ -143,7 +143,8 @@ fn main() -> Result<()> {
     let forc_versions = collect_new_versions(&channel_doc, SWAY_REPO).unwrap();
     let fuel_core_versions = collect_new_versions(&channel_doc, FUEL_CORE_REPO).unwrap();
 
-    select_versions(&channel_doc, forc_versions, fuel_core_versions);
+    let versions = select_versions(&channel_doc, forc_versions, fuel_core_versions);
+    print_selected_versions(&versions.0, &versions.1);
     Ok(())
 }
 
@@ -151,7 +152,7 @@ fn select_versions(
     channel: &Document,
     mut forc_versions: Vec<Version>,
     mut fuel_core_versions: Vec<Version>,
-) -> String {
+) -> (Vec<Version>, Vec<Version>) {
     let latest_forc_indexed_version = parse_latest_indexed_version(channel, "forc");
     let latest_fuel_core_indexed_version = parse_latest_indexed_version(channel, "fuel-core");
 
@@ -162,10 +163,10 @@ fn select_versions(
             forc_versions.push(latest_forc_indexed_version);
             fuel_core_versions.push(latest_fuel_core_indexed_version);
         }
-        _ => return "".to_string(),
+        (true, true) => {}
     };
 
-    print_selected_versions(&mut forc_versions, &mut fuel_core_versions)
+    (forc_versions, fuel_core_versions)
 }
 
 #[cfg(test)]
@@ -195,20 +196,20 @@ hash = "17e255b3f9a293b5f6b991092d43ac19560de9091fcf2913add6958549018b0f"
         let channel_doc = example_channel();
         let expected_str = "forc-0.17.0@fuel-core-0.9.5\nforc-0.17.0@fuel-core-0.9.4\nforc-0.16.2@fuel-core-0.9.5\nforc-0.16.2@fuel-core-0.9.4\n";
 
+        let versions = select_versions(
+            &channel_doc,
+            vec![Version::new(0, 17, 0)],
+            vec![Version::new(0, 9, 5)],
+        );
         assert_eq!(
             expected_str,
-            select_versions(
-                &channel_doc,
-                vec![Version::new(0, 17, 0)],
-                vec![Version::new(0, 9, 5)]
-            )
+            print_selected_versions(&versions.0, &versions.1)
         )
     }
 
     #[test]
     fn test_parse_both_empty() {
-        let channel_doc = example_channel();
-        assert_eq!("", select_versions(&channel_doc, vec![], vec![]));
+        assert_eq!("", print_selected_versions(&[], &[]));
     }
 
     #[test]
@@ -216,13 +217,14 @@ hash = "17e255b3f9a293b5f6b991092d43ac19560de9091fcf2913add6958549018b0f"
         let channel_doc = example_channel();
         let expected_str = "forc-0.16.2@fuel-core-0.9.4\nforc-0.17.0@fuel-core-0.9.4\n";
 
+        let versions = select_versions(
+            &channel_doc,
+            vec![Version::new(0, 16, 2), Version::new(0, 17, 0)],
+            vec![],
+        );
         assert_eq!(
             expected_str,
-            select_versions(
-                &channel_doc,
-                vec![Version::new(0, 16, 2), Version::new(0, 17, 0)],
-                vec![]
-            )
+            print_selected_versions(&versions.0, &versions.1)
         );
     }
 }

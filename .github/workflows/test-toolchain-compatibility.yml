@@ -121,21 +121,21 @@ jobs:
 
       # Run index-versions.sh here which generates the channel TOML file with download links and hashes for forc and fuel-core.
       - name: Prepare channel with compatible versions
+        if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
         run: |
             touch channel-fuel-latest.toml
             mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
             ./.github/workflows/scripts/index-versions.sh ${{ env.LATEST_COMPATIBLE_FORC }} ${{ env.LATEST_COMPATIBLE_FUEL_CORE }}
             cp channel-fuel-latest.toml ${{ env.LATEST_CHANNEL_DIR }}
-        if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
 
       - name: Deploy latest channel
+        if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ env.LATEST_CHANNEL_DIR }}
           keep_files: true
           destination_dir: ./
-        if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
 
       - name: Deploy incompatible versions
         uses: peaceiris/actions-gh-pages@v3

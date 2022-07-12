@@ -62,7 +62,7 @@ jobs:
           args: --manifest-path ./test/src/sdk-harness/Cargo.toml -- --test-threads=1 --nocapture
 
       # We have to explicitly check for:
-      # 1) e2e-tests.concluion == 'failure'
+      # 1) e2e-tests.conclusion == 'failure'
       # 2) std-lib-tests.conclusion == 'failure'
       # So that we create failure artifacts if and only if tests fail, and not the setup.
       - name: Create failure artifact

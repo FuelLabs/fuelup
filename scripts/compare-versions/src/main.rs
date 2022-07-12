@@ -1,3 +1,19 @@
+//! # `compare-versions`
+//!
+//! This crate queries the GitHub API for forc and fuel-core versions newer than the latest
+//! published versions within channel-fuel-latest.toml and collects these versions along with
+//! the last published version(s). Then it formats these versions into strings and
+//! prints them out to be used as a JSON input into `test-toolchain-compatibility.yml`.
+//!
+//! If only one of `forc` or `fuel-core` has a new release, only the last published version of the
+//! other binary is collected. In this scenario we only need to run tests for that one release vs.
+//! the already published binary.
+//!
+//! If both have new releases, then the last published versions of both binaries are collected.
+//! Reason is that it isn't insufficient to test only the newly released versions, since they may
+//! both fail. We have to also test the new releases against the last published version sets that
+//! we know are compatible, so we can update the channel if necessary.
+
 use anyhow::Result;
 use semver::Version;
 use serde::{Deserialize, Serialize};

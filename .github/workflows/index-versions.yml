@@ -9,6 +9,10 @@ env:
   LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
 
 jobs:
+  # compare-versions: This job runs the compare-version script which collects
+  # latest versions released after the versions found in channel-fuel-latest.toml,
+  # filters out incompatible versions and uses the leftover as inputs to
+  # test-toolchain-compatibility job to run integration tests.
   compare-versions:
     name: Check versions
     runs-on: ubuntu-latest
@@ -41,7 +45,12 @@ jobs:
         run: |
           compare-versions >> out
           VERSIONS=''
+          # If file is empty, we have no new versions and we are done.
           if [ -s out ]; then
+
+            # Read the output of compare-versions line-by-line
+            # for the versions newer than what is published within
+            # channel-fuel-latest.toml
             while read line
             do
               if [ -d gh-pages/incompatible-versions ] && [ -e gh-pages/incompatible-versions/$line ]; then
@@ -54,9 +63,13 @@ jobs:
                 fi
 
                 # Next 4 lines is simply splitting the lines received from compare-versions into a JSON object.
-                # example line: forc-0.17.0@fuel-core-0.9.4
+                # example line: 
+                # forc-0.17.0@fuel-core-0.9.4
                 # result:
                 # {"forc-version":"0.17.0","fuel-core-version":"0.9.4"}
+                #
+                # We append this string to VERSIONS.
+                
                 FORC_VERSION="$(echo $line | cut -d '@' -f1 | cut -d '-' -f2-)"
                 FUEL_CORE_VERSION="$(echo $line | cut -d '@' -f2- | cut -d '-' -f3-)"
                 JSON_FMT='{"forc-version":"%s","fuel-core-version":"%s"}'
@@ -71,6 +84,11 @@ jobs:
             echo -e "\nNo new and untested versions; exiting"
           fi
 
+  # test-compatibility: This job invokes test-toolchain-compatibility with
+  # version-matrix, a JSON string input, to trigger jobs to test compatibility
+  # between forc and fuel-core.
+  #
+  # This is only run if should-run is set to true.
   test-compatibility:
     name: Test compatibility
     needs: compare-versions

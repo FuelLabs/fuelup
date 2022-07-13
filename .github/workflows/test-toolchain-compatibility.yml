@@ -78,7 +78,7 @@ jobs:
       # We have to explicitly check for:
       # 1) e2e-tests.conclusion == 'failure'
       # 2) std-lib-tests.conclusion == 'failure'
-      # So that we create failure artifacts iff tests fail and not anywhere before so that we can retry this workflow
+      # So that we create failure artifacts only if tests fail and not anywhere before so that we can retry this workflow
       # if it fails for other reasons other than tests.
       - name: Create failure artifact
         if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || steps.std-lib-tests.conclusion == 'failure' )}}

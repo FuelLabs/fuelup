@@ -17,7 +17,7 @@ When installing the `latest` channel, fuelup will refer to the `channel-fuel-lat
 
 ## Developer Guide
 
-### Understanding the workflow
+### Understanding the `latest` workflow
 
 _Note: Reading the information below is only really necessary if you wish to contribute to the workflows or want a deeper understanding on how channels are updated_
 

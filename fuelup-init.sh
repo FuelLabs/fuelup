@@ -27,8 +27,8 @@ main() {
     _published_fuelup_version_url="https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/fuelup-version"
     _fuelup_version="$(curl -s $_published_fuelup_version_url)"
     if echo "$_fuelup_version" | grep -q -E '404|400'; then
-	warn "fuelup-version was not found on fuelup gh-pages (https://github.com/FuelLabs/fuelup/tree/gh-pages); falling back to using GitHub API."
-	_fuelup_version="$(curl -s https://api.github.com/repos/FuelLabs/fuelup/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)"
+        warn "fuelup-version was not found on fuelup gh-pages (https://github.com/FuelLabs/fuelup/tree/gh-pages); falling back to using GitHub API."
+        _fuelup_version="$(curl -s https://api.github.com/repos/FuelLabs/fuelup/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)"
     fi
 
     local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/v${_fuelup_version}/fuelup-${_fuelup_version}-${_arch}.tar.gz"

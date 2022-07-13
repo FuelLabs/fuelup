@@ -1,6 +1,7 @@
 use std::{cell::RefCell, path::PathBuf};
+use toml_edit::{value, Document, Table, Value};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{bail, Result};
 
 use crate::file;
 
@@ -65,18 +66,21 @@ pub struct Settings {
     pub default_toolchain: Option<String>,
 }
 
-fn take_value(table: &mut toml::value::Table, key: &str, path: &str) -> Result<toml::Value> {
-    table
-        .remove(key)
-        .ok_or_else(|| anyhow!(format!("missing key: '{}'", path.to_owned() + key)))
+fn take_value(table: &mut Table, key: &str) -> Result<Value> {
+    if let Some(i) = table.remove(key) {
+        i.into_value()
+            .or_else(|_| bail!("Item is None for key: '{}'", key))
+    } else {
+        bail!("missing key: '{}'", key)
+    }
 }
 
-fn get_opt_string(table: &mut toml::value::Table, key: &str, path: &str) -> Result<Option<String>> {
-    if let Ok(v) = take_value(table, key, path) {
-        if let toml::Value::String(s) = v {
-            Ok(Some(s))
+fn get_opt_string(table: &mut Table, key: &str) -> Result<Option<String>> {
+    if let Ok(v) = take_value(table, key) {
+        if let Value::String(s) = v {
+            Ok(Some(s.to_string()))
         } else {
-            bail!("Expected string, got {}", path.to_owned() + key)
+            bail!("Expected string, got {}", key)
         }
     } else {
         Ok(None)
@@ -84,28 +88,29 @@ fn get_opt_string(table: &mut toml::value::Table, key: &str, path: &str) -> Resu
 }
 
 impl Settings {
-    pub(crate) fn from_toml(mut table: toml::value::Table, path: &str) -> Result<Self> {
+    pub(crate) fn from_toml(mut document: Document) -> Result<Self> {
         Ok(Self {
-            default_toolchain: get_opt_string(&mut table, "default_toolchain", path)?,
+            default_toolchain: get_opt_string(document.as_table_mut(), "default_toolchain")?,
         })
     }
 
-    pub(crate) fn parse(data: &str) -> Result<Self> {
-        let value = toml::from_str(data)?;
-        Self::from_toml(value, "")
+    pub(crate) fn parse(toml: &str) -> Result<Self> {
+        let document = toml.parse::<Document>().expect("Invalid toml document");
+        Self::from_toml(document)
     }
 
     pub(crate) fn stringify(self) -> String {
-        toml::Value::Table(self.into_toml()).to_string()
+        self.into_toml().to_string()
     }
 
-    pub(crate) fn into_toml(self) -> toml::value::Table {
-        let mut result = toml::value::Table::new();
+    pub(crate) fn into_toml(self) -> Table {
+        let mut table = Table::new();
 
         if let Some(v) = self.default_toolchain {
-            result.insert("default_toolchain".to_owned(), toml::Value::String(v));
+            table["default_toolchain"] = value(v);
         }
 
-        result
+        table.fmt();
+        table
     }
 }

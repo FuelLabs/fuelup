@@ -90,7 +90,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: incompatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
-          path: ${{ github.workspace }}
+          path: incompatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
 
       # On success, we upload files with the `compatible` prefix.
       #
@@ -105,7 +105,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: compatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
-          path: ${{ github.workspace }}
+          path: compatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
 
   # index-versions: This job will process the artifacts above if testing is not skipped and upload
   # incompatible versions and/or publish a new channel-fuel-latest.toml to gh-pages.

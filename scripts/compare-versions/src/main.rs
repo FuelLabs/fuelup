@@ -10,7 +10,7 @@
 //! the already published binary.
 //!
 //! If both have new releases, then the last published versions of both binaries are collected.
-//! Reason is that it isn't insufficient to test only the newly released versions, since they may
+//! Reason is that it isn't sufficient to test only the newly released versions, since they may
 //! both fail. We have to also test the new releases against the last published version sets that
 //! we know are compatible, so we can update the channel if necessary.
 

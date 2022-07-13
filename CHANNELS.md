@@ -15,6 +15,10 @@ When installing the `latest` channel, fuelup will refer to the `channel-fuel-lat
 3. Selects the latest set of versions that successfully pass the tests.
 4. Publishes the selected versions to the channel-fuel-latest.toml manifest.
 
+### `nightly`
+
+This is a WIP - we aim to support `nightly` channel soon. 
+
 ## Developer Guide
 
 ### Understanding the `latest` workflow

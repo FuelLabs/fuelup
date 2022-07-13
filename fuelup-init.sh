@@ -24,7 +24,8 @@ main() {
     mkdir -p "$FUELUP_DIR/bin"
 
     local _fuelup_version
-    _fuelup_version="$(curl -s https://api.github.com/repos/FuelLabs/fuelup/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)"
+    _published_fuelup_version_url="https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/fuelup-version"
+    _fuelup_version="$(curl -s $_published_fuelup_version_url)"
     local _fuelup_url="https://github.com/FuelLabs/fuelup/releases/download/v${_fuelup_version}/fuelup-${_fuelup_version}-${_arch}.tar.gz"
 
     local _dir

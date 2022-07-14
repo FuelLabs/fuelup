@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::io::Write;
 
 use crate::{
+    channel::Channel,
     commands::check::CheckCommand,
     component::SUPPORTED_PLUGINS,
     config::Config,
@@ -52,18 +53,23 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
     Ok(())
 }
 
+fn collect_versions(channel: Channel) -> Result<HashMap<String, Version>> {
+    let mut latest_versions: HashMap<String, Version> = HashMap::new();
+    for package in channel.packages {
+        latest_versions.insert(package.name.to_string(), package.version.clone());
+    }
+    let fuelup_download_cfg: DownloadCfg = DownloadCfg::new(component::FUELUP, None)?;
+    latest_versions.insert(fuelup_download_cfg.name, fuelup_download_cfg.version);
+    Ok(latest_versions)
+}
+
 pub fn check(command: CheckCommand) -> Result<()> {
     let CheckCommand { verbose } = command;
 
     let cfg = Config::from_env()?;
     let toolchains = cfg.list_toolchains()?;
-    let mut latest_versions: HashMap<String, Version> = HashMap::new();
-    let components = [component::FORC, component::FUEL_CORE, component::FUELUP];
-
-    for &component in &components {
-        let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
-        latest_versions.insert(component.to_string(), download_cfg.version);
-    }
+    let channel = Channel::from_dist_channel("latest")?;
+    let latest_versions = collect_versions(channel)?;
 
     for toolchain in toolchains {
         let toolchain = Toolchain::from(&toolchain);

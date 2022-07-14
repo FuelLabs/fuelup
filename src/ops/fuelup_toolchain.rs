@@ -1,9 +1,8 @@
-use crate::commands::toolchain::InstallCommand;
-use crate::component;
 use crate::download::DownloadCfg;
 use crate::path::settings_file;
 use crate::settings::SettingsFile;
 use crate::toolchain::Toolchain;
+use crate::{channel::Channel, commands::toolchain::InstallCommand};
 use anyhow::Result;
 use std::fmt::Write;
 use tracing::{error, info};
@@ -29,9 +28,12 @@ pub fn install(command: InstallCommand) -> Result<()> {
 
     let mut cfgs: Vec<DownloadCfg> = Vec::new();
 
-    for component in [component::FORC, component::FUEL_CORE].iter() {
-        write!(download_msg, "{} ", component)?;
-        let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
+    let channel = Channel::from_dist_channel("latest")?;
+
+    for package in channel.packages.iter() {
+        write!(download_msg, "{} ", package.name)?;
+        let download_cfg: DownloadCfg =
+            DownloadCfg::new(&package.name, Some(package.version.clone()))?;
         cfgs.push(download_cfg);
     }
 

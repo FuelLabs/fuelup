@@ -1,3 +1,4 @@
+use crate::component::{self};
 use crate::download::DownloadCfg;
 use crate::path::settings_file;
 use crate::settings::SettingsFile;
@@ -24,20 +25,31 @@ pub fn install(command: InstallCommand) -> Result<()> {
 
     let mut errored_bins = String::new();
     let mut installed_bins = String::new();
-    let mut download_msg = String::new();
 
-    let mut cfgs: Vec<DownloadCfg> = Vec::new();
+    let cfgs: Vec<DownloadCfg> = match Channel::from_dist_channel("lateste") {
+        Ok(c) => c
+            .packages
+            .iter()
+            .map(|p| DownloadCfg::new(&p.name, Some(p.version.clone())).unwrap())
+            .collect(),
+        Err(e) => {
+            error!(
+                "Failed to get latest channel {} - fetching versions using GitHub API",
+                e
+            );
+            [component::FORC, component::FUEL_CORE]
+                .iter()
+                .map(|c| DownloadCfg::new(&c, None).unwrap())
+                .collect()
+        }
+    };
 
-    let channel = Channel::from_dist_channel("latest")?;
-
-    for package in channel.packages.iter() {
-        write!(download_msg, "{} ", package.name)?;
-        let download_cfg: DownloadCfg =
-            DownloadCfg::new(&package.name, Some(package.version.clone()))?;
-        cfgs.push(download_cfg);
-    }
-
-    info!("Downloading: {}", download_msg);
+    info!(
+        "Downloading: {}",
+        cfgs.iter()
+            .map(|c| c.name.clone() + " ")
+            .collect::<String>()
+    );
     for cfg in cfgs {
         match toolchain.add_component(cfg) {
             Ok(cfg) => writeln!(installed_bins, "- {} {}", cfg.name, cfg.version)?,

@@ -4,6 +4,7 @@ use anyhow::{bail, Result};
 use semver::Version;
 use tempfile::tempdir_in;
 use toml_edit::{Document, Item};
+use tracing::error;
 
 use crate::{download::download_file, file::read_file, path::fuelup_dir, toolchain::ToolchainName};
 
@@ -17,6 +18,7 @@ pub struct HashedBinary {
 
 impl HashedBinary {
     pub fn from_package(table: &Item) -> Result<Self> {
+        // OK to unwrap since url and hash should be correctly created in the channel toml.
         let url = table["url"].as_str().unwrap();
         let hash = table["hash"].as_str().unwrap();
         Ok(Self {
@@ -35,12 +37,26 @@ pub struct Package {
 
 impl Package {
     pub fn from_channel(name: String, table: &Item) -> Result<Self> {
-        let version = Version::from_str(table["version"].as_str().unwrap())
-            .expect("Failed to convert version from str to semver::Version");
+        let version = Version::from_str(
+            table["version"]
+                .as_str()
+                .expect("Could not read 'version' from package"),
+        )
+        // OK to unwrap since version should be correctly created in the channel toml.
+        .unwrap();
         let mut targets: HashMap<String, HashedBinary> = HashMap::new();
-        for (target, target_table) in table["target"].as_table().unwrap() {
-            let bin = HashedBinary::from_package(target_table)?;
-            targets.insert(target.to_string(), bin);
+        for (target, target_table) in table["target"]
+            .as_table()
+            .expect("Could not read 'target' from package")
+        {
+            if let Ok(bin) = HashedBinary::from_package(target_table) {
+                targets.insert(target.to_string(), bin);
+            } else {
+                error!(
+                    "Could not create representation of binary for target {}",
+                    target
+                )
+            }
         }
 
         Ok(Package {
@@ -85,7 +101,10 @@ impl Channel {
         let table = document.as_table_mut();
         let mut packages = Vec::new();
 
-        for (name, package_table) in table["pkg"].as_table().unwrap() {
+        for (name, package_table) in table["pkg"]
+            .as_table()
+            .expect("Failed to read pkg as table")
+        {
             let package = Package::from_channel(name.to_string(), package_table)?;
             packages.push(package);
         }

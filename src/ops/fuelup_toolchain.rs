@@ -30,19 +30,26 @@ pub fn install(command: InstallCommand) -> Result<()> {
         Ok(c) => c
             .packages
             .iter()
-            .map(|p| DownloadCfg::new(&p.name, Some(p.version.clone())).unwrap())
+            .map(|p| {
+                DownloadCfg::new(&p.name, Some(p.version.clone()))
+                    .expect("Could not create DownloadCfg from a package parsed in latest channel")
+            })
             .collect(),
         Err(e) => {
             error!(
                 "Failed to get latest channel {} - fetching versions using GitHub API",
                 e
             );
-            [component::FORC, component::FUEL_CORE]
+            [component::FORC, component::FUEL_CORE, component::FORC_LSP]
                 .iter()
-                .map(|c| DownloadCfg::new(c, None).unwrap())
+                .map(|c| {
+                    DownloadCfg::new(c, None).expect("Failed to create DownloadCfg from component")
+                })
                 .collect()
         }
     };
+
+    println!("{:?}", cfgs);
 
     info!(
         "Downloading: {}",

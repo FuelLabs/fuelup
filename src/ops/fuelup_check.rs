@@ -54,7 +54,7 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
     Ok(())
 }
 
-fn collect_versions(channel: Channel) -> Result<HashMap<String, Version>> {
+fn collect_versions(channel: Channel) -> HashMap<String, Version> {
     let mut latest_versions: HashMap<String, Version> = HashMap::new();
     for package in channel.packages {
         latest_versions.insert(package.name.to_string(), package.version.clone());
@@ -65,7 +65,7 @@ fn collect_versions(channel: Channel) -> Result<HashMap<String, Version>> {
         error!("Failed to create DownloadCfg for component 'fuelup'; skipping check for 'fuelup'");
     }
 
-    Ok(latest_versions)
+    latest_versions
 }
 
 pub fn check(command: CheckCommand) -> Result<()> {
@@ -74,7 +74,7 @@ pub fn check(command: CheckCommand) -> Result<()> {
     let cfg = Config::from_env()?;
     let toolchains = cfg.list_toolchains()?;
     let latest_versions = match Channel::from_dist_channel(ToolchainName::Latest) {
-        Ok(c) => collect_versions(c).unwrap(),
+        Ok(c) => collect_versions(c),
         Err(e) => {
             error!(
                 "Failed to get latest channel {} - fetching versions using GitHub API",

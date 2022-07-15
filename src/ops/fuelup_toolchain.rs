@@ -26,7 +26,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let mut errored_bins = String::new();
     let mut installed_bins = String::new();
 
-    let cfgs: Vec<DownloadCfg> = match Channel::from_dist_channel("lateste") {
+    let cfgs: Vec<DownloadCfg> = match Channel::from_dist_channel("latest") {
         Ok(c) => c
             .packages
             .iter()

@@ -39,7 +39,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
             );
             [component::FORC, component::FUEL_CORE]
                 .iter()
-                .map(|c| DownloadCfg::new(&c, None).unwrap())
+                .map(|c| DownloadCfg::new(c, None).unwrap())
                 .collect()
         }
     };

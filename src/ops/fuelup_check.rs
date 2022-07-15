@@ -78,7 +78,7 @@ pub fn check(command: CheckCommand) -> Result<()> {
             );
             [component::FORC, component::FUEL_CORE, component::FUELUP]
                 .iter()
-                .map(|&c| (c.to_owned(), DownloadCfg::new(&c, None).unwrap().version))
+                .map(|&c| (c.to_owned(), DownloadCfg::new(c, None).unwrap().version))
                 .collect()
         }
     };

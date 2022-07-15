@@ -58,8 +58,8 @@ pub struct Channel {
 }
 
 impl Channel {
-    pub fn from_dist_channel(name: &str) -> Result<Self> {
-        let channel_url = match ToolchainName::from_str(name)? {
+    pub fn from_dist_channel(name: ToolchainName) -> Result<Self> {
+        let channel_url = match name {
             ToolchainName::Latest => FUELUP_GH_PAGES.to_owned() + "channel-fuel-latest.toml",
         };
         let fuelup_dir = fuelup_dir();

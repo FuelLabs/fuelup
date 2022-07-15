@@ -8,7 +8,7 @@ use crate::{
     component::SUPPORTED_PLUGINS,
     config::Config,
     fmt::{bold, colored_bold},
-    toolchain::Toolchain,
+    toolchain::{Toolchain, ToolchainName},
 };
 use anyhow::Result;
 use semver::Version;
@@ -69,7 +69,7 @@ pub fn check(command: CheckCommand) -> Result<()> {
 
     let cfg = Config::from_env()?;
     let toolchains = cfg.list_toolchains()?;
-    let latest_versions = match Channel::from_dist_channel("latest") {
+    let latest_versions = match Channel::from_dist_channel(ToolchainName::Latest) {
         Ok(c) => collect_versions(c).unwrap(),
         Err(e) => {
             error!(

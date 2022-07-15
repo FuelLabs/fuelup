@@ -1,8 +1,8 @@
-use crate::component::{self};
+use crate::component;
 use crate::download::DownloadCfg;
 use crate::path::settings_file;
 use crate::settings::SettingsFile;
-use crate::toolchain::Toolchain;
+use crate::toolchain::{Toolchain, ToolchainName};
 use crate::{channel::Channel, commands::toolchain::InstallCommand};
 use anyhow::Result;
 use std::fmt::Write;
@@ -26,7 +26,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let mut errored_bins = String::new();
     let mut installed_bins = String::new();
 
-    let cfgs: Vec<DownloadCfg> = match Channel::from_dist_channel("latest") {
+    let cfgs: Vec<DownloadCfg> = match Channel::from_dist_channel(ToolchainName::Latest) {
         Ok(c) => c
             .packages
             .iter()

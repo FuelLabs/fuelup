@@ -49,8 +49,6 @@ pub fn install(command: InstallCommand) -> Result<()> {
         }
     };
 
-    println!("{:?}", cfgs);
-
     info!(
         "Downloading: {}",
         cfgs.iter()

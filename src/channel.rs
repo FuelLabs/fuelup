@@ -8,8 +8,6 @@ use toml_edit::{Document, Item};
 use crate::{download::download_file, file::read_file, path::fuelup_dir, toolchain::ToolchainName};
 
 pub const FUELUP_GH_PAGES: &str = "https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/";
-pub const CHANNEL_LATEST: &str = "latest";
-pub const CHANNELS: &[&str] = &[CHANNEL_LATEST];
 
 #[derive(Debug)]
 pub struct HashedBinary {

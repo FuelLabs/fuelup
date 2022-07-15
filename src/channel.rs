@@ -1,16 +1,13 @@
-use std::{collections::HashMap, str::FromStr};
-
+use crate::constants::{CHANNEL_LATEST_FILE_NAME, FUELUP_GH_PAGES};
 use anyhow::{bail, Result};
 use semver::Version;
+use std::{collections::HashMap, str::FromStr};
 use tempfile::tempdir_in;
 use toml_edit::{Document, Item};
 use tracing::error;
 
 use crate::{download::download_file, file::read_file, path::fuelup_dir, toolchain::ToolchainName};
 
-pub const FUELUP_GH_PAGES: &str = "https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/";
-
-#[derive(Debug)]
 pub struct HashedBinary {
     pub url: String,
     pub hash: String,
@@ -28,7 +25,6 @@ impl HashedBinary {
     }
 }
 
-#[derive(Debug)]
 pub struct Package {
     pub name: String,
     pub version: Version,
@@ -74,16 +70,15 @@ pub struct Channel {
 impl Channel {
     pub fn from_dist_channel(name: ToolchainName) -> Result<Self> {
         let channel_url = match name {
-            ToolchainName::Latest => FUELUP_GH_PAGES.to_owned() + "channel-fuel-latest.toml",
+            ToolchainName::Latest => FUELUP_GH_PAGES.to_owned() + CHANNEL_LATEST_FILE_NAME,
         };
         let fuelup_dir = fuelup_dir();
         let tmp_dir = tempdir_in(&fuelup_dir)?;
         let tmp_dir_path = tmp_dir.path();
-        let toml = match download_file(&channel_url, &tmp_dir_path.join("channel-fuel-latest.toml"))
-        {
+        let toml = match download_file(&channel_url, &tmp_dir_path.join(CHANNEL_LATEST_FILE_NAME)) {
             Ok(_) => {
-                let toml_path = tmp_dir_path.join("channel-fuel-latest.toml");
-                read_file("channel-fuel-latest.toml", &toml_path)?
+                let toml_path = tmp_dir_path.join(CHANNEL_LATEST_FILE_NAME);
+                read_file(CHANNEL_LATEST_FILE_NAME, &toml_path)?
             }
             Err(_) => bail!(
                 "Could not download {} to {}",

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::io::Write;
+use tracing::error;
 
 use crate::{
     channel::Channel,
@@ -68,8 +69,19 @@ pub fn check(command: CheckCommand) -> Result<()> {
 
     let cfg = Config::from_env()?;
     let toolchains = cfg.list_toolchains()?;
-    let channel = Channel::from_dist_channel("latest")?;
-    let latest_versions = collect_versions(channel)?;
+    let latest_versions = match Channel::from_dist_channel("latest") {
+        Ok(c) => collect_versions(c).unwrap(),
+        Err(e) => {
+            error!(
+                "Failed to get latest channel {} - fetching versions using GitHub API",
+                e
+            );
+            [component::FORC, component::FUEL_CORE, component::FUELUP]
+                .iter()
+                .map(|&c| (c.to_owned(), DownloadCfg::new(&c, None).unwrap().version))
+                .collect()
+        }
+    };
 
     for toolchain in toolchains {
         let toolchain = Toolchain::from(&toolchain);

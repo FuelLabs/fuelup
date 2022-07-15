@@ -59,8 +59,12 @@ fn collect_versions(channel: Channel) -> Result<HashMap<String, Version>> {
     for package in channel.packages {
         latest_versions.insert(package.name.to_string(), package.version.clone());
     }
-    let fuelup_download_cfg: DownloadCfg = DownloadCfg::new(component::FUELUP, None)?;
-    latest_versions.insert(fuelup_download_cfg.name, fuelup_download_cfg.version);
+    if let Ok(fuelup_download_cfg) = DownloadCfg::new(component::FUELUP, None) {
+        latest_versions.insert(fuelup_download_cfg.name, fuelup_download_cfg.version);
+    } else {
+        error!("Failed to create DownloadCfg for component 'fuelup'; skipping check for 'fuelup'");
+    }
+
     Ok(latest_versions)
 }
 

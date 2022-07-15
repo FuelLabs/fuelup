@@ -114,7 +114,7 @@ mod tests {
     use crate::file::read_file;
 
     #[test]
-    fn test_channel() {
+    fn test_channel_from_toml() {
         let channel_path = std::env::current_dir()
             .unwrap()
             .join("tests/channel-fuel-latest-example.toml");

@@ -138,15 +138,11 @@ pub fn release_url_prefix(repo: &str) -> String {
 }
 
 pub fn tarball_name(name: &str, version: &Version, target: &str) -> Result<String> {
-    match name.as_ref() {
+    match name {
         component::FORC => Ok(format!("forc-binaries-{}.tar.gz", target)),
 
-        component::FUEL_CORE => Ok(format!(
-            "fuel-core-{}-{}.tar.gz",
-            version.to_string(),
-            target
-        )),
-        component::FUELUP => Ok(format!("fuelup-{}-{}.tar.gz", version.to_string(), target)),
+        component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version, target)),
+        component::FUELUP => Ok(format!("fuelup-{}-{}.tar.gz", version, target)),
         _ => bail!("Unrecognized component: {}", name),
     }
 }

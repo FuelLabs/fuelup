@@ -28,14 +28,23 @@ struct LatestReleaseApiResponse {
 #[derive(Debug, PartialEq, Eq)]
 pub struct DownloadCfg {
     pub name: String,
+    pub target: String,
     pub version: Version,
     release_url: String,
 }
 
 impl DownloadCfg {
-    pub fn new(name: &str, version: Option<Version>) -> Result<DownloadCfg> {
+    pub fn new(
+        name: &str,
+        target: Option<String>,
+        version: Option<Version>,
+    ) -> Result<DownloadCfg> {
         Ok(Self {
             name: name.to_string(),
+            target: match target {
+                Some(target) => target,
+                None => target_from_name(name)?,
+            },
             version: match version {
                 Some(version) => version,
                 None => {
@@ -71,8 +80,8 @@ impl DownloadCfg {
     }
 }
 
-pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
-    match download_cfg.name.as_ref() {
+pub fn target_from_name(name: &str) -> Result<String> {
+    match name {
         component::FORC => {
             let os = match std::env::consts::OS {
                 "macos" => "darwin",
@@ -85,7 +94,7 @@ pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
                 unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
             };
 
-            Ok(format!("forc-binaries-{}_{}.tar.gz", os, architecture))
+            Ok(format!("{}_{}", os, architecture))
         }
 
         component::FUEL_CORE => {
@@ -105,13 +114,7 @@ pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
                 unsupported_os => bail!("Unsupported os: {}", unsupported_os),
             };
 
-            Ok(format!(
-                "fuel-core-{}-{}-{}-{}.tar.gz",
-                &download_cfg.version.to_string(),
-                architecture,
-                vendor,
-                os
-            ))
+            Ok(format!("{}-{}-{}", architecture, vendor, os))
         }
         component::FUELUP => {
             let architecture = match std::env::consts::ARCH {
@@ -130,14 +133,26 @@ pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
                 unsupported_os => bail!("Unsupported os: {}", unsupported_os),
             };
 
-            Ok(format!(
-                "fuelup-{}-{}-{}-{}.tar.gz",
-                &download_cfg.version.to_string(),
-                architecture,
-                vendor,
-                os
-            ))
+            Ok(format!("{}-{}-{}", architecture, vendor, os))
         }
+        _ => bail!("Unrecognized component: {}", name),
+    }
+}
+
+pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
+    match download_cfg.name.as_ref() {
+        component::FORC => Ok(format!("forc-binaries-{}.tar.gz", &download_cfg.target)),
+
+        component::FUEL_CORE => Ok(format!(
+            "fuel-core-{}-{}.tar.gz",
+            &download_cfg.version.to_string(),
+            &download_cfg.target
+        )),
+        component::FUELUP => Ok(format!(
+            "fuelup-{}-{}.tar.gz",
+            &download_cfg.version.to_string(),
+            &download_cfg.target
+        )),
         _ => bail!("Unrecognized component: {}", download_cfg.name),
     }
 }

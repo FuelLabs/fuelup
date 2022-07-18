@@ -1,30 +1,97 @@
-name: Index Version Sets
+name: Check Versions
 
 on:
   schedule:
-    # Run at minute 0 and 30 every hour
+    Run at minute 0 and 30 every hour
     - cron: '0,30 * * * *'
 env:
   LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
 
 jobs:
-  index-version-sets:
+  # compare-versions: This job runs the compare-version script which collects
+  # latest versions released after the versions found in channel-fuel-latest.toml,
+  # filters out incompatible versions and uses the leftover as inputs to
+  # test-toolchain-compatibility job to run integration tests.
+  compare-versions:
+    name: Check versions
     runs-on: ubuntu-latest
+    outputs:
+      should-run: ${{ steps.set-version-matrix.outputs.should-run }}
+      version-matrix: ${{ steps.set-version-matrix.outputs.version-matrix }}
     steps:
       - name: checkout master
         uses: actions/checkout@v3
-
-      - name: Get latest versions and update channel if needed
-        run: |
-          curl -s "https://fuellabs.github.io/fuelup/channel-fuel-latest.toml" -L -o channel-fuel-latest.toml
-          mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
-          ./.github/workflows/scripts/index-versions.sh
-          cp channel-fuel-latest.toml ${{ env.LATEST_CHANNEL_DIR }}
-
-      - name: Deploy latest
-        uses: peaceiris/actions-gh-pages@v3
+      - uses: actions-rs/toolchain@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          keep_files: true
-          publish_dir: ${{ env.LATEST_CHANNEL_DIR }}
-          destination_dir: ./
+          profile: minimal
+          toolchain: stable
+
+      - name: Checkout fuelup gh-pages
+        uses: actions/checkout@v3
+        with:
+          repository: fuellabs/fuelup
+          path: gh-pages
+          ref: gh-pages
+
+      - uses: Swatinem/rust-cache@v1
+      - name: Install compare-versions script
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: --debug --path ./scripts/compare-versions
+      - name: Compare versions and set variables for tests if needed
+        id: set-version-matrix
+        run: |
+          compare-versions >> out
+          VERSIONS=''
+          # If file is empty, we have no new versions and we are done.
+          if [ -s out ]; then
+
+            # Read the output of compare-versions line-by-line
+            # for the versions newer than what is published within
+            # channel-fuel-latest.toml
+            while read line
+            do
+              if [ -d gh-pages/incompatible-versions ] && [ -e gh-pages/incompatible-versions/$line ]; then
+                # If an incompatible set is already published onto gh-pages, we do not add it to the matrix input for testing.
+                echo "incompatible versions: $line"
+              else
+                echo "::set-output name=should-run::true"
+                if [ -n "$VERSIONS" ]; then
+                  VERSIONS+=','
+                fi
+
+                # Next 4 lines is simply splitting the lines received from compare-versions into a JSON object.
+                # example line: 
+                # forc-0.17.0@fuel-core-0.9.4
+                # result:
+                # {"forc-version":"0.17.0","fuel-core-version":"0.9.4"}
+                #
+                # We append this string to VERSIONS.
+                
+                FORC_VERSION="$(echo $line | cut -d '@' -f1 | cut -d '-' -f2-)"
+                FUEL_CORE_VERSION="$(echo $line | cut -d '@' -f2- | cut -d '-' -f3-)"
+                JSON_FMT='{"forc-version":"%s","fuel-core-version":"%s"}'
+                VERSIONS+=$(printf "$JSON_FMT" "$FORC_VERSION" "$FUEL_CORE_VERSION")
+              fi
+            done < "./out"
+
+            echo "Testing with versions: $VERSIONS"
+
+            echo "::set-output name=version-matrix::{\"job\":[$VERSIONS]}"
+          else
+            echo -e "\nNo new and untested versions; exiting"
+          fi
+
+  # test-compatibility: This job invokes test-toolchain-compatibility with
+  # version-matrix, a JSON string input, to trigger jobs to test compatibility
+  # between forc and fuel-core.
+  #
+  # This is only run if should-run is set to true.
+  test-compatibility:
+    name: Test compatibility
+    needs: compare-versions
+    if: ${{ needs.compare-versions.outputs.should-run == 'true' }}
+    uses: ./.github/workflows/test-toolchain-compatibility.yml
+    with:
+      version-matrix: ${{ needs.compare-versions.outputs.version-matrix }}

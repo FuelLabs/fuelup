@@ -42,6 +42,10 @@ To check for updates:
 fuelup check
 ```
 
+## Channels
+
+`fuelup` uses channels to distribute Fuel toolchain binaries. Click [here](https://github.com/FuelLabs/fuelup/blob/master/CHANNELS.md) to read more about channels.
+
 ## License
 
 Apache License, Version 2.0, ([LICENSE](./LICENSE) or <https://www.apache.org/licenses/LICENSE-2.0>)

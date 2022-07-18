@@ -7,6 +7,7 @@ use crate::{
     commands::check::CheckCommand,
     component::SUPPORTED_PLUGINS,
     config::Config,
+    download::target_from_name,
     fmt::{bold, colored_bold},
     toolchain::{Toolchain, ToolchainName},
 };
@@ -59,7 +60,11 @@ fn collect_versions(channel: Channel) -> HashMap<String, Version> {
     for package in channel.packages {
         latest_versions.insert(package.name.to_string(), package.version.clone());
     }
-    if let Ok(fuelup_download_cfg) = DownloadCfg::new(component::FUELUP, None) {
+    if let Ok(fuelup_download_cfg) = DownloadCfg::new(
+        component::FUELUP,
+        target_from_name(component::FUELUP).ok(),
+        None,
+    ) {
         latest_versions.insert(fuelup_download_cfg.name, fuelup_download_cfg.version);
     } else {
         error!("Failed to create DownloadCfg for component 'fuelup'; skipping check for 'fuelup'");
@@ -82,7 +87,14 @@ pub fn check(command: CheckCommand) -> Result<()> {
             );
             [component::FORC, component::FUEL_CORE, component::FUELUP]
                 .iter()
-                .map(|&c| (c.to_owned(), DownloadCfg::new(c, None).unwrap().version))
+                .map(|&c| {
+                    (
+                        c.to_owned(),
+                        DownloadCfg::new(c, target_from_name(c).ok(), None)
+                            .unwrap()
+                            .version,
+                    )
+                })
                 .collect()
         }
     };

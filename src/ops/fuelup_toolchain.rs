@@ -1,5 +1,5 @@
 use crate::component;
-use crate::download::DownloadCfg;
+use crate::download::{target_from_name, DownloadCfg};
 use crate::path::settings_file;
 use crate::settings::SettingsFile;
 use crate::toolchain::{Toolchain, ToolchainName};
@@ -31,8 +31,12 @@ pub fn install(command: InstallCommand) -> Result<()> {
             .packages
             .iter()
             .map(|p| {
-                DownloadCfg::new(&p.name, Some(p.version.clone()))
-                    .expect("Could not create DownloadCfg from a package parsed in latest channel")
+                DownloadCfg::new(
+                    &p.name,
+                    target_from_name(&p.name).ok(),
+                    Some(p.version.clone()),
+                )
+                .expect("Could not create DownloadCfg from a package parsed in latest channel")
             })
             .collect(),
         Err(e) => {
@@ -43,7 +47,8 @@ pub fn install(command: InstallCommand) -> Result<()> {
             [component::FORC, component::FUEL_CORE, component::FORC_LSP]
                 .iter()
                 .map(|c| {
-                    DownloadCfg::new(c, None).expect("Failed to create DownloadCfg from component")
+                    DownloadCfg::new(c, target_from_name(c).ok(), None)
+                        .expect("Failed to create DownloadCfg from component")
                 })
                 .collect()
         }

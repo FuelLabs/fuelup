@@ -10,6 +10,7 @@ use std::{fs, thread};
 use tar::Archive;
 use tracing::{error, info};
 
+use crate::channel::Package;
 use crate::component;
 use crate::constants::{
     FUELUP_RELEASE_DOWNLOAD_URL, FUELUP_REPO, FUEL_CORE_RELEASE_DOWNLOAD_URL, FUEL_CORE_REPO,
@@ -70,6 +71,17 @@ impl DownloadCfg {
             version,
             tarball_name,
             tarball_url,
+        })
+    }
+
+    pub fn from_package(package: Package) -> Result<DownloadCfg> {
+        let target = target_from_name(&package.name)?;
+        Ok(Self {
+            name: package.name.to_string(),
+            target: target.clone(),
+            version: package.version.clone(),
+            tarball_name: tarball_name(&package.name, &package.version, &target)?,
+            tarball_url: package.targets.get(&target).unwrap().url.clone(),
         })
     }
 }

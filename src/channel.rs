@@ -1,6 +1,6 @@
 use crate::{
     constants::{CHANNEL_LATEST_FILE_NAME, FUELUP_GH_PAGES},
-    download::{target_from_name, DownloadCfg},
+    download::DownloadCfg,
 };
 use anyhow::{bail, Result};
 use semver::Version;
@@ -11,6 +11,7 @@ use tracing::error;
 
 use crate::{download::download_file, file::read_file, path::fuelup_dir, toolchain::ToolchainName};
 
+#[derive(Debug)]
 pub struct HashedBinary {
     pub url: String,
     pub hash: String,
@@ -114,12 +115,8 @@ impl Channel {
         self.packages
             .iter()
             .map(|p| {
-                DownloadCfg::new(
-                    &p.name,
-                    target_from_name(&p.name).ok(),
-                    Some(p.version.clone()),
-                )
-                .expect("Could not create DownloadCfg from a package parsed in latest channel")
+                DownloadCfg::from_package(p)
+                    .expect("Could not create DownloadCfg from a package parsed in latest channel")
             })
             .collect()
     }

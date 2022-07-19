@@ -74,7 +74,7 @@ impl DownloadCfg {
         })
     }
 
-    pub fn from_package(package: Package) -> Result<DownloadCfg> {
+    pub fn from_package(package: &Package) -> Result<DownloadCfg> {
         let target = target_from_name(&package.name)?;
         Ok(Self {
             name: package.name.to_string(),
@@ -348,19 +348,28 @@ version = "0.17.0"
 [pkg.forc.target.darwin_amd64]
 url = "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-darwin_amd64.tar.gz"
 hash = "a5a2bedd4cf64e372dae28c435a7902160924424cbc50a6f4b582b5a50134485"
+
+[pkg.forc.target.darwin_arm64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-darwin_arm64.tar.gz"
+hash = "dadc6c0e04fd79c71806848747ca7edd4ba86b14016a93a3af42fe0da9afbc14"
+
+[pkg.forc.target.linux_amd64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-linux_amd64.tar.gz"
+hash = "83f010f8d1185629bd6506139945e3a21f7e927ad470b674da367bafb698b5ce"
+
+[pkg.forc.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-linux_arm64.tar.gz"
+hash = "6008e2421cfd6f40c3dad73466d105f462e1ada56a5c21b34a4bd4a719a35b21"
 "#;
         let mut document = package_toml.parse::<Document>().unwrap();
         let table = document.as_table_mut();
         let package = Package::from_channel("forc".to_string(), &table["pkg"]["forc"]).unwrap();
 
-        let download_cfg = DownloadCfg::from_package(package).unwrap();
+        let download_cfg = DownloadCfg::from_package(&package).unwrap();
         assert_eq!(download_cfg.name, "forc");
         assert_eq!(download_cfg.version, Version::new(0, 17, 0));
-        assert_eq!(download_cfg.target, "darwin_amd64");
-        assert_eq!(download_cfg.tarball_url, "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-darwin_amd64.tar.gz");
-        assert_eq!(
-            download_cfg.tarball_name,
-            "forc-binaries-darwin_amd64.tar.gz"
-        );
+        assert!(download_cfg
+            .tarball_url
+            .starts_with("https://github.com/FuelLabs/sway/releases/download/v0.17.0/"));
     }
 }

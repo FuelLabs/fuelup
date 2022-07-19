@@ -39,7 +39,10 @@ jobs:
       - name: Get latest tag and copy into fuelup-version
         run: |
           mkdir -p ${{ env.FUELUP_VERSION_DIR }}
-          echo ${GITHUB_REF#refs/tags/} >> fuelup-version
+          FUELUP_VERSION="${GITHUB_REF#refs/tags/}"
+          # trim v from tag prefix
+          FUELUP_VERSION="${FUELUP_VERSION#v}"
+          echo $FUELUP_VERSION >> fuelup-version
           cp fuelup-version ${{ env.FUELUP_VERSION_DIR }}
 
       - name: Deploy latest fuelup version

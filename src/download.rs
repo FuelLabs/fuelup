@@ -349,9 +349,7 @@ version = "0.17.0"
 url = "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-darwin_amd64.tar.gz"
 hash = "a5a2bedd4cf64e372dae28c435a7902160924424cbc50a6f4b582b5a50134485"
 "#;
-        let mut document = package_toml
-            .parse::<Document>()
-            .expect("Invalid channel toml");
+        let mut document = package_toml.parse::<Document>().unwrap();
         let table = document.as_table_mut();
         let package = Package::from_channel("forc".to_string(), &table["pkg"]["forc"]).unwrap();
 

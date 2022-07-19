@@ -2,7 +2,7 @@ name: Check Versions
 
 on:
   schedule:
-    Run at minute 0 and 30 every hour
+    # Run at minute 0 and 30 every hour
     - cron: '0,30 * * * *'
 env:
   LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/

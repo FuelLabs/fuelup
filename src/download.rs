@@ -301,6 +301,7 @@ mod tests {
     use super::*;
     use dirs::home_dir;
     use tempfile;
+    use toml_edit::Document;
 
     pub(crate) fn with_toolchain_dir<F>(f: F) -> Result<()>
     where
@@ -336,5 +337,32 @@ mod tests {
             assert!(mock_bin_dir.join("forc-mock-exec-2").metadata().is_ok());
             Ok(())
         })
+    }
+
+    #[test]
+    fn download_cfg_from_package() {
+        let package_toml = r#"
+[pkg.forc]
+version = "0.17.0"
+
+[pkg.forc.target.darwin_amd64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-darwin_amd64.tar.gz"
+hash = "a5a2bedd4cf64e372dae28c435a7902160924424cbc50a6f4b582b5a50134485"
+"#;
+        let mut document = package_toml
+            .parse::<Document>()
+            .expect("Invalid channel toml");
+        let table = document.as_table_mut();
+        let package = Package::from_channel("forc".to_string(), &table["pkg"]["forc"]).unwrap();
+
+        let download_cfg = DownloadCfg::from_package(package).unwrap();
+        assert_eq!(download_cfg.name, "forc");
+        assert_eq!(download_cfg.version, Version::new(0, 17, 0));
+        assert_eq!(download_cfg.target, "darwin_amd64");
+        assert_eq!(download_cfg.tarball_url, "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-darwin_amd64.tar.gz");
+        assert_eq!(
+            download_cfg.tarball_name,
+            "forc-binaries-darwin_amd64.tar.gz"
+        );
     }
 }

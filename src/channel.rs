@@ -131,7 +131,7 @@ mod tests {
     use crate::{download::DownloadCfg, file::read_file};
 
     #[test]
-    fn test_channel_from_toml() {
+    fn channel_from_toml() {
         let channel_path = std::env::current_dir()
             .unwrap()
             .join("tests/channel-fuel-latest-example.toml");
@@ -147,7 +147,7 @@ mod tests {
     }
 
     #[test]
-    fn test_download_cfgs_from_channel() -> Result<()> {
+    fn download_cfgs_from_channel() -> Result<()> {
         let channel_path = std::env::current_dir()
             .unwrap()
             .join("tests/channel-fuel-latest-example.toml");

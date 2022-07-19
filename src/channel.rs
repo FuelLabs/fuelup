@@ -11,7 +11,6 @@ use tracing::error;
 
 use crate::{download::download_file, file::read_file, path::fuelup_dir, toolchain::ToolchainName};
 
-#[derive(Debug)]
 pub struct HashedBinary {
     pub url: String,
     pub hash: String,

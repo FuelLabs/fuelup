@@ -1,4 +1,7 @@
-use crate::constants::{CHANNEL_LATEST_FILE_NAME, FUELUP_GH_PAGES};
+use crate::{
+    constants::{CHANNEL_LATEST_FILE_NAME, FUELUP_GH_PAGES},
+    download::{target_from_name, DownloadCfg},
+};
 use anyhow::{bail, Result};
 use semver::Version;
 use std::{collections::HashMap, str::FromStr};
@@ -106,12 +109,26 @@ impl Channel {
 
         Ok(Self { packages })
     }
+
+    pub fn build_download_configs(self) -> Vec<DownloadCfg> {
+        self.packages
+            .iter()
+            .map(|p| {
+                DownloadCfg::new(
+                    &p.name,
+                    target_from_name(&p.name).ok(),
+                    Some(p.version.clone()),
+                )
+                .expect("Could not create DownloadCfg from a package parsed in latest channel")
+            })
+            .collect()
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::file::read_file;
+    use crate::{download::DownloadCfg, file::read_file};
 
     #[test]
     fn test_channel_from_toml() {
@@ -127,7 +144,22 @@ mod tests {
 
         assert_eq!(channel.packages[1].name, "fuel-core");
         assert_eq!(channel.packages[1].version, Version::new(0, 9, 4));
+    }
 
-        assert!(channel_path.is_file());
+    #[test]
+    fn test_download_cfgs_from_channel() -> Result<()> {
+        let channel_path = std::env::current_dir()
+            .unwrap()
+            .join("tests/channel-fuel-latest-example.toml");
+        let channel_file = read_file("channel-fuel-latest-example", &channel_path).unwrap();
+        let channel = Channel::from_toml(&channel_file).unwrap();
+
+        let cfgs: Vec<DownloadCfg> = channel.build_download_configs();
+        assert_eq!(cfgs.len(), 2);
+        assert_eq!(cfgs[0].name, "forc");
+        assert_eq!(cfgs[0].version, Version::new(0, 17, 0));
+        assert_eq!(cfgs[1].name, "fuel-core");
+        assert_eq!(cfgs[1].version, Version::new(0, 9, 4));
+        Ok(())
     }
 }

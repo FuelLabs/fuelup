@@ -27,18 +27,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let mut installed_bins = String::new();
 
     let cfgs: Vec<DownloadCfg> = match Channel::from_dist_channel(ToolchainName::Latest) {
-        Ok(c) => c
-            .packages
-            .iter()
-            .map(|p| {
-                DownloadCfg::new(
-                    &p.name,
-                    target_from_name(&p.name).ok(),
-                    Some(p.version.clone()),
-                )
-                .expect("Could not create DownloadCfg from a package parsed in latest channel")
-            })
-            .collect(),
+        Ok(c) => c.build_download_configs(),
         Err(e) => {
             error!(
                 "Failed to get latest channel {} - fetching versions using GitHub API",

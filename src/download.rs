@@ -11,6 +11,7 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 use std::{fs, thread};
 use tar::Archive;
+use tracing::warn;
 use tracing::{error, info};
 
 use crate::channel::Package;
@@ -261,6 +262,12 @@ pub fn download_file(url: &str, path: &PathBuf, hasher: Option<&mut Sha256>) -> 
 
 pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path) -> Result<()> {
     info!("Fetching binary from {}", &download_cfg.tarball_url);
+    if download_cfg.hash.is_none() {
+        warn!(
+            "Downloading component {} without verifying checksum",
+            &download_cfg.name
+        );
+    }
 
     let tarball_path = dst_dir_path.join(&download_cfg.tarball_name);
 

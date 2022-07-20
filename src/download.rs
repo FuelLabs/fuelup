@@ -2,6 +2,9 @@ use anyhow::{bail, Result};
 use flate2::read::GzDecoder;
 use semver::Version;
 use serde::{Deserialize, Serialize};
+use sha2::Digest;
+use sha2::Sha256;
+use std::cell::RefCell;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
@@ -33,6 +36,7 @@ pub struct DownloadCfg {
     pub version: Version,
     tarball_name: String,
     tarball_url: String,
+    hash: Option<String>,
 }
 
 impl DownloadCfg {
@@ -71,17 +75,21 @@ impl DownloadCfg {
             version,
             tarball_name,
             tarball_url,
+            hash: None,
         })
     }
 
     pub fn from_package(package: &Package) -> Result<DownloadCfg> {
         let target = target_from_name(&package.name)?;
+        let target_tarball = package.targets.get(&target).unwrap();
+
         Ok(Self {
             name: package.name.to_string(),
             target: target.clone(),
             version: package.version.clone(),
             tarball_name: tarball_name(&package.name, &package.version, &target)?,
-            tarball_url: package.targets.get(&target).unwrap().url.clone(),
+            tarball_url: target_tarball.url.clone(),
+            hash: Some(target_tarball.hash.clone()),
         })
     }
 }
@@ -206,12 +214,13 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
     Ok(())
 }
 
-pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
+pub fn download_file(url: &str, path: &PathBuf, hasher: Option<&mut Sha256>) -> Result<()> {
     const RETRY_ATTEMPTS: u8 = 4;
     const RETRY_DELAY_SECS: u64 = 3;
 
     let handle = ureq::builder().user_agent("fuelup").build();
     let mut file = OpenOptions::new().write(true).create(true).open(&path)?;
+    let hasher = RefCell::new(hasher);
 
     for _ in 1..RETRY_ATTEMPTS {
         match handle.get(url).call() {
@@ -226,6 +235,10 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
                         e
                     )
                 };
+
+                if let Some(h) = hasher.borrow_mut().as_mut() {
+                    h.update(data);
+                }
                 return Ok(());
             }
             Err(ureq::Error::Status(404, r)) => {
@@ -251,12 +264,22 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path)
 
     let tarball_path = dst_dir_path.join(&download_cfg.tarball_name);
 
-    if download_file(&download_cfg.tarball_url, &tarball_path).is_err() {
+    let mut hasher = Sha256::new();
+    if download_file(&download_cfg.tarball_url, &tarball_path, Some(&mut hasher)).is_err() {
         bail!(
             "Failed to download {} - the release might not be ready yet.",
             &download_cfg.tarball_name
         );
     };
+
+    let actual_hash = format!("{:x}", hasher.finalize());
+    if download_cfg.hash.is_some() && (&actual_hash != download_cfg.hash.as_ref().unwrap()) {
+        bail!(
+            "Attempt to verify sha256 checksum failed:\ndownloaded file: {}\npublished sha256 hash: {}",
+            &actual_hash,
+            download_cfg.hash.as_ref().unwrap()
+        )
+    }
 
     unpack(&tarball_path, dst_dir_path)?;
 

@@ -78,7 +78,11 @@ impl Channel {
         let fuelup_dir = fuelup_dir();
         let tmp_dir = tempdir_in(&fuelup_dir)?;
         let tmp_dir_path = tmp_dir.path();
-        let toml = match download_file(&channel_url, &tmp_dir_path.join(CHANNEL_LATEST_FILE_NAME)) {
+        let toml = match download_file(
+            &channel_url,
+            &tmp_dir_path.join(CHANNEL_LATEST_FILE_NAME),
+            None,
+        ) {
             Ok(_) => {
                 let toml_path = tmp_dir_path.join(CHANNEL_LATEST_FILE_NAME);
                 read_file(CHANNEL_LATEST_FILE_NAME, &toml_path)?

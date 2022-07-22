@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Result};
 use flate2::read::GzDecoder;
 use semver::Version;
 use serde::{Deserialize, Serialize};
@@ -43,13 +43,9 @@ impl DownloadCfg {
     ) -> Result<DownloadCfg> {
         let version = match version {
             Some(version) => version,
-            None => {
-                if let Ok(result) = get_latest_tag(name) {
-                    result
-                } else {
-                    bail!("Error getting latest tag for component: {}", name);
-                }
-            }
+            None => get_latest_tag(name).map_err(|e| {
+                anyhow!("Error getting latest tag for component: {:?}: {}", name, e)
+            })?,
         };
         let target = match target {
             Some(target) => target,

@@ -112,7 +112,7 @@ jobs:
   index-versions:
     name: Index versions compatibilities
     needs: test-toolchain-compatibility
-    if: needs.test-toolchain-compatibility.result != 'skipped'
+    if: ${{ always() && needs.test-toolchain-compatibility.result != 'skipped' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -122,7 +122,7 @@ jobs:
           path: versions
 
       # Here, we decide which versions to mark as compatible or incompatible.
-      # Compatible: the uploaded artifact starting with the name 'compatible*' and is at the top when sorted.
+      # Compatible: the uploaded artifact starting with the name 'compatible' and is at the top when sorted.
       # We only care about the latest version set that passed tests here.
       #
       # Incompatible: all the uploaded artifacts that has 'incompatible' in file names, followed by their versions.
@@ -132,7 +132,7 @@ jobs:
         id: prep-versions
         working-directory: versions
         run: |
-            COMPATIBLE_VERSIONS=$(ls -1 | grep "compatible*" | sort -rV | head -n 1)
+            COMPATIBLE_VERSIONS=$(ls -1 | grep "^compatible*" | sort -rV | head -n 1)
             echo "LATEST_COMPATIBLE_FORC=$(echo $COMPATIBLE_VERSIONS | cut -d '@' -f1 | cut -d '-' -f3-)" >> $GITHUB_ENV
             echo "LATEST_COMPATIBLE_FUEL_CORE=$(echo $COMPATIBLE_VERSIONS | cut -d '@' -f2 | cut -d '-' -f3)" >> $GITHUB_ENV
 

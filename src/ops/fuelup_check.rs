@@ -10,7 +10,7 @@ use crate::{
     config::Config,
     download::target_from_name,
     fmt::{bold, colored_bold},
-    toolchain::{Toolchain, ToolchainName},
+    toolchain::{DistToolchainName, Toolchain},
 };
 use anyhow::Result;
 use semver::Version;
@@ -93,7 +93,8 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
 }
 
 pub fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
-    let latest_versions = match Channel::from_dist_channel(&ToolchainName::from_str(toolchain)?) {
+    let latest_versions = match Channel::from_dist_channel(&DistToolchainName::from_str(toolchain)?)
+    {
         Ok(c) => collect_versions(c),
         Err(e) => {
             error!(
@@ -114,7 +115,7 @@ pub fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
         }
     };
 
-    let toolchain = Toolchain::from(toolchain);
+    let toolchain = Toolchain::from(toolchain)?;
     bold(|s| writeln!(s, "{}", &toolchain.name));
     for component in [component::FORC, component::FUEL_CORE] {
         let component_executable = toolchain.path.join(component);

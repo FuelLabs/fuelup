@@ -20,8 +20,8 @@ use crate::{component, download::DownloadCfg};
 
 fn collect_versions(channel: Channel) -> HashMap<String, Version> {
     let mut latest_versions: HashMap<String, Version> = HashMap::new();
-    for package in channel.packages {
-        latest_versions.insert(package.name.to_string(), package.version.clone());
+    for (name, package) in channel.pkg.into_iter() {
+        latest_versions.insert(name, package.version);
     }
 
     latest_versions
@@ -41,11 +41,7 @@ fn check_fuelup() -> Result<()> {
             println!(" : {}", FUELUP_VERSION);
         } else {
             colored_bold(Color::Yellow, |s| write!(s, "Update available"));
-            println!(
-                " : {} -> {}",
-                FUELUP_VERSION,
-                fuelup_download_cfg.version.to_string()
-            );
+            println!(" : {} -> {}", FUELUP_VERSION, fuelup_download_cfg.version);
         };
     } else {
         error!("Failed to create DownloadCfg for component 'fuelup'; skipping check for 'fuelup'");

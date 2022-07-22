@@ -71,7 +71,7 @@ pub struct Channel {
 }
 
 impl Channel {
-    pub fn from_dist_channel(name: ToolchainName) -> Result<Self> {
+    pub fn from_dist_channel(name: &ToolchainName) -> Result<Self> {
         let channel_url = match name {
             ToolchainName::Latest => FUELUP_GH_PAGES.to_owned() + CHANNEL_LATEST_FILE_NAME,
         };

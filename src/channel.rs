@@ -3,6 +3,7 @@ use crate::{
     download::DownloadCfg,
 };
 use anyhow::{bail, Result};
+
 use semver::Version;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -99,9 +100,33 @@ mod tests {
 
         assert_eq!(channel.pkg.keys().len(), 2);
         assert!(channel.pkg.contains_key("forc"));
-        assert!(channel.pkg.contains_key("fuel-core"));
         assert_eq!(channel.pkg["forc"].version, Version::new(0, 17, 0));
+        assert!(channel.pkg.contains_key("fuel-core"));
         assert_eq!(channel.pkg["fuel-core"].version, Version::new(0, 9, 4));
+
+        let targets = &channel.pkg["forc"].target;
+        assert_eq!(targets.len(), 4);
+
+        for target in targets.keys() {
+            assert!(targets[target].url != "");
+            assert!(targets[target].hash != "");
+        }
+        assert!(targets.contains_key("darwin_amd64"));
+        assert!(targets.contains_key("darwin_arm64"));
+        assert!(targets.contains_key("linux_amd64"));
+        assert!(targets.contains_key("linux_arm64"));
+
+        let targets = &channel.pkg["fuel-core"].target;
+        assert_eq!(targets.len(), 4);
+
+        for target in targets.keys() {
+            assert!(targets[target].url != "");
+            assert!(targets[target].hash != "");
+        }
+        assert!(targets.contains_key("aarch64-apple-darwin"));
+        assert!(targets.contains_key("aarch64-unknown-linux-gnu"));
+        assert!(targets.contains_key("x86_64-apple-darwin"));
+        assert!(targets.contains_key("x86_64-unknown-linux-gnu"));
     }
 
     #[test]

@@ -1,6 +1,5 @@
 use anyhow::{bail, Result};
 use std::fmt;
-use std::path::Path;
 use std::path::PathBuf;
 use std::str::FromStr;
 use tracing::info;
@@ -75,7 +74,7 @@ impl Toolchain {
         let toolchain = format!("{}-{}", name, target);
         let path = toolchain_bin_dir(&toolchain);
         Ok(Self {
-            name: toolchain.to_string(),
+            name: toolchain,
             path,
         })
     }

@@ -9,7 +9,9 @@ use tempfile::tempdir_in;
 use toml_edit::{Document, Item};
 use tracing::error;
 
-use crate::{download::download_file, file::read_file, path::fuelup_dir, toolchain::ToolchainName};
+use crate::{
+    download::download_file, file::read_file, path::fuelup_dir, toolchain::DistToolchainName,
+};
 
 pub struct HashedBinary {
     pub url: String,
@@ -71,9 +73,9 @@ pub struct Channel {
 }
 
 impl Channel {
-    pub fn from_dist_channel(name: &ToolchainName) -> Result<Self> {
+    pub fn from_dist_channel(name: &DistToolchainName) -> Result<Self> {
         let channel_url = match name {
-            ToolchainName::Latest => FUELUP_GH_PAGES.to_owned() + CHANNEL_LATEST_FILE_NAME,
+            DistToolchainName::Latest => FUELUP_GH_PAGES.to_owned() + CHANNEL_LATEST_FILE_NAME,
         };
         let fuelup_dir = fuelup_dir();
         let tmp_dir = tempdir_in(&fuelup_dir)?;

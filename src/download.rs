@@ -290,8 +290,6 @@ pub fn unpack_bins(dir: &Path, dst_dir: &Path) -> Result<Vec<PathBuf>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::channel::Channel;
-
     use super::*;
     use dirs::home_dir;
     use tempfile;

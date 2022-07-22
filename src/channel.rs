@@ -108,8 +108,8 @@ mod tests {
         assert_eq!(targets.len(), 4);
 
         for target in targets.keys() {
-            assert!(targets[target].url != "");
-            assert!(targets[target].hash != "");
+            assert!(!targets[target].url.is_empty());
+            assert!(!targets[target].hash.is_empty());
         }
         assert!(targets.contains_key("darwin_amd64"));
         assert!(targets.contains_key("darwin_arm64"));
@@ -120,8 +120,8 @@ mod tests {
         assert_eq!(targets.len(), 4);
 
         for target in targets.keys() {
-            assert!(targets[target].url != "");
-            assert!(targets[target].hash != "");
+            assert!(!targets[target].url.is_empty());
+            assert!(!targets[target].hash.is_empty());
         }
         assert!(targets.contains_key("aarch64-apple-darwin"));
         assert!(targets.contains_key("aarch64-unknown-linux-gnu"));

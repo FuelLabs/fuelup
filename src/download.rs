@@ -36,11 +36,7 @@ pub struct DownloadCfg {
 }
 
 impl DownloadCfg {
-    pub fn new(
-        name: &str,
-        target: Option<String>,
-        version: Option<Version>,
-    ) -> Result<DownloadCfg> {
+    pub fn new(name: &str, target: Option<String>, version: Option<Version>) -> Result<Self> {
         let version = match version {
             Some(version) => version,
             None => get_latest_tag(name).map_err(|e| {
@@ -70,7 +66,7 @@ impl DownloadCfg {
         })
     }
 
-    pub fn from_package(package: &Package) -> Result<DownloadCfg> {
+    pub fn from_package(package: &Package) -> Result<Self> {
         let target = target_from_name(&package.name)?;
         Ok(Self {
             name: package.name.to_string(),

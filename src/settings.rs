@@ -78,7 +78,7 @@ fn take_value(table: &mut Table, key: &str) -> Result<Value> {
 fn get_opt_string(table: &mut Table, key: &str) -> Result<Option<String>> {
     if let Ok(v) = take_value(table, key) {
         if let Value::String(s) = v {
-            Ok(Some(s.to_string()))
+            Ok(Some(s.value().to_string()))
         } else {
             bail!("Expected string, got {}", key)
         }

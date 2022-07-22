@@ -66,14 +66,14 @@ impl DownloadCfg {
         })
     }
 
-    pub fn from_package(package: &Package) -> Result<Self> {
-        let target = target_from_name(&package.name)?;
+    pub fn from_package(name: &str, package: Package) -> Result<Self> {
+        let target = target_from_name(name)?;
         Ok(Self {
-            name: package.name.to_string(),
+            name: name.to_string(),
             target: target.clone(),
             version: package.version.clone(),
-            tarball_name: tarball_name(&package.name, &package.version, &target)?,
-            tarball_url: package.targets.get(&target).unwrap().url.clone(),
+            tarball_name: tarball_name(name, &package.version, &target)?,
+            tarball_url: package.target[&target].url.clone(),
         })
     }
 }
@@ -290,10 +290,11 @@ pub fn unpack_bins(dir: &Path, dst_dir: &Path) -> Result<Vec<PathBuf>> {
 
 #[cfg(test)]
 mod tests {
+    use crate::channel::Channel;
+
     use super::*;
     use dirs::home_dir;
     use tempfile;
-    use toml_edit::Document;
 
     pub(crate) fn with_toolchain_dir<F>(f: F) -> Result<()>
     where
@@ -329,39 +330,5 @@ mod tests {
             assert!(mock_bin_dir.join("forc-mock-exec-2").metadata().is_ok());
             Ok(())
         })
-    }
-
-    #[test]
-    fn download_cfg_from_package() {
-        let package_toml = r#"
-[pkg.forc]
-version = "0.17.0"
-
-[pkg.forc.target.darwin_amd64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-darwin_amd64.tar.gz"
-hash = "a5a2bedd4cf64e372dae28c435a7902160924424cbc50a6f4b582b5a50134485"
-
-[pkg.forc.target.darwin_arm64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-darwin_arm64.tar.gz"
-hash = "dadc6c0e04fd79c71806848747ca7edd4ba86b14016a93a3af42fe0da9afbc14"
-
-[pkg.forc.target.linux_amd64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-linux_amd64.tar.gz"
-hash = "83f010f8d1185629bd6506139945e3a21f7e927ad470b674da367bafb698b5ce"
-
-[pkg.forc.target.linux_arm64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-linux_arm64.tar.gz"
-hash = "6008e2421cfd6f40c3dad73466d105f462e1ada56a5c21b34a4bd4a719a35b21"
-"#;
-        let mut document = package_toml.parse::<Document>().unwrap();
-        let table = document.as_table_mut();
-        let package = Package::from_channel("forc".to_string(), &table["pkg"]["forc"]).unwrap();
-
-        let download_cfg = DownloadCfg::from_package(&package).unwrap();
-        assert_eq!(download_cfg.name, "forc");
-        assert_eq!(download_cfg.version, Version::new(0, 17, 0));
-        assert!(download_cfg
-            .tarball_url
-            .starts_with("https://github.com/FuelLabs/sway/releases/download/v0.17.0/"));
     }
 }

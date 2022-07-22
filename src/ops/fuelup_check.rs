@@ -4,7 +4,7 @@ use std::str::FromStr;
 use tracing::error;
 
 use crate::{
-    channel::{Channel, OFFICIAL_CHANNELS},
+    channel::Channel,
     commands::check::CheckCommand,
     component::SUPPORTED_PLUGINS,
     config::Config,

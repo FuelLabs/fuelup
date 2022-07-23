@@ -137,10 +137,6 @@ pub fn target_from_name(name: &str) -> Result<String> {
     }
 }
 
-pub fn release_url_prefix(repo: &str) -> String {
-    format!("{}{}/{}", GITHUB_API_REPOS_BASE_URL, repo, RELEASES_LATEST)
-}
-
 pub fn tarball_name(name: &str, version: &Version, target: &str) -> Result<String> {
     match name {
         component::FORC => Ok(format!("forc-binaries-{}.tar.gz", target)),

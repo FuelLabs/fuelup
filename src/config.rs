@@ -23,6 +23,7 @@ impl Config {
                 .filter_map(io::Result::ok)
                 .filter(|e| {
                     e.file_type().map(|f| f.is_dir()).unwrap_or(false)
+                        // TODO: match nightly/stable when channels are available
                         && e.file_name().to_string_lossy().starts_with("latest")
                 })
                 .map(|e| e.file_name().into_string().ok().unwrap_or_default())

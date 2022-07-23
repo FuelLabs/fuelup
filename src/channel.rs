@@ -1,18 +1,16 @@
 use crate::{
     constants::{CHANNEL_LATEST_FILE_NAME, FUELUP_GH_PAGES},
-    download::DownloadCfg,
+    download::{download_file, DownloadCfg},
+    file::read_file,
+    path::fuelup_dir,
+    toolchain::DistToolchainName,
 };
 use anyhow::{bail, Result};
-
 use semver::Version;
 use serde::Deserialize;
 use std::collections::HashMap;
 use tempfile::tempdir_in;
-use toml_edit::{de, Item};
-
-use crate::{
-    download::download_file, file::read_file, path::fuelup_dir, toolchain::DistToolchainName,
-};
+use toml_edit::de;
 
 #[derive(Debug, Deserialize)]
 pub struct HashedBinary {
@@ -29,18 +27,6 @@ pub struct Channel {
 pub struct Package {
     pub target: HashMap<String, HashedBinary>,
     pub version: Version,
-}
-
-impl HashedBinary {
-    pub fn from_package(table: &Item) -> Result<Self> {
-        // OK to unwrap since url and hash should be correctly created in the channel toml.
-        let url = table["url"].as_str().unwrap();
-        let hash = table["hash"].as_str().unwrap();
-        Ok(Self {
-            url: url.to_string(),
-            hash: hash.to_string(),
-        })
-    }
 }
 
 impl Channel {

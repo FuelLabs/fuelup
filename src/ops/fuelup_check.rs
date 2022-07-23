@@ -27,29 +27,6 @@ fn collect_versions(channel: Channel) -> HashMap<String, Version> {
     latest_versions
 }
 
-fn check_fuelup() -> Result<()> {
-    const FUELUP_VERSION: &str = clap::crate_version!();
-
-    if let Ok(fuelup_download_cfg) = DownloadCfg::new(
-        component::FUELUP,
-        target_from_name(component::FUELUP).ok(),
-        None,
-    ) {
-        bold(|s| write!(s, "{} - ", component::FUELUP));
-        if FUELUP_VERSION == fuelup_download_cfg.version.to_string() {
-            colored_bold(Color::Green, |s| write!(s, "Up to date"));
-            println!(" : {}", FUELUP_VERSION);
-        } else {
-            colored_bold(Color::Yellow, |s| write!(s, "Update available"));
-            println!(" : {} -> {}", FUELUP_VERSION, fuelup_download_cfg.version);
-        };
-    } else {
-        error!("Failed to create DownloadCfg for component 'fuelup'; skipping check for 'fuelup'");
-    }
-
-    Ok(())
-}
-
 fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -> Result<()> {
     let plugin_executable = toolchain.path.join(&plugin);
     match std::process::Command::new(&plugin_executable)
@@ -88,77 +65,6 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
     Ok(())
 }
 
-pub fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
-    let latest_versions = match Channel::from_dist_channel(&DistToolchainName::from_str(toolchain)?)
-    {
-        Ok(c) => collect_versions(c),
-        Err(e) => {
-            error!(
-                "Failed to get latest channel {} - fetching versions using GitHub API",
-                e
-            );
-            [component::FORC, component::FUEL_CORE, component::FUELUP]
-                .iter()
-                .map(|&c| {
-                    (
-                        c.to_owned(),
-                        DownloadCfg::new(c, target_from_name(c).ok(), None)
-                            .unwrap()
-                            .version,
-                    )
-                })
-                .collect()
-        }
-    };
-
-    let toolchain = Toolchain::from(toolchain)?;
-    bold(|s| writeln!(s, "{}", &toolchain.name));
-    for component in [component::FORC, component::FUEL_CORE] {
-        let component_executable = toolchain.path.join(component);
-
-        match std::process::Command::new(&component_executable)
-            .arg("--version")
-            .output()
-        {
-            Ok(o) => {
-                let version = Version::parse(
-                    String::from_utf8_lossy(&o.stdout)
-                        .split_whitespace()
-                        .nth(1)
-                        .expect("expected version"),
-                )?;
-
-                bold(|s| write!(s, "  {} - ", &component));
-                if version == latest_versions[component] {
-                    colored_bold(Color::Green, |s| write!(s, "Up to date"));
-                    println!(" : {}", version);
-                } else {
-                    colored_bold(Color::Yellow, |s| write!(s, "Update available"));
-                    println!(" : {} -> {}", version, latest_versions[component]);
-                }
-            }
-            Err(e) => {
-                print!("  ");
-                bold(|s| write!(s, "{}", &component));
-                print!(" - ");
-                if component_executable.exists() {
-                    println!("execution error - {}", e);
-                } else {
-                    println!("not found");
-                }
-            }
-        };
-
-        if verbose && component == component::FORC {
-            for plugin in SUPPORTED_PLUGINS {
-                check_plugin(&toolchain, plugin, &latest_versions[component::FORC])?;
-            }
-        }
-    }
-
-    Ok(())
-}
-
 pub fn check(command: CheckCommand) -> Result<()> {
     let CheckCommand { verbose } = command;
 
@@ -166,9 +72,91 @@ pub fn check(command: CheckCommand) -> Result<()> {
     let toolchains = cfg.list_official_toolchains()?;
 
     for toolchain in toolchains {
-        check_toolchain(&toolchain, verbose)?;
-    }
-    check_fuelup()?;
+        let latest_versions =
+            match Channel::from_dist_channel(&DistToolchainName::from_str(&toolchain)?) {
+                Ok(c) => collect_versions(c),
+                Err(e) => {
+                    error!(
+                        "Failed to get latest channel {} - fetching versions using GitHub API",
+                        e
+                    );
+                    [component::FORC, component::FUEL_CORE, component::FUELUP]
+                        .iter()
+                        .map(|&c| {
+                            (
+                                c.to_owned(),
+                                DownloadCfg::new(c, target_from_name(c).ok(), None)
+                                    .unwrap()
+                                    .version,
+                            )
+                        })
+                        .collect()
+                }
+            };
 
+        let toolchain = Toolchain::from(&toolchain)?;
+        bold(|s| writeln!(s, "{}", &toolchain.name));
+        for component in [component::FORC, component::FUEL_CORE] {
+            let component_executable = toolchain.path.join(component);
+
+            match std::process::Command::new(&component_executable)
+                .arg("--version")
+                .output()
+            {
+                Ok(o) => {
+                    let version = Version::parse(
+                        String::from_utf8_lossy(&o.stdout)
+                            .split_whitespace()
+                            .nth(1)
+                            .expect("expected version"),
+                    )?;
+
+                    bold(|s| write!(s, "  {} - ", &component));
+                    if version == latest_versions[component] {
+                        colored_bold(Color::Green, |s| write!(s, "Up to date"));
+                        println!(" : {}", version);
+                    } else {
+                        colored_bold(Color::Yellow, |s| write!(s, "Update available"));
+                        println!(" : {} -> {}", version, latest_versions[component]);
+                    }
+                }
+                Err(e) => {
+                    print!("  ");
+                    bold(|s| write!(s, "{}", &component));
+                    print!(" - ");
+                    if component_executable.exists() {
+                        println!("execution error - {}", e);
+                    } else {
+                        println!("not found");
+                    }
+                }
+            };
+
+            if verbose && component == component::FORC {
+                for plugin in SUPPORTED_PLUGINS {
+                    check_plugin(&toolchain, plugin, &latest_versions[component::FORC])?;
+                }
+            }
+        }
+    }
+
+    const FUELUP_VERSION: &str = clap::crate_version!();
+
+    if let Ok(fuelup_download_cfg) = DownloadCfg::new(
+        component::FUELUP,
+        target_from_name(component::FUELUP).ok(),
+        None,
+    ) {
+        bold(|s| write!(s, "{} - ", component::FUELUP));
+        if FUELUP_VERSION == fuelup_download_cfg.version.to_string() {
+            colored_bold(Color::Green, |s| write!(s, "Up to date"));
+            println!(" : {}", FUELUP_VERSION);
+        } else {
+            colored_bold(Color::Yellow, |s| write!(s, "Update available"));
+            println!(" : {} -> {}", FUELUP_VERSION, fuelup_download_cfg.version);
+        };
+    } else {
+        error!("Failed to create DownloadCfg for component 'fuelup'; skipping check for 'fuelup'");
+    }
     Ok(())
 }

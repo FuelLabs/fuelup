@@ -4,8 +4,6 @@ on:
   schedule:
     # Run at minute 0 and 30 every hour
     - cron: '0,30 * * * *'
-env:
-  LATEST_CHANNEL_DIR: ./channel-fuel-stable.toml.d/
 
 jobs:
   # compare-versions: This job runs the compare-version script which collects

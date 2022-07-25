@@ -140,7 +140,6 @@ pub fn target_from_name(name: &str) -> Result<String> {
 pub fn tarball_name(name: &str, version: &Version, target: &str) -> Result<String> {
     match name {
         component::FORC => Ok(format!("forc-binaries-{}.tar.gz", target)),
-
         component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version, target)),
         component::FUELUP => Ok(format!("fuelup-{}-{}.tar.gz", version, target)),
         _ => bail!("Unrecognized component: {}", name),

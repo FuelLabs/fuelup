@@ -12,7 +12,7 @@ use crate::{
     fmt::{bold, colored_bold},
     toolchain::{DistToolchainName, Toolchain},
 };
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use semver::Version;
 use termcolor::Color;
 
@@ -34,22 +34,25 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
         .output()
     {
         Ok(o) => {
-            let version = Version::parse(
-                String::from_utf8_lossy(&o.stdout)
-                    .split_whitespace()
-                    .nth(1)
-                    .expect("expected version"),
-            )?;
-            print!("    - ");
-            bold(|s| write!(s, "{}", plugin));
-            print!(" - ");
-            if &version == latest_version {
-                colored_bold(Color::Green, |s| write!(s, "Up to date"));
-                println!(" : {}", version);
-            } else {
-                colored_bold(Color::Yellow, |s| write!(s, "Update available"));
-                println!(" : {} -> {}", version, latest_version);
-            }
+            let output = String::from_utf8_lossy(&o.stdout).into_owned();
+            match output.split_whitespace().rev().nth(0) {
+                Some(v) => {
+                    let version = Version::parse(v)?;
+                    print!("    - ");
+                    bold(|s| write!(s, "{}", plugin));
+                    print!(" - ");
+                    if &version == latest_version {
+                        colored_bold(Color::Green, |s| write!(s, "Up to date"));
+                        println!(" : {}", version);
+                    } else {
+                        colored_bold(Color::Yellow, |s| write!(s, "Update available"));
+                        println!(" : {} -> {}", version, latest_version);
+                    }
+                }
+                None => {
+                    eprintln!("    - {}: could not get version string", plugin);
+                }
+            };
         }
         Err(e) => {
             print!("    - ");
@@ -120,21 +123,24 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
             .output()
         {
             Ok(o) => {
-                let version = Version::parse(
-                    String::from_utf8_lossy(&o.stdout)
-                        .split_whitespace()
-                        .nth(1)
-                        .expect("expected version"),
-                )?;
+                let output = String::from_utf8_lossy(&o.stdout).into_owned();
+                match output.split_whitespace().rev().nth(0) {
+                    Some(v) => {
+                        let version = Version::parse(v)?;
 
-                bold(|s| write!(s, "  {} - ", &component));
-                if version == latest_versions[component] {
-                    colored_bold(Color::Green, |s| write!(s, "Up to date"));
-                    println!(" : {}", version);
-                } else {
-                    colored_bold(Color::Yellow, |s| write!(s, "Update available"));
-                    println!(" : {} -> {}", version, latest_versions[component]);
-                }
+                        bold(|s| write!(s, "  {} - ", &component));
+                        if version == latest_versions[component] {
+                            colored_bold(Color::Green, |s| write!(s, "Up to date"));
+                            println!(" : {}", version);
+                        } else {
+                            colored_bold(Color::Yellow, |s| write!(s, "Update available"));
+                            println!(" : {} -> {}", version, latest_versions[component]);
+                        }
+                    }
+                    None => {
+                        eprintln!("  {}: could not get version string", component);
+                    }
+                };
             }
             Err(e) => {
                 print!("  ");

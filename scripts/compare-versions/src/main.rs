@@ -14,7 +14,7 @@
 //! both fail. We have to also test the new releases against the last published version sets that
 //! we know are compatible, so we can update the channel if necessary.
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::{io::Read, str::FromStr};
@@ -134,9 +134,10 @@ fn main() -> Result<()> {
         Ok(r) => r
             .into_string()
             .expect("Could not convert channel to string"),
-        Err(_) => {
+        Err(ureq::Error::Status(404, r)) => {
             eprintln!(
-                "Could not download channel-fuel-latest.toml from {}; re-generating channel.",
+                "Error {}: Could not download channel-fuel-latest.toml from {}; re-generating channel.",
+                r.status(),
                 &CHANNEL_FUEL_LATEST_TOML_URL
             );
 
@@ -149,6 +150,9 @@ fn main() -> Result<()> {
                 Version::from_str(&fuel_core_runs.workflow_runs[0].head_branch[1..]).unwrap();
             print_selected_versions(&[latest_sway_version], &[latest_fuel_core_version]);
             std::process::exit(0);
+        }
+        Err(_) => {
+            bail!("Unexpected error trying to fetch channel - retrying at the next scheduled time");
         }
     };
 

@@ -9,7 +9,8 @@ env:
   LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
 
 jobs:
-  index-version-sets:
+  index-versions:
+    name: Index versions and publish channel (latest)
     runs-on: ubuntu-latest
     steps:
       - name: checkout master

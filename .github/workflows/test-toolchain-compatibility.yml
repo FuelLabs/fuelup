@@ -14,7 +14,7 @@ on:
 
 env:
   INCOMPATIBLE_DIR: ./incompatible-versions
-  LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
+  LATEST_CHANNEL_DIR: ./channel-fuel-stable.toml.d/
 
 jobs:
   test-toolchain-compatibility:
@@ -108,7 +108,7 @@ jobs:
           path: compatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
 
   # index-versions: This job will process the artifacts above if testing is not skipped and upload
-  # incompatible versions and/or publish a new channel-fuel-latest.toml to gh-pages.
+  # incompatible versions and/or publish a new channel-fuel-stable.toml to gh-pages.
   index-versions:
     name: Index versions and publish channel (stable)
     needs: test-toolchain-compatibility
@@ -146,12 +146,12 @@ jobs:
       - name: Prepare channel with compatible versions
         if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
         run: |
-            touch channel-fuel-latest.toml
+            touch channel-fuel-stable.toml
             mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
             ./.github/workflows/scripts/index-versions.sh ${{ env.LATEST_COMPATIBLE_FORC }} ${{ env.LATEST_COMPATIBLE_FUEL_CORE }}
-            cp channel-fuel-latest.toml ${{ env.LATEST_CHANNEL_DIR }}
+            cp channel-fuel-stable.toml ${{ env.LATEST_CHANNEL_DIR }}
 
-      - name: Deploy latest channel
+      - name: Publish channel (stable)
         if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
         uses: peaceiris/actions-gh-pages@v3
         with:

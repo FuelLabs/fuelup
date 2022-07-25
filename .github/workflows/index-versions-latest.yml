@@ -10,13 +10,14 @@ env:
 
 jobs:
   index-versions:
-    name: Index versions and publish channel (latest)
+    name: Index and publish channel (latest)
     runs-on: ubuntu-latest
     steps:
       - name: checkout master
         uses: actions/checkout@v3
 
-      - name: Get latest versions and update channel if needed
+      - name: Compare latest versions with published channel
+        id: compare-latest-versions
         run: |
           curl -s "https://fuellabs.github.io/fuelup/channel-fuel-latest.toml" -L -o channel-fuel-latest.toml
           mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
@@ -37,9 +38,11 @@ jobs:
             exit 0
           fi
 
+          echo "::set-output name=should_publish::true"
           ./.github/workflows/scripts/index-versions.sh $FORC_LATEST_VERSION $FUEL_CORE_LATEST_VERSION
           cp channel-fuel-latest.toml ${{ env.LATEST_CHANNEL_DIR }}
-      - name: Deploy latest
+      - name: Publish channel (latest)
+        if: ${{ always() && steps.compare-latest-versions.outputs.should_publish == 'true' }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

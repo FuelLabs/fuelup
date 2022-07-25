@@ -1,10 +1,9 @@
 name: Index Versions (latest)
 
 on:
-  push
-  #schedule:
+  schedule:
     # Run at minute 0 and 30 every hour
-    # - cron: '0,30 * * * *'
+    - cron: '0,30 * * * *'
 env:
   LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
 

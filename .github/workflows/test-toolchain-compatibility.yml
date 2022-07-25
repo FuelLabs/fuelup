@@ -110,7 +110,7 @@ jobs:
   # index-versions: This job will process the artifacts above if testing is not skipped and upload
   # incompatible versions and/or publish a new channel-fuel-latest.toml to gh-pages.
   index-versions:
-    name: Index versions compatibilities
+    name: Index versions and publish channel (stable)
     needs: test-toolchain-compatibility
     if: ${{ always() && needs.test-toolchain-compatibility.result != 'skipped' }}
     runs-on: ubuntu-latest

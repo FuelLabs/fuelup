@@ -14,7 +14,7 @@ on:
 
 env:
   INCOMPATIBLE_DIR: ./incompatible-versions
-  LATEST_CHANNEL_DIR: ./channel-fuel-stable.toml.d/
+  STABLE_CHANNEL_DIR: ./channel-fuel-stable.toml.d/
 
 jobs:
   test-toolchain-compatibility:
@@ -147,16 +147,16 @@ jobs:
         if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
         run: |
             touch channel-fuel-stable.toml
-            mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
+            mkdir -p ${{ env.STABLE_CHANNEL_DIR }}
             ./.github/workflows/scripts/index-versions.sh ${{ env.LATEST_COMPATIBLE_FORC }} ${{ env.LATEST_COMPATIBLE_FUEL_CORE }}
-            cp channel-fuel-stable.toml ${{ env.LATEST_CHANNEL_DIR }}
+            cp channel-fuel-stable.toml ${{ env.STABLE_CHANNEL_DIR }}
 
       - name: Publish channel (stable)
         if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ env.LATEST_CHANNEL_DIR }}
+          publish_dir: ${{ env.STABLE_CHANNEL_DIR }}
           keep_files: true
           destination_dir: ./
 

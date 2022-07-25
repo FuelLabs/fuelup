@@ -12,7 +12,7 @@ use crate::{
     fmt::{bold, colored_bold},
     toolchain::{DistToolchainName, Toolchain},
 };
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use semver::Version;
 use termcolor::Color;
 
@@ -35,7 +35,7 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
     {
         Ok(o) => {
             let output = String::from_utf8_lossy(&o.stdout).into_owned();
-            match output.split_whitespace().rev().nth(0) {
+            match output.split_whitespace().rev().next() {
                 Some(v) => {
                     let version = Version::parse(v)?;
                     print!("    - ");
@@ -50,7 +50,7 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
                     }
                 }
                 None => {
-                    eprintln!("    - {}: could not get version string", plugin);
+                    eprintln!("    - {} - Error getting version string", plugin);
                 }
             };
         }
@@ -124,7 +124,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
         {
             Ok(o) => {
                 let output = String::from_utf8_lossy(&o.stdout).into_owned();
-                match output.split_whitespace().rev().nth(0) {
+                match output.split_whitespace().rev().next() {
                     Some(v) => {
                         let version = Version::parse(v)?;
 
@@ -138,7 +138,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                         }
                     }
                     None => {
-                        eprintln!("  {}: could not get version string", component);
+                        eprintln!("  {} - Error getting version string", component);
                     }
                 };
             }

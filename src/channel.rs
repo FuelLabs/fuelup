@@ -53,7 +53,7 @@ impl Channel {
     }
 
     pub fn from_toml(toml: &str) -> Result<Self> {
-        let channel: Channel = de::from_str(toml).expect("Unable to read toml");
+        let channel: Channel = de::from_str(toml)?;
         Ok(channel)
     }
 

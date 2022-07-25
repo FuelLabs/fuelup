@@ -5,11 +5,11 @@ on:
     # Run at minute 0 and 30 every hour
     - cron: '0,30 * * * *'
 env:
-  LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
+  LATEST_CHANNEL_DIR: ./channel-fuel-stable.toml.d/
 
 jobs:
   # compare-versions: This job runs the compare-version script which collects
-  # latest versions released after the versions found in channel-fuel-latest.toml,
+  # latest versions released after the versions found in channel-fuel-stable.toml,
   # filters out incompatible versions and uses the leftover as inputs to
   # test-toolchain-compatibility job to run integration tests.
   compare-versions:
@@ -49,7 +49,7 @@ jobs:
 
             # Read the output of compare-versions line-by-line
             # for the versions newer than what is published within
-            # channel-fuel-latest.toml
+            # channel-fuel-stable.toml
             while read line
             do
               if [ -d gh-pages/incompatible-versions ] && [ -e gh-pages/incompatible-versions/$line ]; then

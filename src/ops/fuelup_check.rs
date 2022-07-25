@@ -127,7 +127,6 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                 match output.split_whitespace().nth(1) {
                     Some(v) => {
                         let version = Version::parse(v)?;
-
                         bold(|s| write!(s, "  {} - ", &component));
                         if version == latest_versions[component] {
                             colored_bold(Color::Green, |s| write!(s, "Up to date"));

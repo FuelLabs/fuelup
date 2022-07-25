@@ -33,11 +33,11 @@ This is a WIP - we aim to support `nightly` channel soon.
 
 ## Developer Guide
 
-### Understanding `index-versions-stable.yml`
+### Understanding `index-versions-stable.yml` and `test-toolchain-compatibility.yml`
 
 _Note: Reading the information below is only really necessary if you wish to contribute to the workflows or want a deeper understanding on how channels are updated_
 
-The entrypoint of the scheduled workflow is within `index-versions.yml`. We run the Rust script `compare-versions` to collect versions of `forc` and `fuel-core` to be tested. These versions are filtered for incompatible versions prior to being used as a JSON string input to `test-toolchain-compatibility.yml`, where the testing occurs.
+The entrypoint of the scheduled workflow is within `index-versions-stable.yml`. We run the Rust script `compare-versions` to collect versions of `forc` and `fuel-core` to be tested. These versions are filtered for incompatible versions prior to being used as a JSON string input to `test-toolchain-compatibility.yml`, where the testing occurs.
 
 In `test-toolchain-compatibility.yml`, The versions JSON string input is used to init a matrix using the [fromJSON](https://docs.github.com/en/actions/learn-github-actions/expressions#fromjson) expression. We checkout the Sway repo at the given `forc` version and pull the `fuel-core` Docker image at the given `fuel-core` version and run integration tests found in the [Sway CI](https://github.com/FuelLabs/sway/blob/3bd8eaf4a0f11a3009c9421100cc06c2e897b6c2/.github/workflows/ci.yml#L229-L270) for them.
 

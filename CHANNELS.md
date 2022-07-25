@@ -1,19 +1,31 @@
 # Channels
 
-`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, only the `latest` channel will be published and serve as a source of distribution of Fuel toolchain binaries.
+`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, `latest` and `stable` channels are published and serve as sources of distribution of Fuel toolchain binaries.
 
-The `latest` channel is updated by a scheduled GitHub workflow that **runs every 30 minutes** and checks for new, compatible releases of `forc` and `fuel-core`.
+Official channels are updated by scheduled GitHub workflows that **runs every 30 minutes**.
 
 ### `latest`
 
-The `latest` channel is `fuelup`'s default channel. It provides access to the latest compatible, published releases of `forc` and `fuel-core`.
+The `latest` channel is `fuelup`'s default channel. It serves as a source of distribution of the latest published releases of `forc` and `fuel-core`.
 
-When installing the `latest` channel, fuelup will refer to the `channel-fuel-latest.toml` file within this repository to determine the set of `forc` and `fuel-core` versions to retrieve. The versions in this file are updated by a scheduled GitHub workflow that runs once every 30 minutes and performs the following steps:
+When installing the `latest` channel, fuelup will refer to the `channel-fuel-latest.toml` file within this repository to determine the set of `forc` and `fuel-core` versions to retrieve.
+
+The `latest` toolchain is not tested for compatibility and may contain bugs considering our fast pace of development. If you encounter bugs while using it, please file an issue either within the [sway repository](https://github.com/FuelLabs/sway), or the [fuel-core repository](https://github.com/FuelLabs/fuel-core).
+
+### `stable`
+
+The `stable` channel provides access to the latest published AND compatible releases of `forc` and `fuel-core`.
+
+__Compatible__ means that integration tests have been run for both the `forc` and `fuel-core` distributed through this channel.
+
+When installing the `stable` channel, fuelup will refer to the `channel-fuel-stable.toml` file within this repository to determine the set of `forc` and `fuel-core` versions to retrieve. The scheduled workflow `index-versions-stable.yml` performs the following steps:
 
 1. Checks for newly published versions of forc and fuel-core.
 2. Tests compatibility of new versions against a set of integration tests.
 3. Selects the latest set of versions that successfully pass the tests.
-4. Publishes the selected versions to the channel-fuel-latest.toml manifest.
+4. Publishes the selected versions to the channel-fuel-stable.toml manifest.
+
+This means that unlike the `latest` channel, the `stable` toolchain has been tested for compatibility and should contain minimal breaking bugs. However, this also means that this toolchain may lack cutting edge updates you can find in the `latest` toolchain.
 
 ### `nightly`
 
@@ -21,7 +33,7 @@ This is a WIP - we aim to support `nightly` channel soon.
 
 ## Developer Guide
 
-### Understanding the `latest` workflow
+### Understanding `index-versions-stable.yml`
 
 _Note: Reading the information below is only really necessary if you wish to contribute to the workflows or want a deeper understanding on how channels are updated_
 

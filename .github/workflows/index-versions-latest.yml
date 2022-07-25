@@ -1,0 +1,47 @@
+name: Index Versions (latest)
+
+on:
+  schedule:
+    # Run at minute 0 and 30 every hour
+    - push
+    # - cron: '0,30 * * * *'
+env:
+  LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
+
+jobs:
+  index-version-sets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout master
+        uses: actions/checkout@v3
+
+      - name: Get latest versions and update channel if needed
+        run: |
+          curl -s "https://fuellabs.github.io/fuelup/channel-fuel-latest.toml" -L -o channel-fuel-latest.toml
+          mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
+
+          FORC_API_URL="https://api.github.com/repos/FuelLabs/sway/actions/runs?event=release&status=success"
+          FUEL_CORE_API_URL="https://api.github.com/repos/FuelLabs/fuel-core/actions/runs?event=release&status=success"
+
+          # Get latest versions from GitHub repo workflows API
+          FORC_LATEST_VERSION="$(curl -s ${FORC_API_URL} | grep "head_branch" | head -n 1 | cut -d "v" -f 2- | rev | cut -c 3- | rev)"
+          FUEL_CORE_LATEST_VERSION="$(curl -s ${FUEL_CORE_API_URL} | grep "head_branch" | head -n 1 | cut -d "v" -f 2- | rev | cut -c 3- | rev)"
+
+          # Get latest versions published within channel-fuel-latest.yml
+          FORC_CURRENT_VERSION="$(grep -s -A1 "\[pkg.forc\]" channel-fuel-latest.toml | grep "version" | cut -d "\"" -f 2- | rev | cut -c 2- | rev)"
+          FUEL_CORE_CURRENT_VERSION="$(grep -s -A1 "\[pkg.fuel-core\]" channel-fuel-latest.toml | grep "version" | cut -d "\"" -f 2- | rev | cut -c 2- | rev)"
+
+          if [ "${FORC_LATEST_VERSION}" = "${FORC_CURRENT_VERSION}" ] && [ "${FUEL_CORE_LATEST_VERSION}" = "${FUEL_CORE_CURRENT_VERSION}" ]; then
+            printf "No new forc and fuel-core versions; exiting\n"
+            exit 0
+          fi
+
+          ./.github/workflows/scripts/index-versions.sh $FORC_LATEST_VERSION $FUEL_CORE_LATEST_VERSION
+          cp channel-fuel-latest.toml ${{ env.LATEST_CHANNEL_DIR }}
+      - name: Deploy latest
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          keep_files: true
+          publish_dir: ${{ env.LATEST_CHANNEL_DIR }}
+          destination_dir: ./

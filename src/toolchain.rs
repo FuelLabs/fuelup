@@ -81,7 +81,6 @@ impl Toolchain {
 
     pub fn from(toolchain: &str) -> Result<Self> {
         let path = toolchain_bin_dir(toolchain);
-        println!("path: {}", path.display());
         Ok(Self {
             name: toolchain.to_string(),
             path,

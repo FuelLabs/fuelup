@@ -8,10 +8,6 @@ use anyhow::Result;
 use std::fmt::Write;
 use tracing::{error, info};
 
-pub mod toolchain {
-    pub const LATEST: &str = "latest";
-}
-
 pub fn install(command: InstallCommand) -> Result<()> {
     let InstallCommand { name } = command;
 

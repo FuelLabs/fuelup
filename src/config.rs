@@ -4,8 +4,8 @@ use std::path::PathBuf;
 use anyhow::Result;
 use std::io;
 
-use crate::ops::fuelup_toolchain::toolchain;
 use crate::path::toolchain_dir;
+use crate::toolchain::toolchain;
 
 pub struct Config {
     toolchains_dir: PathBuf,

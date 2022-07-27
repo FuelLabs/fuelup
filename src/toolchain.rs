@@ -8,6 +8,10 @@ use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, Dow
 use crate::ops::fuelup_self::self_update;
 use crate::path::{ensure_dir_exists, fuelup_bin, fuelup_bin_dir, toolchain_bin_dir};
 
+pub mod toolchain {
+    pub const LATEST: &str = "latest";
+}
+
 pub enum DistToolchainName {
     Latest,
 }

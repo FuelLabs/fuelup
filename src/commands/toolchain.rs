@@ -1,8 +1,9 @@
 use anyhow::{bail, Result};
-use clap::{Args, Parser};
+use clap::Parser;
 
-use crate::ops::fuelup_toolchain::install::{install, toolchain};
+use crate::ops::fuelup_toolchain::install::install;
 use crate::ops::fuelup_toolchain::new::new;
+use crate::toolchain::toolchain;
 
 #[derive(Debug, Parser)]
 pub enum ToolchainCommand {

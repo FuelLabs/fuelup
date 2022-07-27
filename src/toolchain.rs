@@ -1,6 +1,5 @@
 use anyhow::{bail, Result};
 use std::fmt;
-use std::path::Path;
 use std::path::PathBuf;
 use std::str::FromStr;
 use tracing::info;
@@ -9,14 +8,16 @@ use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, Dow
 use crate::ops::fuelup_self::self_update;
 use crate::path::{ensure_dir_exists, fuelup_bin, fuelup_bin_dir, toolchain_bin_dir};
 
-pub enum ToolchainName {
+pub enum DistToolchainName {
     Latest,
 }
 
-impl FromStr for ToolchainName {
+impl FromStr for DistToolchainName {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
-        match s {
+        let split = s.split_once('-').unwrap();
+        let name = split.0;
+        match name {
             "latest" => Ok(Self::Latest),
             _ => bail!("Unknown name for toolchain: {}", s),
         }
@@ -70,42 +71,19 @@ impl Toolchain {
             Some(t) => TargetTriple(t),
             None => TargetTriple::from_host()?,
         };
-        let name = match ToolchainName::from_str(name)? {
-            ToolchainName::Latest => format!("{}-{}", name, target),
-        };
-        let path = toolchain_bin_dir(&name);
-        Ok(Self { name, path })
-    }
-
-    pub fn from(name: &str) -> Self {
-        let path = toolchain_bin_dir(name);
-        Self {
-            name: name.to_string(),
-            path,
-        }
-    }
-
-    pub fn from_settings(toolchain: &str) -> Result<Self> {
-        let split = toolchain.split_once('-').unwrap();
-        let name = split.0.to_string();
-        let target = TargetTriple(split.1.to_string());
-        let path = match ToolchainName::from_str(&name)? {
-            ToolchainName::Latest => toolchain_bin_dir(&format!("{}-{}", name, target)),
-        };
-        Ok(Self { name, path })
-    }
-
-    pub fn from_path(&self, path: &Path) -> Result<Self> {
-        let name = path.file_name().unwrap();
-
-        // Minimally check that there's a /bin directory
-        if !path.join("bin").is_dir() {
-            bail!("Invalid toolchain path");
-        }
-
+        let toolchain = format!("{}-{}", name, target);
+        let path = toolchain_bin_dir(&toolchain);
         Ok(Self {
-            name: name.to_string_lossy().to_string(),
-            path: path.to_path_buf(),
+            name: toolchain,
+            path,
+        })
+    }
+
+    pub fn from(toolchain: &str) -> Result<Self> {
+        let path = toolchain_bin_dir(toolchain);
+        Ok(Self {
+            name: toolchain.to_string(),
+            path,
         })
     }
 

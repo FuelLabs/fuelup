@@ -5,7 +5,7 @@ use tracing::{error, info};
 
 use crate::{
     component,
-    download::{download_file_and_unpack, unpack_bins, DownloadCfg},
+    download::{download_file_and_unpack, target_from_name, unpack_bins, DownloadCfg},
     path::{fuelup_bin, fuelup_bin_dir},
 };
 
@@ -17,7 +17,11 @@ pub fn attempt_install_self(download_cfg: DownloadCfg, dst: &Path) -> Result<()>
 }
 
 pub fn self_update() -> Result<()> {
-    let download_cfg = DownloadCfg::new(component::FUELUP, None)?;
+    let download_cfg = DownloadCfg::new(
+        component::FUELUP,
+        target_from_name(component::FUELUP).ok(),
+        None,
+    )?;
 
     let fuelup_bin = fuelup_bin();
     let fuelup_bin_dir = fuelup_bin_dir();

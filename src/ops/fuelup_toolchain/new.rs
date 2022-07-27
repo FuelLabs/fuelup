@@ -1,4 +1,4 @@
-use crate::path::ensure_dir_exists;
+use crate::path::{ensure_dir_exists, toolchain_bin_dir};
 use crate::{commands::toolchain::NewCommand, path::toolchain_dir};
 use anyhow::bail;
 use anyhow::Result;
@@ -20,7 +20,9 @@ pub fn new(command: NewCommand) -> Result<()> {
         bail!("Toolchain with name '{}' already exists", &name)
     }
 
-    if ensure_dir_exists(&toolchain_dir.join(&name)).is_ok() {
+    let toolchain_bin_dir = toolchain_bin_dir(&name);
+
+    if ensure_dir_exists(&toolchain_dir.join(toolchain_bin_dir)).is_ok() {
         println!("New toolchain initialized: {}", &name);
     };
 

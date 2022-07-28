@@ -1,7 +1,8 @@
+use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, path::PathBuf};
-use toml_edit::{value, Document, Table, Value};
+use toml_edit::{de, ser, value, Document, Table};
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 
 use crate::file;
 
@@ -61,56 +62,76 @@ impl SettingsFile {
     }
 }
 
-#[derive(Clone, Default)]
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
 pub struct Settings {
     pub default_toolchain: Option<String>,
 }
 
-fn take_value(table: &mut Table, key: &str) -> Result<Value> {
-    if let Some(i) = table.remove(key) {
-        i.into_value()
-            .or_else(|_| bail!("Item is None for key: '{}'", key))
-    } else {
-        bail!("missing key: '{}'", key)
-    }
-}
-
-fn get_opt_string(table: &mut Table, key: &str) -> Result<Option<String>> {
-    if let Ok(v) = take_value(table, key) {
-        if let Value::String(s) = v {
-            Ok(Some(s.to_string()))
-        } else {
-            bail!("Expected string, got {}", key)
-        }
-    } else {
-        Ok(None)
-    }
-}
-
 impl Settings {
-    pub(crate) fn from_toml(mut document: Document) -> Result<Self> {
-        Ok(Self {
-            default_toolchain: get_opt_string(document.as_table_mut(), "default_toolchain")?,
-        })
-    }
-
     pub(crate) fn parse(toml: &str) -> Result<Self> {
-        let document = toml.parse::<Document>().expect("Invalid toml document");
-        Self::from_toml(document)
+        let settings: Settings = de::from_str(toml)?;
+        Ok(settings)
     }
 
     pub(crate) fn stringify(self) -> String {
         self.into_toml().to_string()
     }
 
-    pub(crate) fn into_toml(self) -> Table {
-        let mut table = Table::new();
+    pub(crate) fn into_toml(self) -> Document {
+        ser::to_document(&self).unwrap()
+    }
+}
 
-        if let Some(v) = self.default_toolchain {
-            table["default_toolchain"] = value(v);
-        }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::file::read_file;
 
-        table.fmt();
-        table
+    #[test]
+    fn parse_settings() {
+        let settings_path = std::env::current_dir()
+            .unwrap()
+            .join("tests/settings-example.toml");
+
+        let settings_file = read_file("settings-example", &settings_path).unwrap();
+        let settings = Settings::parse(&settings_file).unwrap();
+
+        assert_eq!(
+            settings.default_toolchain.unwrap(),
+            "latest-x86_64-apple-darwin"
+        )
+    }
+
+    #[test]
+    fn write_settings() -> Result<()> {
+        let settings_path = std::env::current_dir()
+            .unwrap()
+            .join("tests/settings-example-2.toml");
+
+        let settings_file = SettingsFile::new(PathBuf::from(&settings_path));
+        let new_default_toolchain = String::from("new-default-toolchain");
+
+        settings_file.with_mut(|s| {
+            s.default_toolchain = Some(new_default_toolchain.clone());
+            Ok(())
+        })?;
+
+        let settings =
+            Settings::parse(&read_file("settings-example", &settings_path).unwrap()).unwrap();
+        assert_eq!(settings.default_toolchain.unwrap(), new_default_toolchain);
+        Ok(())
+    }
+
+    #[test]
+    fn stringify_settings() {
+        let expected_toml = r#"default_toolchain = "yet-another-default-toolchain"
+"#;
+
+        let settings = Settings {
+            default_toolchain: Some("yet-another-default-toolchain".to_string()),
+        };
+
+        let stringified = settings.stringify();
+        assert_eq!(stringified, expected_toml);
     }
 }

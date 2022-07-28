@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, path::PathBuf};
-use toml_edit::{de, ser, value, Document, Table};
+use toml_edit::{de, ser, Document};
 
 use anyhow::Result;
 
@@ -87,6 +87,14 @@ mod tests {
     use super::*;
     use crate::file::read_file;
 
+    pub(crate) fn with_mock_fuelup_dir<F>(f: F) -> Result<()>
+    where
+        F: FnOnce(tempfile::TempDir) -> Result<()>,
+    {
+        let mock_fuelup_dir = tempfile::tempdir()?;
+        f(mock_fuelup_dir)
+    }
+
     #[test]
     fn parse_settings() {
         let settings_path = std::env::current_dir()
@@ -104,22 +112,23 @@ mod tests {
 
     #[test]
     fn write_settings() -> Result<()> {
-        let settings_path = std::env::current_dir()
-            .unwrap()
-            .join("tests/settings-example-2.toml");
+        with_mock_fuelup_dir(|dir| {
+            let settings_path = dir.path().join("settings-example-dst.toml");
 
-        let settings_file = SettingsFile::new(PathBuf::from(&settings_path));
-        let new_default_toolchain = String::from("new-default-toolchain");
+            let settings_file = SettingsFile::new(PathBuf::from(&settings_path));
+            let new_default_toolchain = String::from("new-default-toolchain");
 
-        settings_file.with_mut(|s| {
-            s.default_toolchain = Some(new_default_toolchain.clone());
+            settings_file.with_mut(|s| {
+                s.default_toolchain = Some(new_default_toolchain.clone());
+                Ok(())
+            })?;
+
+            let settings =
+                Settings::parse(&read_file("settings-example-dst", &settings_path).unwrap())
+                    .unwrap();
+            assert_eq!(settings.default_toolchain.unwrap(), new_default_toolchain);
             Ok(())
-        })?;
-
-        let settings =
-            Settings::parse(&read_file("settings-example", &settings_path).unwrap()).unwrap();
-        assert_eq!(settings.default_toolchain.unwrap(), new_default_toolchain);
-        Ok(())
+        })
     }
 
     #[test]

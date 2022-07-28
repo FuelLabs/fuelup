@@ -1,9 +1,10 @@
 use anyhow::Result;
 use clap::Parser;
 
-use crate::commands::{check, default, fuelup, toolchain};
+use crate::commands::{check, component, default, fuelup, toolchain};
 
 use crate::commands::check::CheckCommand;
+use crate::commands::component::ComponentCommand;
 use crate::commands::default::DefaultCommand;
 use crate::commands::fuelup::FuelupCommand;
 use crate::commands::toolchain::ToolchainCommand;
@@ -19,7 +20,10 @@ struct Cli {
 enum Commands {
     /// Check for updates to Fuel toolchains and fuelup
     Check(CheckCommand),
-    /// Check for updates to Fuel toolchains and fuelup
+    /// Add or remove components from the currently active toolchain
+    #[clap(subcommand)]
+    Component(ComponentCommand),
+    /// Set default toolchain
     Default_(DefaultCommand),
     /// Manage your fuelup installation.
     #[clap(name = "self", subcommand)]
@@ -34,6 +38,7 @@ pub fn fuelup_cli() -> Result<()> {
 
     match cli.command {
         Commands::Check(command) => check::exec(command),
+        Commands::Component(command) => component::exec(command),
         Commands::Default_(command) => default::exec(command),
         Commands::Fuelup(command) => match command {
             FuelupCommand::Update => fuelup::exec(),

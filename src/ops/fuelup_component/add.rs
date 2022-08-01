@@ -29,11 +29,22 @@ pub fn add(command: AddCommand) -> Result<()> {
             Some(t) => {
                 if let Ok(toolchain) = DistToolchainName::from_str(&toolchain.name) {
                     bail!(
-                    "You cannot specify versions of components to add to official toolchain '{}'",
+"Installing specific versions of components is reserved for custom toolchains.
+You are currently using '{}'.
+
+You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
                     toolchain
-                    )
+                )
                 };
-                (t.0, Some(Version::from_str(t.1)?))
+                let v = match Version::from_str(t.1) {
+                    Ok(v) => v,
+                    Err(e) => bail!(
+                        "Invalid version input '{}' while adding component: {}",
+                        t.1,
+                        e
+                    ),
+                };
+                (t.0, Some(v))
             }
             None => (&maybe_versioned_component, None),
         };

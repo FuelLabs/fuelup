@@ -13,13 +13,10 @@ pub struct DefaultCommand {
 pub fn exec(command: DefaultCommand) -> Result<()> {
     let DefaultCommand { toolchain } = command;
 
-    let settings = SettingsFile::new(settings_file());
-    let current_default = settings.with(|s| Ok(s.default_toolchain.clone()));
+    let current_toolchain = Toolchain::from_settings()?;
 
     if toolchain.is_none() {
-        if let Ok(Some(current_default_name)) = current_default {
-            println!("{} (default)", current_default_name);
-        }
+        println!("{} (default)", current_toolchain.name);
         return Ok(());
     };
 
@@ -33,6 +30,7 @@ pub fn exec(command: DefaultCommand) -> Result<()> {
         bail!("Toolchain with name '{}' does not exist", &new_default.name)
     };
 
+    let settings = SettingsFile::new(settings_file());
     settings.with_mut(|s| {
         s.default_toolchain = Some(new_default.name.clone());
         Ok(())

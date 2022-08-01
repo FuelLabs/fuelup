@@ -25,33 +25,32 @@ pub fn add(command: AddCommand) -> Result<()> {
     };
 
     let toolchain = Toolchain::from(&current_default)?;
-    if let Some((component, version)) = maybe_versioned_component.split_once('@') {
-        if let Ok(toolchain) = DistToolchainName::from_str(&current_default) {
-            bail!(
-                "You cannot specify versions of components to add to official toolchain '{}'",
-                toolchain
-            );
-        }
-
-        println!("installing component {} to {}", component, &current_default);
-        let download_cfg = DownloadCfg::new(
-            component,
-            Some(target_from_name(component)?),
-            Some(Version::from_str(version)?),
-        )?;
-        toolchain.add_component(download_cfg)?;
-    } else {
+    if toolchain.has_component(&maybe_versioned_component) {
         println!(
-            "installing component {} to {}",
-            maybe_versioned_component, &current_default
-        );
-        let download_cfg = DownloadCfg::new(
+            "{} already exists; replacing {} in toolchain {}",
             &maybe_versioned_component,
-            Some(target_from_name(&maybe_versioned_component)?),
-            None,
-        )?;
-        toolchain.add_component(download_cfg)?;
+            toolchain.has_component(&maybe_versioned_component),
+            toolchain.name
+        );
     }
+
+    let (component, version): (&str, Option<Version>) =
+        match maybe_versioned_component.split_once('@') {
+            Some(t) => {
+                if let Ok(toolchain) = DistToolchainName::from_str(&current_default) {
+                    bail!(
+                    "You cannot specify versions of components to add to official toolchain '{}'",
+                    toolchain
+                    )
+                };
+                (t.0, Some(Version::from_str(t.1)?))
+            }
+            None => (&maybe_versioned_component, None),
+        };
+    println!("adding component {} to {}", component, &current_default);
+
+    let download_cfg = DownloadCfg::new(component, Some(target_from_name(component)?), version)?;
+    toolchain.add_component(download_cfg)?;
 
     Ok(())
 }

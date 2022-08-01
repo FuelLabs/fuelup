@@ -3,6 +3,7 @@ use clap::Parser;
 
 use crate::ops::fuelup_toolchain::install::install;
 use crate::ops::fuelup_toolchain::new::new;
+use crate::ops::fuelup_toolchain::uninstall::uninstall;
 use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 
 #[derive(Debug, Parser)]
@@ -14,6 +15,8 @@ pub enum ToolchainCommand {
     Install(InstallCommand),
     /// Create a new custom toolchain
     New(NewCommand),
+    /// Uninstall a toolchain
+    Uninstall(UninstallCommand),
 }
 
 #[derive(Debug, Parser)]
@@ -26,6 +29,12 @@ pub struct InstallCommand {
 pub struct NewCommand {
     /// Custom toolchain name. Names starting with 'latest' are not allowed.
     #[clap(value_parser = name_allowed)]
+    pub name: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct UninstallCommand {
+    /// Toolchain to uninstall
     pub name: String,
 }
 
@@ -44,6 +53,7 @@ pub fn exec(command: ToolchainCommand) -> Result<()> {
     match command {
         ToolchainCommand::Install(command) => install(command)?,
         ToolchainCommand::New(command) => new(command)?,
+        ToolchainCommand::Uninstall(command) => uninstall(command)?,
     };
 
     Ok(())

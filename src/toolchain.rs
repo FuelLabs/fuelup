@@ -1,6 +1,6 @@
 use anyhow::{bail, Result};
 use std::fmt;
-use std::fs::remove_file;
+use std::fs::{remove_dir_all, remove_file};
 use std::path::PathBuf;
 use std::str::FromStr;
 use tracing::info;
@@ -186,6 +186,13 @@ impl Toolchain {
             info!("'{}' not found in toolchain '{}'", component, self.name);
         }
 
+        Ok(())
+    }
+
+    pub fn uninstall_self(&self) -> Result<()> {
+        if self.exists() {
+            remove_dir_all(self.path.parent().unwrap())?
+        }
         Ok(())
     }
 }

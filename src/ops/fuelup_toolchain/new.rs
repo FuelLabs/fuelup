@@ -10,13 +10,13 @@ pub fn new(command: NewCommand) -> Result<()> {
 
     let toolchain_dir = toolchain_dir();
 
-    let toolchains: Vec<String> = fs::read_dir(&toolchain_dir)?
+    let toolchain_exists = fs::read_dir(&toolchain_dir)?
         .filter_map(io::Result::ok)
         .filter(|e| e.file_type().map(|f| f.is_dir()).unwrap_or(false))
         .map(|e| e.file_name().into_string().ok().unwrap_or_default())
-        .collect();
+        .any(|x| x == name);
 
-    if toolchains.contains(&name) {
+    if toolchain_exists {
         bail!("Toolchain with name '{}' already exists", &name)
     }
 

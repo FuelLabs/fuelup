@@ -5,7 +5,7 @@ use anyhow::Result;
 use std::io;
 
 use crate::path::toolchain_dir;
-use crate::toolchain::toolchain;
+use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 
 pub struct Config {
     toolchains_dir: PathBuf,
@@ -25,7 +25,9 @@ impl Config {
                 .filter(|e| {
                     e.file_type().map(|f| f.is_dir()).unwrap_or(false)
                         // TODO: match nightly/stable when channels are available
-                        && e.file_name().to_string_lossy().starts_with(toolchain::LATEST)
+                        && RESERVED_TOOLCHAIN_NAMES.iter()
+                            .any(|t|
+                        e.file_name().to_string_lossy().starts_with(t))
                 })
                 .map(|e| e.file_name().into_string().ok().unwrap_or_default())
                 .collect();

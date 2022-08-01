@@ -116,6 +116,10 @@ impl Toolchain {
         self.path.exists() && self.path.is_dir()
     }
 
+    pub fn has_component(&self, component: &str) -> bool {
+        self.path.join(component).exists()
+    }
+
     pub fn add_component(&self, download_cfg: DownloadCfg) -> Result<DownloadCfg> {
         // Pre-install checks: ensuring toolchain dir, fuelup bin dir, and fuelup exist
         ensure_dir_exists(&self.path)?;

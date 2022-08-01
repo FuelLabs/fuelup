@@ -3,7 +3,7 @@ use clap::Parser;
 
 use crate::ops::fuelup_toolchain::install::install;
 use crate::ops::fuelup_toolchain::new::new;
-use crate::toolchain::toolchain;
+use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 
 #[derive(Debug, Parser)]
 pub enum ToolchainCommand {
@@ -30,7 +30,7 @@ pub struct NewCommand {
 }
 
 fn name_allowed(s: &str) -> Result<String> {
-    if [toolchain::LATEST].contains(&s) {
+    if RESERVED_TOOLCHAIN_NAMES.contains(&s) {
         bail!(
             "Cannot use official toolchain name '{}' as a custom toolchain name",
             s

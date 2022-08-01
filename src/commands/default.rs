@@ -1,11 +1,8 @@
+use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 use anyhow::{bail, Result};
 use clap::Parser;
 
-use crate::{
-    path::settings_file,
-    settings::SettingsFile,
-    toolchain::{toolchain, Toolchain},
-};
+use crate::{path::settings_file, settings::SettingsFile, toolchain::Toolchain};
 
 #[derive(Debug, Parser)]
 pub struct DefaultCommand {
@@ -29,13 +26,11 @@ pub fn exec(command: DefaultCommand) -> Result<()> {
     let toolchain = toolchain.unwrap();
     let mut new_default = Toolchain::from(&toolchain)?;
 
-    if [toolchain::LATEST].contains(&toolchain.as_str()) {
+    if RESERVED_TOOLCHAIN_NAMES.contains(&toolchain.as_str()) {
         new_default = Toolchain::new(&toolchain, None)?;
         println!("default toolchain set to '{}'", new_default.name);
-    } else {
-        if !new_default.path.exists() {
-            bail!("Toolchain with name '{}' does not exist", &new_default.name)
-        };
+    } else if !new_default.path.exists() {
+        bail!("Toolchain with name '{}' does not exist", &new_default.name)
     };
 
     settings.with_mut(|s| {

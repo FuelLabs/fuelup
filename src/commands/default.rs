@@ -25,7 +25,6 @@ pub fn exec(command: DefaultCommand) -> Result<()> {
 
     if RESERVED_TOOLCHAIN_NAMES.contains(&toolchain.as_str()) {
         new_default = Toolchain::new(&toolchain, None)?;
-        println!("default toolchain set to '{}'", new_default.name);
     } else if !new_default.path.exists() {
         bail!("Toolchain with name '{}' does not exist", &new_default.name)
     };
@@ -35,6 +34,7 @@ pub fn exec(command: DefaultCommand) -> Result<()> {
         s.default_toolchain = Some(new_default.name.clone());
         Ok(())
     })?;
+    println!("default toolchain set to '{}'", new_default.name);
 
     Ok(())
 }

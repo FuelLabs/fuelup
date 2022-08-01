@@ -13,7 +13,7 @@ pub enum ComponentCommand {
 
 #[derive(Debug, Parser)]
 pub struct AddCommand {
-    /// Component name [possible values: forc, fuel-core]
+    /// Component name [possible values: forc, forc@<version>, fuel-core, fuel-core@<version>]
     pub maybe_versioned_component: String,
 }
 

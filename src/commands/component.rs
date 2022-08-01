@@ -7,14 +7,14 @@ use crate::ops::fuelup_component::{add::add, remove::remove};
 pub enum ComponentCommand {
     /// Add a component to component to the currently active Fuel toolchain
     Add(AddCommand),
-    /// Remove a component to component from the currently active Fuel toolchain
+    /// Remove a component from the currently active Fuel toolchain
     Remove(RemoveCommand),
 }
 
 #[derive(Debug, Parser)]
 pub struct AddCommand {
     /// Component name [possible values: forc, fuel-core]
-    pub component: String,
+    pub maybe_versioned_component: String,
 }
 
 #[derive(Debug, Parser)]

@@ -1,9 +1,11 @@
 use anyhow::Result;
 
-use crate::commands::component::RemoveCommand;
+use crate::{commands::component::RemoveCommand, toolchain::Toolchain};
 
 pub fn remove(command: RemoveCommand) -> Result<()> {
     let RemoveCommand { component } = command;
-    println!("Remove component {}", component);
+
+    let toolchain = Toolchain::from_settings()?;
+    toolchain.remove_component(&component)?;
     Ok(())
 }

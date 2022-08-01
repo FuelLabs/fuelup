@@ -1,12 +1,16 @@
 use anyhow::{bail, Result};
 use std::fmt;
+use std::fs::remove_file;
 use std::path::PathBuf;
 use std::str::FromStr;
 use tracing::info;
 
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
-use crate::path::{ensure_dir_exists, fuelup_bin, fuelup_bin_dir, toolchain_bin_dir};
+use crate::path::{
+    ensure_dir_exists, fuelup_bin, fuelup_bin_dir, settings_file, toolchain_bin_dir,
+};
+use crate::settings::SettingsFile;
 
 pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &["latest", "nightly"];
 pub const LATEST: &str = "latest";
@@ -112,6 +116,22 @@ impl Toolchain {
         })
     }
 
+    pub fn from_settings() -> Result<Self> {
+        let settings = SettingsFile::new(settings_file());
+        let toolchain_name = match settings.with(|s| Ok(s.default_toolchain.clone()))? {
+            Some(t) => t,
+            None => {
+                bail!("No default toolchain detected. Please install or create a toolchain first.")
+            }
+        };
+        let path = toolchain_bin_dir(&toolchain_name);
+
+        Ok(Self {
+            name: toolchain_name,
+            path,
+        })
+    }
+
     pub fn exists(&self) -> bool {
         self.path.exists() && self.path.is_dir()
     }
@@ -154,5 +174,18 @@ impl Toolchain {
         };
 
         Ok(download_cfg)
+    }
+
+    pub fn remove_component(&self, component: &str) -> Result<()> {
+        if self.has_component(component) {
+            info!("Removing '{}' from toolchain '{}'", component, self.name);
+            let component_path = self.path.join(component);
+            remove_file(component_path)?;
+            info!("'{}' removed from toolchain '{}'", component, self.name);
+        } else {
+            info!("'{}' not found in toolchain '{}'", component, self.name);
+        }
+
+        Ok(())
     }
 }

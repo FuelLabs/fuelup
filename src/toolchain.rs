@@ -26,7 +26,7 @@ impl fmt::Display for DistToolchainName {
 impl FromStr for DistToolchainName {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
-        let name = s.split_once('-').and_then(|n| Some(n.0));
+        let name = s.split_once('-').map(|n| n.0);
         match name {
             Some("latest") => Ok(Self::Latest),
             _ => bail!("Unknown name for toolchain: {}", s),

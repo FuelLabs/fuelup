@@ -21,7 +21,7 @@ impl SettingsFile {
 
     fn write_settings(&self) -> Result<()> {
         let s = self.cache.borrow().as_ref().unwrap().clone();
-        file::write_file(&self.path, &s.stringify()?)?;
+        file::write_file(&self.path, &s.to_string()?)?;
         Ok(())
     }
 
@@ -73,7 +73,7 @@ impl Settings {
         Ok(settings)
     }
 
-    pub(crate) fn stringify(self) -> Result<String> {
+    pub(crate) fn to_string(self) -> Result<String> {
         Ok(self.into_toml()?.to_string())
     }
 
@@ -132,7 +132,7 @@ mod tests {
     }
 
     #[test]
-    fn stringify_settings() {
+    fn settings_to_string() {
         let expected_toml = r#"default_toolchain = "yet-another-default-toolchain"
 "#;
 
@@ -140,7 +140,6 @@ mod tests {
             default_toolchain: Some("yet-another-default-toolchain".to_string()),
         };
 
-        let stringified = settings.stringify().unwrap();
-        assert_eq!(stringified, expected_toml);
+        assert_eq!(settings.to_string().unwrap(), expected_toml);
     }
 }

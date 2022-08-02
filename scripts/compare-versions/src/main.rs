@@ -153,7 +153,7 @@ fn main() -> Result<()> {
         }
         Err(e) => {
             bail!(
-                "Unexpected error trying to fetch channel {} - retrying at the next scheduled time",
+                "Unexpected error trying to fetch channel: {} - retrying at the next scheduled time",
                 e
             );
         }

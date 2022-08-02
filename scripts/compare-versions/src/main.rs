@@ -151,8 +151,11 @@ fn main() -> Result<()> {
             print_selected_versions(&[latest_sway_version], &[latest_fuel_core_version]);
             std::process::exit(0);
         }
-        Err(_) => {
-            bail!("Unexpected error trying to fetch channel - retrying at the next scheduled time");
+        Err(e) => {
+            bail!(
+                "Unexpected error trying to fetch channel {} - retrying at the next scheduled time",
+                e
+            );
         }
     };
 

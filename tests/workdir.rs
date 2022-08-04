@@ -1,12 +1,13 @@
 use std::{
     env,
     fs::{self, File},
+    io::Write,
     path::{Path, PathBuf},
     process::{Command, Output},
 };
 
 use anyhow::Result;
-use tempfile::tempdir_in;
+use tempfile::{tempdir_in, tempfile_in};
 
 pub enum FuelupState {
     Empty,
@@ -64,11 +65,11 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
                 .join("bin");
             fs::create_dir_all(&bin_dir).expect("Failed");
 
-            fs::copy(&bin, &bin_dir.join("fuel-core"))?;
-            fs::copy(&bin, &bin_dir.join("forc"))?;
-            fs::copy(&bin, &bin_dir.join("forc-fmt"))?;
-            fs::copy(&bin, &bin_dir.join("forc-lsp"))?;
-            fs::copy(&bin, &bin_dir.join("forc-explore"))?;
+            fs::copy(
+                &"/Users/bh/Projects/fuellabs/fuelup/tests/settings-example.toml",
+                &tmp_fuelup_root_path.join("settings.toml"),
+            )
+            .expect("Failed to copy settings");
         }
     }
 

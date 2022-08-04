@@ -8,7 +8,7 @@ fn smoke_test() -> Result<()> {
     workdir::setup(&|cfg| {
         let expected_version = format!("fuelup {}\n", clap::crate_version!());
 
-        let output = cfg.cmd.arg("--version").output().unwrap();
+        let output = cfg.exec_cmd(&["--version"]);
         let stdout = String::from_utf8_lossy(&output.stdout);
 
         assert_eq!(stdout, expected_version);
@@ -20,10 +20,7 @@ fn smoke_test() -> Result<()> {
 #[test]
 fn fuelup_toolchain_install_latest() -> Result<()> {
     workdir::setup(&|cfg| {
-        cfg.cmd
-            .args(["toolchain", "install", "latest"])
-            .output()
-            .expect("Failed to run command");
+        cfg.exec_cmd(&["toolchain", "install", "latest"]);
 
         let expected_bins = ["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"];
 

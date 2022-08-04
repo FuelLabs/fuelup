@@ -1,7 +1,7 @@
 use std::{
     env, fs,
     path::{Path, PathBuf},
-    process::Command,
+    process::{Command, Output},
 };
 
 use anyhow::Result;
@@ -24,6 +24,10 @@ impl TestCfg {
 
     pub fn toolchains_dir(&self) -> PathBuf {
         return self.home.join(".fuelup").join("toolchains");
+    }
+
+    pub fn exec_cmd(&mut self, args: &[&str]) -> Output {
+        self.cmd.args(args).output().expect("Failed to run command")
     }
 }
 

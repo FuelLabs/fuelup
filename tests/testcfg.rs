@@ -66,7 +66,9 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             fs::create_dir_all(&bin_dir).expect("Failed");
 
             fs::copy(
-                &"/Users/bh/Projects/fuellabs/fuelup/tests/settings-example.toml",
+                &env::current_dir()
+                    .unwrap()
+                    .join("/tests/settings-example.toml"),
                 &tmp_fuelup_root_path.join("settings.toml"),
             )
             .expect("Failed to copy settings");

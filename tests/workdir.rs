@@ -1,11 +1,17 @@
 use std::{
-    env, fs,
+    env,
+    fs::{self, File},
     path::{Path, PathBuf},
     process::{Command, Output},
 };
 
 use anyhow::Result;
 use tempfile::tempdir_in;
+
+pub enum FuelupState {
+    Empty,
+    LatestToolchainInstalled,
+}
 
 pub struct TestCfg {
     pub cmd: Command,
@@ -31,12 +37,7 @@ impl TestCfg {
     }
 }
 
-/// Setup an empty work directory and return a command pointing to the ripgrep
-/// executable whose CWD is set to the work directory.
-///
-/// The name given will be used to create the directory. Generally, it should
-/// correspond to the test name.
-pub fn setup(f: &dyn Fn(&mut TestCfg)) -> Result<()> {
+pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     let root = env::current_exe()
         .unwrap()
         .parent()
@@ -52,7 +53,24 @@ pub fn setup(f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     fs::create_dir(&tmp_fuelup_root_path.join("toolchains")).unwrap();
 
     let bin = root.parent().unwrap().join("fuelup");
-    fs::copy(bin, &tmp_fuelup_bin_dir_path.join("fuelup"))?;
+    fs::copy(&bin, &tmp_fuelup_bin_dir_path.join("fuelup"))?;
+
+    match state {
+        FuelupState::Empty => {}
+        FuelupState::LatestToolchainInstalled => {
+            let bin_dir = tmp_fuelup_root_path
+                .join("toolchains")
+                .join("latest-x86_64-apple-darwin")
+                .join("bin");
+            fs::create_dir_all(&bin_dir).expect("Failed");
+
+            fs::copy(&bin, &bin_dir.join("fuel-core"))?;
+            fs::copy(&bin, &bin_dir.join("forc"))?;
+            fs::copy(&bin, &bin_dir.join("forc-fmt"))?;
+            fs::copy(&bin, &bin_dir.join("forc-lsp"))?;
+            fs::copy(&bin, &bin_dir.join("forc-explore"))?;
+        }
+    }
 
     env::set_var("HOME", tmp_home);
     let cmd = Command::new(tmp_fuelup_bin_dir_path.join("fuelup"));

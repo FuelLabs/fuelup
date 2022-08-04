@@ -68,7 +68,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             fs::copy(
                 &env::current_dir()
                     .unwrap()
-                    .join("/tests/settings-example.toml"),
+                    .join("tests/settings-example.toml"),
                 &tmp_fuelup_root_path.join("settings.toml"),
             )
             .expect("Failed to copy settings");

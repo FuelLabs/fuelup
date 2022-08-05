@@ -1,12 +1,13 @@
 use anyhow::Result;
-use std::{env, os::unix::prelude::CommandExt};
+use fuelup::toolchain::TargetTriple;
+use std::env;
 
 mod testcfg;
 
 use testcfg::FuelupState;
 
 #[test]
-fn smoke_test() -> Result<()> {
+fn fuelup_version() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let expected_version = format!("fuelup {}\n", clap::crate_version!());
 
@@ -28,7 +29,12 @@ fn fuelup_toolchain_install() -> Result<()> {
 
         for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
             let toolchain_dir = entry.unwrap();
-            assert_eq!("latest-x86_64-apple-darwin", toolchain_dir.file_name());
+            let expected_toolchain_name =
+                "latest-".to_owned() + &TargetTriple::from_host().unwrap().to_string();
+            assert_eq!(
+                expected_toolchain_name,
+                toolchain_dir.file_name().to_str().unwrap()
+            );
             assert!(toolchain_dir.file_type().unwrap().is_dir());
 
             let downloaded_bins: Vec<String> = toolchain_dir

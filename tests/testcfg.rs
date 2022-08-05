@@ -1,13 +1,10 @@
+use anyhow::Result;
 use std::{
-    env,
-    fs::{self, File},
-    io::Write,
-    path::{Path, PathBuf},
+    env, fs,
+    path::PathBuf,
     process::{Command, Output},
 };
-
-use anyhow::Result;
-use tempfile::{tempdir_in, tempfile_in};
+use tempfile::tempdir_in;
 
 pub enum FuelupState {
     Empty,
@@ -34,7 +31,7 @@ impl TestCfg {
     }
 
     pub fn exec_cmd(&mut self, args: &[&str]) -> Output {
-        self.cmd.args(args).output().expect("Failed to run command")
+        self.cmd.args(args).output().unwrap()
     }
 }
 

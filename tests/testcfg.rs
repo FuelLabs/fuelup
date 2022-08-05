@@ -1,8 +1,8 @@
 use anyhow::Result;
 use std::{
-    env, fs,
-    path::PathBuf,
-    process::{Command, Output},
+    env, fs, io,
+    path::{Path, PathBuf},
+    process::Command,
 };
 use tempfile::tempdir_in;
 
@@ -12,27 +12,45 @@ pub enum FuelupState {
 }
 
 pub struct TestCfg {
-    pub cmd: Command,
+    pub bin: PathBuf,
     pub root: PathBuf,
     pub home: PathBuf,
 }
 
 impl TestCfg {
-    pub fn new(cmd: Command, root: PathBuf, home: PathBuf) -> Self {
-        Self { cmd, root, home }
-    }
-
-    pub fn fuelup_dir(&self) -> PathBuf {
-        return self.home.join(".fuelup");
+    pub fn new(bin: PathBuf, root: PathBuf, home: PathBuf) -> Self {
+        Self { bin, root, home }
     }
 
     pub fn toolchains_dir(&self) -> PathBuf {
         return self.home.join(".fuelup").join("toolchains");
     }
 
-    pub fn exec_cmd(&mut self, args: &[&str]) -> Output {
-        self.cmd.args(args).output().unwrap()
+    pub fn exec_cmd(&mut self, args: &[&str]) -> String {
+        let output = Command::new(&self.bin)
+            .args(args)
+            .env("HOME", &self.home)
+            .output()
+            .expect("Failed to execute command");
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        stdout.to_string()
     }
+}
+
+pub fn copy_binary<A, B>(a: A, b: B) -> std::io::Result<()>
+where
+    A: AsRef<Path>,
+    B: AsRef<Path>,
+{
+    fn inner(a: &Path, b: &Path) -> io::Result<()> {
+        match fs::remove_file(b) {
+            Err(e) if e.kind() != io::ErrorKind::NotFound => return Err(e),
+            _ => {}
+        }
+        fs::copy(a, b).map(drop)
+    }
+
+    inner(a.as_ref(), b.as_ref())
 }
 
 pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
@@ -41,6 +59,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
         .parent()
         .expect("fuelup's directory")
         .to_path_buf();
+
     let testdir = tempdir_in(&root).unwrap();
     let tmp_home = testdir.path();
 
@@ -51,7 +70,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     fs::create_dir(&tmp_fuelup_root_path.join("toolchains")).unwrap();
 
     let bin = root.parent().unwrap().join("fuelup");
-    fs::copy(&bin, &tmp_fuelup_bin_dir_path.join("fuelup"))?;
+    copy_binary(&bin, &tmp_fuelup_bin_dir_path.join("fuelup"))?;
 
     match state {
         FuelupState::Empty => {}
@@ -72,8 +91,11 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
         }
     }
 
-    env::set_var("HOME", tmp_home);
-    let cmd = Command::new(tmp_fuelup_bin_dir_path.join("fuelup"));
-    f(&mut TestCfg::new(cmd, root, tmp_home.to_path_buf()));
+    f(&mut TestCfg::new(
+        tmp_fuelup_bin_dir_path.join("fuelup"),
+        root,
+        tmp_home.to_path_buf(),
+    ));
+
     Ok(())
 }

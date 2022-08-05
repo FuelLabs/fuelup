@@ -1,4 +1,5 @@
-use crate::path::{ensure_dir_exists, toolchain_bin_dir};
+use crate::path::{ensure_dir_exists, settings_file, toolchain_bin_dir};
+use crate::settings::SettingsFile;
 use crate::{commands::toolchain::NewCommand, path::toolchain_dir};
 use anyhow::bail;
 use anyhow::Result;
@@ -21,6 +22,15 @@ pub fn new(command: NewCommand) -> Result<()> {
     }
 
     let toolchain_bin_dir = toolchain_bin_dir(&name);
+
+    let settings_file = settings_file();
+    if !settings_file.exists() {
+        let settings = SettingsFile::new(settings_file);
+        settings.with_mut(|s| {
+            s.default_toolchain = Some(name.clone());
+            Ok(())
+        })?;
+    }
 
     if ensure_dir_exists(&toolchain_dir.join(toolchain_bin_dir)).is_ok() {
         println!("New toolchain initialized: {}", &name);

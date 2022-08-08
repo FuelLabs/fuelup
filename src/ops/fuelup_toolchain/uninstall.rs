@@ -10,6 +10,7 @@ pub fn uninstall(command: UninstallCommand) -> Result<()> {
 
     if !toolchain.exists() {
         info!("toolchain '{}' does not exist", &name);
+        return Ok(());
     }
 
     if toolchain.uninstall_self().is_ok() {

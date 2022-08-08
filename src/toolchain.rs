@@ -13,7 +13,6 @@ use crate::path::{
 use crate::settings::SettingsFile;
 
 pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &["latest", "nightly"];
-pub const LATEST: &str = "latest";
 
 pub enum DistToolchainName {
     Latest,

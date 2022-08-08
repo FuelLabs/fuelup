@@ -141,3 +141,44 @@ fn fuelup_toolchain_new_and_set_default() -> Result<()> {
 
     Ok(())
 }
+
+#[test]
+fn fuelup_component_add() -> Result<()> {
+    testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+        let stdout = cfg.exec_cmd(&["toolchain", "new", "my_toolchain"]);
+        let expected_stdout = "New toolchain initialized: my_toolchain\n";
+        assert_eq!(stdout, expected_stdout);
+
+        let stdout = cfg.exec_cmd(&["default", "my_toolchain"]);
+        let expected_stdout = "default toolchain set to 'my_toolchain'\n";
+        let toolchain_dir = cfg.toolchains_dir().join("my_toolchain");
+        assert_eq!(stdout, expected_stdout);
+        assert!(cfg.toolchains_dir().join("my_toolchain").is_dir());
+
+        let _ = cfg.exec_cmd(&["component", "add", "forc"]);
+        let expected_bins = ["forc", "forc-explore", "forc-lsp", "forc-fmt"];
+        let downloaded_bins: Vec<String> = toolchain_dir
+            .as_path()
+            .join("bin")
+            .read_dir()
+            .expect("Could not read toolchain bin dir")
+            .into_iter()
+            .map(|b| b.unwrap().file_name().to_string_lossy().to_string())
+            .collect();
+        assert_eq!(downloaded_bins, expected_bins);
+
+        let _ = cfg.exec_cmd(&["component", "add", "fuel-core@0.9.5"]);
+        let expected_bins = ["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"];
+        let downloaded_bins: Vec<String> = toolchain_dir
+            .as_path()
+            .join("bin")
+            .read_dir()
+            .expect("Could not read toolchain bin dir")
+            .into_iter()
+            .map(|b| b.unwrap().file_name().to_string_lossy().to_string())
+            .collect();
+        assert_eq!(downloaded_bins, expected_bins);
+    })?;
+
+    Ok(())
+}

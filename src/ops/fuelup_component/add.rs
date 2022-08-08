@@ -17,10 +17,8 @@ pub fn add(command: AddCommand) -> Result<()> {
     let toolchain = Toolchain::from_settings()?;
     if toolchain.has_component(&maybe_versioned_component) {
         println!(
-            "{} already exists; replacing {} in toolchain {}",
-            &maybe_versioned_component,
-            toolchain.has_component(&maybe_versioned_component),
-            toolchain.name
+            "{} already exists in toolchain '{}'; replacing existing version",
+            &maybe_versioned_component, toolchain.name
         );
     }
 

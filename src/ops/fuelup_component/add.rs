@@ -46,7 +46,6 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
             }
             None => (&maybe_versioned_component, None),
         };
-    println!("adding component {} to {}", component, &toolchain.name);
 
     let download_cfg = DownloadCfg::new(component, Some(target_from_name(component)?), version)?;
     toolchain.add_component(download_cfg)?;

@@ -155,8 +155,8 @@ impl Toolchain {
         }
 
         info!(
-            "Installing component {} v{}",
-            &download_cfg.name, &download_cfg.version
+            "Adding component {} v{} to '{}'",
+            &download_cfg.name, &download_cfg.version, self.name
         );
 
         if let Err(e) = download_file_and_unpack(&download_cfg, &self.path) {

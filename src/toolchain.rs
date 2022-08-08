@@ -108,14 +108,6 @@ impl Toolchain {
         })
     }
 
-    pub fn from(toolchain: &str) -> Result<Self> {
-        let path = toolchain_bin_dir(toolchain);
-        Ok(Self {
-            name: toolchain.to_string(),
-            path,
-        })
-    }
-
     pub fn from_settings() -> Result<Self> {
         let settings = SettingsFile::new(settings_file());
         let toolchain_name = match settings.with(|s| Ok(s.default_toolchain.clone()))? {

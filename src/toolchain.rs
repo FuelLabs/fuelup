@@ -13,7 +13,6 @@ use crate::path::{
 use crate::settings::SettingsFile;
 
 pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &["latest", "nightly"];
-pub const LATEST: &str = "latest";
 
 pub enum DistToolchainName {
     Latest,
@@ -148,8 +147,8 @@ impl Toolchain {
         }
 
         info!(
-            "Installing component {} v{}",
-            &download_cfg.name, &download_cfg.version
+            "Adding component {} v{} to '{}'",
+            &download_cfg.name, &download_cfg.version, self.name
         );
 
         if let Err(e) = download_file_and_unpack(&download_cfg, &self.path) {

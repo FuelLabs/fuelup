@@ -17,10 +17,8 @@ pub fn add(command: AddCommand) -> Result<()> {
     let toolchain = Toolchain::from_settings()?;
     if toolchain.has_component(&maybe_versioned_component) {
         println!(
-            "{} already exists; replacing {} in toolchain {}",
-            &maybe_versioned_component,
-            toolchain.has_component(&maybe_versioned_component),
-            toolchain.name
+            "{} already exists in toolchain '{}'; replacing existing version",
+            &maybe_versioned_component, toolchain.name
         );
     }
 
@@ -48,7 +46,6 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
             }
             None => (&maybe_versioned_component, None),
         };
-    println!("adding component {} to {}", component, &toolchain.name);
 
     let download_cfg = DownloadCfg::new(component, Some(target_from_name(component)?), version)?;
     toolchain.add_component(download_cfg)?;

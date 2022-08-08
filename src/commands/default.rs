@@ -6,7 +6,7 @@ use crate::{path::settings_file, settings::SettingsFile, toolchain::Toolchain};
 
 #[derive(Debug, Parser)]
 pub struct DefaultCommand {
-    /// Set default toolchain.
+    /// Set the default toolchain.
     pub toolchain: Option<String>,
 }
 

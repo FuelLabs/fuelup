@@ -4,7 +4,6 @@ use std::path::PathBuf;
 use anyhow::Result;
 use std::io;
 
-use crate::ops::fuelup_toolchain::toolchain;
 use crate::path::toolchain_dir;
 use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 

@@ -135,8 +135,8 @@ fn fuelup_toolchain_new() -> Result<()> {
 fn fuelup_toolchain_new_disallowed() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let output = cfg.exec_cmd(&["toolchain", "new", "latest"]);
-        let expected_stdout = "error: Invalid value \"latest\" for '<NAME>': Cannot use official toolchain name 'latest' as a custom toolchain name\n\nFor more information try --help\n";
-        assert_eq!(output.stderr, expected_stdout);
+        let expected_stderr = "error: Invalid value \"latest\" for '<NAME>': Cannot use official toolchain name 'latest' as a custom toolchain name\n\nFor more information try --help\n";
+        assert_eq!(output.stderr, expected_stderr);
     })?;
 
     Ok(())
@@ -203,6 +203,20 @@ fn fuelup_component_add() -> Result<()> {
     Ok(())
 }
 
+#[test]
+fn fuelup_component_add_disallowed() -> Result<()> {
+    testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+        let output = cfg.exec_cmd(&["component", "add", "forc@0.19.1"]);
+        let expected_stdout = r#"Installing specific versions of components is reserved for custom toolchains.
+You are currently using 'latest'.
+
+You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
+"#;
+        assert_eq!(output.stdout, expected_stdout);
+    })?;
+
+    Ok(())
+}
 #[test]
 fn fuelup_component_remove() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {

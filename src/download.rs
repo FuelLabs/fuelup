@@ -240,7 +240,7 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path)
 
     if download_file(&download_cfg.tarball_url, &tarball_path).is_err() {
         bail!(
-            "Failed to download {} - the release might not be ready yet, or the version might not exist.",
+            "Failed to download {} - the release may not exist or may not be ready yet.",
             &download_cfg.tarball_name
         );
     };

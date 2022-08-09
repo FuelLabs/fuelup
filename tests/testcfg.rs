@@ -12,7 +12,7 @@ pub enum FuelupState {
 }
 
 pub struct TestCfg {
-    pub bin: PathBuf,
+    pub fuelup_path: PathBuf,
     pub root: PathBuf,
     pub home: PathBuf,
 }
@@ -24,16 +24,20 @@ pub struct TestOutput {
 }
 
 impl TestCfg {
-    pub fn new(bin: PathBuf, root: PathBuf, home: PathBuf) -> Self {
-        Self { bin, root, home }
+    pub fn new(fuelup_path: PathBuf, root: PathBuf, home: PathBuf) -> Self {
+        Self {
+            fuelup_path,
+            root,
+            home,
+        }
     }
 
     pub fn toolchains_dir(&self) -> PathBuf {
         self.home.join(".fuelup").join("toolchains")
     }
 
-    pub fn exec_cmd(&mut self, args: &[&str]) -> TestOutput {
-        let output = Command::new(&self.bin)
+    pub fn fuelup(&mut self, args: &[&str]) -> TestOutput {
+        let output = Command::new(&self.fuelup_path)
             .args(args)
             .env("HOME", &self.home)
             .output()

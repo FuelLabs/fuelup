@@ -11,7 +11,7 @@ fn fuelup_version() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let expected_version = format!("fuelup {}\n", clap::crate_version!());
 
-        let stdout = cfg.exec_cmd(&["--version"]).stdout;
+        let stdout = cfg.fuelup(&["--version"]).stdout;
 
         assert_eq!(stdout, expected_version);
     })?;
@@ -22,7 +22,7 @@ fn fuelup_version() -> Result<()> {
 #[test]
 fn fuelup_toolchain_install() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        cfg.exec_cmd(&["toolchain", "install", "latest"]);
+        cfg.fuelup(&["toolchain", "install", "latest"]);
 
         let expected_bins = ["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"];
 
@@ -46,7 +46,7 @@ fn fuelup_toolchain_install() -> Result<()> {
                 .collect();
 
             assert_eq!(downloaded_bins, expected_bins);
-            let output = cfg.exec_cmd(&["check"]);
+            let output = cfg.fuelup(&["check"]);
             assert!(output
                 .stdout
                 .contains("forc - \u{1b}[0m\u{1b}[0m\u{1b}[1m\u{1b}[32mUp to date\u{1b}"));
@@ -64,7 +64,7 @@ fn fuelup_toolchain_install() -> Result<()> {
 #[test]
 fn fuelup_check() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let output = cfg.exec_cmd(&["check"]);
+        let output = cfg.fuelup(&["check"]);
         let expected_stdout = format!("\u{1b}[0m\u{1b}[1mfuelup - \u{1b}[0m\u{1b}[0m\u{1b}[1m\u{1b}[32mUp to date\u{1b}[0m : {}\n", clap::crate_version!());
 
         assert_eq!(output.stdout, expected_stdout);
@@ -76,7 +76,7 @@ fn fuelup_check() -> Result<()> {
 #[test]
 fn fuelup_self_update() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
-        let output = cfg.exec_cmd(&["self", "update"]);
+        let output = cfg.fuelup(&["self", "update"]);
 
         let expected_stdout_starts_with = "Fetching binary from";
         assert!(output.stdout.starts_with(expected_stdout_starts_with));
@@ -88,7 +88,7 @@ fn fuelup_self_update() -> Result<()> {
 #[test]
 fn fuelup_default_empty() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let output = cfg.exec_cmd(&["default"]);
+        let output = cfg.fuelup(&["default"]);
         let expected_stdout =
             "No default toolchain detected. Please install or create a toolchain first.\n";
 
@@ -101,7 +101,7 @@ fn fuelup_default_empty() -> Result<()> {
 #[test]
 fn fuelup_default() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
-        let output = cfg.exec_cmd(&["default"]);
+        let output = cfg.fuelup(&["default"]);
         let expected_stdout = "latest-x86_64-apple-darwin (default)\n";
 
         assert_eq!(output.stdout, expected_stdout);
@@ -113,7 +113,7 @@ fn fuelup_default() -> Result<()> {
 #[test]
 fn fuelup_toolchain_new() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let output = cfg.exec_cmd(&["toolchain", "new", "my_toolchain"]);
+        let output = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
         let expected_stdout = "New toolchain initialized: my_toolchain\n";
         assert_eq!(output.stdout, expected_stdout);
         assert!(cfg.toolchains_dir().join("my_toolchain").is_dir());
@@ -123,7 +123,7 @@ fn fuelup_toolchain_new() -> Result<()> {
             .join("bin")
             .is_dir());
 
-        let output = cfg.exec_cmd(&["default", "my_toolchain"]);
+        let output = cfg.fuelup(&["default", "my_toolchain"]);
         let expected_stdout = "default toolchain set to 'my_toolchain'\n";
         assert_eq!(output.stdout, expected_stdout);
     })?;
@@ -134,7 +134,7 @@ fn fuelup_toolchain_new() -> Result<()> {
 #[test]
 fn fuelup_toolchain_new_disallowed() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let output = cfg.exec_cmd(&["toolchain", "new", "latest"]);
+        let output = cfg.fuelup(&["toolchain", "new", "latest"]);
         let expected_stderr = "error: Invalid value \"latest\" for '<NAME>': Cannot use official toolchain name 'latest' as a custom toolchain name\n\nFor more information try --help\n";
         assert_eq!(output.stderr, expected_stderr);
     })?;
@@ -145,15 +145,15 @@ fn fuelup_toolchain_new_disallowed() -> Result<()> {
 #[test]
 fn fuelup_toolchain_new_and_set_default() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
-        let output = cfg.exec_cmd(&["default"]);
+        let output = cfg.fuelup(&["default"]);
         let expected_stdout = "latest-x86_64-apple-darwin (default)\n";
         assert_eq!(output.stdout, expected_stdout);
 
-        let output = cfg.exec_cmd(&["toolchain", "new", "my_toolchain"]);
+        let output = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
         let expected_stdout = "New toolchain initialized: my_toolchain\n";
         assert_eq!(output.stdout, expected_stdout);
 
-        let output = cfg.exec_cmd(&["default", "my_toolchain"]);
+        let output = cfg.fuelup(&["default", "my_toolchain"]);
         let expected_stdout = "default toolchain set to 'my_toolchain'\n";
         assert_eq!(output.stdout, expected_stdout);
         assert!(cfg.toolchains_dir().join("my_toolchain").is_dir());
@@ -165,17 +165,17 @@ fn fuelup_toolchain_new_and_set_default() -> Result<()> {
 #[test]
 fn fuelup_component_add() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let output = cfg.exec_cmd(&["toolchain", "new", "my_toolchain"]);
+        let output = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
         let expected_stdout = "New toolchain initialized: my_toolchain\n";
         assert_eq!(output.stdout, expected_stdout);
 
-        let output = cfg.exec_cmd(&["default", "my_toolchain"]);
+        let output = cfg.fuelup(&["default", "my_toolchain"]);
         let expected_stdout = "default toolchain set to 'my_toolchain'\n";
         let toolchain_dir = cfg.toolchains_dir().join("my_toolchain");
         assert_eq!(output.stdout, expected_stdout);
         assert!(cfg.toolchains_dir().join("my_toolchain").is_dir());
 
-        let _ = cfg.exec_cmd(&["component", "add", "forc"]);
+        let _ = cfg.fuelup(&["component", "add", "forc"]);
         let expected_bins = ["forc", "forc-explore", "forc-lsp", "forc-fmt"];
         let downloaded_bins: Vec<String> = toolchain_dir
             .as_path()
@@ -187,7 +187,7 @@ fn fuelup_component_add() -> Result<()> {
             .collect();
         assert_eq!(downloaded_bins, expected_bins);
 
-        let _ = cfg.exec_cmd(&["component", "add", "fuel-core@0.9.5"]);
+        let _ = cfg.fuelup(&["component", "add", "fuel-core@0.9.5"]);
         let expected_bins = ["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"];
         let downloaded_bins: Vec<String> = toolchain_dir
             .as_path()
@@ -206,7 +206,7 @@ fn fuelup_component_add() -> Result<()> {
 #[test]
 fn fuelup_component_add_disallowed() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
-        let output = cfg.exec_cmd(&["component", "add", "forc@0.19.1"]);
+        let output = cfg.fuelup(&["component", "add", "forc@0.19.1"]);
         let expected_stdout = r#"Installing specific versions of components is reserved for custom toolchains.
 You are currently using 'latest'.
 
@@ -232,7 +232,7 @@ fn fuelup_component_remove() -> Result<()> {
             .map(|b| b.unwrap().file_name().to_string_lossy().to_string())
             .collect();
         assert_eq!(downloaded_bins, expected_bins);
-        let _ = cfg.exec_cmd(&["component", "remove", "forc"]);
+        let _ = cfg.fuelup(&["component", "remove", "forc"]);
         let expected_bins = ["fuel-core"];
         let downloaded_bins: Vec<String> = toolchain_dir
             .as_path()
@@ -244,7 +244,7 @@ fn fuelup_component_remove() -> Result<()> {
             .collect();
         assert_eq!(downloaded_bins, expected_bins);
 
-        let _ = cfg.exec_cmd(&["component", "remove", "fuel-core"]);
+        let _ = cfg.fuelup(&["component", "remove", "fuel-core"]);
         assert!(
             toolchain_dir
                 .as_path()

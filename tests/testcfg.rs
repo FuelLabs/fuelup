@@ -29,7 +29,7 @@ impl TestCfg {
     }
 
     pub fn toolchains_dir(&self) -> PathBuf {
-        return self.home.join(".fuelup").join("toolchains");
+        self.home.join(".fuelup").join("toolchains")
     }
 
     pub fn exec_cmd(&mut self, args: &[&str]) -> TestOutput {
@@ -40,10 +40,7 @@ impl TestCfg {
             .expect("Failed to execute command");
         let stdout = String::from_utf8(output.stdout).unwrap();
         let stderr = String::from_utf8(output.stderr).unwrap();
-        TestOutput {
-            stdout: stdout.to_string(),
-            stderr: stderr.to_string(),
-        }
+        TestOutput { stdout, stderr }
     }
 }
 

@@ -245,15 +245,15 @@ fn fuelup_component_remove() -> Result<()> {
         assert_eq!(downloaded_bins, expected_bins);
 
         let _ = cfg.exec_cmd(&["component", "remove", "fuel-core"]);
-        let downloaded_bins: Vec<String> = toolchain_dir
-            .as_path()
-            .join("bin")
-            .read_dir()
-            .expect("Could not read toolchain bin dir")
-            .into_iter()
-            .map(|b| b.unwrap().file_name().to_string_lossy().to_string())
-            .collect();
-        assert!(downloaded_bins.is_empty());
+        assert!(
+            toolchain_dir
+                .as_path()
+                .join("bin")
+                .read_dir()
+                .unwrap()
+                .count()
+                == 0
+        );
     })?;
 
     Ok(())

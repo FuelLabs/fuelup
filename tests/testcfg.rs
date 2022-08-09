@@ -68,7 +68,6 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     fs::create_dir(&tmp_fuelup_root_path).unwrap();
     fs::create_dir(&tmp_fuelup_bin_dir_path).unwrap();
     fs::create_dir(&tmp_fuelup_root_path.join("toolchains")).unwrap();
-
     let bin = root.parent().unwrap().join("fuelup");
     copy_binary(&bin, &tmp_fuelup_bin_dir_path.join("fuelup"))?;
 
@@ -81,6 +80,11 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
                 .join("bin");
             fs::create_dir_all(&bin_dir).expect("Failed");
 
+            fs::File::create(&bin_dir.join("forc"))?;
+            fs::File::create(&bin_dir.join("forc-fmt"))?;
+            fs::File::create(&bin_dir.join("forc-lsp"))?;
+            fs::File::create(&bin_dir.join("forc-explore"))?;
+            fs::File::create(&bin_dir.join("fuel-core"))?;
             fs::copy(
                 &env::current_dir()
                     .unwrap()

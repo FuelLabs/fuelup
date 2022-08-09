@@ -11,7 +11,7 @@ fn fuelup_version() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let expected_version = format!("fuelup {}\n", clap::crate_version!());
 
-        let stdout = cfg.exec_cmd(&["--version"]);
+        let stdout = cfg.exec_cmd(&["--version"]).stdout;
 
         assert_eq!(stdout, expected_version);
     })?;
@@ -46,13 +46,15 @@ fn fuelup_toolchain_install() -> Result<()> {
                 .collect();
 
             assert_eq!(downloaded_bins, expected_bins);
-            let stdout = cfg.exec_cmd(&["check"]);
-            assert!(stdout.contains("forc - \u{1b}[0m\u{1b}[0m\u{1b}[1m\u{1b}[32mUp to date\u{1b}"));
+            let output = cfg.exec_cmd(&["check"]);
+            assert!(output
+                .stdout
+                .contains("forc - \u{1b}[0m\u{1b}[0m\u{1b}[1m\u{1b}[32mUp to date\u{1b}"));
             // TODO: uncomment once new fuel-core is released and this works
             // assert!(stdout.contains("fuel-core - \u{1b}[0m\u{1b}[0m\u{1b}[1m\u{1b}[32mUp to date\u{1b}"));
-            assert!(
-                stdout.contains("fuelup - \u{1b}[0m\u{1b}[0m\u{1b}[1m\u{1b}[32mUp to date\u{1b}")
-            );
+            assert!(output
+                .stdout
+                .contains("fuelup - \u{1b}[0m\u{1b}[0m\u{1b}[1m\u{1b}[32mUp to date\u{1b}"));
         }
     })?;
 
@@ -62,10 +64,10 @@ fn fuelup_toolchain_install() -> Result<()> {
 #[test]
 fn fuelup_check() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let stdout = cfg.exec_cmd(&["check"]);
+        let output = cfg.exec_cmd(&["check"]);
         let expected_stdout = format!("\u{1b}[0m\u{1b}[1mfuelup - \u{1b}[0m\u{1b}[0m\u{1b}[1m\u{1b}[32mUp to date\u{1b}[0m : {}\n", clap::crate_version!());
 
-        assert_eq!(stdout, expected_stdout);
+        assert_eq!(output.stdout, expected_stdout);
     })?;
 
     Ok(())
@@ -74,10 +76,10 @@ fn fuelup_check() -> Result<()> {
 #[test]
 fn fuelup_self_update() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
-        let stdout = cfg.exec_cmd(&["self", "update"]);
+        let output = cfg.exec_cmd(&["self", "update"]);
 
         let expected_stdout_starts_with = "Fetching binary from";
-        assert!(stdout.starts_with(expected_stdout_starts_with));
+        assert!(output.stdout.starts_with(expected_stdout_starts_with));
     })?;
 
     Ok(())
@@ -86,11 +88,11 @@ fn fuelup_self_update() -> Result<()> {
 #[test]
 fn fuelup_default_empty() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let stdout = cfg.exec_cmd(&["default"]);
+        let output = cfg.exec_cmd(&["default"]);
         let expected_stdout =
             "No default toolchain detected. Please install or create a toolchain first.\n";
 
-        assert_eq!(stdout, expected_stdout);
+        assert_eq!(output.stdout, expected_stdout);
     })?;
 
     Ok(())
@@ -99,21 +101,21 @@ fn fuelup_default_empty() -> Result<()> {
 #[test]
 fn fuelup_default() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
-        let stdout = cfg.exec_cmd(&["default"]);
+        let output = cfg.exec_cmd(&["default"]);
         let expected_stdout = "latest-x86_64-apple-darwin (default)\n";
 
-        assert_eq!(stdout, expected_stdout);
+        assert_eq!(output.stdout, expected_stdout);
     })?;
 
     Ok(())
 }
 
 #[test]
-fn fuelup_toolchain_new_only() -> Result<()> {
+fn fuelup_toolchain_new() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let stdout = cfg.exec_cmd(&["toolchain", "new", "my_toolchain"]);
+        let output = cfg.exec_cmd(&["toolchain", "new", "my_toolchain"]);
         let expected_stdout = "New toolchain initialized: my_toolchain\n";
-        assert_eq!(stdout, expected_stdout);
+        assert_eq!(output.stdout, expected_stdout);
         assert!(cfg.toolchains_dir().join("my_toolchain").is_dir());
         assert!(cfg
             .toolchains_dir()
@@ -121,9 +123,20 @@ fn fuelup_toolchain_new_only() -> Result<()> {
             .join("bin")
             .is_dir());
 
-        let stdout = cfg.exec_cmd(&["default", "my_toolchain"]);
+        let output = cfg.exec_cmd(&["default", "my_toolchain"]);
         let expected_stdout = "default toolchain set to 'my_toolchain'\n";
-        assert_eq!(stdout, expected_stdout);
+        assert_eq!(output.stdout, expected_stdout);
+    })?;
+
+    Ok(())
+}
+
+#[test]
+fn fuelup_toolchain_new_disallowed() -> Result<()> {
+    testcfg::setup(FuelupState::Empty, &|cfg| {
+        let output = cfg.exec_cmd(&["toolchain", "new", "latest"]);
+        let expected_stdout = "error: Invalid value \"latest\" for '<NAME>': Cannot use official toolchain name 'latest' as a custom toolchain name\n\nFor more information try --help\n";
+        assert_eq!(output.stderr, expected_stdout);
     })?;
 
     Ok(())
@@ -132,17 +145,17 @@ fn fuelup_toolchain_new_only() -> Result<()> {
 #[test]
 fn fuelup_toolchain_new_and_set_default() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
-        let stdout = cfg.exec_cmd(&["default"]);
+        let output = cfg.exec_cmd(&["default"]);
         let expected_stdout = "latest-x86_64-apple-darwin (default)\n";
-        assert_eq!(stdout, expected_stdout);
+        assert_eq!(output.stdout, expected_stdout);
 
-        let stdout = cfg.exec_cmd(&["toolchain", "new", "my_toolchain"]);
+        let output = cfg.exec_cmd(&["toolchain", "new", "my_toolchain"]);
         let expected_stdout = "New toolchain initialized: my_toolchain\n";
-        assert_eq!(stdout, expected_stdout);
+        assert_eq!(output.stdout, expected_stdout);
 
-        let stdout = cfg.exec_cmd(&["default", "my_toolchain"]);
+        let output = cfg.exec_cmd(&["default", "my_toolchain"]);
         let expected_stdout = "default toolchain set to 'my_toolchain'\n";
-        assert_eq!(stdout, expected_stdout);
+        assert_eq!(output.stdout, expected_stdout);
         assert!(cfg.toolchains_dir().join("my_toolchain").is_dir());
     })?;
 
@@ -152,14 +165,14 @@ fn fuelup_toolchain_new_and_set_default() -> Result<()> {
 #[test]
 fn fuelup_component_add() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let stdout = cfg.exec_cmd(&["toolchain", "new", "my_toolchain"]);
+        let output = cfg.exec_cmd(&["toolchain", "new", "my_toolchain"]);
         let expected_stdout = "New toolchain initialized: my_toolchain\n";
-        assert_eq!(stdout, expected_stdout);
+        assert_eq!(output.stdout, expected_stdout);
 
-        let stdout = cfg.exec_cmd(&["default", "my_toolchain"]);
+        let output = cfg.exec_cmd(&["default", "my_toolchain"]);
         let expected_stdout = "default toolchain set to 'my_toolchain'\n";
         let toolchain_dir = cfg.toolchains_dir().join("my_toolchain");
-        assert_eq!(stdout, expected_stdout);
+        assert_eq!(output.stdout, expected_stdout);
         assert!(cfg.toolchains_dir().join("my_toolchain").is_dir());
 
         let _ = cfg.exec_cmd(&["component", "add", "forc"]);
@@ -206,7 +219,7 @@ fn fuelup_component_remove() -> Result<()> {
             .collect();
         assert_eq!(downloaded_bins, expected_bins);
         let _ = cfg.exec_cmd(&["component", "remove", "forc"]);
-        let expected_bins = ["forc-explore", "fuel-core", "forc-lsp", "forc-fmt"];
+        let expected_bins = ["fuel-core"];
         let downloaded_bins: Vec<String> = toolchain_dir
             .as_path()
             .join("bin")
@@ -216,6 +229,17 @@ fn fuelup_component_remove() -> Result<()> {
             .map(|b| b.unwrap().file_name().to_string_lossy().to_string())
             .collect();
         assert_eq!(downloaded_bins, expected_bins);
+
+        let _ = cfg.exec_cmd(&["component", "remove", "fuel-core"]);
+        let downloaded_bins: Vec<String> = toolchain_dir
+            .as_path()
+            .join("bin")
+            .read_dir()
+            .expect("Could not read toolchain bin dir")
+            .into_iter()
+            .map(|b| b.unwrap().file_name().to_string_lossy().to_string())
+            .collect();
+        assert!(downloaded_bins.is_empty());
     })?;
 
     Ok(())

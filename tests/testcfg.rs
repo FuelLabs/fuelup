@@ -17,6 +17,12 @@ pub struct TestCfg {
     pub home: PathBuf,
 }
 
+#[derive(Debug)]
+pub struct TestOutput {
+    pub stdout: String,
+    pub stderr: String,
+}
+
 impl TestCfg {
     pub fn new(bin: PathBuf, root: PathBuf, home: PathBuf) -> Self {
         Self { bin, root, home }
@@ -26,14 +32,18 @@ impl TestCfg {
         return self.home.join(".fuelup").join("toolchains");
     }
 
-    pub fn exec_cmd(&mut self, args: &[&str]) -> String {
+    pub fn exec_cmd(&mut self, args: &[&str]) -> TestOutput {
         let output = Command::new(&self.bin)
             .args(args)
             .env("HOME", &self.home)
             .output()
             .expect("Failed to execute command");
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        stdout.to_string()
+        let stdout = String::from_utf8(output.stdout).unwrap();
+        let stderr = String::from_utf8(output.stderr).unwrap();
+        TestOutput {
+            stdout: stdout.to_string(),
+            stderr: stderr.to_string(),
+        }
     }
 }
 

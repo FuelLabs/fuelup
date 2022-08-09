@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use tracing::info;
 
+use crate::component;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
@@ -180,6 +181,17 @@ impl Toolchain {
             info!("Removing '{}' from toolchain '{}'", component, self.name);
             let component_path = self.path.join(component);
             remove_file(component_path)?;
+            // If component to remove is 'forc', silently remove forc plugins
+            if component == component::FORC {
+                for component in [
+                    component::FORC_FMT,
+                    component::FORC_LSP,
+                    component::FORC_EXPLORE,
+                ] {
+                    let component_path = self.path.join(component);
+                    remove_file(component_path)?;
+                }
+            }
             info!("'{}' removed from toolchain '{}'", component, self.name);
         } else {
             info!("'{}' not found in toolchain '{}'", component, self.name);

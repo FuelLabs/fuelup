@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use tracing::info;
 
+use crate::component::SUPPORTED_PLUGINS;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
@@ -173,11 +174,7 @@ impl Toolchain {
             remove_file(component_path)?;
             // If component to remove is 'forc', silently remove forc plugins
             if component == component::FORC {
-                for component in [
-                    component::FORC_FMT,
-                    component::FORC_LSP,
-                    component::FORC_EXPLORE,
-                ] {
+                for component in SUPPORTED_PLUGINS {
                     let component_path = self.path.join(component);
                     remove_file(component_path)
                         .with_context(|| format!("failed to remove component '{}'", component))?;

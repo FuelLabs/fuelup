@@ -1,9 +1,5 @@
 use anyhow::Result;
-use std::{
-    env, fs, io,
-    path::{Path, PathBuf},
-    process::Command,
-};
+use std::{env, fs, path::PathBuf, process::Command};
 use tempfile::tempdir_in;
 
 pub enum FuelupState {

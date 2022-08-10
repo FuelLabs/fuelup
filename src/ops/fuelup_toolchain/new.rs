@@ -14,7 +14,7 @@ pub fn new(command: NewCommand) -> Result<()> {
 
     let toolchain_exists = fs::read_dir(&toolchain_dir)?
         .filter_map(io::Result::ok)
-        .filter(|e| e.file_type().map(|f| f.is_dir()).unwrap_or(false))
+        .filter(|e| e.path().is_dir())
         .map(|e| e.file_name().into_string().ok().unwrap_or_default())
         .any(|x| x == name);
 

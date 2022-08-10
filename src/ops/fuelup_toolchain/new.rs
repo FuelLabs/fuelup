@@ -5,6 +5,7 @@ use anyhow::bail;
 use anyhow::Result;
 use std::fs;
 use std::io;
+use tracing::info;
 
 pub fn new(command: NewCommand) -> Result<()> {
     let NewCommand { name } = command;
@@ -33,7 +34,7 @@ pub fn new(command: NewCommand) -> Result<()> {
     }
 
     if ensure_dir_exists(&toolchain_dir.join(toolchain_bin_dir)).is_ok() {
-        println!("New toolchain initialized: {}", &name);
+        info!("New toolchain initialized: {}", &name);
     };
 
     Ok(())

@@ -79,7 +79,8 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
                 .join("toolchains")
                 .join("latest-x86_64-apple-darwin")
                 .join("bin");
-            fs::create_dir_all(&bin_dir).expect("Failed");
+            fs::create_dir_all(&bin_dir)
+                .expect("Failed to create temporary latest toolchain bin dir");
 
             fs::File::create(&bin_dir.join("forc"))?;
             fs::File::create(&bin_dir.join("forc-fmt"))?;

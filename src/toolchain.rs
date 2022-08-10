@@ -171,7 +171,8 @@ impl Toolchain {
         if self.has_component(component) {
             info!("Removing '{}' from toolchain '{}'", component, self.name);
             let component_path = self.path.join(component);
-            remove_file(component_path)?;
+            remove_file(component_path)
+                .with_context(|| format!("failed to remove component '{}'", component))?;
             // If component to remove is 'forc', silently remove forc plugins
             if component == component::FORC {
                 for component in SUPPORTED_PLUGINS {

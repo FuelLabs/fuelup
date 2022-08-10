@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 use std::fmt;
 use std::fs::{remove_dir_all, remove_file};
 use std::path::PathBuf;
@@ -41,21 +41,6 @@ impl FromStr for DistToolchainName {
             _ => bail!("Unknown name for toolchain: {}", s),
         }
     }
-}
-
-pub fn is_official_toolchain(toolchain: &str) -> bool {
-    let mut reserved: Vec<String> = Vec::new();
-    let triple = TargetTriple::from_host().ok();
-    for reserved_toolchain_name in RESERVED_TOOLCHAIN_NAMES {
-        reserved.push(reserved_toolchain_name.to_string());
-
-        if triple.is_some() {
-            reserved
-                .push(reserved_toolchain_name.to_string() + &triple.as_ref().unwrap().to_string());
-        }
-    }
-
-    reserved.contains(&toolchain.to_string())
 }
 
 #[derive(Debug)]
@@ -194,7 +179,8 @@ impl Toolchain {
                     component::FORC_EXPLORE,
                 ] {
                     let component_path = self.path.join(component);
-                    remove_file(component_path)?;
+                    remove_file(component_path)
+                        .with_context(|| format!("failed to remove component '{}'", component))?;
                 }
             }
             info!("'{}' removed from toolchain '{}'", component, self.name);

@@ -5,15 +5,20 @@ use std::path::PathBuf;
 use std::str::FromStr;
 use tracing::info;
 
-use crate::component;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
     ensure_dir_exists, fuelup_bin, fuelup_bin_dir, settings_file, toolchain_bin_dir,
 };
 use crate::settings::SettingsFile;
+use crate::{channel, component};
 
-pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &["latest", "nightly"];
+pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
+    channel::LATEST,
+    channel::BETA,
+    channel::NIGHTLY,
+    channel::STABLE,
+];
 
 pub enum DistToolchainName {
     Latest,
@@ -22,7 +27,7 @@ pub enum DistToolchainName {
 impl fmt::Display for DistToolchainName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            DistToolchainName::Latest => write!(f, "latest"),
+            DistToolchainName::Latest => write!(f, "{}", channel::LATEST),
         }
     }
 }
@@ -32,7 +37,7 @@ impl FromStr for DistToolchainName {
     fn from_str(s: &str) -> Result<Self> {
         let name = s.split_once('-').map(|n| n.0);
         match name {
-            Some("latest") => Ok(Self::Latest),
+            Some(channel::LATEST) => Ok(Self::Latest),
             _ => bail!("Unknown name for toolchain: {}", s),
         }
     }

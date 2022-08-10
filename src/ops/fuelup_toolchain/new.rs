@@ -33,9 +33,8 @@ pub fn new(command: NewCommand) -> Result<()> {
         })?;
     }
 
-    if ensure_dir_exists(&toolchain_dir.join(toolchain_bin_dir)).is_ok() {
-        info!("New toolchain initialized: {}", &name);
-    };
+    ensure_dir_exists(&toolchain_dir.join(toolchain_bin_dir))?;
+    info!("New toolchain initialized: {}", &name);
 
     Ok(())
 }

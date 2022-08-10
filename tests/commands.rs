@@ -1,10 +1,21 @@
 use anyhow::Result;
 use fuelup::toolchain::TargetTriple;
-use std::env;
+use std::{env, path::Path};
 
 mod testcfg;
 
 use testcfg::FuelupState;
+
+fn expect_files_exist(dir: &Path, expected: &[&str]) {
+    let actual: Vec<String> = dir
+        .read_dir()
+        .expect("Could not read directory")
+        .into_iter()
+        .map(|b| b.unwrap().file_name().to_string_lossy().to_string())
+        .collect();
+
+    assert_eq!(actual, expected);
+}
 
 #[test]
 fn fuelup_version() -> Result<()> {
@@ -24,8 +35,6 @@ fn fuelup_toolchain_install() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         cfg.fuelup(&["toolchain", "install", "latest"]);
 
-        let expected_bins = ["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"];
-
         for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
             let toolchain_dir = entry.unwrap();
             let expected_toolchain_name =
@@ -36,16 +45,11 @@ fn fuelup_toolchain_install() -> Result<()> {
             );
             assert!(toolchain_dir.file_type().unwrap().is_dir());
 
-            let downloaded_bins: Vec<String> = toolchain_dir
-                .path()
-                .join("bin")
-                .read_dir()
-                .expect("Could not read toolchain bin dir")
-                .into_iter()
-                .map(|b| b.unwrap().file_name().to_string_lossy().to_string())
-                .collect();
+            expect_files_exist(
+                &toolchain_dir.path().join("bin"),
+                &["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"],
+            );
 
-            assert_eq!(downloaded_bins, expected_bins);
             let output = cfg.fuelup(&["check"]);
             assert!(output
                 .stdout
@@ -116,12 +120,7 @@ fn fuelup_toolchain_new() -> Result<()> {
         let output = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
         let expected_stdout = "New toolchain initialized: my_toolchain\n";
         assert_eq!(output.stdout, expected_stdout);
-        assert!(cfg.toolchains_dir().join("my_toolchain").is_dir());
-        assert!(cfg
-            .toolchains_dir()
-            .join("my_toolchain")
-            .join("bin")
-            .is_dir());
+        assert!(cfg.toolchain_bin_dir("my_toolchain").is_dir());
 
         let output = cfg.fuelup(&["default", "my_toolchain"]);
         let expected_stdout = "default toolchain set to 'my_toolchain'\n";
@@ -148,15 +147,16 @@ fn fuelup_toolchain_new_and_set_default() -> Result<()> {
         let output = cfg.fuelup(&["default"]);
         let expected_stdout = "latest-x86_64-apple-darwin (default)\n";
         assert_eq!(output.stdout, expected_stdout);
+        assert!(!cfg.toolchain_bin_dir("my_toolchain").is_dir());
 
         let output = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
         let expected_stdout = "New toolchain initialized: my_toolchain\n";
         assert_eq!(output.stdout, expected_stdout);
+        assert!(cfg.toolchain_bin_dir("my_toolchain").is_dir());
 
         let output = cfg.fuelup(&["default", "my_toolchain"]);
         let expected_stdout = "default toolchain set to 'my_toolchain'\n";
         assert_eq!(output.stdout, expected_stdout);
-        assert!(cfg.toolchains_dir().join("my_toolchain").is_dir());
     })?;
 
     Ok(())
@@ -171,33 +171,20 @@ fn fuelup_component_add() -> Result<()> {
 
         let output = cfg.fuelup(&["default", "my_toolchain"]);
         let expected_stdout = "default toolchain set to 'my_toolchain'\n";
-        let toolchain_dir = cfg.toolchains_dir().join("my_toolchain");
         assert_eq!(output.stdout, expected_stdout);
-        assert!(cfg.toolchains_dir().join("my_toolchain").is_dir());
+        assert!(cfg.toolchain_bin_dir("my_toolchain").is_dir());
 
         let _ = cfg.fuelup(&["component", "add", "forc"]);
-        let expected_bins = ["forc", "forc-explore", "forc-lsp", "forc-fmt"];
-        let downloaded_bins: Vec<String> = toolchain_dir
-            .as_path()
-            .join("bin")
-            .read_dir()
-            .expect("Could not read toolchain bin dir")
-            .into_iter()
-            .map(|b| b.unwrap().file_name().to_string_lossy().to_string())
-            .collect();
-        assert_eq!(downloaded_bins, expected_bins);
+        expect_files_exist(
+            &cfg.toolchain_bin_dir("my_toolchain"),
+            &["forc", "forc-explore", "forc-lsp", "forc-fmt"],
+        );
 
         let _ = cfg.fuelup(&["component", "add", "fuel-core@0.9.5"]);
-        let expected_bins = ["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"];
-        let downloaded_bins: Vec<String> = toolchain_dir
-            .as_path()
-            .join("bin")
-            .read_dir()
-            .expect("Could not read toolchain bin dir")
-            .into_iter()
-            .map(|b| b.unwrap().file_name().to_string_lossy().to_string())
-            .collect();
-        assert_eq!(downloaded_bins, expected_bins);
+        expect_files_exist(
+            &cfg.toolchain_bin_dir("my_toolchain"),
+            &["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"],
+        );
     })?;
 
     Ok(())
@@ -220,40 +207,17 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
 #[test]
 fn fuelup_component_remove() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
-        let toolchain_dir = cfg.toolchains_dir().join("latest-x86_64-apple-darwin");
+        let latest_toolchain_bin_dir = cfg.toolchain_bin_dir("latest-x86_64-apple-darwin");
 
-        let expected_bins = ["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"];
-        let downloaded_bins: Vec<String> = toolchain_dir
-            .as_path()
-            .join("bin")
-            .read_dir()
-            .expect("Could not read toolchain bin dir")
-            .into_iter()
-            .map(|b| b.unwrap().file_name().to_string_lossy().to_string())
-            .collect();
-        assert_eq!(downloaded_bins, expected_bins);
+        expect_files_exist(
+            &latest_toolchain_bin_dir,
+            &["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"],
+        );
         let _ = cfg.fuelup(&["component", "remove", "forc"]);
-        let expected_bins = ["fuel-core"];
-        let downloaded_bins: Vec<String> = toolchain_dir
-            .as_path()
-            .join("bin")
-            .read_dir()
-            .expect("Could not read toolchain bin dir")
-            .into_iter()
-            .map(|b| b.unwrap().file_name().to_string_lossy().to_string())
-            .collect();
-        assert_eq!(downloaded_bins, expected_bins);
+        expect_files_exist(&latest_toolchain_bin_dir, &["fuel-core"]);
 
         let _ = cfg.fuelup(&["component", "remove", "fuel-core"]);
-        assert!(
-            toolchain_dir
-                .as_path()
-                .join("bin")
-                .read_dir()
-                .unwrap()
-                .count()
-                == 0
-        );
+        expect_files_exist(&latest_toolchain_bin_dir, &[]);
     })?;
 
     Ok(())

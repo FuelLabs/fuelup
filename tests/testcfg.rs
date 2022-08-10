@@ -32,6 +32,14 @@ impl TestCfg {
         self.home.join(".fuelup").join("toolchains")
     }
 
+    pub fn toolchain_bin_dir(&self, toolchain: &str) -> PathBuf {
+        self.home
+            .join(".fuelup")
+            .join("toolchains")
+            .join(toolchain)
+            .join("bin")
+    }
+
     pub fn fuelup(&mut self, args: &[&str]) -> TestOutput {
         let output = Command::new(&self.fuelup_path)
             .args(args)
@@ -59,8 +67,10 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     fs::create_dir(&tmp_fuelup_root_path).unwrap();
     fs::create_dir(&tmp_fuelup_bin_dir_path).unwrap();
     fs::create_dir(&tmp_fuelup_root_path.join("toolchains")).unwrap();
-    let bin = root.parent().unwrap().join("fuelup");
-    fs::copy(&bin, &tmp_fuelup_bin_dir_path.join("fuelup"))?;
+    fs::copy(
+        root.parent().unwrap().join("fuelup"),
+        &tmp_fuelup_bin_dir_path.join("fuelup"),
+    )?;
 
     match state {
         FuelupState::Empty => {}

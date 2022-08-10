@@ -48,22 +48,6 @@ impl TestCfg {
     }
 }
 
-pub fn copy_binary<A, B>(a: A, b: B) -> std::io::Result<()>
-where
-    A: AsRef<Path>,
-    B: AsRef<Path>,
-{
-    fn inner(a: &Path, b: &Path) -> io::Result<()> {
-        match fs::remove_file(b) {
-            Err(e) if e.kind() != io::ErrorKind::NotFound => return Err(e),
-            _ => {}
-        }
-        fs::copy(a, b).map(drop)
-    }
-
-    inner(a.as_ref(), b.as_ref())
-}
-
 pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     let root = env::current_exe()
         .unwrap()
@@ -80,7 +64,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     fs::create_dir(&tmp_fuelup_bin_dir_path).unwrap();
     fs::create_dir(&tmp_fuelup_root_path.join("toolchains")).unwrap();
     let bin = root.parent().unwrap().join("fuelup");
-    copy_binary(&bin, &tmp_fuelup_bin_dir_path.join("fuelup"))?;
+    fs::copy(&bin, &tmp_fuelup_bin_dir_path.join("fuelup"))?;
 
     match state {
         FuelupState::Empty => {}

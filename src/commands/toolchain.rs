@@ -39,7 +39,7 @@ pub struct UninstallCommand {
 }
 
 fn name_allowed(s: &str) -> Result<String> {
-    let name = match s.clone().split_once('-') {
+    let name = match s.split_once('-') {
         Some((prefix, target_triple)) => {
             if TargetTriple::from_host()? == TargetTriple::new(target_triple) {
                 prefix

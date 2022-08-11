@@ -14,7 +14,9 @@ fn expect_files_exist(dir: &Path, expected: &mut [&str]) {
         .map(|b| b.unwrap().file_name().to_string_lossy().to_string())
         .collect();
 
-    assert_eq!(actual.sort(), expected.sort());
+    actual.sort();
+    expected.sort();
+    assert_eq!(actual, expected);
 }
 
 #[test]

@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Result};
 use flate2::read::GzDecoder;
 use semver::Version;
 use serde::{Deserialize, Serialize};
@@ -41,20 +41,12 @@ pub struct DownloadCfg {
 }
 
 impl DownloadCfg {
-    pub fn new(
-        name: &str,
-        target: Option<String>,
-        version: Option<Version>,
-    ) -> Result<DownloadCfg> {
+    pub fn new(name: &str, target: Option<String>, version: Option<Version>) -> Result<Self> {
         let version = match version {
             Some(version) => version,
-            None => {
-                if let Ok(result) = get_latest_tag(name) {
-                    result
-                } else {
-                    bail!("Error getting latest tag for component: {}", name);
-                }
-            }
+            None => get_latest_tag(name).map_err(|e| {
+                anyhow!("Error getting latest tag for component: {:?}: {}", name, e)
+            })?,
         };
         let target = match target {
             Some(target) => target,
@@ -80,17 +72,15 @@ impl DownloadCfg {
         })
     }
 
-    pub fn from_package(package: &Package) -> Result<DownloadCfg> {
-        let target = target_from_name(&package.name)?;
-        let target_tarball = package.targets.get(&target).unwrap();
-
+    pub fn from_package(name: &str, package: Package) -> Result<Self> {
+        let target = target_from_name(name)?;
         Ok(Self {
-            name: package.name.to_string(),
+            name: name.to_string(),
             target: target.clone(),
             version: package.version.clone(),
-            tarball_name: tarball_name(&package.name, &package.version, &target)?,
-            tarball_url: target_tarball.url.clone(),
-            hash: Some(target_tarball.hash.clone()),
+            tarball_name: tarball_name(name, &package.version, &target)?,
+            tarball_url: package.target[&target].url.clone(),
+            hash: Some(package.target[&target].hash.clone()),
         })
     }
 }
@@ -154,14 +144,9 @@ pub fn target_from_name(name: &str) -> Result<String> {
     }
 }
 
-pub fn release_url_prefix(repo: &str) -> String {
-    format!("{}{}/{}", GITHUB_API_REPOS_BASE_URL, repo, RELEASES_LATEST)
-}
-
 pub fn tarball_name(name: &str, version: &Version, target: &str) -> Result<String> {
     match name {
         component::FORC => Ok(format!("forc-binaries-{}.tar.gz", target)),
-
         component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version, target)),
         component::FUELUP => Ok(format!("fuelup-{}-{}.tar.gz", version, target)),
         _ => bail!("Unrecognized component: {}", name),
@@ -331,7 +316,6 @@ mod tests {
     use super::*;
     use dirs::home_dir;
     use tempfile;
-    use toml_edit::Document;
 
     pub(crate) fn with_toolchain_dir<F>(f: F) -> Result<()>
     where
@@ -367,39 +351,5 @@ mod tests {
             assert!(mock_bin_dir.join("forc-mock-exec-2").metadata().is_ok());
             Ok(())
         })
-    }
-
-    #[test]
-    fn download_cfg_from_package() {
-        let package_toml = r#"
-[pkg.forc]
-version = "0.17.0"
-
-[pkg.forc.target.darwin_amd64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-darwin_amd64.tar.gz"
-hash = "a5a2bedd4cf64e372dae28c435a7902160924424cbc50a6f4b582b5a50134485"
-
-[pkg.forc.target.darwin_arm64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-darwin_arm64.tar.gz"
-hash = "dadc6c0e04fd79c71806848747ca7edd4ba86b14016a93a3af42fe0da9afbc14"
-
-[pkg.forc.target.linux_amd64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-linux_amd64.tar.gz"
-hash = "83f010f8d1185629bd6506139945e3a21f7e927ad470b674da367bafb698b5ce"
-
-[pkg.forc.target.linux_arm64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.17.0/forc-binaries-linux_arm64.tar.gz"
-hash = "6008e2421cfd6f40c3dad73466d105f462e1ada56a5c21b34a4bd4a719a35b21"
-"#;
-        let mut document = package_toml.parse::<Document>().unwrap();
-        let table = document.as_table_mut();
-        let package = Package::from_channel("forc".to_string(), &table["pkg"]["forc"]).unwrap();
-
-        let download_cfg = DownloadCfg::from_package(&package).unwrap();
-        assert_eq!(download_cfg.name, "forc");
-        assert_eq!(download_cfg.version, Version::new(0, 17, 0));
-        assert!(download_cfg
-            .tarball_url
-            .starts_with("https://github.com/FuelLabs/sway/releases/download/v0.17.0/"));
     }
 }

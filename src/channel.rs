@@ -1,87 +1,48 @@
 use crate::{
     constants::{CHANNEL_LATEST_FILE_NAME, FUELUP_GH_PAGES},
-    download::DownloadCfg,
+    download::{download_file, DownloadCfg},
+    file::read_file,
+    path::fuelup_dir,
+    toolchain::DistToolchainName,
 };
 use anyhow::{bail, Result};
 use semver::Version;
-use std::{collections::HashMap, str::FromStr};
+use serde::Deserialize;
+use sha2::{Digest, Sha256};
+use std::collections::HashMap;
 use tempfile::tempdir_in;
-use toml_edit::{Document, Item};
-use tracing::error;
+use toml_edit::de;
 
-use crate::{download::download_file, file::read_file, path::fuelup_dir, toolchain::ToolchainName};
-
+#[derive(Debug, Deserialize)]
 pub struct HashedBinary {
     pub url: String,
     pub hash: String,
 }
 
-impl HashedBinary {
-    pub fn from_package(table: &Item) -> Result<Self> {
-        // OK to unwrap since url and hash should be correctly created in the channel toml.
-        let url = table["url"].as_str().unwrap();
-        let hash = table["hash"].as_str().unwrap();
-        Ok(Self {
-            url: url.to_string(),
-            hash: hash.to_string(),
-        })
-    }
-}
-
-pub struct Package {
-    pub name: String,
-    pub version: Version,
-    pub targets: HashMap<String, HashedBinary>,
-}
-
-impl Package {
-    pub fn from_channel(name: String, table: &Item) -> Result<Self> {
-        let version = Version::from_str(
-            table["version"]
-                .as_str()
-                .expect("Could not read 'version' from package"),
-        )
-        // OK to unwrap since version should be correctly created in the channel toml.
-        .unwrap();
-        let mut targets: HashMap<String, HashedBinary> = HashMap::new();
-        for (target, target_table) in table["target"]
-            .as_table()
-            .expect("Could not read 'target' from package")
-        {
-            if let Ok(bin) = HashedBinary::from_package(target_table) {
-                targets.insert(target.to_string(), bin);
-            } else {
-                error!(
-                    "Could not create representation of binary for target {}",
-                    target
-                )
-            }
-        }
-
-        Ok(Package {
-            name,
-            version,
-            targets,
-        })
-    }
-}
-
+#[derive(Debug, Deserialize)]
 pub struct Channel {
-    pub packages: Vec<Package>,
+    pub pkg: HashMap<String, Package>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Package {
+    pub target: HashMap<String, HashedBinary>,
+    pub version: Version,
 }
 
 impl Channel {
-    pub fn from_dist_channel(name: ToolchainName) -> Result<Self> {
+    pub fn from_dist_channel(name: &DistToolchainName) -> Result<Self> {
         let channel_url = match name {
-            ToolchainName::Latest => FUELUP_GH_PAGES.to_owned() + CHANNEL_LATEST_FILE_NAME,
+            DistToolchainName::Latest => FUELUP_GH_PAGES.to_owned() + CHANNEL_LATEST_FILE_NAME,
         };
         let fuelup_dir = fuelup_dir();
         let tmp_dir = tempdir_in(&fuelup_dir)?;
         let tmp_dir_path = tmp_dir.path();
+        let mut hasher = Sha256::new();
         let toml = match download_file(
             &channel_url,
             &tmp_dir_path.join(CHANNEL_LATEST_FILE_NAME),
-            None,
+            Some(&mut hasher),
         ) {
             Ok(_) => {
                 let toml_path = tmp_dir_path.join(CHANNEL_LATEST_FILE_NAME);
@@ -98,30 +59,21 @@ impl Channel {
     }
 
     pub fn from_toml(toml: &str) -> Result<Self> {
-        let mut document = toml.parse::<Document>().expect("Invalid channel toml");
-
-        let table = document.as_table_mut();
-        let mut packages = Vec::new();
-
-        for (name, package_table) in table["pkg"]
-            .as_table()
-            .expect("Failed to read pkg as table")
-        {
-            let package = Package::from_channel(name.to_string(), package_table)?;
-            packages.push(package);
-        }
-
-        Ok(Self { packages })
+        let channel: Channel = de::from_str(toml)?;
+        Ok(channel)
     }
 
     pub fn build_download_configs(self) -> Vec<DownloadCfg> {
-        self.packages
-            .iter()
-            .map(|p| {
-                DownloadCfg::from_package(p)
+        let mut cfgs = self
+            .pkg
+            .into_iter()
+            .map(|(name, package)| {
+                DownloadCfg::from_package(&name, package)
                     .expect("Could not create DownloadCfg from a package parsed in latest channel")
             })
-            .collect()
+            .collect::<Vec<DownloadCfg>>();
+        cfgs.sort_by(|a, b| a.name.cmp(&b.name));
+        cfgs
     }
 }
 
@@ -138,16 +90,39 @@ mod tests {
         let channel_file = read_file("channel-fuel-latest-example", &channel_path).unwrap();
         let channel = Channel::from_toml(&channel_file).unwrap();
 
-        assert_eq!(channel.packages.len(), 2);
-        assert_eq!(channel.packages[0].name, "forc");
-        assert_eq!(channel.packages[0].version, Version::new(0, 17, 0));
+        assert_eq!(channel.pkg.keys().len(), 2);
+        assert!(channel.pkg.contains_key("forc"));
+        assert_eq!(channel.pkg["forc"].version, Version::new(0, 17, 0));
+        assert!(channel.pkg.contains_key("fuel-core"));
+        assert_eq!(channel.pkg["fuel-core"].version, Version::new(0, 9, 4));
 
-        assert_eq!(channel.packages[1].name, "fuel-core");
-        assert_eq!(channel.packages[1].version, Version::new(0, 9, 4));
+        let targets = &channel.pkg["forc"].target;
+        assert_eq!(targets.len(), 4);
+
+        for target in targets.keys() {
+            assert!(!targets[target].url.is_empty());
+            assert!(!targets[target].hash.is_empty());
+        }
+        assert!(targets.contains_key("darwin_amd64"));
+        assert!(targets.contains_key("darwin_arm64"));
+        assert!(targets.contains_key("linux_amd64"));
+        assert!(targets.contains_key("linux_arm64"));
+
+        let targets = &channel.pkg["fuel-core"].target;
+        assert_eq!(targets.len(), 4);
+
+        for target in targets.keys() {
+            assert!(!targets[target].url.is_empty());
+            assert!(!targets[target].hash.is_empty());
+        }
+        assert!(targets.contains_key("aarch64-apple-darwin"));
+        assert!(targets.contains_key("aarch64-unknown-linux-gnu"));
+        assert!(targets.contains_key("x86_64-apple-darwin"));
+        assert!(targets.contains_key("x86_64-unknown-linux-gnu"));
     }
 
     #[test]
-    fn download_cfgs_from_channel() -> Result<()> {
+    fn download_cfgs_from_channel() {
         let channel_path = std::env::current_dir()
             .unwrap()
             .join("tests/channel-fuel-latest-example.toml");
@@ -155,11 +130,11 @@ mod tests {
         let channel = Channel::from_toml(&channel_file).unwrap();
 
         let cfgs: Vec<DownloadCfg> = channel.build_download_configs();
+
         assert_eq!(cfgs.len(), 2);
         assert_eq!(cfgs[0].name, "forc");
         assert_eq!(cfgs[0].version, Version::new(0, 17, 0));
         assert_eq!(cfgs[1].name, "fuel-core");
         assert_eq!(cfgs[1].version, Version::new(0, 9, 4));
-        Ok(())
     }
 }

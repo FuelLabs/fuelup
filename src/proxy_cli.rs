@@ -14,7 +14,7 @@ pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
     let cmd_args: Vec<_> = env::args_os().skip(1).collect();
     let settings_file = SettingsFile::new(settings_file());
     let toolchain =
-        settings_file.with(|s| Toolchain::from_settings(&s.default_toolchain.clone().unwrap()))?;
+        settings_file.with(|s| Toolchain::from(&s.default_toolchain.clone().unwrap()))?;
 
     if !cmd_args.is_empty()
         && component::SUPPORTED_PLUGINS

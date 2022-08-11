@@ -1,6 +1,12 @@
 [book]
-authors = ["bingcicle"]
+authors = ["Fuel Labs <contact@fuel.sh>"]
 language = "en"
 multilingual = false
 src = "src"
 title = "fuelup"
+
+[output.html]
+git-repository-url = "https://github.com/FuelLabs/fuelup"
+
+[rust]
+edition = "2021"

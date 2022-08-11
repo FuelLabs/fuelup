@@ -6,15 +6,15 @@ mod testcfg;
 
 use testcfg::FuelupState;
 
-fn expect_files_exist(dir: &Path, expected: &[&str]) {
-    let actual: Vec<String> = dir
+fn expect_files_exist(dir: &Path, expected: &mut [&str]) {
+    let mut actual: Vec<String> = dir
         .read_dir()
         .expect("Could not read directory")
         .into_iter()
         .map(|b| b.unwrap().file_name().to_string_lossy().to_string())
         .collect();
 
-    assert_eq!(actual, expected);
+    assert_eq!(actual.sort(), expected.sort());
 }
 
 #[test]
@@ -47,7 +47,7 @@ fn fuelup_toolchain_install() -> Result<()> {
 
             expect_files_exist(
                 &toolchain_dir.path().join("bin"),
-                &["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"],
+                &mut ["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"],
             );
 
             let output = cfg.fuelup(&["check"]);
@@ -181,13 +181,13 @@ fn fuelup_component_add() -> Result<()> {
         let _ = cfg.fuelup(&["component", "add", "forc"]);
         expect_files_exist(
             &cfg.toolchain_bin_dir("my_toolchain"),
-            &["forc", "forc-explore", "forc-lsp", "forc-fmt"],
+            &mut ["forc", "forc-explore", "forc-lsp", "forc-fmt"],
         );
 
         let _ = cfg.fuelup(&["component", "add", "fuel-core@0.9.5"]);
         expect_files_exist(
             &cfg.toolchain_bin_dir("my_toolchain"),
-            &["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"],
+            &mut ["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"],
         );
     })?;
 
@@ -215,13 +215,13 @@ fn fuelup_component_remove() -> Result<()> {
 
         expect_files_exist(
             &latest_toolchain_bin_dir,
-            &["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"],
+            &mut ["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"],
         );
         let _ = cfg.fuelup(&["component", "remove", "forc"]);
-        expect_files_exist(&latest_toolchain_bin_dir, &["fuel-core"]);
+        expect_files_exist(&latest_toolchain_bin_dir, &mut ["fuel-core"]);
 
         let _ = cfg.fuelup(&["component", "remove", "fuel-core"]);
-        expect_files_exist(&latest_toolchain_bin_dir, &[]);
+        expect_files_exist(&latest_toolchain_bin_dir, &mut []);
     })?;
 
     Ok(())

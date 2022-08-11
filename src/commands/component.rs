@@ -5,9 +5,9 @@ use crate::ops::fuelup_component::{add::add, remove::remove};
 
 #[derive(Debug, Parser)]
 pub enum ComponentCommand {
-    /// Add a component to component to the currently active Fuel toolchain
+    /// Add a component to the currently active custom toolchain.
     Add(AddCommand),
-    /// Remove a component from the currently active Fuel toolchain
+    /// Remove a component from the currently active custom toolchain
     Remove(RemoveCommand),
 }
 

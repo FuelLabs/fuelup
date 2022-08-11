@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use anyhow::{bail, Result};
 use semver::Version;
+use tracing::info;
 
 use crate::{
     commands::component::AddCommand,
@@ -16,7 +17,7 @@ pub fn add(command: AddCommand) -> Result<()> {
 
     let toolchain = Toolchain::from_settings()?;
     if toolchain.has_component(&maybe_versioned_component) {
-        println!(
+        info!(
             "{} already exists in toolchain '{}'; replacing existing version",
             &maybe_versioned_component, toolchain.name
         );

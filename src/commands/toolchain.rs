@@ -4,7 +4,7 @@ use clap::Parser;
 use crate::ops::fuelup_toolchain::install::install;
 use crate::ops::fuelup_toolchain::new::new;
 use crate::ops::fuelup_toolchain::uninstall::uninstall;
-use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
+use crate::toolchain::{TargetTriple, RESERVED_TOOLCHAIN_NAMES};
 
 #[derive(Debug, Parser)]
 pub enum ToolchainCommand {
@@ -39,7 +39,18 @@ pub struct UninstallCommand {
 }
 
 fn name_allowed(s: &str) -> Result<String> {
-    if RESERVED_TOOLCHAIN_NAMES.contains(&s) {
+    let name = match s.split_once('-') {
+        Some((prefix, target_triple)) => {
+            if TargetTriple::from_host()? == TargetTriple::new(target_triple) {
+                prefix
+            } else {
+                s
+            }
+        }
+        None => s,
+    };
+
+    if RESERVED_TOOLCHAIN_NAMES.contains(&name) {
         bail!(
             "Cannot use official toolchain name '{}' as a custom toolchain name",
             s

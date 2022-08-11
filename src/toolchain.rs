@@ -1,19 +1,25 @@
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 use std::fmt;
 use std::fs::{remove_dir_all, remove_file};
 use std::path::PathBuf;
 use std::str::FromStr;
 use tracing::info;
 
-use crate::component;
+use crate::component::SUPPORTED_PLUGINS;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
     ensure_dir_exists, fuelup_bin, fuelup_bin_dir, settings_file, toolchain_bin_dir,
 };
 use crate::settings::SettingsFile;
+use crate::{channel, component};
 
-pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &["latest", "nightly"];
+pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
+    channel::LATEST,
+    channel::BETA,
+    channel::NIGHTLY,
+    channel::STABLE,
+];
 
 pub enum DistToolchainName {
     Latest,
@@ -22,7 +28,7 @@ pub enum DistToolchainName {
 impl fmt::Display for DistToolchainName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            DistToolchainName::Latest => write!(f, "latest"),
+            DistToolchainName::Latest => write!(f, "{}", channel::LATEST),
         }
     }
 }
@@ -32,25 +38,10 @@ impl FromStr for DistToolchainName {
     fn from_str(s: &str) -> Result<Self> {
         let name = s.split_once('-').map(|n| n.0);
         match name {
-            Some("latest") => Ok(Self::Latest),
+            Some(channel::LATEST) => Ok(Self::Latest),
             _ => bail!("Unknown name for toolchain: {}", s),
         }
     }
-}
-
-pub fn is_official_toolchain(toolchain: &str) -> bool {
-    let mut reserved: Vec<String> = Vec::new();
-    let triple = TargetTriple::from_host().ok();
-    for reserved_toolchain_name in RESERVED_TOOLCHAIN_NAMES {
-        reserved.push(reserved_toolchain_name.to_string());
-
-        if triple.is_some() {
-            reserved
-                .push(reserved_toolchain_name.to_string() + &triple.as_ref().unwrap().to_string());
-        }
-    }
-
-    reserved.contains(&toolchain.to_string())
 }
 
 #[derive(Debug)]
@@ -180,16 +171,14 @@ impl Toolchain {
         if self.has_component(component) {
             info!("Removing '{}' from toolchain '{}'", component, self.name);
             let component_path = self.path.join(component);
-            remove_file(component_path)?;
+            remove_file(component_path)
+                .with_context(|| format!("failed to remove component '{}'", component))?;
             // If component to remove is 'forc', silently remove forc plugins
             if component == component::FORC {
-                for component in [
-                    component::FORC_FMT,
-                    component::FORC_LSP,
-                    component::FORC_EXPLORE,
-                ] {
+                for component in SUPPORTED_PLUGINS {
                     let component_path = self.path.join(component);
-                    remove_file(component_path)?;
+                    remove_file(component_path)
+                        .with_context(|| format!("failed to remove component '{}'", component))?;
                 }
             }
             info!("'{}' removed from toolchain '{}'", component, self.name);

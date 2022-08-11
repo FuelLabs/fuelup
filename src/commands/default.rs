@@ -1,6 +1,7 @@
 use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 use anyhow::{bail, Result};
 use clap::Parser;
+use tracing::info;
 
 use crate::{path::settings_file, settings::SettingsFile, toolchain::Toolchain};
 
@@ -15,12 +16,14 @@ pub fn exec(command: DefaultCommand) -> Result<()> {
 
     let current_toolchain = Toolchain::from_settings()?;
 
-    if toolchain.is_none() {
-        println!("{} (default)", current_toolchain.name);
-        return Ok(());
+    let toolchain = match toolchain {
+        Some(toolchain) => toolchain,
+        None => {
+            info!("{} (default)", current_toolchain.name);
+            return Ok(());
+        }
     };
 
-    let toolchain = toolchain.unwrap();
     let mut new_default = Toolchain::from(&toolchain)?;
 
     if RESERVED_TOOLCHAIN_NAMES.contains(&toolchain.as_str()) {
@@ -34,7 +37,7 @@ pub fn exec(command: DefaultCommand) -> Result<()> {
         s.default_toolchain = Some(new_default.name.clone());
         Ok(())
     })?;
-    println!("default toolchain set to '{}'", new_default.name);
+    info!("default toolchain set to '{}'", new_default.name);
 
     Ok(())
 }

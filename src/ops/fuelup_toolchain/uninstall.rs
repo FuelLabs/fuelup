@@ -13,9 +13,8 @@ pub fn uninstall(command: UninstallCommand) -> Result<()> {
         return Ok(());
     }
 
-    if toolchain.uninstall_self().is_ok() {
-        info!("toolchain '{}' uninstalled", &name);
-    };
+    toolchain.uninstall_self()?;
+    info!("toolchain '{}' uninstalled", &name);
 
     Ok(())
 }

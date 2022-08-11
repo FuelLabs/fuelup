@@ -1,9 +1,9 @@
+use crate::commands::toolchain::InstallCommand;
 use crate::component;
-use crate::download::{target_from_name, DownloadCfg};
+use crate::download::DownloadCfg;
 use crate::path::settings_file;
 use crate::settings::SettingsFile;
-use crate::toolchain::{DistToolchainName, Toolchain};
-use crate::{channel::Channel, commands::toolchain::InstallCommand};
+use crate::toolchain::Toolchain;
 use anyhow::Result;
 use std::fmt::Write;
 use tracing::{error, info};
@@ -25,30 +25,17 @@ pub fn install(command: InstallCommand) -> Result<()> {
 
     let mut errored_bins = String::new();
     let mut installed_bins = String::new();
+    let mut download_msg = String::new();
 
-    let cfgs: Vec<DownloadCfg> = match Channel::from_dist_channel(&DistToolchainName::Latest) {
-        Ok(c) => c.build_download_configs(),
-        Err(e) => {
-            error!(
-                "Failed to get latest channel {} - fetching versions using GitHub API",
-                e
-            );
-            [component::FORC, component::FUEL_CORE, component::FORC_LSP]
-                .iter()
-                .map(|c| {
-                    DownloadCfg::new(c, target_from_name(c).ok(), None)
-                        .expect("Failed to create DownloadCfg from component")
-                })
-                .collect()
-        }
-    };
+    let mut cfgs: Vec<DownloadCfg> = Vec::new();
 
-    info!(
-        "Downloading: {}",
-        cfgs.iter()
-            .map(|c| c.name.clone() + " ")
-            .collect::<String>()
-    );
+    for component in [component::FORC, component::FUEL_CORE].iter() {
+        write!(download_msg, "{} ", component)?;
+        let download_cfg: DownloadCfg = DownloadCfg::new(component, None)?;
+        cfgs.push(download_cfg);
+    }
+
+    info!("Downloading: {}", download_msg);
     for cfg in cfgs {
         match toolchain.add_component(cfg) {
             Ok(cfg) => writeln!(installed_bins, "- {} {}", cfg.name, cfg.version)?,

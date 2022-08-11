@@ -1,5 +1,6 @@
 use anyhow::{bail, Result};
 use std::fmt;
+use std::path::Path;
 use std::path::PathBuf;
 use std::str::FromStr;
 use tracing::info;
@@ -8,16 +9,14 @@ use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, Dow
 use crate::ops::fuelup_self::self_update;
 use crate::path::{ensure_dir_exists, fuelup_bin, fuelup_bin_dir, toolchain_bin_dir};
 
-pub enum DistToolchainName {
+pub enum ToolchainName {
     Latest,
 }
 
-impl FromStr for DistToolchainName {
+impl FromStr for ToolchainName {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
-        let split = s.split_once('-').unwrap();
-        let name = split.0;
-        match name {
+        match s {
             "latest" => Ok(Self::Latest),
             _ => bail!("Unknown name for toolchain: {}", s),
         }
@@ -71,19 +70,42 @@ impl Toolchain {
             Some(t) => TargetTriple(t),
             None => TargetTriple::from_host()?,
         };
-        let toolchain = format!("{}-{}", name, target);
-        let path = toolchain_bin_dir(&toolchain);
-        Ok(Self {
-            name: toolchain,
-            path,
-        })
+        let name = match ToolchainName::from_str(name)? {
+            ToolchainName::Latest => format!("{}-{}", name, target),
+        };
+        let path = toolchain_bin_dir(&name);
+        Ok(Self { name, path })
     }
 
-    pub fn from(toolchain: &str) -> Result<Self> {
-        let path = toolchain_bin_dir(toolchain);
-        Ok(Self {
-            name: toolchain.to_string(),
+    pub fn from(name: &str) -> Self {
+        let path = toolchain_bin_dir(name);
+        Self {
+            name: name.to_string(),
             path,
+        }
+    }
+
+    pub fn from_settings(toolchain: &str) -> Result<Self> {
+        let split = toolchain.split_once('-').unwrap();
+        let name = split.0.to_string();
+        let target = TargetTriple(split.1.to_string());
+        let path = match ToolchainName::from_str(&name)? {
+            ToolchainName::Latest => toolchain_bin_dir(&format!("{}-{}", name, target)),
+        };
+        Ok(Self { name, path })
+    }
+
+    pub fn from_path(&self, path: &Path) -> Result<Self> {
+        let name = path.file_name().unwrap();
+
+        // Minimally check that there's a /bin directory
+        if !path.join("bin").is_dir() {
+            bail!("Invalid toolchain path");
+        }
+
+        Ok(Self {
+            name: name.to_string_lossy().to_string(),
+            path: path.to_path_buf(),
         })
     }
 

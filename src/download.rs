@@ -1,4 +1,4 @@
-use anyhow::{anyhow, bail, Result};
+use anyhow::{bail, Result};
 use flate2::read::GzDecoder;
 use semver::Version;
 use serde::{Deserialize, Serialize};
@@ -10,7 +10,6 @@ use std::{fs, thread};
 use tar::Archive;
 use tracing::{error, info};
 
-use crate::channel::Package;
 use crate::component;
 use crate::constants::{
     FUELUP_RELEASE_DOWNLOAD_URL, FUELUP_REPO, FUEL_CORE_RELEASE_DOWNLOAD_URL, FUEL_CORE_REPO,
@@ -29,57 +28,51 @@ struct LatestReleaseApiResponse {
 #[derive(Debug, PartialEq, Eq)]
 pub struct DownloadCfg {
     pub name: String,
-    pub target: String,
     pub version: Version,
-    tarball_name: String,
-    tarball_url: String,
+    release_url: String,
 }
 
 impl DownloadCfg {
-    pub fn new(name: &str, target: Option<String>, version: Option<Version>) -> Result<Self> {
-        let version = match version {
-            Some(version) => version,
-            None => get_latest_tag(name).map_err(|e| {
-                anyhow!("Error getting latest tag for component: {:?}: {}", name, e)
-            })?,
-        };
-        let target = match target {
-            Some(target) => target,
-            None => target_from_name(name)?,
-        };
-
-        let release_url = match name {
-            component::FORC => SWAY_RELEASE_DOWNLOAD_URL.to_string(),
-            component::FUEL_CORE => FUEL_CORE_RELEASE_DOWNLOAD_URL.to_string(),
-            component::FUELUP => FUELUP_RELEASE_DOWNLOAD_URL.to_string(),
-            _ => bail!("Unrecognized component: {}", name),
-        };
-        let tarball_name = tarball_name(name, &version, &target)?;
-        let tarball_url = format!("{}/v{}/{}", &release_url, &version, &tarball_name);
-
+    pub fn new(name: &str, version: Option<Version>) -> Result<DownloadCfg> {
         Ok(Self {
             name: name.to_string(),
-            target,
-            version,
-            tarball_name,
-            tarball_url,
-        })
-    }
-
-    pub fn from_package(name: &str, package: Package) -> Result<Self> {
-        let target = target_from_name(name)?;
-        Ok(Self {
-            name: name.to_string(),
-            target: target.clone(),
-            version: package.version.clone(),
-            tarball_name: tarball_name(name, &package.version, &target)?,
-            tarball_url: package.target[&target].url.clone(),
+            version: match version {
+                Some(version) => version,
+                None => {
+                    let latest_tag_url = match name {
+                        component::FORC => format!(
+                            "{}{}/{}",
+                            GITHUB_API_REPOS_BASE_URL, SWAY_REPO, RELEASES_LATEST
+                        ),
+                        component::FUEL_CORE => format!(
+                            "{}{}/{}",
+                            GITHUB_API_REPOS_BASE_URL, FUEL_CORE_REPO, RELEASES_LATEST
+                        ),
+                        component::FUELUP => format!(
+                            "{}{}/{}",
+                            GITHUB_API_REPOS_BASE_URL, FUELUP_REPO, RELEASES_LATEST
+                        ),
+                        _ => bail!("Unrecognized component: {}", name),
+                    };
+                    if let Ok(result) = get_latest_tag(&latest_tag_url) {
+                        result
+                    } else {
+                        bail!("Error getting latest tag for component: {}", name);
+                    }
+                }
+            },
+            release_url: match name {
+                component::FORC => SWAY_RELEASE_DOWNLOAD_URL.to_string(),
+                component::FUEL_CORE => FUEL_CORE_RELEASE_DOWNLOAD_URL.to_string(),
+                component::FUELUP => FUELUP_RELEASE_DOWNLOAD_URL.to_string(),
+                _ => bail!("Unrecognized component: {}", name),
+            },
         })
     }
 }
 
-pub fn target_from_name(name: &str) -> Result<String> {
-    match name {
+pub fn tarball_name(download_cfg: &DownloadCfg) -> Result<String> {
+    match download_cfg.name.as_ref() {
         component::FORC => {
             let os = match std::env::consts::OS {
                 "macos" => "darwin",
@@ -92,7 +85,7 @@ pub fn target_from_name(name: &str) -> Result<String> {
                 unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
             };
 
-            Ok(format!("{}_{}", os, architecture))
+            Ok(format!("forc-binaries-{}_{}.tar.gz", os, architecture))
         }
 
         component::FUEL_CORE => {
@@ -112,7 +105,13 @@ pub fn target_from_name(name: &str) -> Result<String> {
                 unsupported_os => bail!("Unsupported os: {}", unsupported_os),
             };
 
-            Ok(format!("{}-{}-{}", architecture, vendor, os))
+            Ok(format!(
+                "fuel-core-{}-{}-{}-{}.tar.gz",
+                &download_cfg.version.to_string(),
+                architecture,
+                vendor,
+                os
+            ))
         }
         component::FUELUP => {
             let architecture = match std::env::consts::ARCH {
@@ -131,39 +130,21 @@ pub fn target_from_name(name: &str) -> Result<String> {
                 unsupported_os => bail!("Unsupported os: {}", unsupported_os),
             };
 
-            Ok(format!("{}-{}-{}", architecture, vendor, os))
+            Ok(format!(
+                "fuelup-{}-{}-{}-{}.tar.gz",
+                &download_cfg.version.to_string(),
+                architecture,
+                vendor,
+                os
+            ))
         }
-        _ => bail!("Unrecognized component: {}", name),
+        _ => bail!("Unrecognized component: {}", download_cfg.name),
     }
 }
 
-pub fn tarball_name(name: &str, version: &Version, target: &str) -> Result<String> {
-    match name {
-        component::FORC => Ok(format!("forc-binaries-{}.tar.gz", target)),
-        component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version, target)),
-        component::FUELUP => Ok(format!("fuelup-{}-{}.tar.gz", version, target)),
-        _ => bail!("Unrecognized component: {}", name),
-    }
-}
-
-pub fn get_latest_tag(name: &str) -> Result<Version> {
-    let latest_tag_url = match name {
-        component::FORC => format!(
-            "{}{}/{}",
-            GITHUB_API_REPOS_BASE_URL, SWAY_REPO, RELEASES_LATEST
-        ),
-        component::FUEL_CORE => format!(
-            "{}{}/{}",
-            GITHUB_API_REPOS_BASE_URL, FUEL_CORE_REPO, RELEASES_LATEST
-        ),
-        component::FUELUP => format!(
-            "{}{}/{}",
-            GITHUB_API_REPOS_BASE_URL, FUELUP_REPO, RELEASES_LATEST
-        ),
-        _ => bail!("Unrecognized component: {}", name),
-    };
+pub fn get_latest_tag(github_api_url: &str) -> Result<Version> {
     let handle = ureq::builder().user_agent("fuelup").build();
-    let resp = handle.get(&latest_tag_url).call()?;
+    let resp = handle.get(github_api_url).call()?;
 
     let mut data = Vec::new();
     resp.into_reader().read_to_end(&mut data)?;
@@ -234,14 +215,20 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
 }
 
 pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path) -> Result<()> {
-    info!("Fetching binary from {}", &download_cfg.tarball_url);
+    let tarball_name = tarball_name(download_cfg)?;
+    let tarball_url = format!(
+        "{}/v{}/{}",
+        &download_cfg.release_url, &download_cfg.version, &tarball_name
+    );
 
-    let tarball_path = dst_dir_path.join(&download_cfg.tarball_name);
+    info!("Fetching binary from {}", &tarball_url);
 
-    if download_file(&download_cfg.tarball_url, &tarball_path).is_err() {
+    let tarball_path = dst_dir_path.join(&tarball_name);
+
+    if download_file(&tarball_url, &tarball_path).is_err() {
         bail!(
             "Failed to download {} - the release might not be ready yet.",
-            &download_cfg.tarball_name
+            &tarball_name
         );
     };
 

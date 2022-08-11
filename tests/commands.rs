@@ -53,14 +53,10 @@ fn fuelup_toolchain_install() -> Result<()> {
             );
 
             let output = cfg.fuelup(&["check"]);
-            assert!(output
-                .stdout
-                .contains("forc - \u{1b}[0m\u{1b}[0m\u{1b}[1m\u{1b}[32mUp to date\u{1b}"));
+            assert!(output.stdout.contains("forc - Up to date"));
             // TODO: uncomment once new fuel-core is released and this works
-            // assert!(stdout.contains("fuel-core - \u{1b}[0m\u{1b}[0m\u{1b}[1m\u{1b}[32mUp to date\u{1b}"));
-            assert!(output
-                .stdout
-                .contains("fuelup - \u{1b}[0m\u{1b}[0m\u{1b}[1m\u{1b}[32mUp to date\u{1b}"));
+            // assert!(stdout.contains("fuel-core - Up to date"));
+            assert!(output.stdout.contains("fuelup - Up to date"));
         }
     })?;
 
@@ -71,7 +67,7 @@ fn fuelup_toolchain_install() -> Result<()> {
 fn fuelup_check() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let output = cfg.fuelup(&["check"]);
-        let expected_stdout = format!("\u{1b}[0m\u{1b}[1mfuelup - \u{1b}[0m\u{1b}[0m\u{1b}[1m\u{1b}[32mUp to date\u{1b}[0m : {}\n", clap::crate_version!());
+        let expected_stdout = format!("fuelup - Up to date : {}\n", clap::crate_version!());
 
         assert_eq!(output.stdout, expected_stdout);
     })?;

@@ -44,6 +44,7 @@ impl TestCfg {
         let output = Command::new(&self.fuelup_path)
             .args(args)
             .env("HOME", &self.home)
+            .env("TERM", "dumb")
             .output()
             .expect("Failed to execute command");
         let stdout = String::from_utf8(output.stdout).unwrap();

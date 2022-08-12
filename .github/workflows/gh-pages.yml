@@ -23,7 +23,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/book
           destination_dir: master
-        if: github.ref == 'refs/heads/master'
 
       - name: Get tag
         id: branch_name

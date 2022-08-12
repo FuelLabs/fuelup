@@ -11,11 +11,14 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
       - name: Setup mdBook
         uses: peaceiris/actions-mdbook@v1
         with:
           mdbook-version: "0.4.8"
+                  
+      - run: mdbook build docs
 
       - name: Deploy master
         uses: peaceiris/actions-gh-pages@v3
@@ -48,6 +51,7 @@ jobs:
           <meta http-equiv="refresh" content="0; URL=../${{ steps.branch_name.outputs.BRANCH_NAME }}/">
           <link rel="canonical" href="../${{ steps.branch_name.outputs.BRANCH_NAME }}/">
           EOF
+
       - name: Set latest to point to tag
         uses: peaceiris/actions-gh-pages@v3
         with:

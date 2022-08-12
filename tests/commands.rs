@@ -144,6 +144,17 @@ fn fuelup_toolchain_new_disallowed() -> Result<()> {
 }
 
 #[test]
+fn fuelup_toolchain_new_disallowed_with_target() -> Result<()> {
+    testcfg::setup(FuelupState::Empty, &|cfg| {
+        let output = cfg.fuelup(&["toolchain", "new", "latest-x86_64-apple-darwin"]);
+        let expected_stderr = "error: Invalid value \"latest-x86_64-apple-darwin\" for '<NAME>': Cannot use official toolchain name 'latest-x86_64-apple-darwin' as a custom toolchain name\n\nFor more information try --help\n";
+        assert_eq!(output.stderr, expected_stderr);
+    })?;
+
+    Ok(())
+}
+
+#[test]
 fn fuelup_toolchain_new_and_set_default() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["default"]);

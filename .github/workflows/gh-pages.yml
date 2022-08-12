@@ -3,9 +3,9 @@ name: github pages
 on:
   push:
     branches:
-      - bingcicle/add-mdbook
-        #tags:
-        #- v*
+      - master
+    tags:
+      - v*
 
 jobs:
   deploy:
@@ -26,6 +26,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/book
           destination_dir: master
+        if: github.ref == 'refs/heads/master'
 
       - name: Get tag
         id: branch_name

@@ -2,9 +2,16 @@
 
 `fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, only the `latest` channel will be published and serve as a source of distribution of Fuel toolchain binaries.
 
-The `latest` channel is updated by a scheduled GitHub workflow that **runs every 30 minutes** and checks for new, compatible releases of `forc` and `fuel-core`.
+| Channel     | Source           | Integration Tested   | Update Frequency      | Available |
+| ----------- | ---------------- | -------------------- | --------------------- | --------- |
+| **latest**  | Published bins.  | ✔️                   | Checked every 30 min. | ✔️        |
+| **nightly** | `master` branch. | ✔️                   | Nightly.              | ➖        |
+| **beta**    | Published bins.  | ✔️                   | 6 Week Cycle.         | ➖        |
+| **stable**  | Published bins.  | ✔️ + successful beta | 6 Week Cycle.         | ➖        |
 
 ### `latest`
+
+The `latest` channel is updated by a scheduled GitHub workflow that **runs every 30 minutes** and checks for new, compatible releases of `forc` and `fuel-core`.
 
 The `latest` channel is `fuelup`'s default channel. It provides access to the latest compatible, published releases of `forc` and `fuel-core`.
 

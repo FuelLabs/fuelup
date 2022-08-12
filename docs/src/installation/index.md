@@ -2,11 +2,10 @@
 
 `fuelup` installs `forc` and `fuel-core`, and other plugins like
 `forc-fmt`, `forc-lsp` and `forc-explore` to Fuelup's `bin` directory.
-On Unix it is located at `$HOME/.fuelup/bin` and on Windows at
-`%USERPROFILE%\.fuelup\bin`.
+On Unix it is located at `$HOME/.fuelup/bin`.
 
-This directory can automatically be in your `$PATH` environment variable if
-allowed, which means you can run them from the shell without further configuration.
+This directory can automatically be in your `PATH` environment variable if
+allowed in the installation step (explained below), which means you can run them from the shell without further configuration.
 
 [other installation methods]: other.md
 

@@ -134,10 +134,6 @@ fn fuelup_toolchain_new_disallowed() -> Result<()> {
         let output = cfg.fuelup(&["toolchain", "new", "latest"]);
         let expected_stderr = "error: Invalid value \"latest\" for '<NAME>': Cannot use official toolchain name 'latest' as a custom toolchain name\n\nFor more information try --help\n";
         assert_eq!(output.stderr, expected_stderr);
-
-        let output = cfg.fuelup(&["toolchain", "new", "latest-x86_64-apple-darwin"]);
-        let expected_stderr = "error: Invalid value \"latest-x86_64-apple-darwin\" for '<NAME>': Cannot use official toolchain name 'latest-x86_64-apple-darwin' as a custom toolchain name\n\nFor more information try --help\n";
-        assert_eq!(output.stderr, expected_stderr);
     })?;
 
     Ok(())
@@ -146,8 +142,10 @@ fn fuelup_toolchain_new_disallowed() -> Result<()> {
 #[test]
 fn fuelup_toolchain_new_disallowed_with_target() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let output = cfg.fuelup(&["toolchain", "new", "latest-x86_64-apple-darwin"]);
-        let expected_stderr = "error: Invalid value \"latest-x86_64-apple-darwin\" for '<NAME>': Cannot use official toolchain name 'latest-x86_64-apple-darwin' as a custom toolchain name\n\nFor more information try --help\n";
+        let target_triple = TargetTriple::from_host().unwrap();
+        let toolchain_name = "latest-".to_owned() + &target_triple.to_string();
+        let output = cfg.fuelup(&["toolchain", "new", &toolchain_name]);
+        let expected_stderr = format!("error: Invalid value \"{toolchain_name}\" for '<NAME>': Cannot use official toolchain name '{toolchain_name}' as a custom toolchain name\n\nFor more information try --help\n");
         assert_eq!(output.stderr, expected_stderr);
     })?;
 

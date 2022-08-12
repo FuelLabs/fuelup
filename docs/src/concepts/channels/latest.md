@@ -1,13 +1,4 @@
-# Channels
-
-`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, only the `latest` channel will be published and serve as a source of distribution of Fuel toolchain binaries.
-
-| Channel     | Source           | Integration Tested   | Update Frequency      | Available |
-| ----------- | ---------------- | -------------------- | --------------------- | --------- |
-| **latest**  | Published bins.  | ✔️                   | Checked every 30 min. | ✔️        |
-| **nightly** | `master` branch. | ✔️                   | Nightly.              | ➖        |
-| **beta**    | Published bins.  | ✔️                   | 6 Week Cycle.         | ➖        |
-| **stable**  | Published bins.  | ✔️ + successful beta | 6 Week Cycle.         | ➖        |
+# latest
 
 ### `latest`
 
@@ -21,10 +12,6 @@ When installing the `latest` channel, fuelup will refer to the `channel-fuel-lat
 2. Tests compatibility of new versions against a set of integration tests.
 3. Selects the latest set of versions that successfully pass the tests.
 4. Publishes the selected versions to the channel-fuel-latest.toml manifest.
-
-### `nightly`
-
-This is a WIP - we aim to support `nightly` channel soon.
 
 ## Developer Guide
 

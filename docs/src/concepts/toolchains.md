@@ -6,7 +6,7 @@ Fuel toolchain. `fuelup` supports **two** types of toolchains.
 1. Official toolchains which track the official release [channels] (only _latest_ for now);
 2. Custom toolchains and install individual components in a modular manner.
 
-[channels]: channels.md
+[channels]: channels/index.md
 
 ## Toolchain specification
 

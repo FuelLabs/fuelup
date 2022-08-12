@@ -37,6 +37,6 @@ help for each subcommand is also available.
 
 For example, run `fuelup component --help` for specifics on installing [components].
 
-[release channel]: concepts/channels.md
+[release channel]: concepts/channels/index.md
 [clap]: https://github.com/clap-rs/clap
 [components]: concepts/components.md

@@ -1,6 +1,6 @@
 # Channels
 
-`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, only the `latest` channel will be published and serve as a source of distribution of Fuel toolchain binaries.
+`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, only the `latest` channel will be published and serve as a source of distribution of Sway toolchain binaries.
 
 | Channel      | Source          | Integration Tested   | Update Frequency         | Available |
 | ------------ | --------------- | -------------------- | ------------------------ | --------- |

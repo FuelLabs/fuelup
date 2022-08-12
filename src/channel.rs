@@ -42,7 +42,7 @@ impl Channel {
         let toml = match download_file(
             &channel_url,
             &tmp_dir_path.join(CHANNEL_LATEST_FILE_NAME),
-            Some(&mut hasher),
+            &mut hasher,
         ) {
             Ok(_) => {
                 let toml_path = tmp_dir_path.join(CHANNEL_LATEST_FILE_NAME);

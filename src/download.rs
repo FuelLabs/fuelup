@@ -4,7 +4,6 @@ use semver::Version;
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
 use sha2::Sha256;
-use std::cell::RefCell;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
@@ -200,13 +199,12 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
     Ok(())
 }
 
-pub fn download_file(url: &str, path: &PathBuf, hasher: Option<&mut Sha256>) -> Result<()> {
+pub fn download_file(url: &str, path: &PathBuf, hasher: &mut Sha256) -> Result<()> {
     const RETRY_ATTEMPTS: u8 = 4;
     const RETRY_DELAY_SECS: u64 = 3;
 
     let handle = ureq::builder().user_agent("fuelup").build();
     let mut file = OpenOptions::new().write(true).create(true).open(&path)?;
-    let hasher = RefCell::new(hasher);
 
     for _ in 1..RETRY_ATTEMPTS {
         match handle.get(url).call() {
@@ -222,9 +220,7 @@ pub fn download_file(url: &str, path: &PathBuf, hasher: Option<&mut Sha256>) -> 
                     )
                 };
 
-                if let Some(h) = hasher.borrow_mut().as_mut() {
-                    h.update(data);
-                }
+                hasher.update(data);
                 return Ok(());
             }
             Err(ureq::Error::Status(404, r)) => {
@@ -257,7 +253,7 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path)
     let tarball_path = dst_dir_path.join(&download_cfg.tarball_name);
 
     let mut hasher = Sha256::new();
-    if download_file(&download_cfg.tarball_url, &tarball_path, Some(&mut hasher)).is_err() {
+    if download_file(&download_cfg.tarball_url, &tarball_path, &mut hasher).is_err() {
         bail!(
             "Failed to download {} - the release might not be ready yet.",
             &download_cfg.tarball_name

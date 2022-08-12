@@ -24,6 +24,10 @@ First, run and ensure all tests pass:
 cargo test
 ```
 
+There are both unit tests and integration tests. Unit tests involve testing isolated components of the codebase,
+while integration tests involve directly invoking the `fuelup` binary in a sandboxed environment with a
+temporary filesystem.
+
 Note that some integration tests involve installing a toolchain and adding components, which means they
 will fail without internet connection.
 

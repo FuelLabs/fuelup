@@ -20,6 +20,12 @@ Otherwise, you can also pass `--no-modify-path` so that `fuelup-init` does not m
 curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh -s -- --no-modify-path
 ```
 
+If you just want `fuelup` without automatically installing the `latest` toolchain:
+
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh -s -- --skip-toolchain-installation
+```
+
 In future, `fuelup` will also let you switch between toolchains, allowing for a smooth developer experience while allowing you to have more flexibility, along with other features.
 
 ## Usage

@@ -50,6 +50,7 @@ main() {
 
     # always prompt PATH modification, unless --no-modify-path provided
     local prompt_modify=yes
+    # always install latest toolchain (for convenience), unless --skip-toolchain-installation provided
     local skip_toolchain_installation=no
 
     for arg in "$@"; do

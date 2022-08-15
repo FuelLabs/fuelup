@@ -127,7 +127,7 @@ main() {
     fi
 
     if [ "$skip_toolchain_installation" = "no" ]; then
-	ignore "$FUELUP_DIR/bin/fuelup" "toolchain" "install" "latest"
+        ignore "$FUELUP_DIR/bin/fuelup" "toolchain" "install" "latest"
     fi
 
     local _retval=$?

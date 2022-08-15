@@ -58,7 +58,7 @@ main() {
             --no-modify-path)
                 prompt_modify=no
                 ;;
-	    --skip-toolchain-installation)
+            --skip-toolchain-installation)
                 skip_toolchain_installation=yes
                 ;;
             *)

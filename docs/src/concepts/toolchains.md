@@ -12,7 +12,7 @@ Sway toolchain. `fuelup` supports **two** types of toolchains.
 
 Standard release channel toolchain names have the following form:
 
-```
+```text
 <channel>[-<date>][-<host>]
 
 <channel>       = latest

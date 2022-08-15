@@ -26,7 +26,7 @@ You can request that `fuelup` update itself to the latest version of `fuelup`
 by running:
 
 ```sh
-$ fuelup self update
+fuelup self update
 ```
 
 ## Help system

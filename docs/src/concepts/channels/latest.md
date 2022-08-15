@@ -1,6 +1,4 @@
-# latest
-
-### `latest`
+# The `latest` channel
 
 The `latest` channel is updated by a scheduled GitHub workflow that **runs every 30 minutes** and checks for new, compatible releases of `forc` and `fuel-core`.
 

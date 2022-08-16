@@ -30,7 +30,7 @@ struct LatestReleaseApiResponse {
 #[derive(Debug, PartialEq, Eq)]
 pub struct DownloadCfg {
     pub name: String,
-    pub target: String,
+    pub target: TargetTriple,
     pub version: Version,
     tarball_name: String,
     tarball_url: String,
@@ -56,7 +56,7 @@ impl DownloadCfg {
 
         Ok(Self {
             name: name.to_string(),
-            target: target.to_string(),
+            target,
             version,
             tarball_name,
             tarball_url,
@@ -65,12 +65,14 @@ impl DownloadCfg {
 
     pub fn from_package(name: &str, package: Package) -> Result<Self> {
         let target = TargetTriple::from_component(name)?;
+        let tarball_name = tarball_name(name, &package.version, &target)?;
+        let tarball_url = package.target[&target.to_string()].url.clone();
         Ok(Self {
             name: name.to_string(),
-            target: target.to_string(),
-            version: package.version.clone(),
-            tarball_name: tarball_name(name, &package.version, &target)?,
-            tarball_url: package.target[&target.to_string()].url.clone(),
+            target,
+            version: package.version,
+            tarball_name,
+            tarball_url,
         })
     }
 }

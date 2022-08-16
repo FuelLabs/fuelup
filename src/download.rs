@@ -18,7 +18,7 @@ use crate::constants::{
 };
 use crate::file::hard_or_symlink_file;
 use crate::path::fuelup_bin;
-use crate::toolchain::TargetTriple;
+use crate::target_triple::TargetTriple;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {

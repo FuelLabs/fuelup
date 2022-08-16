@@ -7,7 +7,7 @@ use crate::{
     component,
     download::{download_file_and_unpack, unpack_bins, DownloadCfg},
     path::{fuelup_bin, fuelup_bin_dir},
-    toolchain::TargetTriple,
+    target_triple::TargetTriple,
 };
 
 pub fn attempt_install_self(download_cfg: DownloadCfg, dst: &Path) -> Result<()> {

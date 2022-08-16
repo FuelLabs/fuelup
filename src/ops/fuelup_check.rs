@@ -9,7 +9,8 @@ use crate::{
     component::SUPPORTED_PLUGINS,
     config::Config,
     fmt::{bold, colored_bold},
-    toolchain::{DistToolchainName, TargetTriple, Toolchain},
+    target_triple::TargetTriple,
+    toolchain::{DistToolchainName, Toolchain},
 };
 use anyhow::Result;
 use semver::Version;

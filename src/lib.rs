@@ -11,4 +11,5 @@ pub mod ops;
 pub mod path;
 pub mod proxy_cli;
 pub mod settings;
+pub mod target_triple;
 pub mod toolchain;

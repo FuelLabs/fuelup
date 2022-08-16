@@ -7,7 +7,8 @@ use tracing::info;
 use crate::{
     commands::component::AddCommand,
     download::DownloadCfg,
-    toolchain::{DistToolchainName, TargetTriple, Toolchain},
+    target_triple::TargetTriple,
+    toolchain::{DistToolchainName, Toolchain},
 };
 
 pub fn add(command: AddCommand) -> Result<()> {

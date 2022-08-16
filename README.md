@@ -1,6 +1,6 @@
-# Fuelup: the Sway toolchain manager
+# Fuelup: the Fuel toolchain manager
 
-`fuelup` installs the Sway toolchain from our official release channels, enabling you to easily keep the toolchain updated.
+`fuelup` installs the Fuel toolchain from our official release channels, enabling you to easily keep the toolchain updated.
 
 ## Installation
 

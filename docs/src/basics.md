@@ -7,13 +7,13 @@ installed `fuelup` via `fuelup-init`:
 fuelup toolchain install latest
 ```
 
-## Keeping the Sway toolchain up to date
+## Keeping the Fuel toolchain up to date
 
-The Sway toolchain is distributed on one [release channel]: latest (with nightly being a WIP).
+The Fuel toolchain is distributed on one [release channel]: latest (with nightly being a WIP).
 `fuelup` uses the `latest` channel by default, which
-represents the latest release of the Sway toolchain.
+represents the latest release of the Fuel toolchain.
 
-When new versions of the components within the Sway toolchain is released,
+When new versions of the components within the Fuel toolchain is released,
 simply type `fuelup toolchain install latest` to update:
 
 ```sh

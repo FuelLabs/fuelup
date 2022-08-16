@@ -23,7 +23,7 @@ then executes the appropriate `forc` found in the `latest` toolchain directory.
 
 ## Terminology
 
-- **channel** — The Sway toolchain will be released to different "channels".
+- **channel** — The Fuel toolchain will be released to different "channels".
   Currently, it is only released to the **latest** channel.
   See the [Channels] chapter for more details.
 
@@ -35,7 +35,7 @@ then executes the appropriate `forc` found in the `latest` toolchain directory.
   A toolchain can be installed either through the channels, or be modularly
   constructed as a [custom toolchain].
 
-- **component** — Each release of the Sway toolchain includes several "components",
+- **component** — Each release of the Fuel toolchain includes several "components",
   which are tools used to develop on Fuel. See the [Components] chapter for more details.
 
 [components]: components.md

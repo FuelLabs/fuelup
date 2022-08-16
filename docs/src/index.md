@@ -1,6 +1,6 @@
 # Introduction
 
-_fuelup_ is the official package manager for [Fuel] that installs The Sway Toolchain
+_fuelup_ is the official package manager for [Fuel] that installs The Fuel Toolchain
 from the official release channels, enabling you to easily switch between different
 toolchains and keep them updated. It makes building and maintaining Sway applications
 simpler with [forc] and [fuel-core] for common platforms.

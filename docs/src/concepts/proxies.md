@@ -1,6 +1,6 @@
 # Proxies
 
-`fuelup` provides wrappers for the common Sway toolchain
+`fuelup` provides wrappers for the common Fuel toolchain
 [components]. These are called _proxies_ and represent commands
 which are provided by the components themselves.
 

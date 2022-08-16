@@ -6,8 +6,8 @@ use tracing::info;
 
 use crate::{
     commands::component::AddCommand,
-    download::{target_from_name, DownloadCfg},
-    toolchain::{DistToolchainName, Toolchain},
+    download::DownloadCfg,
+    toolchain::{DistToolchainName, TargetTriple, Toolchain},
 };
 
 pub fn add(command: AddCommand) -> Result<()> {
@@ -48,7 +48,8 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
             None => (&maybe_versioned_component, None),
         };
 
-    let download_cfg = DownloadCfg::new(component, Some(target_from_name(component)?), version)?;
+    let download_cfg =
+        DownloadCfg::new(component, TargetTriple::from_component(component)?, version)?;
     toolchain.add_component(download_cfg)?;
 
     Ok(())

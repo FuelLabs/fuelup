@@ -8,9 +8,8 @@ use crate::{
     commands::check::CheckCommand,
     component::SUPPORTED_PLUGINS,
     config::Config,
-    download::target_from_name,
     fmt::{bold, colored_bold},
-    toolchain::{DistToolchainName, Toolchain},
+    toolchain::{DistToolchainName, TargetTriple, Toolchain},
 };
 use anyhow::Result;
 use semver::Version;
@@ -73,7 +72,7 @@ fn check_fuelup() -> Result<()> {
 
     if let Ok(fuelup_download_cfg) = DownloadCfg::new(
         component::FUELUP,
-        target_from_name(component::FUELUP).ok(),
+        TargetTriple::from_component(component::FUELUP)?,
         None,
     ) {
         bold(|s| write!(s, "{} - ", component::FUELUP));
@@ -104,9 +103,14 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                 .map(|&c| {
                     (
                         c.to_owned(),
-                        DownloadCfg::new(c, target_from_name(c).ok(), None)
-                            .unwrap()
-                            .version,
+                        DownloadCfg::new(
+                            c,
+                            TargetTriple::from_component(c)
+                                .expect("Failed to create DownloadCfg from component"),
+                            None,
+                        )
+                        .unwrap()
+                        .version,
                     )
                 })
                 .collect()

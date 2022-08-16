@@ -18,6 +18,7 @@ use crate::constants::{
 };
 use crate::file::hard_or_symlink_file;
 use crate::path::fuelup_bin;
+use crate::toolchain::TargetTriple;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
@@ -36,16 +37,12 @@ pub struct DownloadCfg {
 }
 
 impl DownloadCfg {
-    pub fn new(name: &str, target: Option<String>, version: Option<Version>) -> Result<Self> {
+    pub fn new(name: &str, target: TargetTriple, version: Option<Version>) -> Result<Self> {
         let version = match version {
             Some(version) => version,
             None => get_latest_tag(name).map_err(|e| {
                 anyhow!("Error getting latest tag for component: {:?}: {}", name, e)
             })?,
-        };
-        let target = match target {
-            Some(target) => target,
-            None => target_from_name(name)?,
         };
 
         let release_url = match name {
@@ -59,7 +56,7 @@ impl DownloadCfg {
 
         Ok(Self {
             name: name.to_string(),
-            target,
+            target: target.to_string(),
             version,
             tarball_name,
             tarball_url,
@@ -67,77 +64,18 @@ impl DownloadCfg {
     }
 
     pub fn from_package(name: &str, package: Package) -> Result<Self> {
-        let target = target_from_name(name)?;
+        let target = TargetTriple::from_component(name)?;
         Ok(Self {
             name: name.to_string(),
-            target: target.clone(),
+            target: target.to_string(),
             version: package.version.clone(),
             tarball_name: tarball_name(name, &package.version, &target)?,
-            tarball_url: package.target[&target].url.clone(),
+            tarball_url: package.target[&target.to_string()].url.clone(),
         })
     }
 }
 
-pub fn target_from_name(name: &str) -> Result<String> {
-    match name {
-        component::FORC => {
-            let os = match std::env::consts::OS {
-                "macos" => "darwin",
-                "linux" => "linux",
-                unsupported_os => bail!("Unsupported os: {}", unsupported_os),
-            };
-            let architecture = match std::env::consts::ARCH {
-                "aarch64" => "arm64",
-                "x86_64" => "amd64",
-                unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
-            };
-
-            Ok(format!("{}_{}", os, architecture))
-        }
-
-        component::FUEL_CORE => {
-            let architecture = match std::env::consts::ARCH {
-                "aarch64" | "x86_64" => std::env::consts::ARCH,
-                unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
-            };
-
-            let vendor = match std::env::consts::OS {
-                "macos" => "apple",
-                _ => "unknown",
-            };
-
-            let os = match std::env::consts::OS {
-                "macos" => "darwin",
-                "linux" => "linux-gnu",
-                unsupported_os => bail!("Unsupported os: {}", unsupported_os),
-            };
-
-            Ok(format!("{}-{}-{}", architecture, vendor, os))
-        }
-        component::FUELUP => {
-            let architecture = match std::env::consts::ARCH {
-                "aarch64" | "x86_64" => std::env::consts::ARCH,
-                unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
-            };
-
-            let vendor = match std::env::consts::OS {
-                "macos" => "apple",
-                _ => "unknown",
-            };
-
-            let os = match std::env::consts::OS {
-                "macos" => "darwin",
-                "linux" => "linux-gnu",
-                unsupported_os => bail!("Unsupported os: {}", unsupported_os),
-            };
-
-            Ok(format!("{}-{}-{}", architecture, vendor, os))
-        }
-        _ => bail!("Unrecognized component: {}", name),
-    }
-}
-
-pub fn tarball_name(name: &str, version: &Version, target: &str) -> Result<String> {
+pub fn tarball_name(name: &str, version: &Version, target: &TargetTriple) -> Result<String> {
     match name {
         component::FORC => Ok(format!("forc-binaries-{}.tar.gz", target)),
         component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version, target)),

@@ -139,7 +139,7 @@ jobs:
             INCOMPATIBLE_VERSIONS=$(ls | grep 'incompatible' | cut -d '-' -f2-)
             mkdir -p ${{ env.INCOMPATIBLE_DIR }}
             for version in $INCOMPATIBLE_VERSIONS; do
-              touch ${{ env.INCOMPATIBLE_DIR }}/$version
+              echo RUN_URL=https://github.com/FuelLabs/fuelup/actions/runs/$GITHUB_RUN_ID >> ${{ env.INCOMPATIBLE_DIR }}/$version
             done
 
       # Run index-versions.sh here which generates the channel TOML file with download links and hashes for forc and fuel-core.

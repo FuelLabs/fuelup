@@ -56,7 +56,7 @@ main() {
     # Cleanup tmp and downloaded tars/bin folders
     trap 'rm channel-fuel-latest.tmp.toml *.tar.gz' ERR EXIT
 
-    echo -e "run_url = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >>channel-fuel-latest.toml
+    echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >>channel-fuel-latest.toml
 
     create_pkg_in_channel forc "${FORC_LATEST_VERSION}"
     create_pkg_in_channel fuel-core "${FUEL_CORE_LATEST_VERSION}"

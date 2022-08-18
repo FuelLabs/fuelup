@@ -13,6 +13,11 @@ use std::collections::HashMap;
 use tempfile::tempdir_in;
 use toml_edit::de;
 
+pub const LATEST: &str = "latest";
+pub const STABLE: &str = "stable";
+pub const NIGHTLY: &str = "beta";
+pub const BETA: &str = "nightly";
+
 #[derive(Debug, Deserialize)]
 pub struct HashedBinary {
     pub url: String,

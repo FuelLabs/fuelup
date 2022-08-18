@@ -5,16 +5,12 @@ use std::process::{Command, ExitCode, Stdio};
 use std::{env, io};
 
 use crate::component;
-use crate::path::settings_file;
-use crate::settings::SettingsFile;
 use crate::toolchain::Toolchain;
 
 /// Runs forc or fuel-core in proxy mode
 pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
     let cmd_args: Vec<_> = env::args_os().skip(1).collect();
-    let settings_file = SettingsFile::new(settings_file());
-    let toolchain =
-        settings_file.with(|s| Toolchain::from(&s.default_toolchain.clone().unwrap()))?;
+    let toolchain = Toolchain::from_settings()?;
 
     if !cmd_args.is_empty()
         && component::SUPPORTED_PLUGINS

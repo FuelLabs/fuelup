@@ -50,11 +50,16 @@ main() {
 
     # always prompt PATH modification, unless --no-modify-path provided
     local prompt_modify=yes
+    # always install latest toolchain (for convenience), unless --skip-toolchain-installation provided
+    local skip_toolchain_installation=no
 
     for arg in "$@"; do
         case "$arg" in
             --no-modify-path)
                 prompt_modify=no
+                ;;
+            --skip-toolchain-installation)
+                skip_toolchain_installation=yes
                 ;;
             *)
                 OPTIND=1
@@ -121,7 +126,9 @@ main() {
         exit 1
     fi
 
-    ignore "$FUELUP_DIR/bin/fuelup" "toolchain" "install" "latest"
+    if [ "$skip_toolchain_installation" = "no" ]; then
+        ignore "$FUELUP_DIR/bin/fuelup" "toolchain" "install" "latest"
+    fi
 
     local _retval=$?
 

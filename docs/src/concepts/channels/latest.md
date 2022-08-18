@@ -15,7 +15,9 @@ When installing the `latest` channel, fuelup will refer to the `channel-fuel-lat
 
 ### Understanding the `latest` workflow
 
-_Note: Reading the information below is only really necessary if you wish to contribute to the workflows or want a deeper understanding on how channels are updated._
+> **Note**
+>
+> Reading the information below is only really necessary if you wish to contribute to the workflows or want a deeper understanding on how channels are updated.
 
 The entrypoint of the scheduled workflow is within `index-versions.yml`. We run the Rust script `compare-versions` to collect versions of `forc` and `fuel-core` to be tested. These versions are filtered for incompatible versions prior to being used as a JSON string input to `test-toolchain-compatibility.yml`, where the testing occurs.
 
@@ -30,6 +32,7 @@ If tests were not skipped and are now done, we finally get to the `index-version
 1. upload incompatible versions to gh-pages. These incompatible versions are named in the format `incompatible-forc-<FORC_VERSION>@fuel-core-<FUEL_CORE_VERSION>`.
 
 2. update the channel by filtering for the latest versions of `forc` and `fuel-core` that passed tests within the matrix by running `index-versions.sh`. These are named in the format `compatible-forc-<FORC_VERSION>@fuel-core-<FUEL_CORE_VERSION>`. Note that these files are not saved or uploaded onto gh-pages - they are only a way for the `test-toolchain-compatibility` job to share test results with this job.
+
 
 ### Debugging the workflow
 

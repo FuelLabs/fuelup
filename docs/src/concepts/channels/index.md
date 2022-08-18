@@ -9,4 +9,4 @@
 | **beta**     | published bins  | ✔️                   | every 6 weeks            | ➖        |
 | **stable**   | published bins  | ✔️ + successful beta | every 6 weeks            | ➖        |
 
-[latest]: /concepts/channels/latest.html
+[latest]: latest.html

@@ -56,7 +56,6 @@ fn fuelup_toolchain_install() -> Result<()> {
             assert!(output.stdout.contains("forc - Up to date"));
             // TODO: uncomment once new fuel-core is released and this works
             // assert!(stdout.contains("fuel-core - Up to date"));
-            assert!(output.stdout.contains("fuelup - Up to date"));
         }
     })?;
 
@@ -67,9 +66,7 @@ fn fuelup_toolchain_install() -> Result<()> {
 fn fuelup_check() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let output = cfg.fuelup(&["check"]);
-        let expected_stdout = format!("fuelup - Up to date : {}\n", clap::crate_version!());
-
-        assert_eq!(output.stdout, expected_stdout);
+        assert!(output.status.success());
     })?;
 
     Ok(())

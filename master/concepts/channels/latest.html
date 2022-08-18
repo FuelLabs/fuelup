@@ -169,8 +169,7 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="latest"><a class="header" href="#latest">latest</a></h1>
-<h3 id="latest-1"><a class="header" href="#latest-1"><code>latest</code></a></h3>
+                        <h1 id="the-latest-channel"><a class="header" href="#the-latest-channel">The <code>latest</code> channel</a></h1>
 <p>The <code>latest</code> channel is updated by a scheduled GitHub workflow that <strong>runs every 30 minutes</strong> and checks for new, compatible releases of <code>forc</code> and <code>fuel-core</code>.</p>
 <p>The <code>latest</code> channel is <code>fuelup</code>'s default channel. It provides access to the latest compatible, published releases of <code>forc</code> and <code>fuel-core</code>.</p>
 <p>When installing the <code>latest</code> channel, fuelup will refer to the <code>channel-fuel-latest.toml</code> file published within the fuelup repository in the <a href="https://github.com/FuelLabs/fuelup/tree/gh-pages">gh-pages</a> branch to determine the set of <code>forc</code> and <code>fuel-core</code> versions to retrieve. The versions in this file are updated by a scheduled GitHub workflow that runs once every 30 minutes and performs the following steps:</p>
@@ -182,7 +181,10 @@
 </ol>
 <h2 id="developer-guide"><a class="header" href="#developer-guide">Developer Guide</a></h2>
 <h3 id="understanding-the-latest-workflow"><a class="header" href="#understanding-the-latest-workflow">Understanding the <code>latest</code> workflow</a></h3>
-<p><em>Note: Reading the information below is only really necessary if you wish to contribute to the workflows or want a deeper understanding on how channels are updated.</em></p>
+<blockquote>
+<p><strong>Note</strong></p>
+<p>Reading the information below is only really necessary if you wish to contribute to the workflows or want a deeper understanding on how channels are updated.</p>
+</blockquote>
 <p>The entrypoint of the scheduled workflow is within <code>index-versions.yml</code>. We run the Rust script <code>compare-versions</code> to collect versions of <code>forc</code> and <code>fuel-core</code> to be tested. These versions are filtered for incompatible versions prior to being used as a JSON string input to <code>test-toolchain-compatibility.yml</code>, where the testing occurs.</p>
 <p>In <code>test-toolchain-compatibility.yml</code>, The versions JSON string input is used to init a matrix using the <a href="https://docs.github.com/en/actions/learn-github-actions/expressions#fromjson">fromJSON</a> expression. We checkout the Sway repo at the given <code>forc</code> version and pull the <code>fuel-core</code> Docker image at the given <code>fuel-core</code> version and run integration tests found in the <a href="https://github.com/FuelLabs/sway/blob/3bd8eaf4a0f11a3009c9421100cc06c2e897b6c2/.github/workflows/ci.yml#L229-L270">Sway CI</a> for them.</p>
 <p>Note that we only mark versions as incompatible specifically if tests fail, and not if other prior steps fail (eg. we do not want to mark versions as incompatible if there were errors pulling the Docker image)</p>

@@ -209,6 +209,9 @@ use <a href="https://docs.microsoft.com/en-us/windows/wsl/install">Windows Subsy
 <p>You can also install <code>fuelup</code> from source. Check out the git repository from
 <a href="https://github.com/FuelLabs/fuelup">https://github.com/FuelLabs/fuelup</a> and run <code>cargo run --release</code>.</p>
 <p>You should then manually move the <code>fuelup</code> binary to <code>.fuelup/bin</code>.</p>
+<h2 id="direct-download"><a class="header" href="#direct-download">Direct download</a></h2>
+<p><code>fuelup</code> binaries are released on our GitHub <a href="https://github.com/FuelLabs/fuelup/releases">releases page</a> where you can directly
+download the appropriate bin for your system as well as check out our changelog.</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="concepts"><a class="header" href="#concepts">Concepts</a></h1>
 <h2 id="how-fuelup-works"><a class="header" href="#how-fuelup-works">How fuelup works</a></h2>
 <p><code>fuelup</code> is largely inspired by <a href="https://github.com/rust-lang/rustup"><code>rustup</code></a>. It installs and manages multiple Fuel
@@ -245,13 +248,12 @@ which are tools used to develop on Fuel. See the <a href="concepts/components.ht
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="channels"><a class="header" href="#channels">Channels</a></h1>
 <p><code>fuelup</code> adopts a simplified version of <code>rustup</code> <a href="https://rust-lang.github.io/rustup/concepts/channels.html">channels</a>. Currently, only the <code>latest</code> channel will be published and serve as a source of distribution of Fuel toolchain binaries.</p>
 <table><thead><tr><th>Channel</th><th>Source</th><th>Integration Tested</th><th>Update Frequency</th><th>Available</th></tr></thead><tbody>
-<tr><td><strong><a href="concepts/channels//concepts/channels/latest.html">latest</a></strong></td><td>published bins</td><td>✔️</td><td>checked every 30 minutes</td><td>✔️</td></tr>
+<tr><td><strong><a href="concepts/channels/latest.html">latest</a></strong></td><td>published bins</td><td>✔️</td><td>checked every 30 minutes</td><td>✔️</td></tr>
 <tr><td><strong>nightly</strong></td><td><code>master</code> branch</td><td>✔️</td><td>nightly</td><td>➖</td></tr>
 <tr><td><strong>beta</strong></td><td>published bins</td><td>✔️</td><td>every 6 weeks</td><td>➖</td></tr>
 <tr><td><strong>stable</strong></td><td>published bins</td><td>✔️ + successful beta</td><td>every 6 weeks</td><td>➖</td></tr>
 </tbody></table>
-<div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="latest"><a class="header" href="#latest">latest</a></h1>
-<h3 id="latest-1"><a class="header" href="#latest-1"><code>latest</code></a></h3>
+<div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="the-latest-channel"><a class="header" href="#the-latest-channel">The <code>latest</code> channel</a></h1>
 <p>The <code>latest</code> channel is updated by a scheduled GitHub workflow that <strong>runs every 30 minutes</strong> and checks for new, compatible releases of <code>forc</code> and <code>fuel-core</code>.</p>
 <p>The <code>latest</code> channel is <code>fuelup</code>'s default channel. It provides access to the latest compatible, published releases of <code>forc</code> and <code>fuel-core</code>.</p>
 <p>When installing the <code>latest</code> channel, fuelup will refer to the <code>channel-fuel-latest.toml</code> file published within the fuelup repository in the <a href="https://github.com/FuelLabs/fuelup/tree/gh-pages">gh-pages</a> branch to determine the set of <code>forc</code> and <code>fuel-core</code> versions to retrieve. The versions in this file are updated by a scheduled GitHub workflow that runs once every 30 minutes and performs the following steps:</p>
@@ -263,7 +265,10 @@ which are tools used to develop on Fuel. See the <a href="concepts/components.ht
 </ol>
 <h2 id="developer-guide"><a class="header" href="#developer-guide">Developer Guide</a></h2>
 <h3 id="understanding-the-latest-workflow"><a class="header" href="#understanding-the-latest-workflow">Understanding the <code>latest</code> workflow</a></h3>
-<p><em>Note: Reading the information below is only really necessary if you wish to contribute to the workflows or want a deeper understanding on how channels are updated.</em></p>
+<blockquote>
+<p><strong>Note</strong></p>
+<p>Reading the information below is only really necessary if you wish to contribute to the workflows or want a deeper understanding on how channels are updated.</p>
+</blockquote>
 <p>The entrypoint of the scheduled workflow is within <code>index-versions.yml</code>. We run the Rust script <code>compare-versions</code> to collect versions of <code>forc</code> and <code>fuel-core</code> to be tested. These versions are filtered for incompatible versions prior to being used as a JSON string input to <code>test-toolchain-compatibility.yml</code>, where the testing occurs.</p>
 <p>In <code>test-toolchain-compatibility.yml</code>, The versions JSON string input is used to init a matrix using the <a href="https://docs.github.com/en/actions/learn-github-actions/expressions#fromjson">fromJSON</a> expression. We checkout the Sway repo at the given <code>forc</code> version and pull the <code>fuel-core</code> Docker image at the given <code>fuel-core</code> version and run integration tests found in the <a href="https://github.com/FuelLabs/sway/blob/3bd8eaf4a0f11a3009c9421100cc06c2e897b6c2/.github/workflows/ci.yml#L229-L270">Sway CI</a> for them.</p>
 <p>Note that we only mark versions as incompatible specifically if tests fail, and not if other prior steps fail (eg. we do not want to mark versions as incompatible if there were errors pulling the Docker image)</p>
@@ -298,7 +303,7 @@ Fuel toolchain. <code>fuelup</code> supports <strong>two</strong> types of toolc
 </ol>
 <h2 id="toolchain-specification"><a class="header" href="#toolchain-specification">Toolchain specification</a></h2>
 <p>Standard release channel toolchain names have the following form:</p>
-<pre><code>&lt;channel&gt;[-&lt;date&gt;][-&lt;host&gt;]
+<pre><code class="language-text">&lt;channel&gt;[-&lt;date&gt;][-&lt;host&gt;]
 
 &lt;channel&gt;       = latest
 &lt;date&gt;          = YYYY-MM-DD
@@ -356,14 +361,14 @@ installed <code>fuelup</code> via <code>fuelup-init</code>:</p>
 <p>The Fuel toolchain is distributed on one <a href="concepts/channels/index.html">release channel</a>: latest (with nightly being a WIP).
 <code>fuelup</code> uses the <code>latest</code> channel by default, which
 represents the latest release of the Fuel toolchain.</p>
-<p>When new versions of the components within the Fuel toolchain is released,
+<p>When new versions of the components within the Fuel toolchain are released,
 simply type <code>fuelup toolchain install latest</code> to update:</p>
 <pre><code class="language-sh">fuelup toolchain install latest
 </code></pre>
 <h2 id="keeping-fuelup-up-to-date"><a class="header" href="#keeping-fuelup-up-to-date">Keeping <code>fuelup</code> up to date</a></h2>
 <p>You can request that <code>fuelup</code> update itself to the latest version of <code>fuelup</code>
 by running:</p>
-<pre><code class="language-sh">$ fuelup self update
+<pre><code class="language-sh">fuelup self update
 </code></pre>
 <h2 id="help-system"><a class="header" href="#help-system">Help system</a></h2>
 <p>The <code>fuelup</code> command-line is built with <a href="https://github.com/clap-rs/clap">clap</a>, which serves a nice, built-in help system
@@ -451,13 +456,13 @@ Any changes to the branch will require a re-review.</li>
 <h3 id="linking-issues"><a class="header" href="#linking-issues">Linking issues</a></h3>
 <p>Pull requests should be linked to at least one issue in the same repo.</p>
 <p>If the pull request resolves the relevant issues, and you want GitHub to close these issues automatically after it merged into the default branch, you can use the syntax (<code>KEYWORD #ISSUE-NUMBER</code>) like this:</p>
-<pre><code>close #123
+<pre><code class="language-text">close #123
 </code></pre>
 <p>If the pull request links an issue but does not close it, you can use the keyword <code>ref</code> like this:</p>
-<pre><code>ref #456
+<pre><code class="language-text">ref #456
 </code></pre>
 <p>Multiple issues should use full syntax for each issue and separate by a comma, like:</p>
-<pre><code>close #123, ref #456
+<pre><code class="language-text">close #123, ref #456
 </code></pre>
 
                     </main>

@@ -33,7 +33,6 @@ If tests were not skipped and are now done, we finally get to the `index-version
 
 2. update the channel by filtering for the latest versions of `forc` and `fuel-core` that passed tests within the matrix by running `index-versions.sh`. These are named in the format `compatible-forc-<FORC_VERSION>@fuel-core-<FUEL_CORE_VERSION>`. Note that these files are not saved or uploaded onto gh-pages - they are only a way for the `test-toolchain-compatibility` job to share test results with this job.
 
-
 ### Debugging the workflow
 
 If you're contributing to the workflows, it might be a good idea to fork the repo and test any changes you've made on a personal repo first.

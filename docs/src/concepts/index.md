@@ -40,6 +40,5 @@ then executes the appropriate `forc` found in the `latest` toolchain directory.
 
 [components]: components.md
 [custom toolchain]: toolchains.md#custom-toolchains
-[profiles]: profiles.md
 [toolchain specification]: toolchains.md
 [channels]: channels.md

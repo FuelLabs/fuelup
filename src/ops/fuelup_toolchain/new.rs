@@ -12,11 +12,12 @@ pub fn new(command: NewCommand) -> Result<()> {
 
     let toolchain_dir = toolchain_dir();
 
-    let toolchain_exists = fs::read_dir(&toolchain_dir)?
-        .filter_map(io::Result::ok)
-        .filter(|e| e.path().is_dir())
-        .map(|e| e.file_name().into_string().ok().unwrap_or_default())
-        .any(|x| x == name);
+    let toolchain_exists = toolchain_dir.is_dir()
+        && fs::read_dir(&toolchain_dir)?
+            .filter_map(io::Result::ok)
+            .filter(|e| e.path().is_dir())
+            .map(|e| e.file_name().into_string().ok().unwrap_or_default())
+            .any(|x| x == name);
 
     if toolchain_exists {
         bail!("Toolchain with name '{}' already exists", &name)

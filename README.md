@@ -4,7 +4,7 @@
 
 ## Installation
 
-Currently, this script supports Linux/macOS systems only. For other systems, please [install from source](https://fuellabs.github.io/sway/latest/introduction/installation.html#installing-from-source).
+Currently, this script supports Linux/macOS systems only. For other systems, please [install from source](https://fuellabs.github.io/sway/master/introduction/installation.html#installing-from-source).
 
 Installation is simple: all you need is `fuelup-init.sh`, which downloads the core Fuel binaries needed to get you started on development.
 
@@ -30,7 +30,7 @@ In future, `fuelup` will also let you switch between toolchains, allowing for a 
 
 ## Book
 
-For more details on how `fuelup` works, as well as usage examples, please refer to [The Fuelup Book](https://fuellabs.github.io/fuelup/master/introduction/index.html).
+For more details on how `fuelup` works, as well as usage examples, please refer to [The Fuelup Book](https://fuellabs.github.io/fuelup/master/).
 
 ## Contributing to Fuelup
 

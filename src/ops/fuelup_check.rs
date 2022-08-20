@@ -92,7 +92,7 @@ fn check_fuelup() -> Result<()> {
     ) {
         bold(|s| write!(s, "{} - ", component::FUELUP));
         compare_versions(
-            &Version::parse(&FUELUP_VERSION)?,
+            &Version::parse(FUELUP_VERSION)?,
             &fuelup_download_cfg.version,
         );
     } else {

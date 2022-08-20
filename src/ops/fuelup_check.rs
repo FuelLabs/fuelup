@@ -28,7 +28,7 @@ fn collect_versions(channel: Channel) -> HashMap<String, Version> {
     latest_versions
 }
 
-fn compare_versions(current_version: &Version, target_version: &Version) {
+fn compare_and_print_versions(current_version: &Version, target_version: &Version) {
     match current_version.cmp(target_version) {
         Less => {
             colored_bold(Color::Yellow, |s| write!(s, "Update available"));
@@ -61,7 +61,7 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
                     print!("    - ");
                     bold(|s| write!(s, "{}", plugin));
                     print!(" - ");
-                    compare_versions(&version, latest_version);
+                    compare_and_print_versions(&version, latest_version);
                 }
                 None => {
                     eprintln!("    - {} - Error getting version string", plugin);
@@ -91,7 +91,7 @@ fn check_fuelup() -> Result<()> {
         None,
     ) {
         bold(|s| write!(s, "{} - ", component::FUELUP));
-        compare_versions(
+        compare_and_print_versions(
             &Version::parse(FUELUP_VERSION)?,
             &fuelup_download_cfg.version,
         );
@@ -139,7 +139,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                     Some(v) => {
                         let version = Version::parse(v)?;
                         bold(|s| write!(s, "  {} - ", &component));
-                        compare_versions(&version, &latest_versions[component]);
+                        compare_and_print_versions(&version, &latest_versions[component]);
                     }
                     None => {
                         eprintln!("  {} - Error getting version string", component);

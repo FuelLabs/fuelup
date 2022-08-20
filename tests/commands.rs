@@ -49,14 +49,21 @@ fn fuelup_toolchain_install() -> Result<()> {
 
             expect_files_exist(
                 &toolchain_dir.path().join("bin"),
-                &mut ["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"],
+                &mut [
+                    "forc",
+                    "forc-explore",
+                    "fuel-core",
+                    "forc-lsp",
+                    "forc-fmt",
+                    "forc-run",
+                    "forc-deploy",
+                ],
             );
 
             let output = cfg.fuelup(&["check"]);
             assert!(output.stdout.contains("forc - Up to date"));
             // TODO: uncomment once new fuel-core is released and this works
             // assert!(stdout.contains("fuel-core - Up to date"));
-            assert!(output.stdout.contains("fuelup - Up to date"));
         }
     })?;
 
@@ -67,9 +74,7 @@ fn fuelup_toolchain_install() -> Result<()> {
 fn fuelup_check() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let output = cfg.fuelup(&["check"]);
-        let expected_stdout = format!("fuelup - Up to date : {}\n", clap::crate_version!());
-
-        assert_eq!(output.stdout, expected_stdout);
+        assert!(output.status.success());
     })?;
 
     Ok(())
@@ -188,13 +193,28 @@ fn fuelup_component_add() -> Result<()> {
         let _ = cfg.fuelup(&["component", "add", "forc"]);
         expect_files_exist(
             &cfg.toolchain_bin_dir("my_toolchain"),
-            &mut ["forc", "forc-explore", "forc-lsp", "forc-fmt"],
+            &mut [
+                "forc",
+                "forc-explore",
+                "forc-lsp",
+                "forc-fmt",
+                "forc-run",
+                "forc-deploy",
+            ],
         );
 
         let _ = cfg.fuelup(&["component", "add", "fuel-core@0.9.5"]);
         expect_files_exist(
             &cfg.toolchain_bin_dir("my_toolchain"),
-            &mut ["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"],
+            &mut [
+                "forc",
+                "forc-explore",
+                "fuel-core",
+                "forc-lsp",
+                "forc-fmt",
+                "forc-run",
+                "forc-deploy",
+            ],
         );
     })?;
 

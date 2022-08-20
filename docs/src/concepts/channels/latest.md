@@ -1,29 +1,23 @@
-# Channels
-
-`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, only the `latest` channel will be published and serve as a source of distribution of Fuel toolchain binaries.
+# The `latest` channel
 
 The `latest` channel is updated by a scheduled GitHub workflow that **runs every 30 minutes** and checks for new, compatible releases of `forc` and `fuel-core`.
 
-### `latest`
-
 The `latest` channel is `fuelup`'s default channel. It provides access to the latest compatible, published releases of `forc` and `fuel-core`.
 
-When installing the `latest` channel, fuelup will refer to the `channel-fuel-latest.toml` file within this repository to determine the set of `forc` and `fuel-core` versions to retrieve. The versions in this file are updated by a scheduled GitHub workflow that runs once every 30 minutes and performs the following steps:
+When installing the `latest` channel, fuelup will refer to the `channel-fuel-latest.toml` file published within the fuelup repository in the [gh-pages] branch to determine the set of `forc` and `fuel-core` versions to retrieve. The versions in this file are updated by a scheduled GitHub workflow that runs once every 30 minutes and performs the following steps:
 
 1. Checks for newly published versions of forc and fuel-core.
 2. Tests compatibility of new versions against a set of integration tests.
 3. Selects the latest set of versions that successfully pass the tests.
 4. Publishes the selected versions to the channel-fuel-latest.toml manifest.
 
-### `nightly`
-
-This is a WIP - we aim to support `nightly` channel soon. 
-
 ## Developer Guide
 
 ### Understanding the `latest` workflow
 
-_Note: Reading the information below is only really necessary if you wish to contribute to the workflows or want a deeper understanding on how channels are updated_
+> **Note**
+>
+> Reading the information below is only really necessary if you wish to contribute to the workflows or want a deeper understanding on how channels are updated.
 
 The entrypoint of the scheduled workflow is within `index-versions.yml`. We run the Rust script `compare-versions` to collect versions of `forc` and `fuel-core` to be tested. These versions are filtered for incompatible versions prior to being used as a JSON string input to `test-toolchain-compatibility.yml`, where the testing occurs.
 
@@ -50,3 +44,5 @@ Some changes you might want to make to allow for easier testing:
 2. You can also exit with 0 or 1 in jobs or steps where you want it to pass/fail.
 
 You may also use [nektos/act](https://github.com/nektos/act) to run the workflow(s) locally.
+
+[gh-pages]: https://github.com/FuelLabs/fuelup/tree/gh-pages

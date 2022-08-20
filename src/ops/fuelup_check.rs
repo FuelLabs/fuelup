@@ -1,3 +1,4 @@
+use std::cmp::Ordering::{Equal, Greater, Less};
 use std::collections::HashMap;
 use std::io::Write;
 use std::str::FromStr;
@@ -27,6 +28,25 @@ fn collect_versions(channel: Channel) -> HashMap<String, Version> {
     latest_versions
 }
 
+fn compare_and_print_versions(current_version: &Version, target_version: &Version) {
+    match current_version.cmp(target_version) {
+        Less => {
+            colored_bold(Color::Yellow, |s| write!(s, "Update available"));
+            println!(" : {} -> {}", current_version, target_version);
+        }
+        Equal => {
+            colored_bold(Color::Green, |s| write!(s, "Up to date"));
+            println!(" : {}", current_version);
+        }
+        Greater => {
+            print!(" : {}", current_version);
+            colored_bold(Color::Yellow, |s| write!(s, " (unstable)"));
+            print!(" -> {}", target_version);
+            colored_bold(Color::Green, |s| writeln!(s, " (recommended)"));
+        }
+    }
+}
+
 fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -> Result<()> {
     let plugin_executable = toolchain.path.join(&plugin);
     match std::process::Command::new(&plugin_executable)
@@ -41,13 +61,7 @@ fn check_plugin(toolchain: &Toolchain, plugin: &str, latest_version: &Version) -
                     print!("    - ");
                     bold(|s| write!(s, "{}", plugin));
                     print!(" - ");
-                    if &version == latest_version {
-                        colored_bold(Color::Green, |s| write!(s, "Up to date"));
-                        println!(" : {}", version);
-                    } else {
-                        colored_bold(Color::Yellow, |s| write!(s, "Update available"));
-                        println!(" : {} -> {}", version, latest_version);
-                    }
+                    compare_and_print_versions(&version, latest_version);
                 }
                 None => {
                     eprintln!("    - {} - Error getting version string", plugin);
@@ -77,13 +91,10 @@ fn check_fuelup() -> Result<()> {
         None,
     ) {
         bold(|s| write!(s, "{} - ", component::FUELUP));
-        if FUELUP_VERSION == fuelup_download_cfg.version.to_string() {
-            colored_bold(Color::Green, |s| write!(s, "Up to date"));
-            println!(" : {}", FUELUP_VERSION);
-        } else {
-            colored_bold(Color::Yellow, |s| write!(s, "Update available"));
-            println!(" : {} -> {}", FUELUP_VERSION, fuelup_download_cfg.version);
-        };
+        compare_and_print_versions(
+            &Version::parse(FUELUP_VERSION)?,
+            &fuelup_download_cfg.version,
+        );
     } else {
         error!("Failed to create DownloadCfg for component 'fuelup'; skipping check for 'fuelup'");
     }
@@ -128,13 +139,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                     Some(v) => {
                         let version = Version::parse(v)?;
                         bold(|s| write!(s, "  {} - ", &component));
-                        if version == latest_versions[component] {
-                            colored_bold(Color::Green, |s| write!(s, "Up to date"));
-                            println!(" : {}", version);
-                        } else {
-                            colored_bold(Color::Yellow, |s| write!(s, "Update available"));
-                            println!(" : {} -> {}", version, latest_versions[component]);
-                        }
+                        compare_and_print_versions(&version, &latest_versions[component]);
                     }
                     None => {
                         eprintln!("  {} - Error getting version string", component);

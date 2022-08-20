@@ -12,7 +12,7 @@ use tracing::{error, info};
 pub fn install(command: InstallCommand) -> Result<()> {
     let InstallCommand { name } = command;
 
-    let toolchain = Toolchain::new(&name, None)?;
+    let toolchain = Toolchain::new(&name)?;
 
     let settings = SettingsFile::new(settings_file());
     settings.with_mut(|s| {

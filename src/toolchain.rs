@@ -52,11 +52,8 @@ pub struct Toolchain {
 }
 
 impl Toolchain {
-    pub fn new(name: &str, target: Option<String>) -> Result<Self> {
-        let target = match target {
-            Some(t) => TargetTriple::new(&t),
-            None => TargetTriple::from_host()?,
-        };
+    pub fn new(name: &str) -> Result<Self> {
+        let target = TargetTriple::from_host()?;
         let toolchain = format!("{}-{}", name, target);
         let path = toolchain_bin_dir(&toolchain);
         Ok(Self {

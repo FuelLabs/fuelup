@@ -7,8 +7,6 @@ On Unix it is located at `$HOME/.fuelup/bin`.
 This directory can automatically be in your `PATH` environment variable if
 allowed in the installation step (explained below), which means you can run them from the shell without further configuration.
 
-[other installation methods]: other.md
-
 ## Quickstart
 
 Installation is done through the `fuelup-init` script found on our [repository], where you may find the source code.

@@ -12,10 +12,6 @@ impl fmt::Display for TargetTriple {
 }
 
 impl TargetTriple {
-    pub fn new(name: &str) -> Self {
-        Self(name.to_string())
-    }
-
     pub fn from_host() -> Result<Self> {
         let architecture = match std::env::consts::ARCH {
             "aarch64" | "x86_64" => std::env::consts::ARCH,

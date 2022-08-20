@@ -75,8 +75,8 @@ impl DownloadCfg {
         let hash = Some(package.target[&target.to_string()].hash.clone());
         Ok(Self {
             name: name.to_string(),
-            target: target.clone(),
-            version: package.version.clone(),
+            target,
+            version: package.version,
             tarball_name,
             tarball_url,
             hash,

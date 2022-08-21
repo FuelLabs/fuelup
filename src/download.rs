@@ -2,12 +2,15 @@ use anyhow::{anyhow, bail, Result};
 use flate2::read::GzDecoder;
 use semver::Version;
 use serde::{Deserialize, Serialize};
+use sha2::Digest;
+use sha2::Sha256;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 use std::{fs, thread};
 use tar::Archive;
+use tracing::warn;
 use tracing::{error, info};
 
 use crate::channel::Package;
@@ -18,6 +21,7 @@ use crate::constants::{
 };
 use crate::file::hard_or_symlink_file;
 use crate::path::fuelup_bin;
+use crate::target_triple::TargetTriple;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
@@ -29,23 +33,20 @@ struct LatestReleaseApiResponse {
 #[derive(Debug, PartialEq, Eq)]
 pub struct DownloadCfg {
     pub name: String,
-    pub target: String,
+    pub target: TargetTriple,
     pub version: Version,
     tarball_name: String,
     tarball_url: String,
+    hash: Option<String>,
 }
 
 impl DownloadCfg {
-    pub fn new(name: &str, target: Option<String>, version: Option<Version>) -> Result<Self> {
+    pub fn new(name: &str, target: TargetTriple, version: Option<Version>) -> Result<Self> {
         let version = match version {
             Some(version) => version,
             None => get_latest_tag(name).map_err(|e| {
                 anyhow!("Error getting latest tag for component: {:?}: {}", name, e)
             })?,
-        };
-        let target = match target {
-            Some(target) => target,
-            None => target_from_name(name)?,
         };
 
         let release_url = match name {
@@ -63,81 +64,27 @@ impl DownloadCfg {
             version,
             tarball_name,
             tarball_url,
+            hash: None,
         })
     }
 
     pub fn from_package(name: &str, package: Package) -> Result<Self> {
-        let target = target_from_name(name)?;
+        let target = TargetTriple::from_component(name)?;
+        let tarball_name = tarball_name(name, &package.version, &target)?;
+        let tarball_url = package.target[&target.to_string()].url.clone();
+        let hash = Some(package.target[&target.to_string()].hash.clone());
         Ok(Self {
             name: name.to_string(),
-            target: target.clone(),
-            version: package.version.clone(),
-            tarball_name: tarball_name(name, &package.version, &target)?,
-            tarball_url: package.target[&target].url.clone(),
+            target,
+            version: package.version,
+            tarball_name,
+            tarball_url,
+            hash,
         })
     }
 }
 
-pub fn target_from_name(name: &str) -> Result<String> {
-    match name {
-        component::FORC => {
-            let os = match std::env::consts::OS {
-                "macos" => "darwin",
-                "linux" => "linux",
-                unsupported_os => bail!("Unsupported os: {}", unsupported_os),
-            };
-            let architecture = match std::env::consts::ARCH {
-                "aarch64" => "arm64",
-                "x86_64" => "amd64",
-                unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
-            };
-
-            Ok(format!("{}_{}", os, architecture))
-        }
-
-        component::FUEL_CORE => {
-            let architecture = match std::env::consts::ARCH {
-                "aarch64" | "x86_64" => std::env::consts::ARCH,
-                unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
-            };
-
-            let vendor = match std::env::consts::OS {
-                "macos" => "apple",
-                _ => "unknown",
-            };
-
-            let os = match std::env::consts::OS {
-                "macos" => "darwin",
-                "linux" => "linux-gnu",
-                unsupported_os => bail!("Unsupported os: {}", unsupported_os),
-            };
-
-            Ok(format!("{}-{}-{}", architecture, vendor, os))
-        }
-        component::FUELUP => {
-            let architecture = match std::env::consts::ARCH {
-                "aarch64" | "x86_64" => std::env::consts::ARCH,
-                unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
-            };
-
-            let vendor = match std::env::consts::OS {
-                "macos" => "apple",
-                _ => "unknown",
-            };
-
-            let os = match std::env::consts::OS {
-                "macos" => "darwin",
-                "linux" => "linux-gnu",
-                unsupported_os => bail!("Unsupported os: {}", unsupported_os),
-            };
-
-            Ok(format!("{}-{}-{}", architecture, vendor, os))
-        }
-        _ => bail!("Unrecognized component: {}", name),
-    }
-}
-
-pub fn tarball_name(name: &str, version: &Version, target: &str) -> Result<String> {
+pub fn tarball_name(name: &str, version: &Version, target: &TargetTriple) -> Result<String> {
     match name {
         component::FORC => Ok(format!("forc-binaries-{}.tar.gz", target)),
         component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version, target)),
@@ -193,7 +140,7 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
     Ok(())
 }
 
-pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
+pub fn download_file(url: &str, path: &PathBuf, hasher: &mut Sha256) -> Result<()> {
     const RETRY_ATTEMPTS: u8 = 4;
     const RETRY_DELAY_SECS: u64 = 3;
 
@@ -213,6 +160,8 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
                         e
                     )
                 };
+
+                hasher.update(data);
                 return Ok(());
             }
             Err(ureq::Error::Status(404, r)) => {
@@ -235,15 +184,31 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
 
 pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path) -> Result<()> {
     info!("Fetching binary from {}", &download_cfg.tarball_url);
+    if download_cfg.hash.is_none() {
+        warn!(
+            "Downloading component {} without verifying checksum",
+            &download_cfg.name
+        );
+    }
 
     let tarball_path = dst_dir_path.join(&download_cfg.tarball_name);
 
-    if download_file(&download_cfg.tarball_url, &tarball_path).is_err() {
+    let mut hasher = Sha256::new();
+    if download_file(&download_cfg.tarball_url, &tarball_path, &mut hasher).is_err() {
         bail!(
             "Failed to download {} - the release may not exist or may not be ready yet.",
             &download_cfg.tarball_name
         );
     };
+
+    let actual_hash = format!("{:x}", hasher.finalize());
+    if download_cfg.hash.is_some() && (&actual_hash != download_cfg.hash.as_ref().unwrap()) {
+        bail!(
+            "Attempt to verify sha256 checksum failed:\ndownloaded file: {}\npublished sha256 hash: {}",
+            &actual_hash,
+            download_cfg.hash.as_ref().unwrap()
+        )
+    }
 
     unpack(&tarball_path, dst_dir_path)?;
 

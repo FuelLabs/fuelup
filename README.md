@@ -1,10 +1,10 @@
-# Fuelup: the Fuel toolchain installer
+# Fuelup: the Fuel toolchain manager
 
 `fuelup` installs the Fuel toolchain from our official release channels, enabling you to easily keep the toolchain updated.
 
 ## Installation
 
-Currently, this script supports Linux/macOS systems only. For other systems, please [install from source](https://fuellabs.github.io/sway/latest/introduction/installation.html#installing-from-source).
+Currently, this script supports Linux/macOS systems only. For other systems, please [install from source](https://fuellabs.github.io/sway/master/introduction/installation.html#installing-from-source).
 
 Installation is simple: all you need is `fuelup-init.sh`, which downloads the core Fuel binaries needed to get you started on development.
 
@@ -20,31 +20,23 @@ Otherwise, you can also pass `--no-modify-path` so that `fuelup-init` does not m
 curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh -s -- --no-modify-path
 ```
 
+If you just want `fuelup` without automatically installing the `latest` toolchain:
+
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh -s -- --skip-toolchain-installation
+```
+
 In future, `fuelup` will also let you switch between toolchains, allowing for a smooth developer experience while allowing you to have more flexibility, along with other features.
 
-## Usage
+## Book
 
-To install and update the latest toolchain:
+For more details on how `fuelup` works, as well as usage examples, please refer to [The Fuelup Book](https://fuellabs.github.io/fuelup/master/).
 
-```sh
-fuelup toolchain install latest
-```
+## Contributing to Fuelup
 
-To update `fuelup` itself:
+We welcome contributions to fuelup!
 
-```sh
-fuelup self update
-```
-
-To check for updates:
-
-```sh
-fuelup check
-```
-
-## Channels
-
-`fuelup` uses channels to distribute Fuel toolchain binaries. Click [here](https://github.com/FuelLabs/fuelup/blob/master/CHANNELS.md) to read more about channels.
+Please see the [Contributing To Fuelup](https://fuellabs.github.io/fuelup/master/contributing_to_fuelup.html) of The Fuelup Book for guidelines and instructions to help you get started.
 
 ## License
 

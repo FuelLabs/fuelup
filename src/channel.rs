@@ -8,6 +8,7 @@ use crate::{
 use anyhow::{bail, Result};
 use semver::Version;
 use serde::Deserialize;
+use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use tempfile::tempdir_in;
 use toml_edit::de;
@@ -42,7 +43,12 @@ impl Channel {
         let fuelup_dir = fuelup_dir();
         let tmp_dir = tempdir_in(&fuelup_dir)?;
         let tmp_dir_path = tmp_dir.path();
-        let toml = match download_file(&channel_url, &tmp_dir_path.join(CHANNEL_LATEST_FILE_NAME)) {
+        let mut hasher = Sha256::new();
+        let toml = match download_file(
+            &channel_url,
+            &tmp_dir_path.join(CHANNEL_LATEST_FILE_NAME),
+            &mut hasher,
+        ) {
             Ok(_) => {
                 let toml_path = tmp_dir_path.join(CHANNEL_LATEST_FILE_NAME);
                 read_file(CHANNEL_LATEST_FILE_NAME, &toml_path)?

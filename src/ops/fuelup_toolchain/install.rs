@@ -1,7 +1,8 @@
 use crate::component;
-use crate::download::{target_from_name, DownloadCfg};
+use crate::download::DownloadCfg;
 use crate::path::settings_file;
 use crate::settings::SettingsFile;
+use crate::target_triple::TargetTriple;
 use crate::toolchain::{DistToolchainName, Toolchain};
 use crate::{channel::Channel, commands::toolchain::InstallCommand};
 use anyhow::Result;
@@ -11,7 +12,7 @@ use tracing::{error, info};
 pub fn install(command: InstallCommand) -> Result<()> {
     let InstallCommand { name } = command;
 
-    let toolchain = Toolchain::new(&name, None)?;
+    let toolchain = Toolchain::new(&name)?;
 
     let settings = SettingsFile::new(settings_file());
     settings.with_mut(|s| {
@@ -32,8 +33,13 @@ pub fn install(command: InstallCommand) -> Result<()> {
             [component::FORC, component::FUEL_CORE, component::FORC_LSP]
                 .iter()
                 .map(|c| {
-                    DownloadCfg::new(c, target_from_name(c).ok(), None)
-                        .expect("Failed to create DownloadCfg from component")
+                    DownloadCfg::new(
+                        c,
+                        TargetTriple::from_component(c)
+                            .expect("Failed to create DownloadCfg from component"),
+                        None,
+                    )
+                    .unwrap()
                 })
                 .collect()
         }

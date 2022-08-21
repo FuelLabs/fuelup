@@ -1,6 +1,6 @@
 [package]
 name = "fuelup"
-version = "0.2.3"
+version = "0.3.2"
 authors = ["Fuel Labs <contact@fuel.sh>"]
 edition = "2021"
 homepage = "https://fuel.network/"
@@ -25,6 +25,7 @@ flate2 = "1"
 semver = { version = "1", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+sha2 = "0.10"
 tar = "0.4"
 tempfile = "3"
 termcolor = "1"

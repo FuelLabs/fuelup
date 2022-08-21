@@ -1,5 +1,5 @@
 use anyhow::Result;
-use fuelup::toolchain::TargetTriple;
+use fuelup::target_triple::TargetTriple;
 use std::{env, path::Path};
 
 mod testcfg;

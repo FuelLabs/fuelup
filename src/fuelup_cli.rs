@@ -1,7 +1,8 @@
 use anyhow::Result;
 use clap::Parser;
 
-use crate::commands::{check, component, default, fuelup, toolchain};
+use crate::commands::show::ShowCommand;
+use crate::commands::{check, component, default, fuelup, show, toolchain};
 
 use crate::commands::check::CheckCommand;
 use crate::commands::component::ComponentCommand;
@@ -31,6 +32,8 @@ enum Commands {
     /// Install new toolchains or modify/query installed toolchains
     #[clap(subcommand)]
     Toolchain(ToolchainCommand),
+    /// Show the active and installed toolchains, as well as the host and fuelup home
+    Show(ShowCommand),
 }
 
 pub fn fuelup_cli() -> Result<()> {
@@ -43,6 +46,7 @@ pub fn fuelup_cli() -> Result<()> {
         Commands::Fuelup(command) => match command {
             FuelupCommand::Update => fuelup::exec(),
         },
+        Commands::Show(_command) => show::exec(),
         Commands::Toolchain(command) => toolchain::exec(command),
     }
 }

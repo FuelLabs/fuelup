@@ -1,3 +1,4 @@
+use std::io::Write;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 // In the below functions, we ignore the `Result`s of `set_color` and `reset` to allow `write`
@@ -21,5 +22,12 @@ where
     let mut stdout = StandardStream::stdout(ColorChoice::Auto);
     let _ = stdout.set_color(ColorSpec::new().set_fg(Some(color)).set_bold(true));
     write(&mut stdout).expect("Unexpected error writing to stdout");
+    let _ = stdout.reset();
+}
+
+pub fn print_header(header: &str) {
+    let mut stdout = StandardStream::stdout(ColorChoice::Auto);
+    bold(|s| writeln!(s, "{}", header));
+    writeln!(stdout, "{}", "-".repeat(header.len())).expect("Unexpected error writing to stdout");
     let _ = stdout.reset();
 }

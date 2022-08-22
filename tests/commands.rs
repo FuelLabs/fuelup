@@ -91,7 +91,7 @@ fn fuelup_show() -> Result<()> {
             lines.next().unwrap(),
             &format!("Default host: {}", TargetTriple::from_host().unwrap())
         );
-        assert!(lines.next().unwrap().contains(&format!("fuelup home")));
+        assert!(lines.next().unwrap().contains("fuelup home: "));
 
         let expected_stdout = r#"installed toolchains
 --------------------

@@ -30,7 +30,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
                 "Failed to get latest channel {} - fetching versions using GitHub API",
                 e
             );
-            [component::FORC, component::FUEL_CORE, component::FORC_LSP]
+            [component::FORC, component::FUEL_CORE]
                 .iter()
                 .map(|c| {
                     DownloadCfg::new(

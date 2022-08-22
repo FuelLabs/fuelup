@@ -71,6 +71,12 @@ pub fn show() -> Result<()> {
         if component == component::FORC {
             for plugin in SUPPORTED_PLUGINS {
                 let plugin_executable = current_toolchain.path.join(&plugin);
+                if plugin == &component::FORC_DEPLOY {
+                    bold(|s| writeln!(s, "    - forc-client"));
+                }
+                if plugin == &component::FORC_RUN || plugin == &component::FORC_DEPLOY {
+                    print!("  ");
+                }
                 match std::process::Command::new(&plugin_executable)
                     .arg("--version")
                     .output()

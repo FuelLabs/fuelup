@@ -1,9 +1,3 @@
-use std::cmp::Ordering::{Equal, Greater, Less};
-use std::collections::HashMap;
-use std::io::Write;
-use std::str::FromStr;
-use tracing::error;
-
 use crate::{
     channel::Channel,
     commands::check::CheckCommand,
@@ -15,7 +9,12 @@ use crate::{
 };
 use anyhow::Result;
 use semver::Version;
+use std::cmp::Ordering::{Equal, Greater, Less};
+use std::collections::HashMap;
+use std::io::Write;
+use std::str::FromStr;
 use termcolor::Color;
+use tracing::error;
 
 use crate::{component, download::DownloadCfg};
 
@@ -165,6 +164,12 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
 
         if verbose && component == component::FORC {
             for plugin in SUPPORTED_PLUGINS {
+                if plugin == &component::FORC_DEPLOY {
+                    bold(|s| writeln!(s, "    - forc-client"));
+                }
+                if plugin == &component::FORC_RUN || plugin == &component::FORC_DEPLOY {
+                    print!("  ");
+                }
                 check_plugin(&toolchain, plugin, &latest_versions[component::FORC])?;
             }
         }

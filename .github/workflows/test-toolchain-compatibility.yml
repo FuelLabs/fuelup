@@ -139,7 +139,7 @@ jobs:
             INCOMPATIBLE_VERSIONS=$(ls | grep 'incompatible' | cut -d '-' -f2-)
             mkdir -p ${{ env.INCOMPATIBLE_DIR }}
             for version in $INCOMPATIBLE_VERSIONS; do
-              touch ${{ env.INCOMPATIBLE_DIR }}/$version
+              echo published_by=https://github.com/FuelLabs/fuelup/actions/runs/$GITHUB_RUN_ID >> ${{ env.INCOMPATIBLE_DIR }}/$version
             done
 
       # Run index-versions.sh here which generates the channel TOML file with download links and hashes for forc and fuel-core.
@@ -148,7 +148,7 @@ jobs:
         run: |
             touch channel-fuel-latest.toml
             mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
-            ./.github/workflows/scripts/index-versions.sh ${{ env.LATEST_COMPATIBLE_FORC }} ${{ env.LATEST_COMPATIBLE_FUEL_CORE }}
+            ./.github/workflows/scripts/index-versions.sh ${{ env.LATEST_COMPATIBLE_FORC }} ${{ env.LATEST_COMPATIBLE_FUEL_CORE }} $GITHUB_RUN_ID
             cp channel-fuel-latest.toml ${{ env.LATEST_CHANNEL_DIR }}
 
       - name: Deploy latest channel

@@ -165,6 +165,12 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
 
         if verbose && component == component::FORC {
             for plugin in SUPPORTED_PLUGINS {
+                if plugin == &component::FORC_DEPLOY {
+                    bold(|s| writeln!(s, "    - forc-client"));
+                }
+                if plugin == &component::FORC_RUN || plugin == &component::FORC_DEPLOY {
+                    print!("  ");
+                }
                 check_plugin(&toolchain, plugin, &latest_versions[component::FORC])?;
             }
         }

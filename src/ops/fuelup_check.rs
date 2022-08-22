@@ -1,9 +1,3 @@
-use std::cmp::Ordering::{Equal, Greater, Less};
-use std::collections::HashMap;
-use std::io::Write;
-use std::str::FromStr;
-use tracing::error;
-
 use crate::{
     channel::Channel,
     commands::check::CheckCommand,
@@ -15,7 +9,12 @@ use crate::{
 };
 use anyhow::Result;
 use semver::Version;
+use std::cmp::Ordering::{Equal, Greater, Less};
+use std::collections::HashMap;
+use std::io::Write;
+use std::str::FromStr;
 use termcolor::Color;
+use tracing::error;
 
 use crate::{component, download::DownloadCfg};
 

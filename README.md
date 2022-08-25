@@ -12,7 +12,7 @@ Installation is simple: all you need is `fuelup-init.sh`, which downloads the co
 curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh
 ```
 
-This will install `forc` and its accompanying plugins, as well as `fuel-core` in `~/.fuelup/bin`. Please read the [Components chapter](https://fuellabs.github.io/fuelup/master/concepts/components.html) for more info.
+This will install `forc` and its accompanying plugins, as well as `fuel-core` in `~/.fuelup/bin`. Please read the [Components chapter](https://fuellabs.github.io/fuelup/master/concepts/components.html) for more info on the components installed.
 
 The script will ask for permission to add `~/.fuelup/bin` to your `PATH`.
 

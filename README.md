@@ -2,9 +2,9 @@
 
 `fuelup` installs the Fuel toolchain from our official release channels, enabling you to easily keep the toolchain updated.
 
-## Installation
+## Quickstart 
 
-Currently, this script supports Linux/macOS systems only. For other systems, please [install from source](https://fuellabs.github.io/sway/master/introduction/installation.html#installing-from-source).
+Currently, this script supports Linux/macOS systems only. For other systems, please [read the Installation chapter](https://fuellabs.github.io/fuelup/master/installation/other.html).
 
 Installation is simple: all you need is `fuelup-init.sh`, which downloads the core Fuel binaries needed to get you started on development.
 
@@ -12,7 +12,9 @@ Installation is simple: all you need is `fuelup-init.sh`, which downloads the co
 curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh
 ```
 
-This will install `forc`, `forc-fmt`, `forc-explore`, `forc-lsp` as well as `fuel-core` in `~/.fuelup/bin`. The script will ask for permission to add `~/.fuelup/bin` to your `PATH`.
+This will install `forc` and its accompanying plugins, as well as `fuel-core` in `~/.fuelup/bin`. Please read the [Components chapter](https://fuellabs.github.io/fuelup/master/concepts/components.html) for more info.
+
+The script will ask for permission to add `~/.fuelup/bin` to your `PATH`.
 
 Otherwise, you can also pass `--no-modify-path` so that `fuelup-init` does not modify your `PATH` and will not ask for permission to do so:
 
@@ -20,13 +22,11 @@ Otherwise, you can also pass `--no-modify-path` so that `fuelup-init` does not m
 curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh -s -- --no-modify-path
 ```
 
-If you just want `fuelup` without automatically installing the `latest` toolchain:
+If you just want `fuelup` without automatically installing the `latest` toolchain, you can pass the `--skip-toolchain-installation` option:
 
 ```sh
 curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh -s -- --skip-toolchain-installation
 ```
-
-In future, `fuelup` will also let you switch between toolchains, allowing for a smooth developer experience while allowing you to have more flexibility, along with other features.
 
 ## Book
 

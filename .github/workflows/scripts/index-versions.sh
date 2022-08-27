@@ -29,26 +29,26 @@ create_pkg_in_channel() {
             _targets=("darwin_amd64" "darwin_arm64" "linux_amd64" "linux_arm64")
             _repo="sway"
             _tarball_prefix="forc-binaries"
-	    if [ ${2} = "nightly" ]; then
-	        version="nightly-${date}"
-		TAG="forc-binaries-${version}"
-	    fi
+            if [ ${2} = "nightly" ]; then
+                version="nightly-${date}"
+                TAG="forc-binaries-${version}"
+            fi
             ;;
         "fuel-core")
             _targets=("aarch64-apple-darwin" "aarch64-unknown-linux-gnu" "x86_64-apple-darwin" "x86_64-unknown-linux-gnu")
             _repo="fuel-core"
             _tarball_prefix="fuel-core"
-	    if [ ${2} = "nightly" ]; then
-	        version="nightly-${date}"
-		TAG="fuel-core-${version}"
-	    else
-	        version="${2}"
-	    fi
+            if [ ${2} = "nightly" ]; then
+                version="nightly-${date}"
+                TAG="fuel-core-${version}"
+            else
+                version="${2}"
+            fi
             ;;
     esac
 
     if [ ${2} = "nightly" ]; then
-	_repo="sway-nightly-binaries"
+        _repo="sway-nightly-binaries"
     fi
 
     # We need to recreate channel-fuel-latest.toml, generating new URLs and sha256 hashes for the download links.
@@ -58,7 +58,7 @@ create_pkg_in_channel() {
     _content=""
     for target in "${_targets[@]}"; do
         _content+="[pkg.${1}.target.${target}]\n"
-	# TAG is either: v0.22.1 or forc-binaries-nightly-2022-08-25
+        # TAG is either: v0.22.1 or forc-binaries-nightly-2022-08-25
         add_url_and_hash $_repo "${TAG}" "${_tarball_prefix}${version}-${target}.tar.gz"
         _content+="$RETVAL"
     done

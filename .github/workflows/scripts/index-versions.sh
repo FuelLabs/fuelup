@@ -22,7 +22,7 @@ create_pkg_in_channel() {
     COMPONENT=$1
     CHANNEL_TOML_NAME=$3
     version=$2
-    date="$(date --date="date +'%Y-%m-%d'")"
+    date="$(date +'%Y-%m-%d')"
     tag="v${2}"
     case "${1}" in
         "forc")
@@ -36,9 +36,11 @@ create_pkg_in_channel() {
         "fuel-core")
             _targets=("aarch64-apple-darwin" "aarch64-unknown-linux-gnu" "x86_64-apple-darwin" "x86_64-unknown-linux-gnu")
             _repo="fuel-core"
-            _tarball_prefix="fuel-core-${version}"
             if [ ${2} = "nightly" ]; then
+                _tarball_prefix="fuel-core"
 		version="$(curl -s https://api.github.com/repos/FuelLabs/fuel-core/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)-nightly (${date})"
+	    else
+                _tarball_prefix="fuel-core-${version}"
             fi
             ;;
     esac

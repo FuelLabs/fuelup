@@ -20,18 +20,17 @@ create_new_pkg() {
 
 create_pkg_in_channel() {
     COMPONENT=$1
-    TAG="v${2}"
     CHANNEL_TOML_NAME=$3
-    version=""
+    version=$2
     date="$(date --date="date +'%Y-%m-%d'")"
+    tag="v${2}"
     case "${1}" in
         "forc")
             _targets=("darwin_amd64" "darwin_arm64" "linux_amd64" "linux_arm64")
             _repo="sway"
             _tarball_prefix="forc-binaries"
             if [ ${2} = "nightly" ]; then
-                version="$(curl -s https://api.github.com/repos/FuelLabs/sway/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-) nightly"
-                TAG="forc-binaries-${version}"
+		version="$(curl -s https://api.github.com/repos/FuelLabs/sway/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)-nightly (${date})"
             fi
             ;;
         "fuel-core")
@@ -39,16 +38,15 @@ create_pkg_in_channel() {
             _repo="fuel-core"
             _tarball_prefix="fuel-core"
             if [ ${2} = "nightly" ]; then
-                version="$(curl -s https://api.github.com/repos/FuelLabs/fuel-core/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-) nightly"
-                TAG="fuel-core-${version}"
-            else
-                version="${2}"
+		version="$(curl -s https://api.github.com/repos/FuelLabs/fuel-core/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)-nightly (${date})"
             fi
             ;;
     esac
 
     if [ ${2} = "nightly" ]; then
         _repo="sway-nightly-binaries"
+	_tarball_prefix+="-nightly-${date}"
+	_tag=$_tarball_prefix
     fi
 
     # We need to recreate channel-fuel-latest.toml, generating new URLs and sha256 hashes for the download links.
@@ -59,7 +57,7 @@ create_pkg_in_channel() {
     for target in "${_targets[@]}"; do
         _content+="[pkg.${1}.target.${target}]\n"
         # TAG is either: v0.22.1 or forc-binaries-nightly-2022-08-25
-        add_url_and_hash $_repo "${TAG}" "${_tarball_prefix}${version}-${target}.tar.gz"
+        add_url_and_hash $_repo "${tag}" "${_tarball_prefix}-${target}.tar.gz"
         _content+="$RETVAL"
     done
 

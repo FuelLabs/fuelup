@@ -16,6 +16,7 @@ jobs:
   publish-channel:
     name: Publish channel (nightly)
     runs-on: ubuntu-latest
+    steps:
       - name: Publish nightly channel
         run: |
             touch channel-fuel-nightly.toml

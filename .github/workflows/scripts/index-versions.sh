@@ -5,7 +5,7 @@ add_url_and_hash() {
     _url="https://github.com/FuelLabs/$1/releases/download/$2/$3"
     _err=$(curl -sSf "${_url}" -L -o "${3}" 2>&1)
     if echo "$_err" | grep -q 404; then
-        printf "Could not download from %s - the release binary might not be ready yet. You can check if a binary is available here: https://github.com/FuelLabs/%s/releases/v%s\n" "${_url}" "${1}" "${2}"
+        printf "Could not download from %s - the release binary might not be ready yet. You can check if a binary is available here: https://github.com/FuelLabs/%s/releases/%s\n" "${_url}" "${1}" "${2}"
         exit 1
     fi
     # shasum generates extra output so we take the first 64 bytes.
@@ -36,7 +36,7 @@ create_pkg_in_channel() {
         "fuel-core")
             _targets=("aarch64-apple-darwin" "aarch64-unknown-linux-gnu" "x86_64-apple-darwin" "x86_64-unknown-linux-gnu")
             _repo="fuel-core"
-            _tarball_prefix="fuel-core"
+            _tarball_prefix="fuel-core-${version}"
             if [ ${2} = "nightly" ]; then
 		version="$(curl -s https://api.github.com/repos/FuelLabs/fuel-core/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)-nightly (${date})"
             fi
@@ -46,7 +46,7 @@ create_pkg_in_channel() {
     if [ ${2} = "nightly" ]; then
         _repo="sway-nightly-binaries"
 	_tarball_prefix+="-nightly-${date}"
-	_tag=$_tarball_prefix
+	tag=${_tarball_prefix}
     fi
 
     # We need to recreate channel-fuel-latest.toml, generating new URLs and sha256 hashes for the download links.

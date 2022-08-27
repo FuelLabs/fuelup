@@ -25,7 +25,7 @@ jobs:
             touch channel-fuel-nightly.toml
             mkdir -p ${{ env.NIGHTLY_CHANNEL_DIR }}
             ./.github/workflows/scripts/index-versions.sh nightly nightly $GITHUB_RUN_ID channel-fuel-nightly.toml
-            cp channel-fuel-nightly.toml ${{ env.NIGHTLY_CHANNEL_ID }}
+            cp channel-fuel-nightly.toml ${{ env.NIGHTLY_CHANNEL_DIR }}
 
       - name: Deploy latest channel
         uses: peaceiris/actions-gh-pages@v3

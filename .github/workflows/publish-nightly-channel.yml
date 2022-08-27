@@ -1,0 +1,32 @@
+name: Publish Channel (nightly)
+
+on:
+  push:
+    branches:
+      - bingcicle/nightly-channel
+  workflow_dispatch:
+  schedule:
+    # Publish 1 hour after nightlies start building
+    - cron: '0 1 * * *'
+
+env:
+  NIGHTLY_CHANNEL_DIR: ./channel-fuel-nightly.toml.d/
+
+jobs:
+  publish-channel:
+    name: Publish channel (nightly)
+    runs-on: ubuntu-latest
+      - name: Publish nightly channel
+        run: |
+            touch channel-fuel-nightly.toml
+            mkdir -p ${{ env.NIGHTLY_CHANNEL_DIR }}
+            ./.github/workflows/scripts/index-versions.sh nightly nightly $GITHUB_RUN_ID channel-fuel-nightly.toml
+            cp channel-fuel-nightly.toml ${{ env.NIGHTLY_CHANNEL_ID }}
+
+      - name: Deploy latest channel
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
+          keep_files: true
+          destination_dir: ./

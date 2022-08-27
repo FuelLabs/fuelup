@@ -3,7 +3,7 @@ name: Publish Channel (nightly)
 on:
   push:
     branches:
-      - bingcicle/nightly-channel
+      - "bingcicle/nightly-channel"
   workflow_dispatch:
   schedule:
     # Publish 1 hour after nightlies start building

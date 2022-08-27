@@ -30,7 +30,7 @@ create_pkg_in_channel() {
             _repo="sway"
             _tarball_prefix="forc-binaries"
             if [ ${2} = "nightly" ]; then
-                version="nightly-${date}"
+                version="$(curl -s https://api.github.com/repos/FuelLabs/sway/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-) nightly"
                 TAG="forc-binaries-${version}"
             fi
             ;;
@@ -39,7 +39,7 @@ create_pkg_in_channel() {
             _repo="fuel-core"
             _tarball_prefix="fuel-core"
             if [ ${2} = "nightly" ]; then
-                version="nightly-${date}"
+                version="$(curl -s https://api.github.com/repos/FuelLabs/fuel-core/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-) nightly"
                 TAG="fuel-core-${version}"
             else
                 version="${2}"

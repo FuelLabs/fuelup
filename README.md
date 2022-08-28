@@ -2,7 +2,7 @@
 
 `fuelup` installs the Fuel toolchain from our official release channels, enabling you to easily keep the toolchain updated.
 
-## Quickstart 
+## Quickstart
 
 Currently, this script supports Linux/macOS systems only. For other systems, please [read the Installation chapter](https://fuellabs.github.io/fuelup/master/installation/other.html).
 

@@ -30,7 +30,7 @@ create_pkg_in_channel() {
             _repo="sway"
             _tarball_prefix="forc-binaries"
             if [ ${2} = "nightly" ]; then
-		version="$(curl -s https://api.github.com/repos/FuelLabs/sway/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)-nightly (${date})"
+                version="$(curl -s https://api.github.com/repos/FuelLabs/sway/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)-nightly (${date})"
             fi
             ;;
         "fuel-core")
@@ -38,8 +38,8 @@ create_pkg_in_channel() {
             _repo="fuel-core"
             if [ ${2} = "nightly" ]; then
                 _tarball_prefix="fuel-core"
-		version="$(curl -s https://api.github.com/repos/FuelLabs/fuel-core/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)-nightly (${date})"
-	    else
+                version="$(curl -s https://api.github.com/repos/FuelLabs/fuel-core/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)-nightly (${date})"
+            else
                 _tarball_prefix="fuel-core-${version}"
             fi
             ;;
@@ -47,8 +47,8 @@ create_pkg_in_channel() {
 
     if [ ${2} = "nightly" ]; then
         _repo="sway-nightly-binaries"
-	_tarball_prefix+="-nightly-${date}"
-	tag=${_tarball_prefix}
+        _tarball_prefix+="-nightly-${date}"
+        tag=${_tarball_prefix}
     fi
 
     # We need to recreate channel-fuel-latest.toml, generating new URLs and sha256 hashes for the download links.

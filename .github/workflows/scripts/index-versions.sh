@@ -19,7 +19,6 @@ create_new_pkg() {
 }
 
 create_pkg_in_channel() {
-    COMPONENT=$1
     CHANNEL_TOML_NAME=$3
     version=$2
     date="$(date +'%Y-%m-%d')"
@@ -29,14 +28,14 @@ create_pkg_in_channel() {
             _targets=("darwin_amd64" "darwin_arm64" "linux_amd64" "linux_arm64")
             _repo="sway"
             _tarball_prefix="forc-binaries"
-            if [ ${2} = "nightly" ]; then
+            if [ "${2}" = "nightly" ]; then
                 version="$(curl -s https://api.github.com/repos/FuelLabs/sway/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)-nightly (${date})"
             fi
             ;;
         "fuel-core")
             _targets=("aarch64-apple-darwin" "aarch64-unknown-linux-gnu" "x86_64-apple-darwin" "x86_64-unknown-linux-gnu")
             _repo="fuel-core"
-            if [ ${2} = "nightly" ]; then
+            if [ "${2}" = "nightly" ]; then
                 _tarball_prefix="fuel-core"
                 version="$(curl -s https://api.github.com/repos/FuelLabs/fuel-core/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)-nightly (${date})"
             else
@@ -45,7 +44,7 @@ create_pkg_in_channel() {
             ;;
     esac
 
-    if [ ${2} = "nightly" ]; then
+    if [ "${2}" = "nightly" ]; then
         _repo="sway-nightly-binaries"
         _tarball_prefix+="-nightly-${date}"
         tag=${_tarball_prefix}
@@ -65,7 +64,7 @@ create_pkg_in_channel() {
 
     # Only write to file if there's no problem downloading and hashing all the above releases.
     _package=$(printf "%s\n%s" "${_header}" "${_content}")
-    echo -ne "$_package" >>$CHANNEL_TOML_NAME
+    echo -ne "$_package" >>"$CHANNEL_TOML_NAME"
 }
 
 main() {
@@ -73,17 +72,17 @@ main() {
     FUEL_CORE_LATEST_VERSION=$2
     GITHUB_RUN_ID=$3
     CHANNEL_TOML_NAME=$4
-    mv $CHANNEL_TOML_NAME channel.tmp.toml
+    mv "$CHANNEL_TOML_NAME" channel.tmp.toml
     # Cleanup tmp and downloaded tars/bin folders
     trap 'rm channel.tmp.toml *.tar.gz' ERR EXIT
 
-    echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >>$CHANNEL_TOML_NAME
+    echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >>"$CHANNEL_TOML_NAME"
 
     create_pkg_in_channel forc "${FORC_LATEST_VERSION}" "${CHANNEL_TOML_NAME}"
     create_pkg_in_channel fuel-core "${FUEL_CORE_LATEST_VERSION}" "${CHANNEL_TOML_NAME}"
 
     # remove newline at the end
-    truncate -s -1 $CHANNEL_TOML_NAME
+    truncate -s -1 "$CHANNEL_TOML_NAME"
     printf "Done.\n"
     exit 0
 }

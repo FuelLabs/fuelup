@@ -3,6 +3,8 @@ use std::fmt;
 use std::fs::{remove_dir_all, remove_file};
 use std::path::PathBuf;
 use std::str::FromStr;
+use time::macros::format_description;
+use time::Date;
 use tracing::info;
 
 use crate::component::SUPPORTED_PLUGINS;
@@ -22,14 +24,17 @@ pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
     channel::STABLE,
 ];
 
+#[derive(Debug, PartialEq)]
 pub enum DistToolchainName {
     Latest,
+    Nightly,
 }
 
 impl fmt::Display for DistToolchainName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             DistToolchainName::Latest => write!(f, "{}", channel::LATEST),
+            DistToolchainName::Nightly => write!(f, "{}", channel::NIGHTLY),
         }
     }
 }
@@ -37,11 +42,62 @@ impl fmt::Display for DistToolchainName {
 impl FromStr for DistToolchainName {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
-        let name = s.split_once('-').map(|n| n.0);
-        match name {
-            Some(channel::LATEST) => Ok(Self::Latest),
+        match s {
+            channel::LATEST => Ok(Self::Latest),
+            channel::NIGHTLY => Ok(Self::Nightly),
             _ => bail!("Unknown name for toolchain: {}", s),
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct OfficialToolchainDescription {
+    pub name: DistToolchainName,
+    pub date: Option<Date>,
+    pub target: Option<TargetTriple>,
+}
+
+fn parse_metadata(metadata: String) -> Result<(Option<Date>, Option<TargetTriple>)> {
+    let format = format_description!("[year]-[month]-[day]");
+    let (first, second) = metadata.split_at(std::cmp::min(10, metadata.len()));
+
+    match Date::parse(first, &format) {
+        Ok(d) => {
+            match TargetTriple::new(second.trim_start_matches('-')) {
+                Ok(t) => return Ok((Some(d), Some(t))),
+                Err(_) => return Ok((Some(d), None)),
+            };
+        }
+        Err(_) => {
+            // try parse target, if date not ok
+            match TargetTriple::new(&metadata) {
+                Ok(t) => return Ok((None, Some(t))),
+                Err(_) => bail!("Failed to parse date or target"),
+            };
+        }
+    };
+}
+
+impl FromStr for OfficialToolchainDescription {
+    type Err = anyhow::Error;
+    fn from_str(s: &str) -> Result<Self> {
+        let (name, metadata) = s.split_once('-').unwrap_or((s, ""));
+
+        if metadata.is_empty() {
+            return Ok(Self {
+                name: DistToolchainName::from_str(name)?,
+                date: None,
+                target: None,
+            });
+        }
+
+        let (date, target) = parse_metadata(metadata.to_string())?;
+
+        Ok(Self {
+            name: DistToolchainName::from_str(name)?,
+            date,
+            target,
+        })
     }
 }
 
@@ -84,6 +140,10 @@ impl Toolchain {
             name: toolchain_name,
             path,
         })
+    }
+
+    pub fn is_official(&self) -> bool {
+        OfficialToolchainDescription::from_str(&self.name).is_ok()
     }
 
     pub fn exists(&self) -> bool {
@@ -155,6 +215,118 @@ impl Toolchain {
     pub fn uninstall_self(&self) -> Result<()> {
         if self.exists() {
             remove_dir_all(self.path.parent().unwrap())?
+        }
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const DATE: &str = "2022-08-29";
+    const DATE_TARGET_APPLE: &str = "2022-08-29-x86_64-apple-darwin";
+
+    const TARGET_X86_APPLE: &str = "x86_64-apple-darwin";
+    const TARGET_ARM_APPLE: &str = "aarch64-apple-darwin";
+    const TARGET_X86_LINUX: &str = "x86_64-unknown-linux-gnu";
+    const TARGET_ARM_LINUX: &str = "aarch64-unknown-linux-gnu";
+
+    const NIGHTLY_DATE: &str = "nightly-2022-08-29";
+
+    #[test]
+    fn test_parse_name() -> Result<()> {
+        for name in [channel::LATEST, channel::NIGHTLY] {
+            let desc = OfficialToolchainDescription::from_str(name)?;
+            assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
+            assert_eq!(desc.date, None);
+            assert_eq!(desc.target, None);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_name_should_fail() -> Result<()> {
+        let inputs = ["latest-2", "nightly-toolchain"];
+        for name in inputs {
+            assert!(OfficialToolchainDescription::from_str(name).is_err());
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_nightly_date() -> Result<()> {
+        let desc = OfficialToolchainDescription::from_str(NIGHTLY_DATE)?;
+        assert_eq!(desc.name, DistToolchainName::from_str("nightly").unwrap());
+        assert_eq!(desc.date.unwrap().to_string(), DATE);
+        assert_eq!(desc.target, None);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_nightly_date_target() -> Result<()> {
+        for target in [
+            TARGET_ARM_APPLE,
+            TARGET_ARM_LINUX,
+            TARGET_X86_APPLE,
+            TARGET_X86_LINUX,
+        ] {
+            let input = channel::NIGHTLY.to_owned() + "-" + DATE + "-" + target;
+            let desc = OfficialToolchainDescription::from_str(&input)?;
+            assert_eq!(
+                desc.name,
+                DistToolchainName::from_str(channel::NIGHTLY).unwrap()
+            );
+            assert_eq!(desc.date.unwrap().to_string(), DATE);
+            assert_eq!(desc.target.unwrap().to_string(), target);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_name_target() -> Result<()> {
+        for target in [
+            TARGET_ARM_APPLE,
+            TARGET_ARM_LINUX,
+            TARGET_X86_APPLE,
+            TARGET_X86_LINUX,
+        ] {
+            for name in [channel::LATEST, channel::NIGHTLY] {
+                let toolchain = name.to_owned() + "-" + target;
+                let desc = OfficialToolchainDescription::from_str(&toolchain)?;
+                assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
+                assert!(desc.date.is_none());
+                assert_eq!(desc.target.unwrap().to_string(), target);
+            }
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_metadata_date() -> Result<()> {
+        let (date, _) = parse_metadata(DATE.to_string())?;
+        assert_eq!(DATE, date.unwrap().to_string());
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_metadata_date_target() -> Result<()> {
+        let (date, target) = parse_metadata(DATE_TARGET_APPLE.to_string())?;
+        assert_eq!(DATE, date.unwrap().to_string());
+        assert_eq!(TARGET_X86_APPLE, target.unwrap().to_string());
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_metadata_should_fail() -> Result<()> {
+        const INPUTS: &[&str] = &["2022", "2022-8-1", "2022-8", "2022-8-x86_64-apple-darwin"];
+        for input in INPUTS {
+            assert!(parse_metadata(input.to_string()).is_err());
         }
         Ok(())
     }

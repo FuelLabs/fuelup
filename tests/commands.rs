@@ -4,9 +4,11 @@ use std::{env, path::Path};
 
 mod testcfg;
 
-use testcfg::FuelupState;
+use testcfg::{FuelupState, ALL_BINS, FUEL_CORE_BIN};
 
-fn expect_files_exist(dir: &Path, expected: &mut [&str]) {
+use crate::testcfg::FORC_BINS;
+
+fn expect_files_exist(dir: &Path, expected: &[&str]) {
     let mut actual: Vec<String> = dir
         .read_dir()
         .expect("Could not read directory")
@@ -15,7 +17,6 @@ fn expect_files_exist(dir: &Path, expected: &mut [&str]) {
         .collect();
 
     actual.sort();
-    expected.sort();
     assert_eq!(actual, expected);
 }
 
@@ -47,18 +48,7 @@ fn fuelup_toolchain_install() -> Result<()> {
             );
             assert!(toolchain_dir.file_type().unwrap().is_dir());
 
-            expect_files_exist(
-                &toolchain_dir.path().join("bin"),
-                &mut [
-                    "forc",
-                    "forc-explore",
-                    "fuel-core",
-                    "forc-lsp",
-                    "forc-fmt",
-                    "forc-run",
-                    "forc-deploy",
-                ],
-            );
+            expect_files_exist(&toolchain_dir.path().join("bin"), ALL_BINS);
 
             let output = cfg.fuelup(&["check"]);
             assert!(output.stdout.contains("forc - Up to date"));
@@ -225,31 +215,10 @@ fn fuelup_component_add() -> Result<()> {
         assert!(cfg.toolchain_bin_dir("my_toolchain").is_dir());
 
         let _ = cfg.fuelup(&["component", "add", "forc"]);
-        expect_files_exist(
-            &cfg.toolchain_bin_dir("my_toolchain"),
-            &mut [
-                "forc",
-                "forc-explore",
-                "forc-lsp",
-                "forc-fmt",
-                "forc-run",
-                "forc-deploy",
-            ],
-        );
+        expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), FORC_BINS);
 
         let _ = cfg.fuelup(&["component", "add", "fuel-core@0.9.5"]);
-        expect_files_exist(
-            &cfg.toolchain_bin_dir("my_toolchain"),
-            &mut [
-                "forc",
-                "forc-explore",
-                "fuel-core",
-                "forc-lsp",
-                "forc-fmt",
-                "forc-run",
-                "forc-deploy",
-            ],
-        );
+        expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), ALL_BINS);
     })?;
 
     Ok(())
@@ -274,12 +243,9 @@ fn fuelup_component_remove() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let latest_toolchain_bin_dir = cfg.toolchain_bin_dir("latest-x86_64-apple-darwin");
 
-        expect_files_exist(
-            &latest_toolchain_bin_dir,
-            &mut ["forc", "forc-explore", "fuel-core", "forc-lsp", "forc-fmt"],
-        );
+        expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
         let _ = cfg.fuelup(&["component", "remove", "forc"]);
-        expect_files_exist(&latest_toolchain_bin_dir, &mut ["fuel-core"]);
+        expect_files_exist(&latest_toolchain_bin_dir, FUEL_CORE_BIN);
 
         let _ = cfg.fuelup(&["component", "remove", "fuel-core"]);
         expect_files_exist(&latest_toolchain_bin_dir, &mut []);

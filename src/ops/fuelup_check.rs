@@ -5,7 +5,7 @@ use crate::{
     config::Config,
     fmt::{bold, colored_bold},
     target_triple::TargetTriple,
-    toolchain::{DistToolchainName, Toolchain},
+    toolchain::{OfficialToolchainDescription, Toolchain},
 };
 use anyhow::Result;
 use semver::Version;
@@ -101,8 +101,8 @@ fn check_fuelup() -> Result<()> {
 }
 
 fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
-    let latest_versions = match Channel::from_dist_channel(&DistToolchainName::from_str(toolchain)?)
-    {
+    let description = OfficialToolchainDescription::from_str(toolchain)?;
+    let latest_versions = match Channel::from_dist_channel(&description) {
         Ok(c) => collect_versions(c),
         Err(e) => {
             error!(

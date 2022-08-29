@@ -5,10 +5,8 @@ use semver::Version;
 use tracing::info;
 
 use crate::{
-    commands::component::AddCommand,
-    download::DownloadCfg,
-    target_triple::TargetTriple,
-    toolchain::{DistToolchainName, Toolchain},
+    commands::component::AddCommand, download::DownloadCfg, target_triple::TargetTriple,
+    toolchain::Toolchain,
 };
 
 pub fn add(command: AddCommand) -> Result<()> {
@@ -27,13 +25,13 @@ pub fn add(command: AddCommand) -> Result<()> {
     let (component, version): (&str, Option<Version>) =
         match maybe_versioned_component.split_once('@') {
             Some(t) => {
-                if let Ok(toolchain) = DistToolchainName::from_str(&toolchain.name) {
+                if toolchain.is_official() {
                     bail!(
 "Installing specific versions of components is reserved for custom toolchains.
 You are currently using '{}'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
-                    toolchain
+                    toolchain.name
                 )
                 };
                 let v = match Version::from_str(t.1) {

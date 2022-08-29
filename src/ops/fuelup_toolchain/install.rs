@@ -3,16 +3,18 @@ use crate::download::DownloadCfg;
 use crate::path::settings_file;
 use crate::settings::SettingsFile;
 use crate::target_triple::TargetTriple;
-use crate::toolchain::{DistToolchainName, Toolchain};
+use crate::toolchain::{OfficialToolchainDescription, Toolchain};
 use crate::{channel::Channel, commands::toolchain::InstallCommand};
 use anyhow::Result;
 use std::fmt::Write;
+use std::str::FromStr;
 use tracing::{error, info};
 
 pub fn install(command: InstallCommand) -> Result<()> {
     let InstallCommand { name } = command;
 
     let toolchain = Toolchain::new(&name)?;
+    let description = OfficialToolchainDescription::from_str(&name)?;
 
     let settings = SettingsFile::new(settings_file());
     settings.with_mut(|s| {
@@ -23,7 +25,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let mut errored_bins = String::new();
     let mut installed_bins = String::new();
 
-    let cfgs: Vec<DownloadCfg> = match Channel::from_dist_channel(&DistToolchainName::Latest) {
+    let cfgs: Vec<DownloadCfg> = match Channel::from_dist_channel(&description) {
         Ok(c) => c.build_download_configs(),
         Err(e) => {
             error!(

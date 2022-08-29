@@ -248,7 +248,7 @@ fn fuelup_component_remove() -> Result<()> {
         expect_files_exist(&latest_toolchain_bin_dir, FUEL_CORE_BIN);
 
         let _ = cfg.fuelup(&["component", "remove", "fuel-core"]);
-        expect_files_exist(&latest_toolchain_bin_dir, &mut []);
+        expect_files_exist(&latest_toolchain_bin_dir, &[]);
     })?;
 
     Ok(())

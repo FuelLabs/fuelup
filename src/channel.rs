@@ -1,9 +1,9 @@
 use crate::{
-    constants::{CHANNEL_LATEST_FILE_NAME, FUELUP_GH_PAGES},
+    constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME, FUELUP_GH_PAGES},
     download::{download_file, DownloadCfg},
     file::read_file,
     path::fuelup_dir,
-    toolchain::DistToolchainName,
+    toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
 use anyhow::{bail, Result};
 use semver::Version;
@@ -15,8 +15,8 @@ use toml_edit::de;
 
 pub const LATEST: &str = "latest";
 pub const STABLE: &str = "stable";
-pub const NIGHTLY: &str = "beta";
-pub const BETA: &str = "nightly";
+pub const BETA: &str = "beta";
+pub const NIGHTLY: &str = "nightly";
 
 #[derive(Debug, Deserialize)]
 pub struct HashedBinary {
@@ -36,9 +36,10 @@ pub struct Package {
 }
 
 impl Channel {
-    pub fn from_dist_channel(name: &DistToolchainName) -> Result<Self> {
-        let channel_url = match name {
+    pub fn from_dist_channel(desc: &OfficialToolchainDescription) -> Result<Self> {
+        let channel_url = match desc.name {
             DistToolchainName::Latest => FUELUP_GH_PAGES.to_owned() + CHANNEL_LATEST_FILE_NAME,
+            DistToolchainName::Nightly => FUELUP_GH_PAGES.to_owned() + CHANNEL_NIGHTLY_FILE_NAME,
         };
         let fuelup_dir = fuelup_dir();
         let tmp_dir = tempdir_in(&fuelup_dir)?;

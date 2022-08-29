@@ -260,7 +260,7 @@ fn fuelup_component_add_disallowed() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["component", "add", "forc@0.19.1"]);
         let expected_stdout = r#"Installing specific versions of components is reserved for custom toolchains.
-You are currently using 'latest'.
+You are currently using 'latest-x86_64-apple-darwin'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
 "#;

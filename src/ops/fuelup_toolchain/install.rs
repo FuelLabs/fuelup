@@ -31,6 +31,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let fuelup_dir = fuelup_dir();
     let tmp_dir = tempdir_in(&fuelup_dir)?;
     let tmp_dir_path = tmp_dir.into_path();
+
     let cfgs: Vec<DownloadCfg> =
         match Channel::from_dist_channel(&description, tmp_dir_path.clone()) {
             Ok(c) => c.build_download_configs(),

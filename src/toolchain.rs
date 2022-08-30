@@ -78,6 +78,10 @@ fn parse_metadata(metadata: String) -> Result<(Option<Date>, Option<TargetTriple
 impl FromStr for OfficialToolchainDescription {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
+        if s.ends_with('-') && s.matches('-').count() == 1 {
+            bail!("Invalid official toolchain name '{}'", s);
+        }
+
         let (name, metadata) = s.split_once('-').unwrap_or((s, ""));
 
         if metadata.is_empty() {
@@ -86,15 +90,23 @@ impl FromStr for OfficialToolchainDescription {
                 date: None,
                 target: None,
             });
+        } else {
+            if let Ok((_, _)) = parse_metadata(metadata.to_string()) {
+                bail!(
+                    "You may not specify a date or target for official toolchain name '{}' yet.",
+                    name
+                );
+
+                // TODO: uncomment once specifying date and target is supported
+                // Ok(Self {
+                //     name: DistToolchainName::from_str(name)?,
+                //     date,
+                //     target,
+                // })
+            } else {
+                bail!("Invalid official toolchain name '{}'", s);
+            }
         }
-
-        let (date, target) = parse_metadata(metadata.to_string())?;
-
-        Ok(Self {
-            name: DistToolchainName::from_str(name)?,
-            date,
-            target,
-        })
     }
 }
 
@@ -149,7 +161,7 @@ impl Toolchain {
     }
 
     pub fn has_component(&self, component: &str) -> bool {
-        self.path.join(component).exists()
+        self.bin_path.join(component).exists()
     }
 
     pub fn add_component(&self, download_cfg: DownloadCfg) -> Result<DownloadCfg> {
@@ -191,13 +203,13 @@ impl Toolchain {
     pub fn remove_component(&self, component: &str) -> Result<()> {
         if self.has_component(component) {
             info!("Removing '{}' from toolchain '{}'", component, self.name);
-            let component_path = self.path.join(component);
+            let component_path = self.bin_path.join(component);
             remove_file(component_path)
                 .with_context(|| format!("failed to remove component '{}'", component))?;
             // If component to remove is 'forc', silently remove forc plugins
             if component == component::FORC {
                 for component in SUPPORTED_PLUGINS {
-                    let component_path = self.path.join(component);
+                    let component_path = self.bin_path.join(component);
                     remove_file(component_path)
                         .with_context(|| format!("failed to remove component '{}'", component))?;
                 }

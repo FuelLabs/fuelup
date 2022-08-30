@@ -222,7 +222,7 @@ impl Toolchain {
 
     pub fn uninstall_self(&self) -> Result<()> {
         if self.exists() {
-            remove_dir_all(self.path.parent().unwrap())?
+            remove_dir_all(self.path.clone())?
         }
         Ok(())
     }

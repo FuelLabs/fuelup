@@ -180,14 +180,14 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
         }
     };
 
-    let toolchain = Toolchain::from(toolchain)?;
+    let toolchain = Toolchain::new(toolchain)?;
 
     let channel_file_name = match description.name {
         DistToolchainName::Latest => CHANNEL_LATEST_FILE_NAME,
         DistToolchainName::Nightly => CHANNEL_NIGHTLY_FILE_NAME,
     };
     let toml_path = toolchain.path.join(channel_file_name);
-    let toml = read_file(CHANNEL_LATEST_FILE_NAME, &toml_path)?;
+    let toml = read_file("channel", &toml_path)?;
     let channel = Channel::from_toml(&toml)?;
 
     bold(|s| writeln!(s, "{}", &toolchain.name));
@@ -236,7 +236,9 @@ pub fn check(command: CheckCommand) -> Result<()> {
     let cfg = Config::from_env()?;
 
     for toolchain in cfg.list_official_toolchains()? {
-        check_toolchain(&toolchain, verbose)?;
+        // TODO: remove once date/target are supported
+        let name = toolchain.split_once('-').unwrap_or_default().0;
+        check_toolchain(&name, verbose)?;
     }
 
     check_fuelup()?;

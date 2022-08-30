@@ -17,6 +17,7 @@ The following is an overview of the different components:
 - [`forc-explore`] — A Forc plugin for running the Fuel Block Explorer.
 - [`forc-fmt`] — A Forc plugin for running the Sway code formatter.
 - [`forc-lsp`] - A Forc plugin for the Sway LSP (Language Server Protocol) implementation.
+- [`forc-client`] - A Forc plugin for interacting with a Fuel node. Contains the `forc-deploy` and `forc-run` binaries.
 
 [toolchain]: toolchains.md
 [`forc`]: https://fuellabs.github.io/sway/master/forc/index.html
@@ -24,3 +25,4 @@ The following is an overview of the different components:
 [`forc-explore`]: https://fuellabs.github.io/sway/master/forc_explore.html
 [`forc-fmt`]: https://fuellabs.github.io/sway/master/forc_fmt.html
 [`forc-lsp`]: https://fuellabs.github.io/sway/master/forc_lsp.html
+[`forc-client`]: https://fuellabs.github.io/sway/master/forc_client.html

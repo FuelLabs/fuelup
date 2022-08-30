@@ -43,7 +43,6 @@ fn compare_and_print_versions(
             Version::parse(&target_version_string)?,
         ),
         DistToolchainName::Nightly => (
-            // 0.11.0-nightly
             Version::parse(current_version_string.split_once('-').unwrap_or_default().0)?,
             Version::parse(target_version_string.split_once('-').unwrap_or_default().0)?,
         ),

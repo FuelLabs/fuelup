@@ -153,7 +153,7 @@ impl Toolchain {
     }
 
     pub fn is_official(&self) -> bool {
-        OfficialToolchainDescription::from_str(&self.name).is_ok()
+        RESERVED_TOOLCHAIN_NAMES.contains(&self.name.split_once('-').unwrap_or_default().0)
     }
 
     pub fn exists(&self) -> bool {
@@ -268,10 +268,12 @@ mod tests {
 
     #[test]
     fn test_parse_nightly_date() -> Result<()> {
-        let desc = OfficialToolchainDescription::from_str(NIGHTLY_DATE)?;
-        assert_eq!(desc.name, DistToolchainName::from_str("nightly").unwrap());
-        assert_eq!(desc.date.unwrap().to_string(), DATE);
-        assert_eq!(desc.target, None);
+        assert!(OfficialToolchainDescription::from_str(NIGHTLY_DATE).is_err());
+
+        // TODO: uncomment once specifying date and target is supporting
+        //assert_eq!(desc.name, DistToolchainName::from_str("nightly").unwrap());
+        //assert_eq!(desc.date.unwrap().to_string(), DATE);
+        //assert_eq!(desc.target, None);
 
         Ok(())
     }
@@ -285,13 +287,14 @@ mod tests {
             TARGET_X86_LINUX,
         ] {
             let input = channel::NIGHTLY.to_owned() + "-" + DATE + "-" + target;
-            let desc = OfficialToolchainDescription::from_str(&input)?;
-            assert_eq!(
-                desc.name,
-                DistToolchainName::from_str(channel::NIGHTLY).unwrap()
-            );
-            assert_eq!(desc.date.unwrap().to_string(), DATE);
-            assert_eq!(desc.target.unwrap().to_string(), target);
+            assert!(OfficialToolchainDescription::from_str(&input).is_err());
+            // TODO: uncomment once specifying date and target is supporting
+            //   assert_eq!(
+            //       desc.name,
+            //       DistToolchainName::from_str(channel::NIGHTLY).unwrap()
+            //   );
+            //   assert_eq!(desc.date.unwrap().to_string(), DATE);
+            //   assert_eq!(desc.target.unwrap().to_string(), target);
         }
 
         Ok(())
@@ -307,10 +310,12 @@ mod tests {
         ] {
             for name in [channel::LATEST, channel::NIGHTLY] {
                 let toolchain = name.to_owned() + "-" + target;
-                let desc = OfficialToolchainDescription::from_str(&toolchain)?;
-                assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
-                assert!(desc.date.is_none());
-                assert_eq!(desc.target.unwrap().to_string(), target);
+                assert!(OfficialToolchainDescription::from_str(&toolchain).is_err());
+
+                // TODO: uncomment once specifying date and target is supporting
+                // assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
+                // assert!(desc.date.is_none());
+                // assert_eq!(desc.target.unwrap().to_string(), target);
             }
         }
 

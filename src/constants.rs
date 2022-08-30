@@ -1,3 +1,5 @@
+use time::{format_description::FormatItem, macros::format_description};
+
 pub const SWAY_REPO: &str = "sway";
 pub const FUEL_CORE_REPO: &str = "fuel-core";
 pub const FUELUP_REPO: &str = "fuelup";
@@ -15,3 +17,5 @@ pub const FUELUP_GH_PAGES: &str = "https://raw.githubusercontent.com/FuelLabs/fu
 
 pub const CHANNEL_LATEST_FILE_NAME: &str = "channel-fuel-latest.toml";
 pub const CHANNEL_NIGHTLY_FILE_NAME: &str = "channel-fuel-nightly.toml";
+
+pub const DATE_FORMAT: &[FormatItem] = format_description!("[year]-[month]-[day]");

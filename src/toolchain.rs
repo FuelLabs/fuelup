@@ -3,15 +3,15 @@ use std::fmt;
 use std::fs::{remove_dir_all, remove_file};
 use std::path::PathBuf;
 use std::str::FromStr;
-use time::macros::format_description;
 use time::Date;
 use tracing::info;
 
 use crate::component::SUPPORTED_PLUGINS;
+use crate::constants::DATE_FORMAT;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
-    ensure_dir_exists, fuelup_bin, fuelup_bin_dir, settings_file, toolchain_bin_dir,
+    ensure_dir_exists, fuelup_bin, fuelup_bin_dir, settings_file, toolchain_bin_dir, toolchain_dir,
 };
 use crate::settings::SettingsFile;
 use crate::target_triple::TargetTriple;
@@ -58,10 +58,9 @@ pub struct OfficialToolchainDescription {
 }
 
 fn parse_metadata(metadata: String) -> Result<(Option<Date>, Option<TargetTriple>)> {
-    let format = format_description!("[year]-[month]-[day]");
     let (first, second) = metadata.split_at(std::cmp::min(10, metadata.len()));
 
-    match Date::parse(first, &format) {
+    match Date::parse(first, DATE_FORMAT) {
         Ok(d) => {
             match TargetTriple::new(second.trim_start_matches('-')) {
                 Ok(t) => return Ok((Some(d), Some(t))),
@@ -105,24 +104,25 @@ impl FromStr for OfficialToolchainDescription {
 pub struct Toolchain {
     pub name: String,
     pub path: PathBuf,
+    pub bin_path: PathBuf,
 }
 
 impl Toolchain {
     pub fn new(name: &str) -> Result<Self> {
         let target = TargetTriple::from_host()?;
         let toolchain = format!("{}-{}", name, target);
-        let path = toolchain_bin_dir(&toolchain);
         Ok(Self {
-            name: toolchain,
-            path,
+            name: toolchain.clone(),
+            path: toolchain_dir(&toolchain),
+            bin_path: toolchain_bin_dir(&toolchain),
         })
     }
 
     pub fn from(toolchain: &str) -> Result<Self> {
-        let path = toolchain_bin_dir(toolchain);
         Ok(Self {
             name: toolchain.to_string(),
-            path,
+            path: toolchain_dir(&toolchain),
+            bin_path: toolchain_bin_dir(&toolchain),
         })
     }
 
@@ -134,11 +134,11 @@ impl Toolchain {
                 bail!("No default toolchain detected. Please install or create a toolchain first.")
             }
         };
-        let path = toolchain_bin_dir(&toolchain_name);
 
         Ok(Self {
-            name: toolchain_name,
-            path,
+            name: toolchain_name.clone(),
+            path: toolchain_dir(&toolchain_name),
+            bin_path: toolchain_bin_dir(&toolchain_name),
         })
     }
 
@@ -156,7 +156,7 @@ impl Toolchain {
 
     pub fn add_component(&self, download_cfg: DownloadCfg) -> Result<DownloadCfg> {
         // Pre-install checks: ensuring toolchain dir, fuelup bin dir, and fuelup exist
-        ensure_dir_exists(&self.path)?;
+        ensure_dir_exists(&self.bin_path)?;
 
         let fuelup_bin_dir = fuelup_bin_dir();
         ensure_dir_exists(&fuelup_bin_dir)?;
@@ -174,7 +174,7 @@ impl Toolchain {
             &download_cfg.name, &download_cfg.version, self.name
         );
 
-        if let Err(e) = download_file_and_unpack(&download_cfg, &self.path) {
+        if let Err(e) = download_file_and_unpack(&download_cfg, &self.bin_path) {
             bail!(
                 "Could not add component {}({}): {}",
                 &download_cfg.name,
@@ -183,7 +183,7 @@ impl Toolchain {
             )
         };
 
-        if let Ok(downloaded) = unpack_bins(&self.path, &fuelup_bin_dir) {
+        if let Ok(downloaded) = unpack_bins(&self.bin_path, &fuelup_bin_dir) {
             link_to_fuelup(downloaded)?;
         };
 

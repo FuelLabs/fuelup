@@ -238,7 +238,7 @@ pub fn check(command: CheckCommand) -> Result<()> {
     for toolchain in cfg.list_official_toolchains()? {
         // TODO: remove once date/target are supported
         let name = toolchain.split_once('-').unwrap_or_default().0;
-        check_toolchain(&name, verbose)?;
+        check_toolchain(name, verbose)?;
     }
 
     check_fuelup()?;

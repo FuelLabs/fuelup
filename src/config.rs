@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use anyhow::Result;
 use std::io;
 
-use crate::path::toolchain_dir;
+use crate::path::toolchains_dir;
 use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 
 pub struct Config {
@@ -14,7 +14,7 @@ pub struct Config {
 impl Config {
     pub(crate) fn from_env() -> Result<Self> {
         Ok(Self {
-            toolchains_dir: toolchain_dir(),
+            toolchains_dir: toolchains_dir(),
         })
     }
 

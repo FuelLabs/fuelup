@@ -37,7 +37,7 @@ pub fn show() -> Result<()> {
 
     println!("{} (default)", current_toolchain.name);
     for component in [component::FORC, component::FUEL_CORE] {
-        let component_executable = current_toolchain.path.join(component);
+        let component_executable = current_toolchain.bin_path.join(component);
 
         match std::process::Command::new(&component_executable)
             .arg("--version")
@@ -70,7 +70,7 @@ pub fn show() -> Result<()> {
 
         if component == component::FORC {
             for plugin in SUPPORTED_PLUGINS {
-                let plugin_executable = current_toolchain.path.join(&plugin);
+                let plugin_executable = current_toolchain.bin_path.join(&plugin);
                 if plugin == &component::FORC_DEPLOY {
                     bold(|s| writeln!(s, "    - forc-client"));
                 }

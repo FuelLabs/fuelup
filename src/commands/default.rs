@@ -28,7 +28,7 @@ pub fn exec(command: DefaultCommand) -> Result<()> {
 
     let mut new_default = Toolchain::from(&toolchain)?;
 
-    if let Ok(_) = OfficialToolchainDescription::from_str(&toolchain) {
+    if OfficialToolchainDescription::from_str(&toolchain).is_ok() {
         new_default = Toolchain::new(&toolchain)?;
     } else if !new_default.exists() {
         bail!("Toolchain with name '{}' does not exist", &new_default.name);

@@ -85,27 +85,25 @@ impl FromStr for OfficialToolchainDescription {
         let (name, metadata) = s.split_once('-').unwrap_or((s, ""));
 
         if metadata.is_empty() {
-            return Ok(Self {
+            Ok(Self {
                 name: DistToolchainName::from_str(name)?,
                 date: None,
                 target: None,
-            });
-        } else {
-            if let Ok((_, _)) = parse_metadata(metadata.to_string()) {
-                bail!(
-                    "You may not specify a date or target for official toolchain name '{}' yet.",
-                    name
-                );
+            })
+        } else if let Ok((_, _)) = parse_metadata(metadata.to_string()) {
+            bail!(
+                "You may not specify a date or target for official toolchain name '{}' yet.",
+                name
+            );
 
-                // TODO: uncomment once specifying date and target is supported
-                // Ok(Self {
-                //     name: DistToolchainName::from_str(name)?,
-                //     date,
-                //     target,
-                // })
-            } else {
-                bail!("Invalid official toolchain name '{}'", s);
-            }
+            // TODO: uncomment once specifying date and target is supported
+            // Ok(Self {
+            //     name: DistToolchainName::from_str(name)?,
+            //     date,
+            //     target,
+            // })
+        } else {
+            bail!("Invalid official toolchain name '{}'", s);
         }
     }
 }

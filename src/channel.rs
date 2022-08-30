@@ -2,15 +2,12 @@ use crate::{
     constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME, FUELUP_GH_PAGES},
     download::{download_file, DownloadCfg},
     file::read_file,
-    path::fuelup_dir,
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
 use anyhow::{bail, Result};
-use semver::Version;
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
-use std::collections::HashMap;
-use tempfile::tempdir_in;
+use std::{collections::HashMap, path::PathBuf};
 use toml_edit::de;
 
 pub const LATEST: &str = "latest";
@@ -32,32 +29,30 @@ pub struct Channel {
 #[derive(Debug, Deserialize)]
 pub struct Package {
     pub target: HashMap<String, HashedBinary>,
-    pub version: Version,
+    pub version: String,
 }
 
 impl Channel {
-    pub fn from_dist_channel(desc: &OfficialToolchainDescription) -> Result<Self> {
-        let channel_url = match desc.name {
-            DistToolchainName::Latest => FUELUP_GH_PAGES.to_owned() + CHANNEL_LATEST_FILE_NAME,
-            DistToolchainName::Nightly => FUELUP_GH_PAGES.to_owned() + CHANNEL_NIGHTLY_FILE_NAME,
+    pub fn from_dist_channel(
+        desc: &OfficialToolchainDescription,
+        dst_path: PathBuf,
+    ) -> Result<Self> {
+        let channel_file_name = match desc.name {
+            DistToolchainName::Latest => CHANNEL_LATEST_FILE_NAME,
+            DistToolchainName::Nightly => CHANNEL_NIGHTLY_FILE_NAME,
         };
-        let fuelup_dir = fuelup_dir();
-        let tmp_dir = tempdir_in(&fuelup_dir)?;
-        let tmp_dir_path = tmp_dir.path();
+        let channel_url = FUELUP_GH_PAGES.to_owned() + channel_file_name;
         let mut hasher = Sha256::new();
-        let toml = match download_file(
-            &channel_url,
-            &tmp_dir_path.join(CHANNEL_LATEST_FILE_NAME),
-            &mut hasher,
-        ) {
+        let toml = match download_file(&channel_url, &dst_path.join(channel_file_name), &mut hasher)
+        {
             Ok(_) => {
-                let toml_path = tmp_dir_path.join(CHANNEL_LATEST_FILE_NAME);
+                let toml_path = dst_path.join(channel_file_name);
                 read_file(CHANNEL_LATEST_FILE_NAME, &toml_path)?
             }
             Err(_) => bail!(
                 "Could not download {} to {}",
                 &channel_url,
-                tmp_dir_path.display()
+                dst_path.display()
             ),
         };
 
@@ -98,9 +93,9 @@ mod tests {
 
         assert_eq!(channel.pkg.keys().len(), 2);
         assert!(channel.pkg.contains_key("forc"));
-        assert_eq!(channel.pkg["forc"].version, Version::new(0, 17, 0));
+        assert_eq!(channel.pkg["forc"].version, "0.17.0");
         assert!(channel.pkg.contains_key("fuel-core"));
-        assert_eq!(channel.pkg["fuel-core"].version, Version::new(0, 9, 4));
+        assert_eq!(channel.pkg["fuel-core"].version, "0.9.4");
 
         let targets = &channel.pkg["forc"].target;
         assert_eq!(targets.len(), 4);
@@ -139,8 +134,8 @@ mod tests {
 
         assert_eq!(cfgs.len(), 2);
         assert_eq!(cfgs[0].name, "forc");
-        assert_eq!(cfgs[0].version, Version::new(0, 17, 0));
+        assert_eq!(cfgs[0].version, "0.17.0");
         assert_eq!(cfgs[1].name, "fuel-core");
-        assert_eq!(cfgs[1].version, Version::new(0, 9, 4));
+        assert_eq!(cfgs[1].version, "0.9.4");
     }
 }

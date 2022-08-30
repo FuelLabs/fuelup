@@ -24,7 +24,7 @@ pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
     channel::STABLE,
 ];
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum DistToolchainName {
     Latest,
     Nightly,
@@ -61,20 +61,18 @@ fn parse_metadata(metadata: String) -> Result<(Option<Date>, Option<TargetTriple
     let (first, second) = metadata.split_at(std::cmp::min(10, metadata.len()));
 
     match Date::parse(first, DATE_FORMAT) {
-        Ok(d) => {
-            match TargetTriple::new(second.trim_start_matches('-')) {
-                Ok(t) => return Ok((Some(d), Some(t))),
-                Err(_) => return Ok((Some(d), None)),
-            };
-        }
+        Ok(d) => match TargetTriple::new(second.trim_start_matches('-')) {
+            Ok(t) => Ok((Some(d), Some(t))),
+            Err(_) => Ok((Some(d), None)),
+        },
         Err(_) => {
             // try parse target, if date not ok
             match TargetTriple::new(&metadata) {
-                Ok(t) => return Ok((None, Some(t))),
+                Ok(t) => Ok((None, Some(t))),
                 Err(_) => bail!("Failed to parse date or target"),
-            };
+            }
         }
-    };
+    }
 }
 
 impl FromStr for OfficialToolchainDescription {
@@ -121,8 +119,8 @@ impl Toolchain {
     pub fn from(toolchain: &str) -> Result<Self> {
         Ok(Self {
             name: toolchain.to_string(),
-            path: toolchain_dir(&toolchain),
-            bin_path: toolchain_bin_dir(&toolchain),
+            path: toolchain_dir(toolchain),
+            bin_path: toolchain_bin_dir(toolchain),
         })
     }
 

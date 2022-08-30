@@ -13,6 +13,7 @@ use tar::Archive;
 use tracing::warn;
 use tracing::{error, info};
 
+use crate::channel;
 use crate::channel::Package;
 use crate::component;
 use crate::constants::{
@@ -34,7 +35,7 @@ struct LatestReleaseApiResponse {
 pub struct DownloadCfg {
     pub name: String,
     pub target: TargetTriple,
-    pub version: Version,
+    pub version: String,
     tarball_name: String,
     tarball_url: String,
     hash: Option<String>,
@@ -55,13 +56,13 @@ impl DownloadCfg {
             component::FUELUP => FUELUP_RELEASE_DOWNLOAD_URL.to_string(),
             _ => bail!("Unrecognized component: {}", name),
         };
-        let tarball_name = tarball_name(name, &version, &target)?;
+        let tarball_name = tarball_name(name, version.to_string(), &target)?;
         let tarball_url = format!("{}/v{}/{}", &release_url, &version, &tarball_name);
 
         Ok(Self {
             name: name.to_string(),
             target,
-            version,
+            version: version.to_string(),
             tarball_name,
             tarball_url,
             hash: None,
@@ -70,7 +71,7 @@ impl DownloadCfg {
 
     pub fn from_package(name: &str, package: Package) -> Result<Self> {
         let target = TargetTriple::from_component(name)?;
-        let tarball_name = tarball_name(name, &package.version, &target)?;
+        let tarball_name = tarball_name(name, package.version.clone(), &target)?;
         let tarball_url = package.target[&target.to_string()].url.clone();
         let hash = Some(package.target[&target.to_string()].hash.clone());
         Ok(Self {
@@ -84,7 +85,14 @@ impl DownloadCfg {
     }
 }
 
-pub fn tarball_name(name: &str, version: &Version, target: &TargetTriple) -> Result<String> {
+pub fn tarball_name(name: &str, version_string: String, target: &TargetTriple) -> Result<String> {
+    let version = if let Ok(parsed) = Version::parse(&version_string) {
+        parsed.to_string()
+    } else {
+        let split = version_string.split_once('(').unwrap_or_default();
+        channel::NIGHTLY.to_owned() + "-" + split.1.trim_end_matches(')')
+    };
+
     match name {
         component::FORC => Ok(format!("forc-binaries-{}.tar.gz", target)),
         component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version, target)),

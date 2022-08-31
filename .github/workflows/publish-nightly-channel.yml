@@ -29,7 +29,7 @@ jobs:
             cp channel-fuel-nightly.toml ${{ env.NIGHTLY_CHANNEL_DIR }}
 
             archive_dir=$(date +'%Y/%m/%d')
-            echo "::set-output name=archive_dir::archive_dir"
+            echo "::set-output name=archive_dir::channels/nightly/$archive_dir"
 
       - name: Deploy nightly channel (latest version)
         uses: peaceiris/actions-gh-pages@v3

@@ -65,13 +65,10 @@ fn parse_metadata(metadata: String) -> Result<(Option<Date>, Option<TargetTriple
             Ok(t) => Ok((Some(d), Some(t))),
             Err(_) => Ok((Some(d), None)),
         },
-        Err(_) => {
-            // try parse target, if date not ok
-            match TargetTriple::new(&metadata) {
-                Ok(t) => Ok((None, Some(t))),
-                Err(_) => bail!("Failed to parse date or target"),
-            }
-        }
+        Err(_) => match TargetTriple::new(&metadata) {
+            Ok(t) => Ok((None, Some(t))),
+            Err(_) => bail!("Failed to parse date or target"),
+        },
     }
 }
 

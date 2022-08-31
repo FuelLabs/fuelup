@@ -157,8 +157,8 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
         Ok(c) => collect_versions(c),
         Err(e) => {
             error!(
-                "Failed to get latest channel {} - fetching versions using GitHub API",
-                e
+                "Failed to get '{}' channel: {} - fetching versions using GitHub API",
+                description.name, e
             );
             [component::FORC, component::FUEL_CORE, component::FUELUP]
                 .iter()

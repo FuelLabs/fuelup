@@ -18,16 +18,28 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Publish nightly channel
+        id: setup
         run: |
             touch channel-fuel-nightly.toml
             mkdir -p ${{ env.NIGHTLY_CHANNEL_DIR }}
             ./.github/workflows/scripts/index-versions.sh nightly nightly $GITHUB_RUN_ID channel-fuel-nightly.toml
             cp channel-fuel-nightly.toml ${{ env.NIGHTLY_CHANNEL_DIR }}
 
-      - name: Deploy latest channel
+            archive_dir=$(date +'%Y/%m/%d')
+            echo "::set-output name=archive_dir::archive_dir"
+
+      - name: Deploy nightly channel (latest version)
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
           keep_files: true
           destination_dir: ./
+
+      - name: Deploy nightly channel (archive)
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
+          keep_files: true
+          destination_dir: ${{ steps.setup.outputs.archive_dir }}

@@ -83,6 +83,28 @@ fn fuelup_toolchain_install_nightly() -> Result<()> {
 }
 
 #[test]
+fn fuelup_toolchain_install_nightly_date() -> Result<()> {
+    testcfg::setup(FuelupState::Empty, &|cfg| {
+        cfg.fuelup(&["toolchain", "install", "nightly-2022-08-31"]);
+
+        for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
+            let toolchain_dir = entry.unwrap();
+            let expected_toolchain_name =
+                "nightly-2022-08-31-".to_owned() + &TargetTriple::from_host().unwrap().to_string();
+            assert_eq!(
+                expected_toolchain_name,
+                toolchain_dir.file_name().to_str().unwrap()
+            );
+            assert!(toolchain_dir.file_type().unwrap().is_dir());
+
+            expect_files_exist(&toolchain_dir.path().join("bin"), ALL_BINS);
+        }
+    })?;
+
+    Ok(())
+}
+
+#[test]
 fn fuelup_check() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let output = cfg.fuelup(&["check"]);

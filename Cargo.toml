@@ -29,7 +29,7 @@ sha2 = "0.10"
 tar = "0.4"
 tempfile = "3"
 termcolor = "1"
-time = { version = "0.3", features = ["macros", "parsing"] }
+time = { version = "0.3", features = ["macros", "parsing", "formatting"] }
 toml_edit = { version = "0.13", features = ["serde", "easy"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["ansi", "env-filter", "json"] }

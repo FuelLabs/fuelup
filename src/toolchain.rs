@@ -231,8 +231,6 @@ mod tests {
     const TARGET_X86_LINUX: &str = "x86_64-unknown-linux-gnu";
     const TARGET_ARM_LINUX: &str = "aarch64-unknown-linux-gnu";
 
-    const NIGHTLY_DATE: &str = "nightly-2022-08-29";
-
     #[test]
     fn test_parse_name() -> Result<()> {
         for name in [channel::LATEST, channel::NIGHTLY] {
@@ -257,12 +255,12 @@ mod tests {
 
     #[test]
     fn test_parse_nightly_date() -> Result<()> {
-        assert!(OfficialToolchainDescription::from_str(NIGHTLY_DATE).is_err());
+        let toolchain = channel::NIGHTLY.to_owned() + "-" + DATE;
+        let desc = OfficialToolchainDescription::from_str(&toolchain).unwrap();
 
-        // TODO: uncomment once specifying date and target is supporting
-        //assert_eq!(desc.name, DistToolchainName::from_str("nightly").unwrap());
-        //assert_eq!(desc.date.unwrap().to_string(), DATE);
-        //assert_eq!(desc.target, None);
+        assert_eq!(desc.name, DistToolchainName::from_str("nightly").unwrap());
+        assert_eq!(desc.date.unwrap().to_string(), DATE);
+        assert_eq!(desc.target, None);
 
         Ok(())
     }
@@ -275,15 +273,14 @@ mod tests {
             TARGET_X86_APPLE,
             TARGET_X86_LINUX,
         ] {
-            let input = channel::NIGHTLY.to_owned() + "-" + DATE + "-" + target;
-            assert!(OfficialToolchainDescription::from_str(&input).is_err());
-            // TODO: uncomment once specifying date and target is supporting
-            //   assert_eq!(
-            //       desc.name,
-            //       DistToolchainName::from_str(channel::NIGHTLY).unwrap()
-            //   );
-            //   assert_eq!(desc.date.unwrap().to_string(), DATE);
-            //   assert_eq!(desc.target.unwrap().to_string(), target);
+            let toolchain = channel::NIGHTLY.to_owned() + "-" + DATE + "-" + target;
+            let desc = OfficialToolchainDescription::from_str(&toolchain).unwrap();
+            assert_eq!(
+                desc.name,
+                DistToolchainName::from_str(channel::NIGHTLY).unwrap()
+            );
+            assert_eq!(desc.date.unwrap().to_string(), DATE);
+            assert_eq!(desc.target.unwrap().to_string(), target);
         }
 
         Ok(())
@@ -299,12 +296,11 @@ mod tests {
         ] {
             for name in [channel::LATEST, channel::NIGHTLY] {
                 let toolchain = name.to_owned() + "-" + target;
-                assert!(OfficialToolchainDescription::from_str(&toolchain).is_err());
+                let desc = OfficialToolchainDescription::from_str(&toolchain).unwrap();
 
-                // TODO: uncomment once specifying date and target is supporting
-                // assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
-                // assert!(desc.date.is_none());
-                // assert_eq!(desc.target.unwrap().to_string(), target);
+                assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
+                assert!(desc.date.is_none());
+                assert_eq!(desc.target.unwrap().to_string(), target);
             }
         }
 

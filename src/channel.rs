@@ -5,7 +5,6 @@ use crate::{
     },
     download::{download_file, DownloadCfg},
     file::read_file,
-    target_triple::TargetTriple,
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
 use anyhow::{bail, Result};

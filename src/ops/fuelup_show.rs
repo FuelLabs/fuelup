@@ -1,6 +1,6 @@
 use anyhow::Result;
 use semver::Version;
-use std::io::Write;
+use std::{io::Write, thread::current};
 
 use crate::{
     component::{self, SUPPORTED_PLUGINS},
@@ -21,10 +21,10 @@ pub fn show() -> Result<()> {
 
     print_header("installed toolchains");
     let cfg = Config::from_env()?;
-    let current_toolchain = Toolchain::from_settings()?;
+    let active_toolchain = Toolchain::from_settings()?;
 
     for toolchain in cfg.list_toolchains()? {
-        if toolchain == current_toolchain.name {
+        if toolchain == active_toolchain.name {
             println!("{} (default)", toolchain);
         } else {
             println!("{}", toolchain);
@@ -33,11 +33,10 @@ pub fn show() -> Result<()> {
 
     println!();
     print_header("active toolchain");
-    let current_toolchain = Toolchain::from_settings()?;
 
-    println!("{} (default)", current_toolchain.name);
+    println!("{} (default)", active_toolchain.name);
     for component in [component::FORC, component::FUEL_CORE] {
-        let component_executable = current_toolchain.bin_path.join(component);
+        let component_executable = active_toolchain.bin_path.join(component);
 
         match std::process::Command::new(&component_executable)
             .arg("--version")
@@ -70,7 +69,7 @@ pub fn show() -> Result<()> {
 
         if component == component::FORC {
             for plugin in SUPPORTED_PLUGINS {
-                let plugin_executable = current_toolchain.bin_path.join(&plugin);
+                let plugin_executable = active_toolchain.bin_path.join(&plugin);
                 if plugin == &component::FORC_DEPLOY {
                     bold(|s| writeln!(s, "    - forc-client"));
                 }

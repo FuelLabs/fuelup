@@ -58,17 +58,40 @@ pub struct OfficialToolchainDescription {
 }
 
 fn parse_metadata(metadata: String) -> Result<(Option<Date>, Option<TargetTriple>)> {
+    if metadata.is_empty() {
+        return Ok((None, None));
+    }
+
     let (first, second) = metadata.split_at(std::cmp::min(10, metadata.len()));
 
     match Date::parse(first, DATE_FORMAT) {
-        Ok(d) => match TargetTriple::new(second.trim_start_matches('-')) {
-            Ok(t) => Ok((Some(d), Some(t))),
-            Err(_) => Ok((Some(d), None)),
-        },
+        Ok(d) => {
+            if second.is_empty() {
+                return Ok((Some(d), None));
+            } else {
+                bail!(
+                    "You specified target '{}': specifying a target is not supported yet.",
+                    second
+                );
+            }
+        }
         Err(_) => match TargetTriple::new(&metadata) {
             Ok(t) => Ok((None, Some(t))),
             Err(_) => bail!("Failed to parse date or target"),
         },
+    }
+}
+
+impl fmt::Display for OfficialToolchainDescription {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let target = match self.target.as_ref() {
+            Some(t) => t.to_string(),
+            None => "".to_string(),
+        };
+        match self.date {
+            Some(d) => write!(f, "{}-{}-{}", self.name, d, target),
+            None => write!(f, "{}-{}", self.name, target),
+        }
     }
 }
 
@@ -81,21 +104,13 @@ impl FromStr for OfficialToolchainDescription {
 
         let (name, metadata) = s.split_once('-').unwrap_or((s, ""));
 
-        if metadata.is_empty() {
-            Ok(Self {
-                name: DistToolchainName::from_str(name)?,
-                date: None,
-                target: None,
-            })
-        } else if let Ok((date, target)) = parse_metadata(metadata.to_string()) {
-            Ok(Self {
-                name: DistToolchainName::from_str(name)?,
-                date,
-                target,
-            })
-        } else {
-            bail!("Invalid official toolchain name '{}'", s);
-        }
+        let (date, target) = parse_metadata(metadata.to_string())?;
+
+        Ok(Self {
+            name: DistToolchainName::from_str(name)?,
+            date,
+            target,
+        })
     }
 }
 
@@ -117,7 +132,7 @@ impl Toolchain {
         })
     }
 
-    pub fn from(toolchain: &str) -> Result<Self> {
+    pub fn from_path(toolchain: &str) -> Result<Self> {
         Ok(Self {
             name: toolchain.to_string(),
             path: toolchain_dir(toolchain),

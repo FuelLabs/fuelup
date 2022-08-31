@@ -22,7 +22,7 @@ create_pkg_in_channel() {
     CHANNEL_TOML_NAME=$3
     version=$2
     #date="$(date +'%Y-%m-%d')"
-    date="2022/08/25"
+    date="2022-08-25"
     tag="v${2}"
     case "${1}" in
         "forc")

@@ -96,7 +96,14 @@ pub fn show() -> Result<()> {
             for plugin in SUPPORTED_PLUGINS {
                 if let Some(c) = channel.as_ref() {
                     let version = &c.pkg[component].version;
-                    bold(|s| write!(s, "    {}", &plugin));
+
+                    if plugin == &component::FORC_DEPLOY {
+                        bold(|s| writeln!(s, "    - forc-client"));
+                    }
+                    if plugin == &component::FORC_RUN || plugin == &component::FORC_DEPLOY {
+                        print!("  ");
+                    }
+                    bold(|s| write!(s, "    - {}", &plugin));
                     println!(" : {}", version);
                 } else {
                     let plugin_executable = active_toolchain.bin_path.join(&plugin);

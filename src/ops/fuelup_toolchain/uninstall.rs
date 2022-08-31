@@ -6,7 +6,7 @@ use crate::{commands::toolchain::UninstallCommand, toolchain::Toolchain};
 pub fn uninstall(command: UninstallCommand) -> Result<()> {
     let UninstallCommand { name } = command;
 
-    let toolchain = Toolchain::from(&name)?;
+    let toolchain = Toolchain::from_path(&name)?;
 
     if !toolchain.exists() {
         info!("toolchain '{}' does not exist", &name);

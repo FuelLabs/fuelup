@@ -179,12 +179,12 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
         }
     };
 
-    let toolchain = Toolchain::new(toolchain)?;
-
     let channel_file_name = match description.name {
         DistToolchainName::Latest => CHANNEL_LATEST_FILE_NAME,
         DistToolchainName::Nightly => CHANNEL_NIGHTLY_FILE_NAME,
     };
+
+    let toolchain = Toolchain::from_path(toolchain)?;
     let toml_path = toolchain.path.join(channel_file_name);
     let toml = read_file("channel", &toml_path)?;
     let channel = Channel::from_toml(&toml)?;

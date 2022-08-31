@@ -69,9 +69,14 @@ fn parse_metadata(metadata: String) -> Result<(Option<Date>, Option<TargetTriple
             if second.is_empty() {
                 return Ok((Some(d), None));
             } else {
+                let target = if second != "-" {
+                    second.trim_start_matches('-')
+                } else {
+                    second
+                };
                 bail!(
                     "You specified target '{}': specifying a target is not supported yet.",
-                    second
+                    target
                 );
             }
         }
@@ -280,7 +285,6 @@ mod tests {
         Ok(())
     }
 
-    #[test]
     fn test_parse_nightly_date_target() -> Result<()> {
         for target in [
             TARGET_ARM_APPLE,
@@ -329,7 +333,6 @@ mod tests {
         Ok(())
     }
 
-    #[test]
     fn test_parse_metadata_date_target() -> Result<()> {
         let (date, target) = parse_metadata(DATE_TARGET_APPLE.to_string())?;
         assert_eq!(DATE, date.unwrap().to_string());

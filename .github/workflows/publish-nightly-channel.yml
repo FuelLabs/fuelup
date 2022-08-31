@@ -23,12 +23,12 @@ jobs:
       - name: Publish nightly channel
         id: setup
         run: |
+            archive_dir=$(date +'%Y/%m/26')
             touch channel-fuel-nightly.toml
             mkdir -p ${{ env.NIGHTLY_CHANNEL_DIR }}
             ./.github/workflows/scripts/index-versions.sh nightly nightly $GITHUB_RUN_ID channel-fuel-nightly.toml
             cp channel-fuel-nightly.toml ${{ env.NIGHTLY_CHANNEL_DIR }}
 
-            archive_dir=$(date +'%Y/%m/25')
             echo "::set-output name=archive_dir::channels/nightly/$archive_dir"
 
       - name: Deploy nightly channel (latest version)

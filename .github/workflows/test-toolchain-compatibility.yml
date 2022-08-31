@@ -148,7 +148,7 @@ jobs:
         run: |
             touch channel-fuel-latest.toml
             mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
-            ./.github/workflows/scripts/index-versions.sh ${{ env.LATEST_COMPATIBLE_FORC }} ${{ env.LATEST_COMPATIBLE_FUEL_CORE }} $GITHUB_RUN_ID
+            ./.github/workflows/scripts/index-versions.sh ${{ env.LATEST_COMPATIBLE_FORC }} ${{ env.LATEST_COMPATIBLE_FUEL_CORE }} $GITHUB_RUN_ID channel-fuel-latest.toml
             cp channel-fuel-latest.toml ${{ env.LATEST_CHANNEL_DIR }}
 
       - name: Deploy latest channel

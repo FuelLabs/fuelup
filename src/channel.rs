@@ -41,6 +41,7 @@ impl Channel {
             DistToolchainName::Latest => CHANNEL_LATEST_FILE_NAME,
             DistToolchainName::Nightly => CHANNEL_NIGHTLY_FILE_NAME,
         };
+
         let channel_url = FUELUP_GH_PAGES.to_owned() + channel_file_name;
         let mut hasher = Sha256::new();
         let toml = match download_file(&channel_url, &dst_path.join(channel_file_name), &mut hasher)
@@ -123,7 +124,7 @@ mod tests {
     }
 
     #[test]
-    fn download_cfgs_from_channel() {
+    fn download_cfgs_from_channel_latest() {
         let channel_path = std::env::current_dir()
             .unwrap()
             .join("tests/channel-fuel-latest-example.toml");
@@ -137,5 +138,22 @@ mod tests {
         assert_eq!(cfgs[0].version, "0.17.0");
         assert_eq!(cfgs[1].name, "fuel-core");
         assert_eq!(cfgs[1].version, "0.9.4");
+    }
+
+    #[test]
+    fn download_cfgs_from_channel_nightly() {
+        let channel_path = std::env::current_dir()
+            .unwrap()
+            .join("tests/channel-fuel-nightly-example.toml");
+        let channel_file = read_file("channel-fuel-nightly-example", &channel_path).unwrap();
+        let channel = Channel::from_toml(&channel_file).unwrap();
+
+        let cfgs: Vec<DownloadCfg> = channel.build_download_configs();
+
+        assert_eq!(cfgs.len(), 2);
+        assert_eq!(cfgs[0].name, "forc");
+        assert_eq!(cfgs[0].version, "0.21.0-nightly (2022-08-30)");
+        assert_eq!(cfgs[1].name, "fuel-core");
+        assert_eq!(cfgs[1].version, "0.10.1-nightly (2022-08-30)");
     }
 }

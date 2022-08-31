@@ -1,7 +1,11 @@
 use crate::{
-    constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME, FUELUP_GH_PAGES},
+    constants::{
+        CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME, DATE_FORMAT_URL_FRIENDLY,
+        FUELUP_GH_PAGES,
+    },
     download::{download_file, DownloadCfg},
     file::read_file,
+    target_triple::TargetTriple,
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
 use anyhow::{bail, Result};
@@ -42,13 +46,20 @@ impl Channel {
             DistToolchainName::Nightly => CHANNEL_NIGHTLY_FILE_NAME,
         };
 
-        let channel_url = FUELUP_GH_PAGES.to_owned() + channel_file_name;
+        let mut channel_url = FUELUP_GH_PAGES.to_owned();
+        if desc.name == DistToolchainName::Nightly && desc.date.is_some() {
+            channel_url.push_str("channels/nightly/");
+            channel_url.push_str(&desc.date.unwrap().format(DATE_FORMAT_URL_FRIENDLY)?);
+            channel_url.push('/');
+        }
+
+        channel_url.push_str(channel_file_name);
         let mut hasher = Sha256::new();
         let toml = match download_file(&channel_url, &dst_path.join(channel_file_name), &mut hasher)
         {
             Ok(_) => {
                 let toml_path = dst_path.join(channel_file_name);
-                read_file(CHANNEL_LATEST_FILE_NAME, &toml_path)?
+                read_file(channel_file_name, &toml_path)?
             }
             Err(_) => bail!(
                 "Could not download {} to {}",

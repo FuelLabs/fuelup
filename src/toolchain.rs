@@ -89,10 +89,7 @@ fn parse_metadata(metadata: String) -> Result<(Option<Date>, Option<TargetTriple
 
 impl fmt::Display for OfficialToolchainDescription {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let target = match self.target.as_ref() {
-            Some(t) => t.to_string(),
-            None => "".to_string(),
-        };
+        let target = TargetTriple::from_host().unwrap_or_default();
         match self.date {
             Some(d) => write!(f, "{}-{}-{}", self.name, d, target),
             None => write!(f, "{}-{}", self.name, target),

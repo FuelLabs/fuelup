@@ -13,20 +13,26 @@ impl fmt::Display for TargetTriple {
 
 impl TargetTriple {
     pub fn new(s: &str) -> Result<Self> {
-        let (architecture, rest) = s.split_once('-').unwrap_or(("", ""));
+        let (architecture, rest) = match s.split_once('-') {
+            Some((architecture, rest)) => ((architecture, rest)),
+            None => bail!("missing vendor-os specifier"),
+        };
 
         if !["aarch64", "x86_64"].contains(&architecture) {
-            bail!("Unsupported architecture: '{}'", architecture);
+            bail!("unsupported architecture: '{}'", architecture);
         }
 
-        let (vendor, os) = rest.split_once('-').unwrap_or(("", ""));
+        let (vendor, os) = match rest.split_once('-') {
+            Some((vendor, os)) => ((vendor, os)),
+            None => bail!("missing os specifier"),
+        };
 
         if !["apple", "unknown"].contains(&vendor) {
-            bail!("Unsupported vendor: '{}'", vendor);
+            bail!("unsupported vendor: '{}'", vendor);
         }
 
         if !["darwin", "linux-gnu"].contains(&os) {
-            bail!("Unsupported os: '{}'", os);
+            bail!("unsupported os: '{}'", os);
         }
 
         Ok(Self(s.to_string()))

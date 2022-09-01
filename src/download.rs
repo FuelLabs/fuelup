@@ -79,14 +79,14 @@ impl DownloadCfg {
     pub fn from_package(name: &str, package: Package) -> Result<Self> {
         let target = TargetTriple::from_component(name)?;
         let tarball_name =
-            tarball_name(name, &package.version.core, package.version.date, &target)?;
+            tarball_name(name, &package.version.semver, package.version.date, &target)?;
         let tarball_url = package.target[&target.to_string()].url.clone();
         let hash = Some(package.target[&target.to_string()].hash.clone());
         Ok(Self {
             name: name.to_string(),
             target,
             date: package.version.date,
-            version: package.version.core,
+            version: package.version.semver,
             tarball_name,
             tarball_url,
             hash,

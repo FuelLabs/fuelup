@@ -30,7 +30,7 @@ fn collect_versions_and_dates(channel: Channel) -> HashMap<String, (Version, Opt
     let mut latest_versions: HashMap<String, (Version, Option<Date>)> = HashMap::new();
 
     for (name, package) in channel.pkg.into_iter() {
-        latest_versions.insert(name, (package.version.core, package.version.date));
+        latest_versions.insert(name, (package.version.semver, package.version.date));
     }
 
     latest_versions
@@ -149,7 +149,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
     bold(|s| writeln!(s, "{}", &toolchain.name));
 
     for component in [component::FORC, component::FUEL_CORE] {
-        let version = &channel.pkg[component].version.core;
+        let version = &channel.pkg[component].version.semver;
         let date = channel.pkg[component].version.date;
 
         let latest_version = &latest_versions_and_dates[component].0;

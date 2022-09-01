@@ -37,7 +37,7 @@ pub struct Package {
 
 #[derive(Debug)]
 pub struct PackageVersion {
-    pub core: Version,
+    pub semver: Version,
     pub date: Option<Date>,
 }
 
@@ -58,7 +58,7 @@ where
     };
 
     Ok(PackageVersion {
-        core: Version::parse(version).unwrap(),
+        semver: Version::parse(version).unwrap(),
         date: parsed_date,
     })
 }
@@ -125,12 +125,12 @@ mod tests {
         assert_eq!(channel.pkg.keys().len(), 2);
         assert!(channel.pkg.contains_key("forc"));
         assert_eq!(
-            channel.pkg["forc"].version.core,
+            channel.pkg["forc"].version.semver,
             Version::parse("0.17.0").unwrap()
         );
         assert!(channel.pkg.contains_key("fuel-core"));
         assert_eq!(
-            channel.pkg["fuel-core"].version.core,
+            channel.pkg["fuel-core"].version.semver,
             Version::parse("0.9.4").unwrap()
         );
 

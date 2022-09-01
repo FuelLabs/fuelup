@@ -30,7 +30,9 @@ pub fn exec(command: DefaultCommand) -> Result<()> {
 
     if let Ok(description) = OfficialToolchainDescription::from_str(&toolchain) {
         new_default = Toolchain::from(&description.to_string())?;
-    } else if !new_default.exists() {
+    }
+
+    if !new_default.exists() {
         bail!("Toolchain with name '{}' does not exist", &new_default.name);
     };
 

@@ -5,9 +5,11 @@ use crate::{
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
 use anyhow::{bail, Result};
+use semver::Version;
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use std::{collections::HashMap, path::PathBuf};
+use time::Date;
 use toml_edit::de;
 
 pub const LATEST: &str = "latest";
@@ -29,7 +31,8 @@ pub struct Channel {
 #[derive(Debug, Deserialize)]
 pub struct Package {
     pub target: HashMap<String, HashedBinary>,
-    pub version: String,
+    pub version: Version,
+    pub date: Option<Date>,
 }
 
 impl Channel {
@@ -93,9 +96,15 @@ mod tests {
 
         assert_eq!(channel.pkg.keys().len(), 2);
         assert!(channel.pkg.contains_key("forc"));
-        assert_eq!(channel.pkg["forc"].version, "0.17.0");
+        assert_eq!(
+            channel.pkg["forc"].version,
+            Version::parse("0.17.0").unwrap()
+        );
         assert!(channel.pkg.contains_key("fuel-core"));
-        assert_eq!(channel.pkg["fuel-core"].version, "0.9.4");
+        assert_eq!(
+            channel.pkg["fuel-core"].version,
+            Version::parse("0.9.4").unwrap()
+        );
 
         let targets = &channel.pkg["forc"].target;
         assert_eq!(targets.len(), 4);

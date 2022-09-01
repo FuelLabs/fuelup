@@ -72,6 +72,16 @@ fn parse_metadata(metadata: String) -> Result<(Option<Date>, Option<TargetTriple
     }
 }
 
+impl fmt::Display for OfficialToolchainDescription {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let target = TargetTriple::from_host().unwrap_or_default();
+        match self.date {
+            Some(d) => write!(f, "{}-{}-{}", self.name, d, target),
+            None => write!(f, "{}-{}", self.name, target),
+        }
+    }
+}
+
 impl FromStr for OfficialToolchainDescription {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
@@ -148,7 +158,7 @@ impl Toolchain {
     }
 
     pub fn is_official(&self) -> bool {
-        RESERVED_TOOLCHAIN_NAMES.contains(&self.name.split_once('-').unwrap_or_default().0)
+        RESERVED_TOOLCHAIN_NAMES.contains(&self.name.split_once('-').unwrap_or((&self.name, "")).0)
     }
 
     pub fn exists(&self) -> bool {

@@ -2,7 +2,7 @@ use crate::component;
 use anyhow::{bail, Result};
 use std::fmt;
 
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct TargetTriple(String);
 
 impl fmt::Display for TargetTriple {

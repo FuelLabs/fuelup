@@ -12,7 +12,6 @@ pub fn uninstall(command: UninstallCommand) -> Result<()> {
     let UninstallCommand { name } = command;
 
     let mut toolchain = Toolchain::from(&name)?;
-    println!("{:?}", toolchain);
 
     if toolchain.is_official() {
         let description = OfficialToolchainDescription::from_str(&name)?;

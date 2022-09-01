@@ -10,6 +10,7 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 use std::{fs, thread};
 use tar::Archive;
+use time::Date;
 use tracing::warn;
 use tracing::{error, info};
 
@@ -35,14 +36,20 @@ struct LatestReleaseApiResponse {
 pub struct DownloadCfg {
     pub name: String,
     pub target: TargetTriple,
-    pub version: String,
+    pub version: Version,
+    pub date: Option<Date>,
     tarball_name: String,
     tarball_url: String,
     hash: Option<String>,
 }
 
 impl DownloadCfg {
-    pub fn new(name: &str, target: TargetTriple, version: Option<Version>) -> Result<Self> {
+    pub fn new(
+        name: &str,
+        target: TargetTriple,
+        version: Option<Version>,
+        date: Option<Date>,
+    ) -> Result<Self> {
         let version = match version {
             Some(version) => version,
             None => get_latest_tag(name).map_err(|e| {
@@ -62,7 +69,8 @@ impl DownloadCfg {
         Ok(Self {
             name: name.to_string(),
             target,
-            version: version.to_string(),
+            version,
+            date,
             tarball_name,
             tarball_url,
             hash: None,

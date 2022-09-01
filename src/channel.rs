@@ -37,8 +37,8 @@ pub struct Package {
     pub date: Option<Date_>,
 }
 
-#[derive(Debug)]
-struct Date_(Date);
+#[derive(Debug, Eq, PartialEq)]
+pub struct Date_(Date);
 
 struct DateVisitor;
 

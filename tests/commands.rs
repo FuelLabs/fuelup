@@ -4,7 +4,7 @@ use std::{env, path::Path};
 
 mod testcfg;
 
-use testcfg::{FuelupState, ALL_BINS, FUEL_CORE_BIN};
+use testcfg::{FuelupState, ALL_BINS};
 
 use crate::testcfg::FORC_BINS;
 
@@ -252,7 +252,7 @@ fn fuelup_component_add() -> Result<()> {
 fn fuelup_component_add_disallowed() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["component", "add", "forc@0.19.1"]);
-        let expected_stdout = r#"Installing specific versions of components is reserved for custom toolchains.
+        let expected_stdout = r#"Installing specific components is reserved for custom toolchains.
 You are currently using 'latest-x86_64-apple-darwin'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
@@ -263,16 +263,20 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
     Ok(())
 }
 #[test]
-fn fuelup_component_remove() -> Result<()> {
+fn fuelup_component_remove_disallowed() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let latest_toolchain_bin_dir = cfg.toolchain_bin_dir("latest-x86_64-apple-darwin");
 
         expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
-        let _ = cfg.fuelup(&["component", "remove", "forc"]);
-        expect_files_exist(&latest_toolchain_bin_dir, FUEL_CORE_BIN);
+        let output = cfg.fuelup(&["component", "remove", "forc"]);
 
-        let _ = cfg.fuelup(&["component", "remove", "fuel-core"]);
-        expect_files_exist(&latest_toolchain_bin_dir, &[]);
+        let expected_stdout = r#"Removing specific components is reserved for custom toolchains.
+You are currently using 'latest-x86_64-apple-darwin'.
+
+You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
+"#;
+        assert_eq!(output.stdout, expected_stdout);
+        expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
     })?;
 
     Ok(())

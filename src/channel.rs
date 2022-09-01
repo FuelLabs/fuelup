@@ -1,12 +1,14 @@
 use crate::{
-    constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME, FUELUP_GH_PAGES},
+    constants::{
+        CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME, DATE_FORMAT, FUELUP_GH_PAGES,
+    },
     download::{download_file, DownloadCfg},
     file::read_file,
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
 use anyhow::{bail, Result};
 use semver::Version;
-use serde::Deserialize;
+use serde::{de::Visitor, Deserialize};
 use sha2::{Digest, Sha256};
 use std::{collections::HashMap, path::PathBuf};
 use time::Date;
@@ -32,7 +34,42 @@ pub struct Channel {
 pub struct Package {
     pub target: HashMap<String, HashedBinary>,
     pub version: Version,
-    pub date: Option<Date>,
+    pub date: Option<Date_>,
+}
+
+#[derive(Debug)]
+struct Date_(Date);
+
+struct DateVisitor;
+
+impl<'de> Visitor<'de> for DateVisitor {
+    type Value = Date_;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("a date in the format (YYYY-MM-DD)")
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(Date_(
+            Date::parse(
+                v.split_once('(').unwrap().1.trim_end_matches(')'),
+                DATE_FORMAT,
+            )
+            .unwrap(),
+        ))
+    }
+}
+
+impl<'de> Deserialize<'de> for Date_ {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_str(DateVisitor)
+    }
 }
 
 impl Channel {
@@ -143,8 +180,8 @@ mod tests {
 
         assert_eq!(cfgs.len(), 2);
         assert_eq!(cfgs[0].name, "forc");
-        assert_eq!(cfgs[0].version, "0.17.0");
+        assert_eq!(cfgs[0].version, Version::parse("0.17.0").unwrap());
         assert_eq!(cfgs[1].name, "fuel-core");
-        assert_eq!(cfgs[1].version, "0.9.4");
+        assert_eq!(cfgs[1].version, Version::parse("0.9.4").unwrap());
     }
 }

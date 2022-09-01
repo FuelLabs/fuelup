@@ -32,7 +32,6 @@ pub const FORC_BINS: &[&str] = &[
     "forc-lsp",
     "forc-run",
 ];
-pub const FUEL_CORE_BIN: &[&str] = &["fuel-core"];
 
 pub static ALL_BINS: &[&str] = &[
     "forc",

@@ -15,9 +15,19 @@ pub fn add(command: AddCommand) -> Result<()> {
     } = command;
 
     let toolchain = Toolchain::from_settings()?;
+    if toolchain.is_official() {
+        bail!(
+            "Installing specific components is reserved for custom toolchains.
+You are currently using '{}'.
+
+You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
+            toolchain.name
+        )
+    };
+
     if toolchain.has_component(&maybe_versioned_component) {
         info!(
-            "{} already exists in toolchain '{}'; replacing existing version",
+            "{} already exists in toolchain '{}'; replacing existing version with `latest` version",
             &maybe_versioned_component, toolchain.name
         );
     }
@@ -25,15 +35,6 @@ pub fn add(command: AddCommand) -> Result<()> {
     let (component, version): (&str, Option<Version>) =
         match maybe_versioned_component.split_once('@') {
             Some(t) => {
-                if toolchain.is_official() {
-                    bail!(
-"Installing specific versions of components is reserved for custom toolchains.
-You are currently using '{}'.
-
-You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
-                    toolchain.name
-                )
-                };
                 let v = match Version::from_str(t.1) {
                     Ok(v) => v,
                     Err(e) => bail!(

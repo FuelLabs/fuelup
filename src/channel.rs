@@ -10,6 +10,7 @@ use anyhow::{bail, Result};
 use semver::Version;
 use serde::{de::Visitor, Deserialize};
 use sha2::{Digest, Sha256};
+use std::fmt;
 use std::{collections::HashMap, path::PathBuf};
 use time::Date;
 use toml_edit::de;
@@ -39,6 +40,12 @@ pub struct Package {
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Date_(Date);
+
+impl fmt::Display for Date_ {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
 
 struct DateVisitor;
 

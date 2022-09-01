@@ -1,9 +1,7 @@
-use crate::component;
 use crate::constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME};
 use crate::download::DownloadCfg;
 use crate::path::{fuelup_dir, settings_file};
 use crate::settings::SettingsFile;
-use crate::target_triple::TargetTriple;
 use crate::toolchain::{DistToolchainName, OfficialToolchainDescription, Toolchain};
 use crate::{channel::Channel, commands::toolchain::InstallCommand};
 use anyhow::{bail, Result};

@@ -1,18 +1,15 @@
 use crate::{
-    constants::{
-        CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME, DATE_FORMAT, FUELUP_GH_PAGES,
-    },
+    constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME, FUELUP_GH_PAGES},
     download::{download_file, DownloadCfg},
     file::read_file,
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
 use anyhow::{bail, Result};
 use semver::Version;
-use serde::{de::Visitor, Deserialize};
+use serde::{Deserialize, Deserializer};
 use sha2::{Digest, Sha256};
-use std::fmt;
 use std::{collections::HashMap, path::PathBuf};
-use time::Date;
+use time::{macros::format_description, Date};
 use toml_edit::de;
 
 pub const LATEST: &str = "latest";
@@ -34,49 +31,36 @@ pub struct Channel {
 #[derive(Debug, Deserialize)]
 pub struct Package {
     pub target: HashMap<String, HashedBinary>,
-    pub version: Version,
-    pub date: Option<Date_>,
+    #[serde(deserialize_with = "version_and_date_from_str")]
+    pub version: PackageVersion,
 }
 
-#[derive(Debug, Eq, PartialEq)]
-pub struct Date_(Date);
-
-impl fmt::Display for Date_ {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
-    }
+#[derive(Debug)]
+pub struct PackageVersion {
+    pub core: Version,
+    pub date: Option<Date>,
 }
 
-struct DateVisitor;
+fn version_and_date_from_str<'de, D>(deserializer: D) -> Result<PackageVersion, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    let (version, date) = match s.split_once(' ') {
+        Some((version, date)) => (version, Some(date)),
+        None => (s.as_str(), None),
+    };
 
-impl<'de> Visitor<'de> for DateVisitor {
-    type Value = Date_;
+    let parsed_date = if let Some(date) = date {
+        Date::parse(date, format_description!("([year]-[month]-[day])")).ok()
+    } else {
+        None
+    };
 
-    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        formatter.write_str("a date in the format (YYYY-MM-DD)")
-    }
-
-    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
-    where
-        E: serde::de::Error,
-    {
-        Ok(Date_(
-            Date::parse(
-                v.split_once('(').unwrap().1.trim_end_matches(')'),
-                DATE_FORMAT,
-            )
-            .unwrap(),
-        ))
-    }
-}
-
-impl<'de> Deserialize<'de> for Date_ {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        deserializer.deserialize_str(DateVisitor)
-    }
+    Ok(PackageVersion {
+        core: Version::parse(version).unwrap(),
+        date: parsed_date,
+    })
 }
 
 impl Channel {
@@ -141,12 +125,12 @@ mod tests {
         assert_eq!(channel.pkg.keys().len(), 2);
         assert!(channel.pkg.contains_key("forc"));
         assert_eq!(
-            channel.pkg["forc"].version,
+            channel.pkg["forc"].version.core,
             Version::parse("0.17.0").unwrap()
         );
         assert!(channel.pkg.contains_key("fuel-core"));
         assert_eq!(
-            channel.pkg["fuel-core"].version,
+            channel.pkg["fuel-core"].version.core,
             Version::parse("0.9.4").unwrap()
         );
 

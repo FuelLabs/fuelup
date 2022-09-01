@@ -14,7 +14,6 @@ use time::Date;
 use tracing::warn;
 use tracing::{error, info};
 
-use crate::channel;
 use crate::channel::Package;
 use crate::component;
 use crate::constants::{
@@ -63,7 +62,7 @@ impl DownloadCfg {
             component::FUELUP => FUELUP_RELEASE_DOWNLOAD_URL.to_string(),
             _ => bail!("Unrecognized component: {}", name),
         };
-        let tarball_name = tarball_name(name, version.to_string(), &target)?;
+        let tarball_name = tarball_name(name, &version, date, &target)?;
         let tarball_url = format!("{}/v{}/{}", &release_url, &version, &tarball_name);
 
         Ok(Self {
@@ -79,13 +78,15 @@ impl DownloadCfg {
 
     pub fn from_package(name: &str, package: Package) -> Result<Self> {
         let target = TargetTriple::from_component(name)?;
-        let tarball_name = tarball_name(name, package.version.clone(), &target)?;
+        let tarball_name =
+            tarball_name(name, &package.version.core, package.version.date, &target)?;
         let tarball_url = package.target[&target.to_string()].url.clone();
         let hash = Some(package.target[&target.to_string()].hash.clone());
         Ok(Self {
             name: name.to_string(),
             target,
-            version: package.version,
+            date: package.version.date,
+            version: package.version.core,
             tarball_name,
             tarball_url,
             hash,
@@ -93,12 +94,16 @@ impl DownloadCfg {
     }
 }
 
-pub fn tarball_name(name: &str, version_string: String, target: &TargetTriple) -> Result<String> {
-    let version = if let Ok(parsed) = Version::parse(&version_string) {
-        parsed.to_string()
+pub fn tarball_name(
+    name: &str,
+    version: &Version,
+    date: Option<Date>,
+    target: &TargetTriple,
+) -> Result<String> {
+    let version = if let Some(d) = date {
+        version.to_string() + "-" + &d.to_string()
     } else {
-        let split = version_string.split_once('(').unwrap_or_default();
-        channel::NIGHTLY.to_owned() + "-" + split.1.trim_end_matches(')')
+        version.to_string()
     };
 
     match name {

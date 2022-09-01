@@ -9,7 +9,7 @@ pub fn remove(command: RemoveCommand) -> Result<()> {
 
     if toolchain.is_official() {
         bail!(
-            "Installing specific components is reserved for custom toolchains.
+            "Removing specific components is reserved for custom toolchains.
 You are currently using '{}'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",

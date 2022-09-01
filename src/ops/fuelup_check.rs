@@ -45,12 +45,12 @@ fn compare_and_print_versions(
     let mut current = current_version.to_string();
     let mut latest = latest_version.to_string();
 
-    if current_date.is_some() && latest_date.is_some() {
-        current.push_str(&current_date.unwrap().to_string());
-        latest.push_str(&latest_date.unwrap().to_string());
+    if let (Some(c), Some(l)) = (current_date, latest_date) {
+        current.push_str(&(" (".to_owned() + &c.to_string() + ")"));
+        latest.push_str(&(" (".to_owned() + &l.to_string() + ")"));
     }
 
-    match current_version.cmp(&latest_version) {
+    match current_version.cmp(latest_version) {
         Less => {
             colored_bold(Color::Yellow, |s| write!(s, "Update available"));
             println!(" : {} -> {}", current, latest);
@@ -159,7 +159,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
 
         if component_executable.is_file() {
             bold(|s| write!(s, "  {} - ", &component));
-            compare_and_print_versions(&version, date, &latest_version, latest_date)?;
+            compare_and_print_versions(version, date, latest_version, latest_date)?;
         } else {
             print!("  ");
             bold(|s| write!(s, "{}", &component));
@@ -179,9 +179,9 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                 check_plugin(
                     &plugin_executable,
                     plugin,
-                    &version,
+                    version,
                     date,
-                    &latest_version,
+                    latest_version,
                     latest_date,
                 )?;
             }

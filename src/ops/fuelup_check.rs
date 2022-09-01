@@ -23,10 +23,11 @@ use tracing::error;
 
 use crate::{component, download::DownloadCfg};
 
-fn collect_versions(channel: Channel) -> HashMap<String, String> {
-    let mut latest_versions: HashMap<String, String> = HashMap::new();
+fn collect_versions_and_dates(channel: Channel) -> HashMap<String, (Version, Option<Date>)> {
+    let mut latest_versions: HashMap<String, (Version, Option<Date>)> = HashMap::new();
+
     for (name, package) in channel.pkg.into_iter() {
-        latest_versions.insert(name, package.version);
+        latest_versions.insert(name, (package.version, package.date));
     }
 
     latest_versions
@@ -135,6 +136,7 @@ fn check_fuelup() -> Result<()> {
         component::FUELUP,
         TargetTriple::from_component(component::FUELUP)?,
         None,
+        None,
     ) {
         bold(|s| write!(s, "{} - ", component::FUELUP));
         compare_and_print_versions(
@@ -153,31 +155,33 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
 
     let fuelup_dir = fuelup_dir();
     let tmp_dir = tempdir_in(&fuelup_dir)?;
-    let latest_versions = match Channel::from_dist_channel(&description, tmp_dir.into_path()) {
-        Ok(c) => collect_versions(c),
-        Err(e) => {
-            error!(
-                "Failed to get '{}' channel: {} - fetching versions using GitHub API",
-                description.name, e
-            );
-            [component::FORC, component::FUEL_CORE, component::FUELUP]
-                .iter()
-                .map(|&c| {
-                    (
-                        c.to_owned(),
-                        DownloadCfg::new(
-                            c,
-                            TargetTriple::from_component(c)
-                                .expect("Failed to create DownloadCfg from component"),
-                            None,
+    let latest_versions_and_dates =
+        match Channel::from_dist_channel(&description, tmp_dir.into_path()) {
+            Ok(c) => collect_versions_and_dates(c),
+            Err(e) => {
+                error!(
+                    "Failed to get '{}' channel: {} - fetching versions using GitHub API",
+                    description.name, e
+                );
+                [component::FORC, component::FUEL_CORE, component::FUELUP]
+                    .iter()
+                    .map(|&c| {
+                        (
+                            c.to_owned(),
+                            DownloadCfg::new(
+                                c,
+                                TargetTriple::from_component(c)
+                                    .expect("Failed to create DownloadCfg from component"),
+                                None,
+                                None,
+                            )
+                            .unwrap()
+                            .version,
                         )
-                        .unwrap()
-                        .version,
-                    )
-                })
-                .collect()
-        }
-    };
+                    })
+                    .collect()
+            }
+        };
 
     let toolchain = Toolchain::new(toolchain)?;
 

@@ -48,8 +48,12 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
             None => (&maybe_versioned_component, None),
         };
 
-    let download_cfg =
-        DownloadCfg::new(component, TargetTriple::from_component(component)?, version)?;
+    let download_cfg = DownloadCfg::new(
+        component,
+        TargetTriple::from_component(component)?,
+        version,
+        None,
+    )?;
     toolchain.add_component(download_cfg)?;
 
     Ok(())

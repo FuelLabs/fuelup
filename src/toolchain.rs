@@ -67,7 +67,7 @@ fn parse_metadata(metadata: String) -> Result<(Option<Date>, Option<TargetTriple
     match Date::parse(first, DATE_FORMAT) {
         Ok(d) => {
             if second.is_empty() {
-                return Ok((Some(d), None));
+                Ok((Some(d), None))
             } else {
                 let target = if second != "-" {
                     second.trim_start_matches('-')
@@ -282,6 +282,7 @@ mod tests {
         Ok(())
     }
 
+    #[test]
     fn test_parse_nightly_date_target() -> Result<()> {
         for target in [
             TARGET_ARM_APPLE,
@@ -290,13 +291,14 @@ mod tests {
             TARGET_X86_LINUX,
         ] {
             let toolchain = channel::NIGHTLY.to_owned() + "-" + DATE + "-" + target;
-            let desc = OfficialToolchainDescription::from_str(&toolchain).unwrap();
-            assert_eq!(
-                desc.name,
-                DistToolchainName::from_str(channel::NIGHTLY).unwrap()
-            );
-            assert_eq!(desc.date.unwrap().to_string(), DATE);
-            assert_eq!(desc.target.unwrap().to_string(), target);
+            assert!(OfficialToolchainDescription::from_str(&toolchain).is_err());
+            // TODO: Uncomment once target specification is supported
+            // assert_eq!(
+            //     desc.name,
+            //     DistToolchainName::from_str(channel::NIGHTLY).unwrap()
+            // );
+            // assert_eq!(desc.date.unwrap().to_string(), DATE);
+            // assert_eq!(desc.target.unwrap().to_string(), target);
         }
 
         Ok(())
@@ -330,10 +332,12 @@ mod tests {
         Ok(())
     }
 
+    #[test]
     fn test_parse_metadata_date_target() -> Result<()> {
-        let (date, target) = parse_metadata(DATE_TARGET_APPLE.to_string())?;
-        assert_eq!(DATE, date.unwrap().to_string());
-        assert_eq!(TARGET_X86_APPLE, target.unwrap().to_string());
+        assert!(parse_metadata(DATE_TARGET_APPLE.to_string()).is_err());
+        // TODO: Uncomment once target specification is supported
+        //assert_eq!(DATE, date.unwrap().to_string());
+        //assert_eq!(TARGET_X86_APPLE, target.unwrap().to_string());
         Ok(())
     }
 

@@ -14,7 +14,7 @@ impl fmt::Display for TargetTriple {
 impl TargetTriple {
     pub fn new(s: &str) -> Result<Self> {
         let (architecture, rest) = match s.split_once('-') {
-            Some((architecture, rest)) => ((architecture, rest)),
+            Some((architecture, rest)) => (architecture, rest),
             None => bail!("missing vendor-os specifier"),
         };
 
@@ -23,7 +23,7 @@ impl TargetTriple {
         }
 
         let (vendor, os) = match rest.split_once('-') {
-            Some((vendor, os)) => ((vendor, os)),
+            Some((vendor, os)) => (vendor, os),
             None => bail!("missing os specifier"),
         };
 

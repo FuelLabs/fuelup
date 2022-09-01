@@ -164,10 +164,13 @@ fn fuelup_default() -> Result<()> {
 }
 
 #[test]
-fn fuelup_default_latest() -> Result<()> {
+fn fuelup_default_uninstalled_toolchain() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
-        let output = cfg.fuelup(&["default", "latest"]);
-        let expected_stdout = "default toolchain set to 'latest-x86_64-apple-darwin'\n";
+        let output = cfg.fuelup(&["default", "nightly"]);
+        let expected_stdout = format!(
+            "Toolchain with name 'nightly-{}' does not exist\n",
+            TargetTriple::from_host().unwrap()
+        );
 
         assert_eq!(output.stdout, expected_stdout);
     })?;

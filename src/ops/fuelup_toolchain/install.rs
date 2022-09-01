@@ -17,7 +17,6 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let InstallCommand { name } = command;
 
     let description = OfficialToolchainDescription::from_str(&name)?;
-    println!("{}", description);
 
     let settings_file = settings_file();
     if !settings_file.exists() {

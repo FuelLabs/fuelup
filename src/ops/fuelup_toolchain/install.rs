@@ -23,7 +23,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
     if !settings_file.exists() {
         let settings = SettingsFile::new(settings_file);
         settings.with_mut(|s| {
-            s.default_toolchain = Some(description.to_string().clone());
+            s.default_toolchain = Some(description.to_string());
             Ok(())
         })?;
     }

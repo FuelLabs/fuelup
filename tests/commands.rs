@@ -220,6 +220,18 @@ fn fuelup_default() -> Result<()> {
 }
 
 #[test]
+fn fuelup_default_latest() -> Result<()> {
+    testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+        let output = cfg.fuelup(&["default", "latest"]);
+        let expected_stdout = "default toolchain set to 'latest-x86_64-apple-darwin'\n";
+
+        assert_eq!(output.stdout, expected_stdout);
+    })?;
+
+    Ok(())
+}
+
+#[test]
 fn fuelup_toolchain_new() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let output = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);

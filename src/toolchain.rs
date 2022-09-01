@@ -159,7 +159,7 @@ impl Toolchain {
     }
 
     pub fn is_official(&self) -> bool {
-        RESERVED_TOOLCHAIN_NAMES.contains(&self.name.split_once('-').unwrap_or_default().0)
+        RESERVED_TOOLCHAIN_NAMES.contains(&self.name.split_once('-').unwrap_or((&self.name, "")).0)
     }
 
     pub fn exists(&self) -> bool {

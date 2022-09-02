@@ -5,6 +5,7 @@ use crate::{
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
 use anyhow::{anyhow, bail, Context, Result};
+use core::fmt;
 use semver::Version;
 use serde::{Deserialize, Deserializer};
 use sha2::{Digest, Sha256};
@@ -36,7 +37,7 @@ pub struct Package {
     pub version: PackageVersion,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct PackageVersion {
     pub semver: Version,
     pub date: Option<Date>,
@@ -66,6 +67,14 @@ impl FromStr for PackageVersion {
                 .ok(),
         };
         Ok(PackageVersion { semver, date })
+    }
+}
+impl fmt::Display for PackageVersion {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.date {
+            Some(d) => write!(f, "{} ({})", self.semver, d),
+            None => write!(f, "{}", self.semver),
+        }
     }
 }
 

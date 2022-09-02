@@ -28,26 +28,26 @@ create_pkg_in_channel() {
             _targets=("darwin_amd64" "darwin_arm64" "linux_amd64" "linux_arm64")
             _repo="sway"
             _tarball_prefix="forc-binaries"
-            if [ "${2}" = "nightly" ]; then
-                version="$(curl -s https://api.github.com/repos/FuelLabs/sway/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)-nightly (${date})"
-            fi
             ;;
         "fuel-core")
             _targets=("aarch64-apple-darwin" "aarch64-unknown-linux-gnu" "x86_64-apple-darwin" "x86_64-unknown-linux-gnu")
             _repo="fuel-core"
-            if [ "${2}" = "nightly" ]; then
-                _tarball_prefix="fuel-core"
-                version="$(curl -s https://api.github.com/repos/FuelLabs/fuel-core/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)-nightly (${date})"
-            else
-                _tarball_prefix="fuel-core-${version}"
+            _tarball_prefix="fuel-core"
+
+            if [ "${2}" != "nightly" ]; then
+                _tarball_prefix+="-${version}"
             fi
+
             ;;
     esac
 
     if [ "${2}" = "nightly" ]; then
         _repo="sway-nightly-binaries"
-        _tarball_prefix+="-nightly-${date}"
-        tag=${_tarball_prefix}
+        semver="$(curl -s https://api.github.com/repos/FuelLabs/${_repo}/releases | grep "tag_name" | grep "nightly-${date}" | grep "${_tarball_prefix}" | head -n 1 | cut -d "-" -f3)"
+        version="${semver}-nightly (${date})"
+        version_url_friendly="${semver}-nightly-${date}"
+        _tarball_prefix+="-${version_url_friendly}"
+        tag="${_tarball_prefix}"
     fi
 
     # We need to recreate channel-fuel-latest.toml, generating new URLs and sha256 hashes for the download links.

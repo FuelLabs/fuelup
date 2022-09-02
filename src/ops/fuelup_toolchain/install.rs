@@ -1,12 +1,10 @@
-use crate::component;
 use crate::constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME};
 use crate::download::DownloadCfg;
 use crate::path::{fuelup_dir, settings_file};
 use crate::settings::SettingsFile;
-use crate::target_triple::TargetTriple;
 use crate::toolchain::{DistToolchainName, OfficialToolchainDescription, Toolchain};
 use crate::{channel::Channel, commands::toolchain::InstallCommand};
-use anyhow::Result;
+use anyhow::{bail, Result};
 use std::fmt::Write;
 use std::fs;
 use std::str::FromStr;
@@ -35,26 +33,10 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let tmp_dir_path = tmp_dir.into_path();
 
     let cfgs: Vec<DownloadCfg> =
-        match Channel::from_dist_channel(&description, tmp_dir_path.clone()) {
-            Ok(c) => c.build_download_configs(),
-            Err(e) => {
-                error!(
-                    "Failed to get latest channel {} - fetching versions using GitHub API",
-                    e
-                );
-                [component::FORC, component::FUEL_CORE]
-                    .iter()
-                    .map(|c| {
-                        DownloadCfg::new(
-                            c,
-                            TargetTriple::from_component(c)
-                                .expect("Failed to create DownloadCfg from component"),
-                            None,
-                        )
-                        .unwrap()
-                    })
-                    .collect()
-            }
+        if let Ok(channel) = Channel::from_dist_channel(&description, tmp_dir_path.clone()) {
+            channel.build_download_configs()
+        } else {
+            bail!("Could not build download configs from channel")
         };
 
     info!(

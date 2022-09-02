@@ -8,9 +8,11 @@ use crate::{
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
 use anyhow::{bail, Result};
-use serde::Deserialize;
+use semver::Version;
+use serde::{Deserialize, Deserializer};
 use sha2::{Digest, Sha256};
 use std::{collections::HashMap, path::PathBuf};
+use time::{macros::format_description, Date};
 use toml_edit::de;
 
 pub const LATEST: &str = "latest";
@@ -32,7 +34,36 @@ pub struct Channel {
 #[derive(Debug, Deserialize)]
 pub struct Package {
     pub target: HashMap<String, HashedBinary>,
-    pub version: String,
+    #[serde(deserialize_with = "version_and_date_from_str")]
+    pub version: PackageVersion,
+}
+
+#[derive(Debug)]
+pub struct PackageVersion {
+    pub semver: Version,
+    pub date: Option<Date>,
+}
+
+fn version_and_date_from_str<'de, D>(deserializer: D) -> Result<PackageVersion, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    let (version, date) = match s.split_once(' ') {
+        Some((version, date)) => (version, Some(date)),
+        None => (s.as_str(), None),
+    };
+
+    let parsed_date = if let Some(date) = date {
+        Date::parse(date, format_description!("([year]-[month]-[day])")).ok()
+    } else {
+        None
+    };
+
+    Ok(PackageVersion {
+        semver: Version::parse(version).unwrap(),
+        date: parsed_date,
+    })
 }
 
 impl Channel {
@@ -104,9 +135,15 @@ mod tests {
 
         assert_eq!(channel.pkg.keys().len(), 2);
         assert!(channel.pkg.contains_key("forc"));
-        assert_eq!(channel.pkg["forc"].version, "0.17.0");
+        assert_eq!(
+            channel.pkg["forc"].version.semver,
+            Version::parse("0.17.0").unwrap()
+        );
         assert!(channel.pkg.contains_key("fuel-core"));
-        assert_eq!(channel.pkg["fuel-core"].version, "0.9.4");
+        assert_eq!(
+            channel.pkg["fuel-core"].version.semver,
+            Version::parse("0.9.4").unwrap()
+        );
 
         let targets = &channel.pkg["forc"].target;
         assert_eq!(targets.len(), 4);
@@ -145,9 +182,9 @@ mod tests {
 
         assert_eq!(cfgs.len(), 2);
         assert_eq!(cfgs[0].name, "forc");
-        assert_eq!(cfgs[0].version, "0.17.0");
+        assert_eq!(cfgs[0].version, Version::parse("0.17.0").unwrap());
         assert_eq!(cfgs[1].name, "fuel-core");
-        assert_eq!(cfgs[1].version, "0.9.4");
+        assert_eq!(cfgs[1].version, Version::parse("0.9.4").unwrap());
     }
 
     #[test]

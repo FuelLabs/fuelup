@@ -99,7 +99,7 @@ pub fn tarball_name(name: &str, version: &PackageVersion, target: &TargetTriple)
     match name {
         component::FORC => {
             let postfix = if let Some(date) = version.date {
-                version.semver.to_string() + &target.to_string()
+                version_string.to_string() + "-" + &target.to_string()
             } else {
                 target.to_string()
             };

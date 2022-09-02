@@ -4,9 +4,7 @@ use std::{env, path::Path};
 
 mod testcfg;
 
-use testcfg::{FuelupState, ALL_BINS};
-
-use crate::testcfg::FORC_BINS;
+use testcfg::{FuelupState, ALL_BINS, FORC_BINS};
 
 fn expect_files_exist(dir: &Path, expected: &[&str]) {
     let mut actual: Vec<String> = dir

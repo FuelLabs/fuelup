@@ -10,6 +10,8 @@ use tempfile::tempdir_in;
 pub enum FuelupState {
     Empty,
     LatestToolchainInstalled,
+    NightlyInstalled,
+    NightlyDateInstalled,
     LatestAndCustomInstalled,
     LatestAndNightlyInstalled,
     NightlyAndNightlyDateInstalled,
@@ -98,14 +100,15 @@ fn setup_toolchain(fuelup_home_path: &Path, toolchain: &str) -> Result<()> {
         fs::File::create(&bin_dir.join(bin))?;
     }
 
-    fs::copy(
-        &env::current_dir()
-            .unwrap()
-            .join("tests/settings-example.toml"),
-        &fuelup_home_path.join("settings.toml"),
+    Ok(())
+}
+
+fn setup_settings_file(settings_path: &Path, default_toolchain: &str) -> Result<()> {
+    fs::write(
+        settings_path,
+        format!("default_toolchain = \"{}\"", default_toolchain),
     )
     .expect("Failed to copy settings");
-
     Ok(())
 }
 
@@ -137,14 +140,31 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
         FuelupState::Empty => {}
         FuelupState::LatestToolchainInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
+            setup_settings_file(&tmp_fuelup_root_path.join("settings.toml"), &latest)?;
+        }
+        FuelupState::NightlyInstalled => {
+            setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
+            setup_settings_file(&tmp_fuelup_root_path.join("settings.toml"), &nightly)?;
+        }
+        FuelupState::NightlyDateInstalled => {
+            setup_toolchain(
+                &tmp_fuelup_root_path,
+                &format!("nightly-{}-{}", DATE, target),
+            )?;
+            setup_settings_file(
+                &tmp_fuelup_root_path.join("settings.toml"),
+                &format!("nightly-{}-{}", DATE, target),
+            )?;
         }
         FuelupState::LatestAndCustomInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_toolchain(&tmp_fuelup_root_path, "my-toolchain")?;
+            setup_settings_file(&tmp_fuelup_root_path.join("settings.toml"), &latest)?;
         }
         FuelupState::LatestAndNightlyInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
+            setup_settings_file(&tmp_fuelup_root_path.join("settings.toml"), &latest)?;
         }
         FuelupState::NightlyAndNightlyDateInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
@@ -152,6 +172,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
                 &tmp_fuelup_root_path,
                 &format!("nightly-{}-{}", DATE, target),
             )?;
+            setup_settings_file(&tmp_fuelup_root_path.join("settings.toml"), &nightly)?;
         }
     }
 

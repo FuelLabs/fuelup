@@ -8,6 +8,7 @@ use std::{
 use tempfile::tempdir_in;
 
 pub enum FuelupState {
+    AllInstalled,
     Empty,
     LatestToolchainInstalled,
     NightlyInstalled,
@@ -138,6 +139,15 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
 
     match state {
         FuelupState::Empty => {}
+        FuelupState::AllInstalled => {
+            setup_toolchain(&tmp_fuelup_root_path, &latest)?;
+            setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
+            setup_toolchain(
+                &tmp_fuelup_root_path,
+                &format!("nightly-{}-{}", DATE, target),
+            )?;
+            setup_settings_file(&tmp_fuelup_root_path.join("settings.toml"), &latest)?;
+        }
         FuelupState::LatestToolchainInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_settings_file(&tmp_fuelup_root_path.join("settings.toml"), &latest)?;

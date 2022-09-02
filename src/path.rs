@@ -24,12 +24,16 @@ pub fn settings_file() -> PathBuf {
     fuelup_dir().join("settings.toml")
 }
 
-pub fn toolchain_dir() -> PathBuf {
+pub fn toolchains_dir() -> PathBuf {
     fuelup_dir().join("toolchains")
 }
 
+pub fn toolchain_dir(toolchain: &str) -> PathBuf {
+    toolchains_dir().join(toolchain)
+}
+
 pub fn toolchain_bin_dir(toolchain: &str) -> PathBuf {
-    toolchain_dir().join(toolchain).join("bin")
+    toolchain_dir(toolchain).join("bin")
 }
 
 pub fn ensure_dir_exists(path: &Path) -> Result<()> {

@@ -1,6 +1,6 @@
-use crate::path::{ensure_dir_exists, settings_file, toolchain_bin_dir};
+use crate::commands::toolchain::NewCommand;
+use crate::path::{ensure_dir_exists, settings_file, toolchain_bin_dir, toolchains_dir};
 use crate::settings::SettingsFile;
-use crate::{commands::toolchain::NewCommand, path::toolchain_dir};
 use anyhow::bail;
 use anyhow::Result;
 use std::fs;
@@ -10,10 +10,10 @@ use tracing::info;
 pub fn new(command: NewCommand) -> Result<()> {
     let NewCommand { name } = command;
 
-    let toolchain_dir = toolchain_dir();
+    let toolchains_dir = toolchains_dir();
 
-    let toolchain_exists = toolchain_dir.is_dir()
-        && fs::read_dir(&toolchain_dir)?
+    let toolchain_exists = toolchains_dir.is_dir()
+        && fs::read_dir(&toolchains_dir)?
             .filter_map(io::Result::ok)
             .filter(|e| e.path().is_dir())
             .map(|e| e.file_name().into_string().ok().unwrap_or_default())
@@ -34,7 +34,7 @@ pub fn new(command: NewCommand) -> Result<()> {
         })?;
     }
 
-    ensure_dir_exists(&toolchain_dir.join(toolchain_bin_dir))?;
+    ensure_dir_exists(&toolchains_dir.join(toolchain_bin_dir))?;
     info!("New toolchain initialized: {}", &name);
 
     Ok(())

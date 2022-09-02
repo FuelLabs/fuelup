@@ -386,26 +386,100 @@ You are currently using 'latest-x86_64-apple-darwin'.
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
 "#;
         assert_eq!(output.stdout, expected_stdout);
+
+        let output = cfg.fuelup(&["component", "add", "fuel-core"]);
+        assert_eq!(output.stdout, expected_stdout);
     })?;
 
-    Ok(())
-}
-#[test]
-fn fuelup_component_remove_disallowed() -> Result<()> {
-    testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
-        let latest_toolchain_bin_dir = cfg.toolchain_bin_dir("latest-x86_64-apple-darwin");
-
-        expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
-        let output = cfg.fuelup(&["component", "remove", "forc"]);
-
-        let expected_stdout = r#"Removing specific components is reserved for custom toolchains.
-You are currently using 'latest-x86_64-apple-darwin'.
+    testcfg::setup(FuelupState::NightlyInstalled, &|cfg| {
+        let output = cfg.fuelup(&["component", "add", "forc@.19.1"]);
+        let expected_stdout = r#"Installing specific components is reserved for custom toolchains.
+You are currently using 'nightly-x86_64-apple-darwin'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
 "#;
         assert_eq!(output.stdout, expected_stdout);
+
+        let output = cfg.fuelup(&["component", "add", "fuel-core"]);
+        assert_eq!(output.stdout, expected_stdout);
+    })?;
+
+    testcfg::setup(FuelupState::NightlyDateInstalled, &|cfg| {
+        let output = cfg.fuelup(&["component", "add", "forc@.19.1"]);
+        let expected_stdout = format!(
+            r#"Installing specific components is reserved for custom toolchains.
+You are currently using 'nightly-{}-x86_64-apple-darwin'.
+
+You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
+"#,
+            DATE
+        );
+        assert_eq!(output.stdout, expected_stdout);
+
+        let output = cfg.fuelup(&["component", "add", "fuel-core"]);
+        assert_eq!(output.stdout, expected_stdout);
+    })?;
+    Ok(())
+}
+
+#[test]
+fn fuelup_component_remove_disallowed() -> Result<()> {
+    let latest = format!("latest-{}", TargetTriple::from_host().unwrap());
+    let nightly = format!("nightly-{}", TargetTriple::from_host().unwrap());
+    let nightly_date = format!("nightly-{}-{}", DATE, TargetTriple::from_host().unwrap());
+
+    testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+        let latest_toolchain_bin_dir = cfg.toolchain_bin_dir(&latest);
+
+        expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
+        let output = cfg.fuelup(&["component", "remove", "forc"]);
+
+        let expected_stdout = format!(
+            r#"Removing specific components is reserved for custom toolchains.
+You are currently using '{}'.
+
+You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
+"#,
+            latest
+        );
+        assert_eq!(output.stdout, expected_stdout);
         expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
     })?;
 
+    testcfg::setup(FuelupState::NightlyInstalled, &|cfg| {
+        let latest_toolchain_bin_dir = cfg.toolchain_bin_dir(&nightly);
+
+        expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
+        let output = cfg.fuelup(&["component", "remove", "forc"]);
+
+        let expected_stdout = format!(
+            r#"Removing specific components is reserved for custom toolchains.
+You are currently using '{}'.
+
+You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
+"#,
+            nightly
+        );
+        assert_eq!(output.stdout, expected_stdout);
+        expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
+    })?;
+
+    testcfg::setup(FuelupState::NightlyDateInstalled, &|cfg| {
+        let latest_toolchain_bin_dir = cfg.toolchain_bin_dir(&nightly_date);
+
+        expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
+        let output = cfg.fuelup(&["component", "remove", "forc"]);
+
+        let expected_stdout = format!(
+            r#"Removing specific components is reserved for custom toolchains.
+You are currently using '{}'.
+
+You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
+"#,
+            nightly_date
+        );
+        assert_eq!(output.stdout, expected_stdout);
+        expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
+    })?;
     Ok(())
 }

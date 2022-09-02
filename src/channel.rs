@@ -62,9 +62,11 @@ impl FromStr for PackageVersion {
         let semver = semver::Version::parse(semver_str).context("failed to parse semver")?;
         let date = match date_str {
             None => None,
-            Some(s) => Date::parse(s, format_description!("([year]-[month]-[day])"))
-                .context("specified date is invalid")
-                .ok(),
+            Some(s) => {
+                let date = Date::parse(s, format_description!("([year]-[month]-[day])"))
+                    .context("specified date is invalid")?;
+                Some(date)
+            }
         };
         Ok(PackageVersion { semver, date })
     }

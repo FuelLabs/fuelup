@@ -24,6 +24,26 @@ pub struct TestOutput {
     pub status: ExitStatus,
 }
 
+pub const FORC_BINS: &[&str] = &[
+    "forc",
+    "forc-deploy",
+    "forc-explore",
+    "forc-fmt",
+    "forc-lsp",
+    "forc-run",
+];
+pub const FUEL_CORE_BIN: &[&str] = &["fuel-core"];
+
+pub static ALL_BINS: &[&str] = &[
+    "forc",
+    "forc-deploy",
+    "forc-explore",
+    "forc-fmt",
+    "forc-lsp",
+    "forc-run",
+    "fuel-core",
+];
+
 impl TestCfg {
     pub fn new(fuelup_path: PathBuf, root: PathBuf, home: PathBuf) -> Self {
         Self {
@@ -92,11 +112,10 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             fs::create_dir_all(&bin_dir)
                 .expect("Failed to create temporary latest toolchain bin dir");
 
-            fs::File::create(&bin_dir.join("forc"))?;
-            fs::File::create(&bin_dir.join("forc-fmt"))?;
-            fs::File::create(&bin_dir.join("forc-lsp"))?;
-            fs::File::create(&bin_dir.join("forc-explore"))?;
-            fs::File::create(&bin_dir.join("fuel-core"))?;
+            for bin in ALL_BINS {
+                fs::File::create(&bin_dir.join(bin))?;
+            }
+
             fs::copy(
                 &env::current_dir()
                     .unwrap()

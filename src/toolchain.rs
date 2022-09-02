@@ -108,11 +108,8 @@ impl FromStr for OfficialToolchainDescription {
 
         let (date, target) = parse_metadata(metadata.to_string())?;
 
-        if name == "latest" && (date.is_some() || target.is_some()) {
-            bail!(
-                "You may not specify a date or target for '{}' toolchain",
-                name
-            )
+        if name == "latest" && date.is_some() {
+            bail!("You may not specify a date for '{}' toolchain", name)
         }
 
         Ok(Self {
@@ -321,16 +318,11 @@ mod tests {
         ] {
             for name in [channel::LATEST, channel::NIGHTLY] {
                 let toolchain = name.to_owned() + "-" + target;
-                if name == channel::LATEST {
-                    // TODO: Remove this branch once target specification is supported
-                    assert!(OfficialToolchainDescription::from_str(&toolchain).is_err());
-                } else {
-                    let desc = OfficialToolchainDescription::from_str(&toolchain).unwrap();
+                let desc = OfficialToolchainDescription::from_str(&toolchain).unwrap();
 
-                    assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
-                    assert!(desc.date.is_none());
-                    assert_eq!(desc.target.unwrap().to_string(), target);
-                }
+                assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
+                assert!(desc.date.is_none());
+                assert_eq!(desc.target.unwrap().to_string(), target);
             }
         }
 

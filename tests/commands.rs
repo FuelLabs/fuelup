@@ -51,6 +51,7 @@ fn fuelup_toolchain_install_latest() -> Result<()> {
             expect_files_exist(&toolchain_dir.path().join("bin"), ALL_BINS);
 
             let output = cfg.fuelup(&["check"]);
+            println!("{:?}", output);
             assert!(output.stdout.contains("forc - Up to date"));
             // TODO: uncomment once new fuel-core is released and this works
             // assert!(stdout.contains("fuel-core - Up to date"));

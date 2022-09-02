@@ -9,6 +9,7 @@ use tempfile::tempdir_in;
 pub enum FuelupState {
     Empty,
     LatestToolchainInstalled,
+    LatestAndCustomInstalled,
     LatestAndNightlyInstalled,
     NightlyAndNightlyDateInstalled,
 }
@@ -25,6 +26,8 @@ pub struct TestOutput {
     pub stderr: String,
     pub status: ExitStatus,
 }
+
+pub const DATE: &str = "2022-08-30";
 
 pub const FORC_BINS: &[&str] = &[
     "forc",
@@ -130,6 +133,10 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
         FuelupState::LatestToolchainInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, "latest-x86_64-apple-darwin")?;
         }
+        FuelupState::LatestAndCustomInstalled => {
+            setup_toolchain(&tmp_fuelup_root_path, "latest-x86_64-apple-darwin")?;
+            setup_toolchain(&tmp_fuelup_root_path, "my-toolchain")?;
+        }
         FuelupState::LatestAndNightlyInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, "latest-x86_64-apple-darwin")?;
             setup_toolchain(&tmp_fuelup_root_path, "nightly-x86_64-apple-darwin")?;
@@ -138,7 +145,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, "nightly-x86_64-apple-darwin")?;
             setup_toolchain(
                 &tmp_fuelup_root_path,
-                "nightly-2022-08-30-x86_64-apple-darwin",
+                &format!("nightly-{}-x86_64-apple-darwin", DATE),
             )?;
         }
     }

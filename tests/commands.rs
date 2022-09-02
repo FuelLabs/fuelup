@@ -6,7 +6,7 @@ mod testcfg;
 
 use testcfg::{FuelupState, ALL_BINS};
 
-use crate::testcfg::FORC_BINS;
+use crate::testcfg::{DATE, FORC_BINS};
 
 fn expect_files_exist(dir: &Path, expected: &[&str]) {
     let mut actual: Vec<String> = dir
@@ -220,6 +220,26 @@ fn fuelup_default() -> Result<()> {
 }
 
 #[test]
+fn fuelup_default_latest_and_custom() -> Result<()> {
+    testcfg::setup(FuelupState::LatestAndCustomInstalled, &|cfg| {
+        let output = cfg.fuelup(&["default", "latest"]);
+        let expected_stdout = format!(
+            "default toolchain set to 'latest-{}'\n",
+            TargetTriple::from_host().unwrap()
+        );
+
+        assert_eq!(output.stdout, expected_stdout);
+
+        let output = cfg.fuelup(&["default", "my-toolchain"]);
+        let expected_stdout = "default toolchain set to 'my-toolchain'\n";
+
+        assert_eq!(output.stdout, expected_stdout);
+    })?;
+
+    Ok(())
+}
+
+#[test]
 fn fuelup_default_uninstalled_toolchain() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["default", "nightly"]);
@@ -228,6 +248,43 @@ fn fuelup_default_uninstalled_toolchain() -> Result<()> {
             TargetTriple::from_host().unwrap()
         );
 
+        assert_eq!(output.stdout, expected_stdout);
+    })?;
+
+    Ok(())
+}
+
+#[test]
+fn fuelup_default_nightly() -> Result<()> {
+    testcfg::setup(FuelupState::LatestAndNightlyInstalled, &|cfg| {
+        let output = cfg.fuelup(&["default", "nightly"]);
+        let expected_stdout = format!(
+            "default toolchain set to 'nightly-{}'\n",
+            TargetTriple::from_host().unwrap()
+        );
+
+        assert_eq!(output.stdout, expected_stdout);
+    })?;
+
+    Ok(())
+}
+
+#[test]
+fn fuelup_default_nightly_and_nightly_date() -> Result<()> {
+    testcfg::setup(FuelupState::NightlyAndNightlyDateInstalled, &|cfg| {
+        let output = cfg.fuelup(&["default", "nightly"]);
+        let expected_stdout = format!(
+            "default toolchain set to 'nightly-{}'\n",
+            TargetTriple::from_host().unwrap()
+        );
+        assert_eq!(output.stdout, expected_stdout);
+
+        let output = cfg.fuelup(&["default", &format!("nightly-{}", DATE)]);
+        let expected_stdout = format!(
+            "default toolchain set to 'nightly-{}-{}'\n",
+            DATE,
+            TargetTriple::from_host().unwrap()
+        );
         assert_eq!(output.stdout, expected_stdout);
     })?;
 

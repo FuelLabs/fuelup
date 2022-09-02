@@ -37,7 +37,7 @@ pub struct Package {
     pub version: PackageVersion,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Ord, PartialOrd)]
 pub struct PackageVersion {
     pub semver: Version,
     pub date: Option<Date>,

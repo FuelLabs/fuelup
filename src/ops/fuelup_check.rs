@@ -53,28 +53,6 @@ fn compare_and_print_versions(
         Equal => {
             colored_bold(Color::Green, |s| write!(s, "Up to date"));
             println!(" : {}", current_version);
-            // dates always come in the format '(YYYY-MM-DD)'
-            //            if current_date.is_some() && latest_date.is_some() {
-            //                match current_date.cmp(&latest_date) {
-            //                    Less => {
-            //                        colored_bold(Color::Yellow, |s| write!(s, "Update available"));
-            //                        println!(" : {} -> {}", current_version, latest_version);
-            //                    }
-            //                    Equal => {
-            //                        colored_bold(Color::Green, |s| write!(s, "Up to date"));
-            //                        println!(" : {}", current_version);
-            //                    }
-            //                    Greater => {
-            //                        print!(" : {}", current_version);
-            //                        colored_bold(Color::Yellow, |s| write!(s, " (unstable)"));
-            //                        print!(" -> {}", latest_version);
-            //                        colored_bold(Color::Green, |s| writeln!(s, " (recommended)"));
-            //                    }
-            //                }
-            //            } else {
-            //                colored_bold(Color::Green, |s| write!(s, "Up to date"));
-            //                println!(" : {}", current_version);
-            //            }
         }
         Greater => {
             print!(" : {}", current_version);

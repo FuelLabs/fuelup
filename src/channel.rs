@@ -78,7 +78,7 @@ impl Channel {
         {
             Ok(_) => {
                 let toml_path = dst_path.join(channel_file_name);
-                read_file(CHANNEL_LATEST_FILE_NAME, &toml_path)?
+                read_file(channel_file_name, &toml_path)?
             }
             Err(_) => bail!(
                 "Could not download {} to {}",

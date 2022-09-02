@@ -209,9 +209,10 @@ fn fuelup_default_empty() -> Result<()> {
 
 #[test]
 fn fuelup_default() -> Result<()> {
+    let latest = format!("latest-{}", TargetTriple::from_host().unwrap());
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["default"]);
-        let expected_stdout = "latest-x86_64-apple-darwin (default)\n";
+        let expected_stdout = format!("{} (default)\n", latest);
 
         assert_eq!(output.stdout, expected_stdout);
     })?;
@@ -335,9 +336,11 @@ fn fuelup_toolchain_new_disallowed_with_target() -> Result<()> {
 
 #[test]
 fn fuelup_toolchain_new_and_set_default() -> Result<()> {
+    let latest = format!("latest-{}", TargetTriple::from_host().unwrap());
+
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["default"]);
-        let expected_stdout = "latest-x86_64-apple-darwin (default)\n";
+        let expected_stdout = format!("{} (default)\n", latest);
         assert_eq!(output.stdout, expected_stdout);
         assert!(!cfg.toolchain_bin_dir("my_toolchain").is_dir());
 
@@ -378,13 +381,17 @@ fn fuelup_component_add() -> Result<()> {
 
 #[test]
 fn fuelup_component_add_disallowed() -> Result<()> {
+    let latest = format!("latest-{}", TargetTriple::from_host().unwrap());
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["component", "add", "forc@0.19.1"]);
-        let expected_stdout = r#"Installing specific components is reserved for custom toolchains.
-You are currently using 'latest-x86_64-apple-darwin'.
+        let expected_stdout = format!(
+            r#"Installing specific components is reserved for custom toolchains.
+You are currently using '{}'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#;
+"#,
+            latest
+        );
         assert_eq!(output.stdout, expected_stdout);
 
         let output = cfg.fuelup(&["component", "add", "fuel-core"]);

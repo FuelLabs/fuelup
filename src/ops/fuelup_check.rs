@@ -117,7 +117,6 @@ fn check_fuelup() -> Result<()> {
         component::FUELUP,
         TargetTriple::from_component(component::FUELUP)?,
         None,
-        None,
     ) {
         bold(|s| write!(s, "{} - ", component::FUELUP));
         compare_and_print_versions(&fuelup_version, None, &fuelup_download_cfg.version, None)?;

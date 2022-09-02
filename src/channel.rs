@@ -5,10 +5,10 @@ use crate::{
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
 use anyhow::{anyhow, bail, Context, Result};
-use core::fmt;
 use semver::Version;
 use serde::{Deserialize, Deserializer};
 use sha2::{Digest, Sha256};
+use std::fmt;
 use std::str::FromStr;
 use std::{collections::HashMap, path::PathBuf};
 use time::{macros::format_description, Date};

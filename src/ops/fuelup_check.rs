@@ -29,13 +29,7 @@ fn collect_package_versions(channel: Channel) -> HashMap<String, PackageVersion>
     let mut latest_versions: HashMap<String, PackageVersion> = HashMap::new();
 
     for (name, package) in channel.pkg.into_iter() {
-        latest_versions.insert(
-            name,
-            PackageVersion {
-                semver: package.version.semver,
-                date: package.version.date,
-            },
-        );
+        latest_versions.insert(name, package.version.clone());
     }
 
     latest_versions

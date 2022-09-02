@@ -10,7 +10,6 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 use std::{fs, thread};
 use tar::Archive;
-use time::Date;
 use tracing::warn;
 use tracing::{error, info};
 
@@ -98,7 +97,7 @@ pub fn tarball_name(name: &str, version: &PackageVersion, target: &TargetTriple)
 
     match name {
         component::FORC => {
-            let postfix = if let Some(date) = version.date {
+            let postfix = if version.date.is_some() {
                 version_string.to_string() + "-" + &target.to_string()
             } else {
                 target.to_string()

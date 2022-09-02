@@ -5,8 +5,8 @@ use semver::Version;
 use tracing::info;
 
 use crate::{
-    commands::component::AddCommand, download::DownloadCfg, target_triple::TargetTriple,
-    toolchain::Toolchain,
+    channel::PackageVersion, commands::component::AddCommand, download::DownloadCfg,
+    target_triple::TargetTriple, toolchain::Toolchain,
 };
 
 pub fn add(command: AddCommand) -> Result<()> {
@@ -32,7 +32,7 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
         );
     }
 
-    let (component, version): (&str, Option<Version>) =
+    let (component, version): (&str, Option<PackageVersion>) =
         match maybe_versioned_component.split_once('@') {
             Some(t) => {
                 let v = match Version::from_str(t.1) {
@@ -43,7 +43,13 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
                         e
                     ),
                 };
-                (t.0, Some(v))
+                (
+                    t.0,
+                    Some(PackageVersion {
+                        semver: v,
+                        date: None,
+                    }),
+                )
             }
             None => (&maybe_versioned_component, None),
         };

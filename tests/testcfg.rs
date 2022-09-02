@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::{
     env, fs,
-    path::PathBuf,
+    path::{Path, PathBuf},
     process::{Command, ExitStatus},
 };
 use tempfile::tempdir_in;
@@ -9,6 +9,8 @@ use tempfile::tempdir_in;
 pub enum FuelupState {
     Empty,
     LatestToolchainInstalled,
+    LatestAndNightlyInstalled,
+    NightlyAndNightlyDateInstalled,
 }
 
 pub struct TestCfg {
@@ -81,6 +83,28 @@ impl TestCfg {
     }
 }
 
+fn setup_toolchain(fuelup_home_path: &Path, toolchain: &str) -> Result<()> {
+    let bin_dir = fuelup_home_path
+        .join("toolchains")
+        .join(toolchain)
+        .join("bin");
+    fs::create_dir_all(&bin_dir).expect("Failed to create temporary latest toolchain bin dir");
+
+    for bin in ALL_BINS {
+        fs::File::create(&bin_dir.join(bin))?;
+    }
+
+    fs::copy(
+        &env::current_dir()
+            .unwrap()
+            .join("tests/settings-example.toml"),
+        &fuelup_home_path.join("settings.toml"),
+    )
+    .expect("Failed to copy settings");
+
+    Ok(())
+}
+
 pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     let root = env::current_exe()
         .unwrap()
@@ -104,24 +128,18 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     match state {
         FuelupState::Empty => {}
         FuelupState::LatestToolchainInstalled => {
-            let bin_dir = tmp_fuelup_root_path
-                .join("toolchains")
-                .join("latest-x86_64-apple-darwin")
-                .join("bin");
-            fs::create_dir_all(&bin_dir)
-                .expect("Failed to create temporary latest toolchain bin dir");
-
-            for bin in ALL_BINS {
-                fs::File::create(&bin_dir.join(bin))?;
-            }
-
-            fs::copy(
-                &env::current_dir()
-                    .unwrap()
-                    .join("tests/settings-example.toml"),
-                &tmp_fuelup_root_path.join("settings.toml"),
-            )
-            .expect("Failed to copy settings");
+            setup_toolchain(&tmp_fuelup_root_path, "latest-x86_64-apple-darwin")?;
+        }
+        FuelupState::LatestAndNightlyInstalled => {
+            setup_toolchain(&tmp_fuelup_root_path, "latest-x86_64-apple-darwin")?;
+            setup_toolchain(&tmp_fuelup_root_path, "nightly-x86_64-apple-darwin")?;
+        }
+        FuelupState::NightlyAndNightlyDateInstalled => {
+            setup_toolchain(&tmp_fuelup_root_path, "nightly-x86_64-apple-darwin")?;
+            setup_toolchain(
+                &tmp_fuelup_root_path,
+                "nightly-2022-08-30-x86_64-apple-darwin",
+            )?;
         }
     }
 

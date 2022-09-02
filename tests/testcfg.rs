@@ -1,4 +1,5 @@
 use anyhow::Result;
+use fuelup::target_triple::TargetTriple;
 use std::{
     env, fs,
     path::{Path, PathBuf},
@@ -128,24 +129,28 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
         &tmp_fuelup_bin_dir_path.join("fuelup"),
     )?;
 
+    let target = TargetTriple::from_host().unwrap();
+    let latest = format!("latest-{}", target);
+    let nightly = format!("nightly-{}", target);
+
     match state {
         FuelupState::Empty => {}
         FuelupState::LatestToolchainInstalled => {
-            setup_toolchain(&tmp_fuelup_root_path, "latest-x86_64-apple-darwin")?;
+            setup_toolchain(&tmp_fuelup_root_path, &latest)?;
         }
         FuelupState::LatestAndCustomInstalled => {
-            setup_toolchain(&tmp_fuelup_root_path, "latest-x86_64-apple-darwin")?;
+            setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_toolchain(&tmp_fuelup_root_path, "my-toolchain")?;
         }
         FuelupState::LatestAndNightlyInstalled => {
-            setup_toolchain(&tmp_fuelup_root_path, "latest-x86_64-apple-darwin")?;
-            setup_toolchain(&tmp_fuelup_root_path, "nightly-x86_64-apple-darwin")?;
+            setup_toolchain(&tmp_fuelup_root_path, &latest)?;
+            setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
         }
         FuelupState::NightlyAndNightlyDateInstalled => {
-            setup_toolchain(&tmp_fuelup_root_path, "nightly-x86_64-apple-darwin")?;
+            setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
             setup_toolchain(
                 &tmp_fuelup_root_path,
-                &format!("nightly-{}-x86_64-apple-darwin", DATE),
+                &format!("nightly-{}-{}", DATE, target),
             )?;
         }
     }

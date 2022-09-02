@@ -15,6 +15,7 @@ use tracing::warn;
 use tracing::{error, info};
 
 use crate::channel::Package;
+use crate::channel::PackageVersion;
 use crate::component;
 use crate::constants::{
     FUELUP_RELEASE_DOWNLOAD_URL, FUELUP_REPO, FUEL_CORE_RELEASE_DOWNLOAD_URL, FUEL_CORE_REPO,
@@ -35,25 +36,22 @@ struct LatestReleaseApiResponse {
 pub struct DownloadCfg {
     pub name: String,
     pub target: TargetTriple,
-    pub version: Version,
-    pub date: Option<Date>,
+    pub version: PackageVersion,
     tarball_name: String,
     tarball_url: String,
     hash: Option<String>,
 }
 
 impl DownloadCfg {
-    pub fn new(
-        name: &str,
-        target: TargetTriple,
-        version: Option<Version>,
-        date: Option<Date>,
-    ) -> Result<Self> {
+    pub fn new(name: &str, target: TargetTriple, version: Option<PackageVersion>) -> Result<Self> {
         let version = match version {
             Some(version) => version,
-            None => get_latest_tag(name).map_err(|e| {
-                anyhow!("Error getting latest tag for component: {:?}: {}", name, e)
-            })?,
+            None => PackageVersion {
+                semver: get_latest_tag(name).map_err(|e| {
+                    anyhow!("Error getting latest tag for component: {:?}: {}", name, e)
+                })?,
+                date: None,
+            },
         };
 
         let release_url = match name {
@@ -62,14 +60,13 @@ impl DownloadCfg {
             component::FUELUP => FUELUP_RELEASE_DOWNLOAD_URL.to_string(),
             _ => bail!("Unrecognized component: {}", name),
         };
-        let tarball_name = tarball_name(name, &version, date, &target)?;
-        let tarball_url = format!("{}/v{}/{}", &release_url, &version, &tarball_name);
+        let tarball_name = tarball_name(name, &version, &target)?;
+        let tarball_url = format!("{}/v{}/{}", &release_url, &version.semver, &tarball_name);
 
         Ok(Self {
             name: name.to_string(),
             target,
             version,
-            date,
             tarball_name,
             tarball_url,
             hash: None,
@@ -78,15 +75,13 @@ impl DownloadCfg {
 
     pub fn from_package(name: &str, package: Package) -> Result<Self> {
         let target = TargetTriple::from_component(name)?;
-        let tarball_name =
-            tarball_name(name, &package.version.semver, package.version.date, &target)?;
+        let tarball_name = tarball_name(name, &package.version, &target)?;
         let tarball_url = package.target[&target.to_string()].url.clone();
         let hash = Some(package.target[&target.to_string()].hash.clone());
         Ok(Self {
             name: name.to_string(),
             target,
-            date: package.version.date,
-            version: package.version.semver,
+            version: package.version,
             tarball_name,
             tarball_url,
             hash,
@@ -94,12 +89,7 @@ impl DownloadCfg {
     }
 }
 
-pub fn tarball_name(
-    name: &str,
-    version: &Version,
-    date: Option<Date>,
-    target: &TargetTriple,
-) -> Result<String> {
+pub fn tarball_name(name: &str, version: &PackageVersion, target: &TargetTriple) -> Result<String> {
     let version = if let Some(d) = date {
         version.to_string() + "-" + &d.to_string()
     } else {

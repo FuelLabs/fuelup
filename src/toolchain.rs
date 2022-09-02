@@ -108,6 +108,13 @@ impl FromStr for OfficialToolchainDescription {
 
         let (date, target) = parse_metadata(metadata.to_string())?;
 
+        if name == "latest" && (date.is_some() || target.is_some()) {
+            bail!(
+                "You may not specify a date or target for '{}' toolchain",
+                name
+            )
+        }
+
         Ok(Self {
             name: DistToolchainName::from_str(name)?,
             date,

@@ -4,10 +4,11 @@ use crate::{
     file::read_file,
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use semver::Version;
 use serde::{Deserialize, Deserializer};
 use sha2::{Digest, Sha256};
+use std::str::FromStr;
 use std::{collections::HashMap, path::PathBuf};
 use time::{macros::format_description, Date};
 use toml_edit::de;
@@ -31,7 +32,7 @@ pub struct Channel {
 #[derive(Debug, Deserialize)]
 pub struct Package {
     pub target: HashMap<String, HashedBinary>,
-    #[serde(deserialize_with = "version_and_date_from_str")]
+    #[serde(deserialize_with = "package_version_from_str")]
     pub version: PackageVersion,
 }
 
@@ -41,26 +42,31 @@ pub struct PackageVersion {
     pub date: Option<Date>,
 }
 
-fn version_and_date_from_str<'de, D>(deserializer: D) -> Result<PackageVersion, D::Error>
+fn package_version_from_str<'de, D>(deserializer: D) -> Result<PackageVersion, D::Error>
 where
     D: Deserializer<'de>,
 {
     let s = String::deserialize(deserializer)?;
-    let (version, date) = match s.split_once(' ') {
-        Some((version, date)) => (version, Some(date)),
-        None => (s.as_str(), None),
-    };
+    s.parse().map_err(serde::de::Error::custom)
+}
 
-    let parsed_date = if let Some(date) = date {
-        Date::parse(date, format_description!("([year]-[month]-[day])")).ok()
-    } else {
-        None
-    };
-
-    Ok(PackageVersion {
-        semver: Version::parse(version).unwrap(),
-        date: parsed_date,
-    })
+impl FromStr for PackageVersion {
+    type Err = anyhow::Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut elems = s.split(' ');
+        let semver_str = elems
+            .next()
+            .ok_or_else(|| anyhow!("package version string is empty"))?;
+        let date_str = elems.next();
+        let semver = semver::Version::parse(semver_str).context("failed to parse semver")?;
+        let date = match date_str {
+            None => None,
+            Some(s) => Date::parse(s, format_description!("([year]-[month]-[day])"))
+                .context("specified date is invalid")
+                .ok(),
+        };
+        Ok(PackageVersion { semver, date })
+    }
 }
 
 impl Channel {

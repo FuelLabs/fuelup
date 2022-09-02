@@ -123,7 +123,7 @@ impl Channel {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{download::DownloadCfg, file::read_file};
+    use crate::{constants::DATE_FORMAT, download::DownloadCfg, file::read_file};
 
     #[test]
     fn channel_from_toml() {
@@ -183,8 +183,10 @@ mod tests {
         assert_eq!(cfgs.len(), 2);
         assert_eq!(cfgs[0].name, "forc");
         assert_eq!(cfgs[0].version, Version::parse("0.17.0").unwrap());
+        assert_eq!(cfgs[0].date, None);
         assert_eq!(cfgs[1].name, "fuel-core");
         assert_eq!(cfgs[1].version, Version::parse("0.9.4").unwrap());
+        assert_eq!(cfgs[1].date, None);
     }
 
     #[test]
@@ -199,8 +201,10 @@ mod tests {
 
         assert_eq!(cfgs.len(), 2);
         assert_eq!(cfgs[0].name, "forc");
-        assert_eq!(cfgs[0].version, "0.21.0-nightly (2022-08-30)");
+        assert_eq!(cfgs[0].version, Version::parse("0.21.0-nightly").unwrap());
+        assert_eq!(cfgs[0].date, Date::parse("2022-08-30", DATE_FORMAT).ok());
         assert_eq!(cfgs[1].name, "fuel-core");
-        assert_eq!(cfgs[1].version, "0.10.1-nightly (2022-08-30)");
+        assert_eq!(cfgs[1].version, Version::parse("0.10.1-nightly").unwrap());
+        assert_eq!(cfgs[1].date, Date::parse("2022-08-30", DATE_FORMAT).ok());
     }
 }

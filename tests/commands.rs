@@ -179,8 +179,9 @@ fn fuelup_check() -> Result<()> {
 
 #[test]
 fn fuelup_show() -> Result<()> {
-    testcfg::setup(FuelupState::Empty, &|cfg| {
+    testcfg::setup(FuelupState::AllInstalled, &|cfg| {
         cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
+        cfg.fuelup(&["default", "my_toolchain"]);
         let stdout = cfg.fuelup(&["show"]).stdout;
 
         let mut lines = stdout.lines();
@@ -190,9 +191,14 @@ fn fuelup_show() -> Result<()> {
         );
         assert!(lines.next().unwrap().contains("fuelup home: "));
 
-        let expected_stdout = r#"installed toolchains
+        let target = TargetTriple::from_host().unwrap();
+        let expected_stdout = &format!(
+            r#"installed toolchains
 --------------------
 my_toolchain (default)
+latest-{target}
+nightly-2022-08-30-{target}
+nightly-{target}
 
 active toolchain
 ----------------
@@ -205,7 +211,8 @@ my_toolchain (default)
       - forc-run - not found
       - forc-deploy - not found
   fuel-core - not found
-"#;
+"#
+        );
         assert!(stdout.contains(expected_stdout));
     })?;
     Ok(())

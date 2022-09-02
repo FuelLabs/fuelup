@@ -42,10 +42,9 @@ create_pkg_in_channel() {
     esac
 
     if [ "${2}" = "nightly" ]; then
-        semver="$(curl -s https://api.github.com/repos/FuelLabs/${_repo}/releases/latest | grep "tag_name" | cut -d "\"" -f4 | cut -c 2-)"
-        version="${semver}-nightly (${date})"
         _repo="sway-nightly-binaries"
-
+        semver="$(curl -s https://api.github.com/repos/FuelLabs/${_repo}/releases | grep "tag_name" | grep "nightly-${date}" | grep "${_tarball_prefix}" | head -n 1 | cut -d "-" -f3)"
+        version="${semver}-nightly (${date})"
         version_url_friendly="${semver}-nightly-${date}"
         _tarball_prefix+="-${version_url_friendly}"
         tag="${_tarball_prefix}"

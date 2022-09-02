@@ -90,16 +90,23 @@ impl DownloadCfg {
 }
 
 pub fn tarball_name(name: &str, version: &PackageVersion, target: &TargetTriple) -> Result<String> {
-    let version = if let Some(d) = date {
-        version.to_string() + "-" + &d.to_string()
+    let version_string = if let Some(date) = version.date {
+        version.semver.to_string() + "-" + &date.to_string()
     } else {
-        version.to_string()
+        version.semver.to_string()
     };
 
     match name {
-        component::FORC => Ok(format!("forc-binaries-{}.tar.gz", target)),
-        component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version, target)),
-        component::FUELUP => Ok(format!("fuelup-{}-{}.tar.gz", version, target)),
+        component::FORC => {
+            let postfix = if let Some(date) = version.date {
+                version.semver.to_string() + &target.to_string()
+            } else {
+                target.to_string()
+            };
+            Ok(format!("forc-binaries-{}.tar.gz", postfix))
+        }
+        component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version_string, target)),
+        component::FUELUP => Ok(format!("fuelup-{}-{}.tar.gz", version_string, target)),
         _ => bail!("Unrecognized component: {}", name),
     }
 }

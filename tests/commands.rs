@@ -382,6 +382,9 @@ fn fuelup_component_add() -> Result<()> {
 #[test]
 fn fuelup_component_add_disallowed() -> Result<()> {
     let latest = format!("latest-{}", TargetTriple::from_host().unwrap());
+    let nightly = format!("nightly-{}", TargetTriple::from_host().unwrap());
+    let nightly_date = format!("nightly-{}-{}", DATE, TargetTriple::from_host().unwrap());
+
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["component", "add", "forc@0.19.1"]);
         let expected_stdout = format!(
@@ -400,11 +403,14 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
 
     testcfg::setup(FuelupState::NightlyInstalled, &|cfg| {
         let output = cfg.fuelup(&["component", "add", "forc@.19.1"]);
-        let expected_stdout = r#"Installing specific components is reserved for custom toolchains.
-You are currently using 'nightly-x86_64-apple-darwin'.
+        let expected_stdout = format!(
+            r#"Installing specific components is reserved for custom toolchains.
+You are currently using '{}'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#;
+"#,
+            nightly
+        );
         assert_eq!(output.stdout, expected_stdout);
 
         let output = cfg.fuelup(&["component", "add", "fuel-core"]);
@@ -415,11 +421,11 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
         let output = cfg.fuelup(&["component", "add", "forc@.19.1"]);
         let expected_stdout = format!(
             r#"Installing specific components is reserved for custom toolchains.
-You are currently using 'nightly-{}-x86_64-apple-darwin'.
+You are currently using '{}'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
 "#,
-            DATE
+            nightly_date
         );
         assert_eq!(output.stdout, expected_stdout);
 

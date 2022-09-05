@@ -14,6 +14,7 @@ use tracing::warn;
 use tracing::{error, info};
 
 use crate::channel::Package;
+use crate::channel::PackageVersion;
 use crate::component;
 use crate::constants::{
     FUELUP_RELEASE_DOWNLOAD_URL, FUELUP_REPO, FUEL_CORE_RELEASE_DOWNLOAD_URL, FUEL_CORE_REPO,
@@ -34,19 +35,22 @@ struct LatestReleaseApiResponse {
 pub struct DownloadCfg {
     pub name: String,
     pub target: TargetTriple,
-    pub version: Version,
+    pub version: PackageVersion,
     tarball_name: String,
     tarball_url: String,
     hash: Option<String>,
 }
 
 impl DownloadCfg {
-    pub fn new(name: &str, target: TargetTriple, version: Option<Version>) -> Result<Self> {
+    pub fn new(name: &str, target: TargetTriple, version: Option<PackageVersion>) -> Result<Self> {
         let version = match version {
             Some(version) => version,
-            None => get_latest_tag(name).map_err(|e| {
-                anyhow!("Error getting latest tag for component: {:?}: {}", name, e)
-            })?,
+            None => PackageVersion {
+                semver: get_latest_tag(name).map_err(|e| {
+                    anyhow!("Error getting latest tag for component: {:?}: {}", name, e)
+                })?,
+                date: None,
+            },
         };
 
         let release_url = match name {
@@ -56,7 +60,7 @@ impl DownloadCfg {
             _ => bail!("Unrecognized component: {}", name),
         };
         let tarball_name = tarball_name(name, &version, &target)?;
-        let tarball_url = format!("{}/v{}/{}", &release_url, &version, &tarball_name);
+        let tarball_url = format!("{}/v{}/{}", &release_url, &version.semver, &tarball_name);
 
         Ok(Self {
             name: name.to_string(),
@@ -84,11 +88,24 @@ impl DownloadCfg {
     }
 }
 
-pub fn tarball_name(name: &str, version: &Version, target: &TargetTriple) -> Result<String> {
+pub fn tarball_name(name: &str, version: &PackageVersion, target: &TargetTriple) -> Result<String> {
+    let version_string = if let Some(date) = version.date {
+        version.semver.to_string() + "-" + &date.to_string()
+    } else {
+        version.semver.to_string()
+    };
+
     match name {
-        component::FORC => Ok(format!("forc-binaries-{}.tar.gz", target)),
-        component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version, target)),
-        component::FUELUP => Ok(format!("fuelup-{}-{}.tar.gz", version, target)),
+        component::FORC => {
+            let postfix = if version.date.is_some() {
+                version_string + "-" + &target.to_string()
+            } else {
+                target.to_string()
+            };
+            Ok(format!("forc-binaries-{}.tar.gz", postfix))
+        }
+        component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version_string, target)),
+        component::FUELUP => Ok(format!("fuelup-{}-{}.tar.gz", version_string, target)),
         _ => bail!("Unrecognized component: {}", name),
     }
 }

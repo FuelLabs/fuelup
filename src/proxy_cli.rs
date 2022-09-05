@@ -26,7 +26,7 @@ pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
 }
 
 fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: Toolchain) -> io::Result<ExitCode> {
-    let bin_path = toolchain.path.join(proc_name);
+    let bin_path = toolchain.bin_path.join(proc_name);
     let mut cmd = Command::new(bin_path);
 
     cmd.args(args);

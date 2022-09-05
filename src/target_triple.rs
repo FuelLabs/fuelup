@@ -2,7 +2,7 @@ use crate::component;
 use anyhow::{bail, Result};
 use std::fmt;
 
-#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct TargetTriple(String);
 
 impl fmt::Display for TargetTriple {
@@ -12,6 +12,26 @@ impl fmt::Display for TargetTriple {
 }
 
 impl TargetTriple {
+    pub fn new(s: &str) -> Result<Self> {
+        let (architecture, rest) = s.split_once('-').unwrap_or(("", ""));
+
+        if !["aarch64", "x86_64"].contains(&architecture) {
+            bail!("Unsupported architecture: '{}'", architecture);
+        }
+
+        let (vendor, os) = rest.split_once('-').unwrap_or(("", ""));
+
+        if !["apple", "unknown"].contains(&vendor) {
+            bail!("Unsupported vendor: '{}'", vendor);
+        }
+
+        if !["darwin", "linux-gnu"].contains(&os) {
+            bail!("Unsupported os: '{}'", os);
+        }
+
+        Ok(Self(s.to_string()))
+    }
+
     pub fn from_host() -> Result<Self> {
         let architecture = match std::env::consts::ARCH {
             "aarch64" | "x86_64" => std::env::consts::ARCH,

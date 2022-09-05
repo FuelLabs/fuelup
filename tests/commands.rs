@@ -1,12 +1,10 @@
 use anyhow::Result;
-use fuelup::target_triple::TargetTriple;
+use fuelup::{channel, target_triple::TargetTriple};
 use std::{env, path::Path};
 
 mod testcfg;
 
-use testcfg::{FuelupState, ALL_BINS, FUEL_CORE_BIN};
-
-use crate::testcfg::FORC_BINS;
+use testcfg::{FuelupState, ALL_BINS, FORC_BINS};
 
 fn expect_files_exist(dir: &Path, expected: &[&str]) {
     let mut actual: Vec<String> = dir
@@ -34,7 +32,7 @@ fn fuelup_version() -> Result<()> {
 }
 
 #[test]
-fn fuelup_toolchain_install() -> Result<()> {
+fn fuelup_toolchain_install_latest() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         cfg.fuelup(&["toolchain", "install", "latest"]);
 
@@ -54,6 +52,28 @@ fn fuelup_toolchain_install() -> Result<()> {
             assert!(output.stdout.contains("forc - Up to date"));
             // TODO: uncomment once new fuel-core is released and this works
             // assert!(stdout.contains("fuel-core - Up to date"));
+        }
+    })?;
+
+    Ok(())
+}
+
+#[test]
+fn fuelup_toolchain_install_nightly() -> Result<()> {
+    testcfg::setup(FuelupState::Empty, &|cfg| {
+        cfg.fuelup(&["toolchain", "install", "nightly"]);
+
+        for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
+            let toolchain_dir = entry.unwrap();
+            let expected_toolchain_name =
+                "nightly-".to_owned() + &TargetTriple::from_host().unwrap().to_string();
+            assert_eq!(
+                expected_toolchain_name,
+                toolchain_dir.file_name().to_str().unwrap()
+            );
+            assert!(toolchain_dir.file_type().unwrap().is_dir());
+
+            expect_files_exist(&toolchain_dir.path().join("bin"), ALL_BINS);
         }
     })?;
 
@@ -142,6 +162,21 @@ fn fuelup_default() -> Result<()> {
 }
 
 #[test]
+fn fuelup_default_uninstalled_toolchain() -> Result<()> {
+    testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+        let output = cfg.fuelup(&["default", "nightly"]);
+        let expected_stdout = format!(
+            "Toolchain with name 'nightly-{}' does not exist\n",
+            TargetTriple::from_host().unwrap()
+        );
+
+        assert_eq!(output.stdout, expected_stdout);
+    })?;
+
+    Ok(())
+}
+
+#[test]
 fn fuelup_toolchain_new() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let output = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
@@ -160,9 +195,11 @@ fn fuelup_toolchain_new() -> Result<()> {
 #[test]
 fn fuelup_toolchain_new_disallowed() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let output = cfg.fuelup(&["toolchain", "new", "latest"]);
-        let expected_stderr = "error: Invalid value \"latest\" for '<NAME>': Cannot use official toolchain name 'latest' as a custom toolchain name\n\nFor more information try --help\n";
-        assert_eq!(output.stderr, expected_stderr);
+        for toolchain in [channel::LATEST, channel::NIGHTLY] {
+            let output = cfg.fuelup(&["toolchain", "new", toolchain]);
+            let expected_stderr = format!("error: Invalid value \"{toolchain}\" for '<NAME>': Cannot use official toolchain name '{toolchain}' as a custom toolchain name\n\nFor more information try --help\n");
+            assert_eq!(output.stderr, expected_stderr);
+        }
     })?;
 
     Ok(())
@@ -228,8 +265,8 @@ fn fuelup_component_add() -> Result<()> {
 fn fuelup_component_add_disallowed() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["component", "add", "forc@0.19.1"]);
-        let expected_stdout = r#"Installing specific versions of components is reserved for custom toolchains.
-You are currently using 'latest'.
+        let expected_stdout = r#"Installing specific components is reserved for custom toolchains.
+You are currently using 'latest-x86_64-apple-darwin'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
 "#;
@@ -239,16 +276,20 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
     Ok(())
 }
 #[test]
-fn fuelup_component_remove() -> Result<()> {
+fn fuelup_component_remove_disallowed() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let latest_toolchain_bin_dir = cfg.toolchain_bin_dir("latest-x86_64-apple-darwin");
 
         expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
-        let _ = cfg.fuelup(&["component", "remove", "forc"]);
-        expect_files_exist(&latest_toolchain_bin_dir, FUEL_CORE_BIN);
+        let output = cfg.fuelup(&["component", "remove", "forc"]);
 
-        let _ = cfg.fuelup(&["component", "remove", "fuel-core"]);
-        expect_files_exist(&latest_toolchain_bin_dir, &[]);
+        let expected_stdout = r#"Removing specific components is reserved for custom toolchains.
+You are currently using 'latest-x86_64-apple-darwin'.
+
+You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
+"#;
+        assert_eq!(output.stdout, expected_stdout);
+        expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
     })?;
 
     Ok(())

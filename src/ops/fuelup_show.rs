@@ -57,7 +57,7 @@ pub fn show() -> Result<()> {
 
     for component in [component::FORC, component::FUEL_CORE] {
         if let Some(c) = channel.as_ref() {
-            let version = &c.pkg[component].version.semver;
+            let version = &c.pkg[component].version;
             bold(|s| write!(s, "  {}", &component));
             println!(" : {}", version);
         } else {
@@ -95,7 +95,7 @@ pub fn show() -> Result<()> {
         if component == component::FORC {
             for plugin in SUPPORTED_PLUGINS {
                 if let Some(c) = channel.as_ref() {
-                    let version = &c.pkg[component].version.semver;
+                    let version = &c.pkg[component].version;
 
                     if plugin == &component::FORC_DEPLOY {
                         bold(|s| writeln!(s, "    - forc-client"));

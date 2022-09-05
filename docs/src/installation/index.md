@@ -28,14 +28,14 @@ curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-in
 Ensure that all components are downloaded and works:
 
 ```sh
-fuelup --version;
-forc --version;
-fuel-core --version;
-forc-deploy --version;
-forc-explore --version;
-forc-fmt --version;
-forc-lsp --version;
-forc-run --version;
+fuelup --version
+forc --version
+fuel-core --version
+forc-deploy --version
+forc-explore --version
+forc-fmt --version
+forc-lsp --version
+forc-run --version
 ```
 
 [repository]: https://github.com/FuelLabs/fuelup

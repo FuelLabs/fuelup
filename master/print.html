@@ -185,7 +185,7 @@ fuelup and getting started.</p>
 <p>Release notes for <em>fuelup</em> may be found under <a href="https://github.com/FuelLabs/fuelup/releases">Releases</a> in our GitHub repository.</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
 <p><code>fuelup</code> installs <code>forc</code> and <code>fuel-core</code>, and other plugins like
-<code>forc-fmt</code>, <code>forc-lsp</code> and <code>forc-explore</code> to Fuelup's <code>bin</code> directory.
+<code>forc-client</code>, <code>forc-fmt</code>, <code>forc-lsp</code> and <code>forc-explore</code> to Fuelup's <code>bin</code> directory.
 On Unix it is located at <code>$HOME/.fuelup/bin</code>.</p>
 <p>This directory can automatically be in your <code>PATH</code> environment variable if
 allowed in the installation step (explained below), which means you can run them from the shell without further configuration.</p>
@@ -194,12 +194,19 @@ allowed in the installation step (explained below), which means you can run them
 <p>Run the following command:</p>
 <pre><code class="language-sh">curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh
 </code></pre>
-<p>This will install <code>forc</code>, <code>forc-fmt</code>, <code>forc-explore</code>, <code>forc-lsp</code> as well as <code>fuel-core</code> in <code>~/.fuelup/bin</code>. The script will ask for permission to add <code>~/.fuelup/bin</code> to your <code>PATH</code>.</p>
+<p>This will install <code>forc</code>, <code>forc-client</code>, <code>forc-fmt</code>, <code>forc-explore</code>, <code>forc-lsp</code> as well as <code>fuel-core</code> in <code>~/.fuelup/bin</code>. The script will ask for permission to add <code>~/.fuelup/bin</code> to your <code>PATH</code>.</p>
 <p>Otherwise, you can also pass <code>--no-modify-path</code> so that <code>fuelup-init</code> does not modify your <code>PATH</code> and will not ask for permission to do so:</p>
 <pre><code class="language-sh">curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh -s -- --no-modify-path
 </code></pre>
 <p>Ensure that all components are downloaded and works:</p>
-<pre><code class="language-sh">fuelup --version; forc --version; fuel-core --version; forc-fmt --version; forc-lsp --version; forc-explore --version
+<pre><code class="language-sh">fuelup --version
+forc --version
+fuel-core --version
+forc-deploy --version
+forc-explore --version
+forc-fmt --version
+forc-lsp --version
+forc-run --version
 </code></pre>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="other-installation-methods"><a class="header" href="#other-installation-methods">Other installation methods</a></h1>
 <h2 id="windows"><a class="header" href="#windows">Windows</a></h2>

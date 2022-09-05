@@ -7,10 +7,12 @@ use crate::{
     file::read_file,
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use semver::Version;
 use serde::{Deserialize, Deserializer};
 use sha2::{Digest, Sha256};
+use std::fmt;
+use std::str::FromStr;
 use std::{collections::HashMap, path::PathBuf};
 use time::{macros::format_description, Date};
 use toml_edit::de;
@@ -34,36 +36,51 @@ pub struct Channel {
 #[derive(Debug, Deserialize)]
 pub struct Package {
     pub target: HashMap<String, HashedBinary>,
-    #[serde(deserialize_with = "version_and_date_from_str")]
+    #[serde(deserialize_with = "package_version_from_str")]
     pub version: PackageVersion,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Clone)]
 pub struct PackageVersion {
     pub semver: Version,
     pub date: Option<Date>,
 }
 
-fn version_and_date_from_str<'de, D>(deserializer: D) -> Result<PackageVersion, D::Error>
+fn package_version_from_str<'de, D>(deserializer: D) -> Result<PackageVersion, D::Error>
 where
     D: Deserializer<'de>,
 {
     let s = String::deserialize(deserializer)?;
-    let (version, date) = match s.split_once(' ') {
-        Some((version, date)) => (version, Some(date)),
-        None => (s.as_str(), None),
-    };
+    s.parse().map_err(serde::de::Error::custom)
+}
 
-    let parsed_date = if let Some(date) = date {
-        Date::parse(date, format_description!("([year]-[month]-[day])")).ok()
-    } else {
-        None
-    };
-
-    Ok(PackageVersion {
-        semver: Version::parse(version).unwrap(),
-        date: parsed_date,
-    })
+impl FromStr for PackageVersion {
+    type Err = anyhow::Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut elems = s.split(' ');
+        let semver_str = elems
+            .next()
+            .ok_or_else(|| anyhow!("package version string is empty"))?;
+        let date_str = elems.next();
+        let semver = semver::Version::parse(semver_str).context("failed to parse semver")?;
+        let date = match date_str {
+            None => None,
+            Some(s) => {
+                let date = Date::parse(s, format_description!("([year]-[month]-[day])"))
+                    .context("specified date is invalid")?;
+                Some(date)
+            }
+        };
+        Ok(PackageVersion { semver, date })
+    }
+}
+impl fmt::Display for PackageVersion {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.date {
+            Some(d) => write!(f, "{} ({})", self.semver, d),
+            None => write!(f, "{}", self.semver),
+        }
+    }
 }
 
 impl Channel {
@@ -182,11 +199,12 @@ mod tests {
 
         assert_eq!(cfgs.len(), 2);
         assert_eq!(cfgs[0].name, "forc");
-        assert_eq!(cfgs[0].version, Version::parse("0.17.0").unwrap());
-        assert_eq!(cfgs[0].date, None);
+        assert_eq!(cfgs[0].version.semver, Version::parse("0.17.0").unwrap());
+        assert_eq!(cfgs[0].version.date, None);
+
         assert_eq!(cfgs[1].name, "fuel-core");
-        assert_eq!(cfgs[1].version, Version::parse("0.9.4").unwrap());
-        assert_eq!(cfgs[1].date, None);
+        assert_eq!(cfgs[1].version.semver, Version::parse("0.9.4").unwrap());
+        assert_eq!(cfgs[1].version.date, None);
     }
 
     #[test]
@@ -201,10 +219,22 @@ mod tests {
 
         assert_eq!(cfgs.len(), 2);
         assert_eq!(cfgs[0].name, "forc");
-        assert_eq!(cfgs[0].version, Version::parse("0.21.0-nightly").unwrap());
-        assert_eq!(cfgs[0].date, Date::parse("2022-08-30", DATE_FORMAT).ok());
+        assert_eq!(
+            cfgs[0].version.semver,
+            Version::parse("0.21.0-nightly").unwrap()
+        );
+        assert_eq!(
+            cfgs[0].version.date,
+            Date::parse("2022-08-30", DATE_FORMAT).ok()
+        );
         assert_eq!(cfgs[1].name, "fuel-core");
-        assert_eq!(cfgs[1].version, Version::parse("0.10.1-nightly").unwrap());
-        assert_eq!(cfgs[1].date, Date::parse("2022-08-30", DATE_FORMAT).ok());
+        assert_eq!(
+            cfgs[1].version.semver,
+            Version::parse("0.10.1-nightly").unwrap()
+        );
+        assert_eq!(
+            cfgs[1].version.date,
+            Date::parse("2022-08-30", DATE_FORMAT).ok()
+        );
     }
 }

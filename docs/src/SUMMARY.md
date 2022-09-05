@@ -7,6 +7,7 @@
 - [Concepts](concepts/index.md)
   - [Channels](concepts/channels/index.md)
     - [latest](concepts/channels/latest.md)
+    - [nightly](concepts/channels/nightly.md)
   - [Toolchains](concepts/toolchains.md)
   - [Components](concepts/components.md)
   - [Proxies](concepts/proxies.md)

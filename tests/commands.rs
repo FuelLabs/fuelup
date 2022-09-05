@@ -475,7 +475,6 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
 #[test]
 fn fuelup_component_remove_disallowed() -> Result<()> {
     let latest = format!("latest-{}", TargetTriple::from_host().unwrap());
-    let nightly = format!("nightly-{}", TargetTriple::from_host().unwrap());
     let nightly_date = format!("nightly-{}-{}", DATE, TargetTriple::from_host().unwrap());
 
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
@@ -484,32 +483,11 @@ fn fuelup_component_remove_disallowed() -> Result<()> {
         expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
         let output = cfg.fuelup(&["component", "remove", "forc"]);
 
-        let expected_stdout = format!(
-            r#"Removing specific components is reserved for custom toolchains.
-You are currently using '{}'.
+        let expected_stdout = r#"Removing specific components is reserved for custom toolchains.
+You are currently using 'latest-x86_64-apple-darwin'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#,
-            latest
-        );
-        assert_eq!(output.stdout, expected_stdout);
-        expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
-    })?;
-
-    testcfg::setup(FuelupState::NightlyInstalled, &|cfg| {
-        let latest_toolchain_bin_dir = cfg.toolchain_bin_dir(&nightly);
-
-        expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
-        let output = cfg.fuelup(&["component", "remove", "forc"]);
-
-        let expected_stdout = format!(
-            r#"Removing specific components is reserved for custom toolchains.
-You are currently using '{}'.
-
-You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#,
-            nightly
-        );
+"#;
         assert_eq!(output.stdout, expected_stdout);
         expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
     })?;

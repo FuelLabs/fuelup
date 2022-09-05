@@ -22,7 +22,6 @@ pub fn self_update() -> Result<()> {
         component::FUELUP,
         TargetTriple::from_component(component::FUELUP)?,
         None,
-        None,
     )?;
 
     let fuelup_bin = fuelup_bin();

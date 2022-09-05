@@ -35,7 +35,7 @@ forc-deploy --version;
 forc-explore --version;
 forc-fmt --version;
 forc-lsp --version;
-forc-run --version
+forc-run --version;
 ```
 
 [repository]: https://github.com/FuelLabs/fuelup

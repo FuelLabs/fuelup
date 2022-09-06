@@ -14,8 +14,6 @@ fn run() -> Result<()> {
         .and_then(std::ffi::OsStr::to_str)
         .map(String::from);
 
-    println!("proc_name: {:?}", process_name);
-
     match process_name.as_deref() {
         Some(component::FUELUP) => {
             if let Err(e) = fuelup_cli::fuelup_cli() {

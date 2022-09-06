@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::Result;
 use fuelup::component;
 use fuelup::{fuelup_cli, proxy_cli};
 use std::panic;
@@ -14,22 +14,18 @@ fn run() -> Result<()> {
         .and_then(std::ffi::OsStr::to_str)
         .map(String::from);
 
+    println!("proc_name: {:?}", process_name);
+
     match process_name.as_deref() {
         Some(component::FUELUP) => {
             if let Err(e) = fuelup_cli::fuelup_cli() {
                 error!("{}", e);
             }
         }
-        Some(n) if component::SUPPORTED_COMPONENTS.contains(&n) => {
+        Some(n) => {
             if let Err(e) = proxy_cli::proxy_run(n) {
                 error!("{}", e);
             }
-        }
-        Some(n) => {
-            bail!(
-                "fuelup invoked with unexpected command or component {:?}",
-                n
-            )
         }
         None => panic!("fuelup does not understand this command"),
     }

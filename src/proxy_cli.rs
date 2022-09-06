@@ -4,7 +4,6 @@ use std::os::unix::prelude::CommandExt;
 use std::process::{Command, ExitCode, Stdio};
 use std::{env, io};
 
-use crate::component;
 use crate::toolchain::Toolchain;
 
 /// Runs forc or fuel-core in proxy mode
@@ -12,16 +11,7 @@ pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
     let cmd_args: Vec<_> = env::args_os().skip(1).collect();
     let toolchain = Toolchain::from_settings()?;
 
-    if !cmd_args.is_empty()
-        && component::SUPPORTED_PLUGINS
-            .contains(&cmd_args[0].to_str().expect("Failed to parse cmd args"))
-    {
-        let plugin = &format!("{}-{}", arg0, &cmd_args[0].to_string_lossy());
-        direct_proxy(plugin, &cmd_args[1..], toolchain)?;
-    } else {
-        direct_proxy(arg0, &cmd_args, toolchain)?;
-    }
-
+    direct_proxy(arg0, &cmd_args, toolchain)?;
     Ok(ExitCode::SUCCESS)
 }
 

@@ -156,6 +156,10 @@ jobs:
 
             ./.github/workflows/scripts/index-versions.sh forc ${{ env.LATEST_COMPATIBLE_FORC }} $CHANNEL_TOML
             ./.github/workflows/scripts/index-versions.sh fuel-core ${{ env.LATEST_COMPATIBLE_FUEL_CORE }} $CHANNEL_TOML
+
+            # Remove extra newline at the end
+            truncate -s -1 $CHANNEL_TOML
+
             cp $CHANNEL_TOML ${{ env.LATEST_CHANNEL_DIR }}
 
       - name: Deploy latest channel

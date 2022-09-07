@@ -142,7 +142,7 @@ jobs:
               echo published_by=https://github.com/FuelLabs/fuelup/actions/runs/$GITHUB_RUN_ID >> ${{ env.INCOMPATIBLE_DIR }}/$version
             done
 
-      # Run index-versions.sh here which generates the channel TOML file with download links and hashes for forc and fuel-core.
+      # Run append_package_to_channel.sh here which generates the channel TOML file with download links and hashes for forc and fuel-core.
       - name: Prepare channel with compatible versions
         if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
         run: |
@@ -154,8 +154,8 @@ jobs:
             touch $CHANNEL_TOML
             echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >> $CHANNEL_TOML
 
-            ./.github/workflows/scripts/index-versions.sh forc ${{ env.LATEST_COMPATIBLE_FORC }} $CHANNEL_TOML
-            ./.github/workflows/scripts/index-versions.sh fuel-core ${{ env.LATEST_COMPATIBLE_FUEL_CORE }} $CHANNEL_TOML
+            ./.github/workflows/scripts/append_package_to_channel.sh forc ${{ env.LATEST_COMPATIBLE_FORC }} $CHANNEL_TOML
+            ./.github/workflows/scripts/append_package_to_channel.sh fuel-core ${{ env.LATEST_COMPATIBLE_FUEL_CORE }} $CHANNEL_TOML
 
             # Remove extra newline at the end
             truncate -s -1 $CHANNEL_TOML

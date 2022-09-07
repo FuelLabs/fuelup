@@ -21,10 +21,21 @@ jobs:
         id: setup
         run: |
             archive_dir=$(date +'%Y/%m/%d')
-            touch channel-fuel-nightly.toml
             mkdir -p ${{ env.NIGHTLY_CHANNEL_DIR }}
-            ./.github/workflows/scripts/index-versions.sh nightly nightly $GITHUB_RUN_ID channel-fuel-nightly.toml
-            cp channel-fuel-nightly.toml ${{ env.NIGHTLY_CHANNEL_DIR }}
+
+            CHANNEL_TOML="channel-fuel-nightly.toml"
+
+            # Create header for channel
+            touch $CHANNEL_TOML
+            echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >> $CHANNEL_TOML
+
+            ./.github/workflows/scripts/index-versions.sh forc nightly $CHANNEL_TOML
+            ./.github/workflows/scripts/index-versions.sh fuel-core nightly $CHANNEL_TOML
+
+            # Remove extra newline at the end
+            truncate -s -1 $CHANNEL_TOML
+
+            cp $CHANNEL_TOML ${{ env.NIGHTLY_CHANNEL_DIR }}
 
             echo "::set-output name=archive_dir::channels/nightly/$archive_dir"
 

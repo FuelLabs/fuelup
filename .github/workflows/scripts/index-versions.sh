@@ -68,22 +68,13 @@ create_pkg_in_channel() {
 }
 
 main() {
-    FORC_LATEST_VERSION=$1
-    FUEL_CORE_LATEST_VERSION=$2
-    GITHUB_RUN_ID=$3
-    CHANNEL_TOML_NAME=$4
-    mv "$CHANNEL_TOML_NAME" channel.tmp.toml
-    # Cleanup tmp and downloaded tars/bin folders
-    trap 'rm channel.tmp.toml *.tar.gz' ERR EXIT
+    COMPONENT=$1
+    VERSION=$2
+    CHANNEL_TOML_NAME=$3
+    trap 'rm *.tar.gz' ERR EXIT
 
-    echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >>"$CHANNEL_TOML_NAME"
+    create_pkg_in_channel "${COMPONENT}" "${VERSION}" "${CHANNEL_TOML_NAME}"
 
-    create_pkg_in_channel forc "${FORC_LATEST_VERSION}" "${CHANNEL_TOML_NAME}"
-    create_pkg_in_channel fuel-core "${FUEL_CORE_LATEST_VERSION}" "${CHANNEL_TOML_NAME}"
-
-    # remove newline at the end
-    truncate -s -1 "$CHANNEL_TOML_NAME"
-    printf "Done.\n"
     exit 0
 }
 

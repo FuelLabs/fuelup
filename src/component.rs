@@ -44,18 +44,20 @@ impl Components {
     }
 
     pub fn collect_exclude_plugins() -> Result<Vec<Component>> {
-        let toml = Self::from_toml(COMPONENTS_TOML)?;
+        let components = Self::from_toml(COMPONENTS_TOML)?;
 
-        let mut main_components: Vec<Component> = toml
+        let mut main_components: Vec<Component> = components
             .component
             .keys()
             .filter(|&c| {
-                toml.component
+                components
+                    .component
                     .get(c)
                     .map_or(false, |p| !p.is_plugin.unwrap_or_default())
             })
             .map(|c| {
-                toml.component
+                components
+                    .component
                     .get(c)
                     .cloned()
                     .expect(&format!("Failed to get component '{}' from toml", c))

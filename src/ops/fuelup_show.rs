@@ -1,11 +1,12 @@
 use anyhow::Result;
 use semver::Version;
-use std::io::Write;
 use std::str::FromStr;
+use std::{io::Write, path::Path};
 
+use crate::component::Components;
 use crate::{
     channel::Channel,
-    component::{self, SUPPORTED_PLUGINS},
+    component,
     config::Config,
     constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME},
     file::read_file,
@@ -14,6 +15,37 @@ use crate::{
     target_triple::TargetTriple,
     toolchain::{DistToolchainName, OfficialToolchainDescription, Toolchain},
 };
+
+fn exec_show_version(component: &str, component_executable: &Path) -> Result<()> {
+    bold(|s| write!(s, "  - {}", &component));
+    match std::process::Command::new(component_executable)
+        .arg("--version")
+        .output()
+    {
+        Ok(o) => {
+            let output = String::from_utf8_lossy(&o.stdout).into_owned();
+            match output.split_whitespace().nth(1) {
+                Some(v) => {
+                    let version = Version::parse(v)?;
+                    println!(" : {}", version);
+                }
+                None => {
+                    eprintln!("  {} - Error getting version string", component);
+                }
+            };
+        }
+        Err(e) => {
+            print!(" - ");
+            if component_executable.exists() {
+                println!("execution error - {}", e);
+            } else {
+                println!("not found");
+            }
+        }
+    }
+
+    Ok(())
+}
 
 pub fn show() -> Result<()> {
     bold(|s| write!(s, "Default host: "));
@@ -62,85 +94,35 @@ pub fn show() -> Result<()> {
             println!(" : {}", version);
         } else {
             let component_executable = active_toolchain.bin_path.join(component);
-            match std::process::Command::new(&component_executable)
-                .arg("--version")
-                .output()
-            {
-                Ok(o) => {
-                    let output = String::from_utf8_lossy(&o.stdout).into_owned();
-                    match output.split_whitespace().nth(1) {
-                        Some(v) => {
-                            let version = Version::parse(v)?;
-                            bold(|s| write!(s, "  {}", &component));
-                            println!(" : {}", version);
-                        }
-                        None => {
-                            eprintln!("  {} - Error getting version string", component);
-                        }
-                    };
-                }
-                Err(e) => {
-                    print!("  ");
-                    bold(|s| write!(s, "{}", &component));
-                    print!(" - ");
-                    if component_executable.exists() {
-                        println!("execution error - {}", e);
-                    } else {
-                        println!("not found");
-                    }
-                }
-            }
+            exec_show_version(component, component_executable.as_path())?;
         };
 
         if component == component::FORC {
-            for plugin in SUPPORTED_PLUGINS {
+            for plugin in Components::collect_plugins()? {
                 if let Some(c) = channel.as_ref() {
                     let version = &c.pkg[component].version;
+                    bold(|s| write!(s, "  - {}", &plugin.name));
 
-                    if plugin == &component::FORC_DEPLOY {
-                        bold(|s| writeln!(s, "    - forc-client"));
+                    if !plugin.is_main_executable() {
+                        println!();
+                        for executable in plugin.executables.iter() {
+                            bold(|s| write!(s, "     - {}", &executable));
+                            println!(" : {}", version);
+                        }
+                    } else {
+                        println!(" : {}", version);
                     }
-                    if plugin == &component::FORC_RUN || plugin == &component::FORC_DEPLOY {
-                        print!("  ");
-                    }
-                    bold(|s| write!(s, "    - {}", &plugin));
-                    println!(" : {}", version);
                 } else {
-                    let plugin_executable = active_toolchain.bin_path.join(&plugin);
-                    if plugin == &component::FORC_DEPLOY {
-                        bold(|s| writeln!(s, "    - forc-client"));
-                    }
-                    if plugin == &component::FORC_RUN || plugin == &component::FORC_DEPLOY {
-                        print!("  ");
-                    }
-                    match std::process::Command::new(&plugin_executable)
-                        .arg("--version")
-                        .output()
-                    {
-                        Ok(o) => {
-                            let output = String::from_utf8_lossy(&o.stdout).into_owned();
-                            match output.split_whitespace().nth(1) {
-                                Some(v) => {
-                                    let version = Version::parse(v)?;
-                                    print!("    - ");
-                                    bold(|s| write!(s, "{}", plugin));
-                                    println!(" : {}", version);
-                                }
-                                None => {
-                                    eprintln!("    - {} - Error getting version string", plugin);
-                                }
-                            };
+                    if !plugin.is_main_executable() {
+                        bold(|s| writeln!(s, "  - {}", &plugin.name));
+                        for executable in plugin.executables.iter() {
+                            print!("  ");
+                            let plugin_executable = active_toolchain.bin_path.join(&executable);
+                            exec_show_version(&executable, plugin_executable.as_path())?;
                         }
-                        Err(e) => {
-                            print!("    - ");
-                            bold(|s| write!(s, "{}", plugin));
-                            print!(" - ");
-                            if plugin_executable.exists() {
-                                println!("execution error - {}", e);
-                            } else {
-                                println!("not found");
-                            }
-                        }
+                    } else {
+                        let plugin_executable = active_toolchain.bin_path.join(&plugin.name);
+                        exec_show_version(&plugin.name, plugin_executable.as_path())?;
                     }
                 }
             }

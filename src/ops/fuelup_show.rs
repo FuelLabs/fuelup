@@ -87,21 +87,21 @@ pub fn show() -> Result<()> {
         None
     };
 
-    for component in [component::FORC, component::FUEL_CORE] {
+    for component in Components::collect_exclude_plugins()? {
         if let Some(c) = channel.as_ref() {
-            let version = &c.pkg[component].version;
-            bold(|s| write!(s, "  {}", &component));
+            let version = &c.pkg[&component.name].version;
+            bold(|s| write!(s, "  {}", &component.name));
             println!(" : {}", version);
         } else {
-            let component_executable = active_toolchain.bin_path.join(component);
-            exec_show_version(component, component_executable.as_path())?;
+            let component_executable = active_toolchain.bin_path.join(&component.name);
+            exec_show_version(&component.name, component_executable.as_path())?;
         };
 
-        if component == component::FORC {
+        if component.name == component::FORC {
             for plugin in Components::collect_plugins()? {
                 if let Some(c) = channel.as_ref() {
-                    let version = &c.pkg[component].version;
                     bold(|s| write!(s, "  - {}", &plugin.name));
+                    let version = &c.pkg[&component.name].version;
 
                     if !plugin.is_main_executable() {
                         println!();

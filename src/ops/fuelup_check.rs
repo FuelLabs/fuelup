@@ -1,6 +1,7 @@
 use crate::{
     channel::{Channel, PackageVersion},
     commands::check::CheckCommand,
+    component::Components,
     config::Config,
     constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME},
     file::read_file,
@@ -119,22 +120,22 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
 
     bold(|s| writeln!(s, "{}", &toolchain.name));
 
-    for component in [component::FORC, component::FUEL_CORE] {
-        let version = &channel.pkg[component].version;
-        let latest_version = &latest_package_versions[component];
+    for component in Components::collect_exclude_plugins()? {
+        let version = &channel.pkg[&component.name].version;
+        let latest_version = &latest_package_versions[&component.name];
 
-        let component_executable = toolchain.bin_path.join(component);
+        let component_executable = toolchain.bin_path.join(&component.name);
 
         if component_executable.is_file() {
-            bold(|s| write!(s, "  {} - ", &component));
+            bold(|s| write!(s, "  {} - ", &component.name));
             compare_and_print_versions(version, latest_version)?;
         } else {
             print!("  ");
-            bold(|s| write!(s, "{}", &component));
+            bold(|s| write!(s, "{}", &component.name));
             println!(" - not installed");
         }
 
-        if verbose && component == component::FORC {
+        if verbose && component.name == component::FORC {
             for plugin in component::Components::collect_plugins()? {
                 if !plugin.is_main_executable() {
                     bold(|s| writeln!(s, "    - {}", plugin.name));

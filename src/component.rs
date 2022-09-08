@@ -58,7 +58,7 @@ impl Components {
                 toml.component
                     .get(c)
                     .cloned()
-                    .expect("Failed to get component")
+                    .expect(&format!("Failed to get component '{}' from toml", c))
             })
             .collect();
 
@@ -80,7 +80,10 @@ impl Components {
                     .map_or(false, |p| p.is_plugin.unwrap_or_default())
             })
             .map(|p| {
-                let plugin = components.component.get(p).expect("Failed to get p");
+                let plugin = components
+                    .component
+                    .get(p)
+                    .expect(&format!("Failed to get plugin '{}' from toml", p));
                 Plugin {
                     name: plugin.name.clone(),
                     executables: plugin.executables.clone(),

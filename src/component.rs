@@ -60,7 +60,7 @@ impl Components {
                     .component
                     .get(c)
                     .cloned()
-                    .expect(&format!("Failed to get component '{}' from toml", c))
+                    .unwrap_or_else(|| panic!("Failed to get component '{}' from toml", c))
             })
             .collect();
 
@@ -85,7 +85,7 @@ impl Components {
                 let plugin = components
                     .component
                     .get(p)
-                    .expect(&format!("Failed to get plugin '{}' from toml", p));
+                    .unwrap_or_else(|| panic!("Failed to get plugin '{}' from toml", p));
                 Plugin {
                     name: plugin.name.clone(),
                     executables: plugin.executables.clone(),

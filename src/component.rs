@@ -46,7 +46,7 @@ impl Components {
     pub fn collect_exclude_plugins() -> Result<Vec<Component>> {
         let toml = Self::from_toml(COMPONENTS_TOML)?;
 
-        let not_plugins = toml
+        let mut main_components: Vec<Component> = toml
             .component
             .keys()
             .filter(|&c| {
@@ -62,7 +62,9 @@ impl Components {
             })
             .collect();
 
-        Ok(not_plugins)
+        main_components.sort_by(|a, b| a.name.cmp(&b.name));
+
+        Ok(main_components)
     }
 
     pub fn collect_plugins() -> Result<Vec<Plugin>> {
@@ -140,15 +142,15 @@ targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 
     #[test]
     fn test_collect_exclude_plugins() -> Result<()> {
-        let components = Components::collect_exclude_plugins()?;
+        let components = Components::collect_exclude_plugins().unwrap();
+        let actual = components
+            .iter()
+            .map(|c| c.name.clone())
+            .collect::<Vec<String>>();
+        let mut expected = [component::FORC, component::FUEL_CORE];
+        expected.sort();
         assert_eq!(components.len(), 2);
-        assert_eq!(
-            components
-                .iter()
-                .map(|c| c.name.clone())
-                .collect::<Vec<String>>(),
-            [component::FORC, component::FUEL_CORE]
-        );
+        assert_eq!(actual, expected);
         Ok(())
     }
 

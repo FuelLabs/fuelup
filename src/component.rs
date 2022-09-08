@@ -91,8 +91,9 @@ mod tests {
     use super::*;
 
     const TOML: &str = r#"
-[forc-fmt]
+[component.forc-fmt]
 name = "forc-fmt"
+is_plugin = true
 tarball_prefix = "forc-binaries"
 executables = ["forc-fmt"]
 repository_url = "https://github.com/FuelLabs/sway"
@@ -100,12 +101,35 @@ targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 "#;
 
     #[test]
-    fn test_toml() {
-        assert!(Components::from_toml(TOML).is_ok());
+    fn test_toml() -> Result<()> {
+        let components = Components::from_toml(TOML)?;
+
+        assert_eq!(components.component["forc-fmt"].name, "forc-fmt");
+        assert_eq!(components.component["forc-fmt"].is_plugin, Some(true));
+        assert_eq!(
+            components.component["forc-fmt"].tarball_prefix,
+            "forc-binaries"
+        );
+        assert_eq!(components.component["forc-fmt"].executables, ["forc-fmt"]);
+        assert_eq!(
+            components.component["forc-fmt"].repository_url,
+            "https://github.com/FuelLabs/sway"
+        );
+        assert_eq!(
+            components.component["forc-fmt"].targets,
+            ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
+        );
+
+        Ok(())
     }
 
     #[test]
     fn test_collect_plugins() {
         assert!(Components::collect_plugins().is_ok());
+    }
+
+    #[test]
+    fn test_collect_plugin_executables() {
+        assert!(Components::collect_plugin_executables().is_ok());
     }
 }

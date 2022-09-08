@@ -1,7 +1,6 @@
 use crate::{
     channel::{Channel, PackageVersion},
     commands::check::CheckCommand,
-    component::SUPPORTED_PLUGINS,
     config::Config,
     constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME},
     file::read_file,
@@ -136,16 +135,21 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
         }
 
         if verbose && component == component::FORC {
-            for plugin in SUPPORTED_PLUGINS {
-                if plugin == &component::FORC_DEPLOY {
-                    bold(|s| writeln!(s, "    - forc-client"));
-                }
-                if plugin == &component::FORC_RUN || plugin == &component::FORC_DEPLOY {
-                    print!("  ");
+            for plugin in component::Components::collect_plugins()? {
+                if !plugin.is_main_executable() {
+                    bold(|s| writeln!(s, "    - {}", plugin.name));
                 }
 
-                let plugin_executable = toolchain.bin_path.join(&plugin);
-                check_plugin(&plugin_executable, plugin, version, latest_version)?;
+                for (index, executable) in plugin.executables.iter().enumerate() {
+                    let plugin_executable = toolchain.bin_path.join(executable);
+
+                    let mut plugin_name = &plugin.name;
+                    if !plugin.is_main_executable() {
+                        print!("  ");
+                        plugin_name = &plugin.executables[index];
+                    }
+                    check_plugin(&plugin_executable, plugin_name, version, latest_version)?;
+                }
             }
         }
     }

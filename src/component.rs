@@ -7,22 +7,15 @@ use toml_edit::de;
 pub const FORC: &str = "forc";
 pub const FUEL_CORE: &str = "fuel-core";
 pub const FUELUP: &str = "fuelup";
-pub const FORC_EXPLORE: &str = "forc-explore";
-pub const FORC_FMT: &str = "forc-fmt";
-pub const FORC_LSP: &str = "forc-lsp";
-pub const FORC_DEPLOY: &str = "forc-run";
-pub const FORC_RUN: &str = "forc-deploy";
 
-pub const SUPPORTED_PLUGINS: &[&str] = &[FORC_FMT, FORC_LSP, FORC_EXPLORE, FORC_DEPLOY, FORC_RUN];
-
-const COMPONENTS_TOML: &'static str = include_str!("../components.toml");
+const COMPONENTS_TOML: &str = include_str!("../components.toml");
 
 #[derive(Debug, Deserialize)]
 pub struct Components {
     pub component: HashMap<String, Component>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Component {
     pub name: String,
     pub is_plugin: Option<bool>,
@@ -48,6 +41,28 @@ impl Components {
     pub fn from_toml(toml: &str) -> Result<Self> {
         let components: Components = de::from_str(toml)?;
         Ok(components)
+    }
+
+    pub fn collect_exclude_plugins() -> Result<Vec<Component>> {
+        let toml = Self::from_toml(COMPONENTS_TOML)?;
+
+        let not_plugins = toml
+            .component
+            .keys()
+            .filter(|&c| {
+                toml.component
+                    .get(c)
+                    .map_or(false, |p| !p.is_plugin.unwrap_or_default())
+            })
+            .map(|c| {
+                toml.component
+                    .get(c)
+                    .cloned()
+                    .expect("Failed to get component")
+            })
+            .collect();
+
+        Ok(not_plugins)
     }
 
     pub fn collect_plugins() -> Result<Vec<Plugin>> {
@@ -120,6 +135,13 @@ targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
             ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
         );
 
+        Ok(())
+    }
+
+    #[test]
+    fn test_collect_exclude_plugins() -> Result<()> {
+        let components = Components::collect_exclude_plugins()?;
+        println!("{:?}", components);
         Ok(())
     }
 

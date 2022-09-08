@@ -17,7 +17,6 @@ use crate::{
 };
 
 fn exec_show_version(component: &str, component_executable: &Path) -> Result<()> {
-    bold(|s| write!(s, "  - {}", &component));
     match std::process::Command::new(component_executable)
         .arg("--version")
         .output()
@@ -88,9 +87,9 @@ pub fn show() -> Result<()> {
     };
 
     for component in Components::collect_exclude_plugins()? {
+        bold(|s| write!(s, "  {}", &component.name));
         if let Some(c) = channel.as_ref() {
             let version = &c.pkg[&component.name].version;
-            bold(|s| write!(s, "  {}", &component.name));
             println!(" : {}", version);
         } else {
             let component_executable = active_toolchain.bin_path.join(&component.name);
@@ -99,23 +98,23 @@ pub fn show() -> Result<()> {
 
         if component.name == component::FORC {
             for plugin in Components::collect_plugins()? {
+                bold(|s| write!(s, "    - {}", &plugin.name));
                 if let Some(c) = channel.as_ref() {
-                    bold(|s| write!(s, "  - {}", &plugin.name));
                     let version = &c.pkg[&component.name].version;
 
                     if !plugin.is_main_executable() {
                         println!();
                         for executable in plugin.executables.iter() {
-                            bold(|s| write!(s, "     - {}", &executable));
+                            bold(|s| write!(s, "      - {}", &executable));
                             println!(" : {}", version);
                         }
                     } else {
                         println!(" : {}", version);
                     }
                 } else if !plugin.is_main_executable() {
-                    bold(|s| writeln!(s, "  - {}", &plugin.name));
+                    println!();
                     for executable in plugin.executables.iter() {
-                        print!("  ");
+                        bold(|s| write!(s, "      - {}", &executable));
                         let plugin_executable = active_toolchain.bin_path.join(&executable);
                         exec_show_version(executable, plugin_executable.as_path())?;
                     }

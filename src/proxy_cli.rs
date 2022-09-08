@@ -4,7 +4,7 @@ use std::os::unix::prelude::CommandExt;
 use std::process::{Command, ExitCode, Stdio};
 use std::{env, io};
 
-use crate::component::SUPPORTED_PLUGINS;
+use crate::component::Components;
 use crate::toolchain::Toolchain;
 
 /// Runs forc or fuel-core in proxy mode
@@ -14,7 +14,7 @@ pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
 
     if !cmd_args.is_empty() {
         let plugin = format!("{}-{}", arg0, &cmd_args[0].to_string_lossy());
-        if SUPPORTED_PLUGINS.contains(&plugin.as_str()) {
+        if Components::collect_plugin_executables()?.contains(&plugin) {
             direct_proxy(&plugin, &cmd_args[1..], &toolchain)?;
         }
     }

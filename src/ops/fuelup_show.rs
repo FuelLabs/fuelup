@@ -112,18 +112,16 @@ pub fn show() -> Result<()> {
                     } else {
                         println!(" : {}", version);
                     }
-                } else {
-                    if !plugin.is_main_executable() {
-                        bold(|s| writeln!(s, "  - {}", &plugin.name));
-                        for executable in plugin.executables.iter() {
-                            print!("  ");
-                            let plugin_executable = active_toolchain.bin_path.join(&executable);
-                            exec_show_version(&executable, plugin_executable.as_path())?;
-                        }
-                    } else {
-                        let plugin_executable = active_toolchain.bin_path.join(&plugin.name);
-                        exec_show_version(&plugin.name, plugin_executable.as_path())?;
+                } else if !plugin.is_main_executable() {
+                    bold(|s| writeln!(s, "  - {}", &plugin.name));
+                    for executable in plugin.executables.iter() {
+                        print!("  ");
+                        let plugin_executable = active_toolchain.bin_path.join(&executable);
+                        exec_show_version(executable, plugin_executable.as_path())?;
                     }
+                } else {
+                    let plugin_executable = active_toolchain.bin_path.join(&plugin.name);
+                    exec_show_version(&plugin.name, plugin_executable.as_path())?;
                 }
             }
         }

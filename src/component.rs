@@ -104,8 +104,10 @@ impl Components {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    const TOML: &str = r#"
+    use crate::component;
+    #[test]
+    fn test_toml() -> Result<()> {
+        const TOML: &str = r#"
 [component.forc-fmt]
 name = "forc-fmt"
 is_plugin = true
@@ -115,8 +117,6 @@ repository_url = "https://github.com/FuelLabs/sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 "#;
 
-    #[test]
-    fn test_toml() -> Result<()> {
         let components = Components::from_toml(TOML)?;
 
         assert_eq!(components.component["forc-fmt"].name, "forc-fmt");
@@ -141,7 +141,14 @@ targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
     #[test]
     fn test_collect_exclude_plugins() -> Result<()> {
         let components = Components::collect_exclude_plugins()?;
-        println!("{:?}", components);
+        assert_eq!(components.len(), 2);
+        assert_eq!(
+            components
+                .iter()
+                .map(|c| c.name.clone())
+                .collect::<Vec<String>>(),
+            [component::FORC, component::FUEL_CORE]
+        );
         Ok(())
     }
 

@@ -5,7 +5,6 @@ executables = ["forc"]
 repository_url = "https://github.com/FuelLabs/sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 
-# This might be distributed together with `forc` above, but we should have a separate entry still.
 [component.forc-fmt]
 name = "forc-fmt"
 tarball_prefix = "forc-binaries"

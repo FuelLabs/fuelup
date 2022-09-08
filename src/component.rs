@@ -62,7 +62,7 @@ impl Components {
             })
             .collect();
 
-        main_components.sort_by(|a, b| a.name.cmp(&b.name));
+        main_components.sort_by_key(|c| c.name.clone());
 
         Ok(main_components)
     }
@@ -70,7 +70,7 @@ impl Components {
     pub fn collect_plugins() -> Result<Vec<Plugin>> {
         let components = Self::from_toml(COMPONENTS_TOML)?;
 
-        let plugins = components
+        let mut plugins: Vec<Plugin> = components
             .component
             .keys()
             .filter(|&c| {
@@ -87,6 +87,7 @@ impl Components {
                 }
             })
             .collect();
+        plugins.sort_by_key(|p| p.name.clone());
 
         Ok(plugins)
     }

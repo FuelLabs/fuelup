@@ -49,19 +49,8 @@ impl Components {
         let mut main_components: Vec<Component> = components
             .component
             .keys()
-            .filter(|&c| {
-                components
-                    .component
-                    .get(c)
-                    .map_or(false, |p| !p.is_plugin.unwrap_or_default())
-            })
-            .map(|c| {
-                components
-                    .component
-                    .get(c)
-                    .cloned()
-                    .unwrap_or_else(|| panic!("Failed to get component '{}' from toml", c))
-            })
+            .map(|c| components.component.get(c).unwrap())
+            .filter_map(|c| c.is_plugin.is_none().then(|| c.clone()))
             .collect();
 
         main_components.sort_by_key(|c| c.name.clone());
@@ -75,21 +64,11 @@ impl Components {
         let mut plugins: Vec<Plugin> = components
             .component
             .keys()
-            .filter(|&c| {
-                components
-                    .component
-                    .get(c)
-                    .map_or(false, |p| p.is_plugin.unwrap_or_default())
-            })
-            .map(|p| {
-                let plugin = components
-                    .component
-                    .get(p)
-                    .unwrap_or_else(|| panic!("Failed to get plugin '{}' from toml", p));
-                Plugin {
-                    name: plugin.name.clone(),
-                    executables: plugin.executables.clone(),
-                }
+            .map(|c| components.component.get(c).unwrap())
+            .filter(|&c| c.is_plugin.unwrap_or_default())
+            .map(|p| Plugin {
+                name: p.name.clone(),
+                executables: p.executables.clone(),
             })
             .collect();
         plugins.sort_by_key(|p| p.name.clone());

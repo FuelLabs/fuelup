@@ -212,6 +212,7 @@ impl Toolchain {
                 let temp_project_path = temp_project.path().to_str().unwrap();
                 if Command::new(&forc_bin_path)
                     .args(["init", "--path", temp_project_path])
+                    .stdout(std::process::Stdio::null())
                     .status()
                     .is_ok()
                 {

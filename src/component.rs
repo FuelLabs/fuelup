@@ -49,7 +49,12 @@ impl Components {
         let mut main_components: Vec<Component> = components
             .component
             .keys()
-            .map(|c| components.component.get(c).unwrap())
+            .map(|c| {
+                components
+                    .component
+                    .get(c)
+                    .expect("Failed to parse components.toml")
+            })
             .filter_map(|c| c.is_plugin.is_none().then(|| c.clone()))
             .collect();
 
@@ -64,7 +69,12 @@ impl Components {
         let mut plugins: Vec<Plugin> = components
             .component
             .keys()
-            .map(|c| components.component.get(c).unwrap())
+            .map(|c| {
+                components
+                    .component
+                    .get(c)
+                    .expect("Failed to parse components.toml")
+            })
             .filter(|&c| c.is_plugin.unwrap_or_default())
             .map(|p| Plugin {
                 name: p.name.clone(),

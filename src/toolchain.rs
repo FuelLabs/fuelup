@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::str::FromStr;
 use time::Date;
-use tracing::info;
+use tracing::{error, info};
 
 use crate::component::SUPPORTED_PLUGINS;
 use crate::constants::DATE_FORMAT;
@@ -216,12 +216,23 @@ impl Toolchain {
                     .status()
                     .is_ok()
                 {
-                    Command::new(forc_bin_path)
+                    info!("Fetching core forc dependencies");
+                    if Command::new(forc_bin_path)
                         .args(["check", "--path", temp_project_path])
-                        .output()?;
+                        .stdout(std::process::Stdio::null())
+                        .status()
+                        .is_err()
+                    {
+                        error!("Failed to fetch core forc dependencies");
+                    };
                 };
             }
         };
+
+        info!(
+            "Installed {} v{} for toolchain '{}'",
+            download_cfg.name, download_cfg.version, self.name
+        );
 
         Ok(download_cfg)
     }

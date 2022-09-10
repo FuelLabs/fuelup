@@ -2,16 +2,18 @@ use anyhow::{bail, Context, Result};
 use std::fmt;
 use std::fs::{remove_dir_all, remove_file};
 use std::path::PathBuf;
+use std::process::Command;
 use std::str::FromStr;
 use time::Date;
-use tracing::info;
+use tracing::{error, info};
 
 use crate::component::SUPPORTED_PLUGINS;
 use crate::constants::DATE_FORMAT;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
-    ensure_dir_exists, fuelup_bin, fuelup_bin_dir, settings_file, toolchain_bin_dir, toolchain_dir,
+    ensure_dir_exists, fuelup_bin, fuelup_bin_dir, fuelup_dir, settings_file, toolchain_bin_dir,
+    toolchain_dir,
 };
 use crate::settings::SettingsFile;
 use crate::target_triple::TargetTriple;
@@ -200,7 +202,37 @@ impl Toolchain {
 
         if let Ok(downloaded) = unpack_bins(&self.bin_path, &fuelup_bin_dir) {
             link_to_fuelup(downloaded)?;
+
+            // Little hack here to download core and std lib upon installing `forc`
+            if download_cfg.name == component::FORC {
+                let forc_bin_path = self.bin_path.join(component::FORC);
+                let temp_project = tempfile::Builder::new()
+                    .prefix("temp-project")
+                    .tempdir_in(fuelup_dir())?;
+                let temp_project_path = temp_project.path().to_str().unwrap();
+                if Command::new(&forc_bin_path)
+                    .args(["init", "--path", temp_project_path])
+                    .stdout(std::process::Stdio::null())
+                    .status()
+                    .is_ok()
+                {
+                    info!("Fetching core forc dependencies");
+                    if Command::new(forc_bin_path)
+                        .args(["check", "--path", temp_project_path])
+                        .stdout(std::process::Stdio::null())
+                        .status()
+                        .is_err()
+                    {
+                        error!("Failed to fetch core forc dependencies");
+                    };
+                };
+            }
         };
+
+        info!(
+            "Installed {} v{} for toolchain '{}'",
+            download_cfg.name, download_cfg.version, self.name
+        );
 
         Ok(download_cfg)
     }

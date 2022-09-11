@@ -4,6 +4,7 @@ use semver::Version;
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
 use sha2::Sha256;
+use std::env;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
@@ -161,7 +162,16 @@ pub fn download_file(url: &str, path: &PathBuf, hasher: &mut Sha256) -> Result<(
     const RETRY_ATTEMPTS: u8 = 4;
     const RETRY_DELAY_SECS: u64 = 3;
 
-    let handle = ureq::builder().user_agent("fuelup").build();
+    // auto detect http proxy setting.
+    let handle = if let Ok(proxy) = env::var("http_proxy") {
+        ureq::builder()
+            .user_agent("fuelup")
+            .proxy(ureq::Proxy::new(proxy)?)
+            .build()
+    } else {
+        ureq::builder().user_agent("fuelup").build()
+    };
+
     let mut file = OpenOptions::new().write(true).create(true).open(&path)?;
 
     for _ in 1..RETRY_ATTEMPTS {

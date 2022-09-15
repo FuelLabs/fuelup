@@ -95,12 +95,12 @@ mod tests {
         assert_eq!(channel.pkg.keys().len(), 2);
         assert!(channel.pkg.contains_key("forc"));
         assert_eq!(
-            channel.pkg["forc"].version.semver,
+            channel.pkg["forc"].version,
             Version::parse("0.17.0").unwrap()
         );
         assert!(channel.pkg.contains_key("fuel-core"));
         assert_eq!(
-            channel.pkg["fuel-core"].version.semver,
+            channel.pkg["fuel-core"].version,
             Version::parse("0.9.4").unwrap()
         );
 
@@ -141,8 +141,8 @@ mod tests {
 
         assert_eq!(cfgs.len(), 2);
         assert_eq!(cfgs[0].name, "forc");
-        assert_eq!(cfgs[0].version.semver, Version::parse("0.17.0").unwrap());
+        assert_eq!(cfgs[0].version, Version::parse("0.17.0").unwrap());
         assert_eq!(cfgs[1].name, "fuel-core");
-        assert_eq!(cfgs[1].version.semver, Version::parse("0.9.4").unwrap());
+        assert_eq!(cfgs[1].version, Version::parse("0.9.4").unwrap());
     }
 }

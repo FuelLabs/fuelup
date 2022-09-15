@@ -188,12 +188,12 @@ mod tests {
         assert!(channel.pkg.contains_key("forc"));
         assert_eq!(
             channel.pkg["forc"].version.semver,
-            Version::parse("0.24.3+nightly.2022-09-15.0b69f4d4").unwrap()
+            Version::parse("0.24.3+nightly.20220915.0b69f4d4").unwrap()
         );
         assert!(channel.pkg.contains_key("fuel-core"));
         assert_eq!(
             channel.pkg["fuel-core"].version.semver,
-            Version::parse("0.10.1+").unwrap()
+            Version::parse("0.10.1+nightly.20220915.bd5901f").unwrap()
         );
 
         let targets = &channel.pkg["forc"].target;

@@ -17,6 +17,12 @@ jobs:
       - name: checkout master
         uses: actions/checkout@v3
 
+      - name: Install toml-reader
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo install --debug --path ./scripts/toml-reader
+
       - name: Publish nightly channel
         id: setup
         run: |
@@ -29,8 +35,10 @@ jobs:
             touch $CHANNEL_TOML
             echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >> $CHANNEL_TOML
 
-            ./.github/workflows/scripts/append_package_to_channel.sh forc nightly $CHANNEL_TOML
-            ./.github/workflows/scripts/append_package_to_channel.sh fuel-core nightly $CHANNEL_TOML
+            COMPONENTS=$(toml-reader)
+            for component in $COMPONENTS; do
+              ./.github/workflows/scripts/append_package_to_channel.sh ${component} nightly $CHANNEL_TOML
+            done
 
             # Remove extra newline at the end
             truncate -s -1 $CHANNEL_TOML

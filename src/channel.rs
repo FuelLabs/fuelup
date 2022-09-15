@@ -177,6 +177,51 @@ mod tests {
     }
 
     #[test]
+    fn channel_from_toml_nightly() {
+        let channel_path = std::env::current_dir()
+            .unwrap()
+            .join("tests/channel-fuel-nightly-example.toml");
+        let channel_file = read_file("channel-fuel-nightly-example", &channel_path).unwrap();
+        let channel = Channel::from_toml(&channel_file).unwrap();
+
+        assert_eq!(channel.pkg.keys().len(), 2);
+        assert!(channel.pkg.contains_key("forc"));
+        assert_eq!(
+            channel.pkg["forc"].version.semver,
+            Version::parse("0.24.3+nightly.2022-09-15.0b69f4d4").unwrap()
+        );
+        assert!(channel.pkg.contains_key("fuel-core"));
+        assert_eq!(
+            channel.pkg["fuel-core"].version.semver,
+            Version::parse("0.10.1+").unwrap()
+        );
+
+        let targets = &channel.pkg["forc"].target;
+        assert_eq!(targets.len(), 4);
+
+        for target in targets.keys() {
+            assert!(!targets[target].url.is_empty());
+            assert!(!targets[target].hash.is_empty());
+        }
+        assert!(targets.contains_key("darwin_amd64"));
+        assert!(targets.contains_key("darwin_arm64"));
+        assert!(targets.contains_key("linux_amd64"));
+        assert!(targets.contains_key("linux_arm64"));
+
+        let targets = &channel.pkg["fuel-core"].target;
+        assert_eq!(targets.len(), 4);
+
+        for target in targets.keys() {
+            assert!(!targets[target].url.is_empty());
+            assert!(!targets[target].hash.is_empty());
+        }
+        assert!(targets.contains_key("aarch64-apple-darwin"));
+        assert!(targets.contains_key("aarch64-unknown-linux-gnu"));
+        assert!(targets.contains_key("x86_64-apple-darwin"));
+        assert!(targets.contains_key("x86_64-unknown-linux-gnu"));
+    }
+
+    #[test]
     fn download_cfgs_from_channel() {
         let channel_path = std::env::current_dir()
             .unwrap()

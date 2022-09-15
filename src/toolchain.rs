@@ -7,7 +7,7 @@ use std::str::FromStr;
 use time::Date;
 use tracing::{error, info};
 
-use crate::component::SUPPORTED_PLUGINS;
+use crate::component::Components;
 use crate::constants::DATE_FORMAT;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
@@ -245,9 +245,9 @@ impl Toolchain {
                 .with_context(|| format!("failed to remove component '{}'", component))?;
             // If component to remove is 'forc', silently remove forc plugins
             if component == component::FORC {
-                for component in SUPPORTED_PLUGINS {
-                    let component_path = self.bin_path.join(component);
-                    remove_file(component_path)
+                for plugin in Components::collect_plugin_executables()? {
+                    let plugin_path = self.bin_path.join(plugin);
+                    remove_file(plugin_path)
                         .with_context(|| format!("failed to remove component '{}'", component))?;
                 }
             }

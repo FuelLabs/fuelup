@@ -23,7 +23,7 @@ jobs:
           toolchain: stable
 
       - name: Install toml-reader
-        run: cargo install --debug --path ./scripts/toml-reader
+        run: cargo install --debug --path ./.github/workflows/scripts/toml-reader
 
       - name: Publish nightly channel
         id: setup

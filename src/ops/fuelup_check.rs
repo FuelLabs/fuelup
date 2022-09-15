@@ -19,7 +19,7 @@ use std::{
 use std::{collections::HashMap, process::Command};
 use tempfile::tempdir_in;
 use termcolor::Color;
-use tracing::error;
+use tracing::{error, info};
 
 use crate::{component, download::DownloadCfg};
 
@@ -53,21 +53,36 @@ fn compare_and_print_versions(current_version: &Version, latest_version: &Versio
     Ok(())
 }
 
-fn check_plugin(
-    plugin_executable: &Path,
-    plugin: &str,
-    current_version: &Version,
-    latest_version: &Version,
-) -> Result<()> {
-    if plugin_executable.is_file() {
-        print!("    - ");
-        bold(|s| write!(s, "{}", plugin));
-        print!(" - ");
-        compare_and_print_versions(current_version, latest_version)?;
-    } else {
-        print!("  ");
-        bold(|s| write!(s, "{}", &plugin));
-        println!(" - not installed");
+fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version) -> Result<()> {
+    match std::process::Command::new(&plugin_executable)
+        .arg("--version")
+        .output()
+    {
+        Ok(o) => {
+            let output = String::from_utf8_lossy(&o.stdout).into_owned();
+            match output.split_whitespace().nth(1) {
+                Some(v) => {
+                    let version = Version::parse(v)?;
+                    print!("    - ");
+                    bold(|s| write!(s, "{}", plugin));
+                    print!(" - ");
+                    compare_and_print_versions(&version, latest_version);
+                }
+                None => {
+                    eprintln!("    - {} - Error getting version string", plugin);
+                }
+            };
+        }
+        Err(e) => {
+            print!("    - ");
+            bold(|s| write!(s, "{}", plugin));
+            print!(" - ");
+            if plugin_executable.exists() {
+                println!("execution error - {}", e);
+            } else {
+                println!("not found");
+            }
+        }
     }
     Ok(())
 }
@@ -103,27 +118,26 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
 
     for component in Components::collect_exclude_plugins()? {
         let component_executable = toolchain.bin_path.join(&component.name);
-        let version = match Command::new(&component_executable)
+        match Command::new(&component_executable)
             .arg("--version")
             .output()
         {
             Ok(o) => {
                 let output = String::from_utf8_lossy(&o.stdout).into_owned();
-                println!("{:?}", o);
-                Version::parse(&output)?
+
+                match output.split_whitespace().nth(1) {
+                    Some(v) => {
+                        let version = Version::parse(v)?;
+                        info!("{} : {}", &component.name, version);
+                    }
+                    None => {
+                        error!("  {} - Error getting version string", &component.name);
+                    }
+                }
             }
             Err(_) => bail!(""),
         };
         let latest_version = &latest_package_versions[&component.name];
-
-        if component_executable.is_file() {
-            bold(|s| write!(s, "  {} - ", &component.name));
-            compare_and_print_versions(&version, latest_version)?;
-        } else {
-            print!("  ");
-            bold(|s| write!(s, "{}", &component.name));
-            println!(" - not installed");
-        }
 
         if verbose && component.name == component::FORC {
             for plugin in component::Components::collect_plugins()? {
@@ -135,11 +149,13 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                     let plugin_executable = toolchain.bin_path.join(executable);
 
                     let mut plugin_name = &plugin.name;
+
                     if !plugin.is_main_executable() {
                         print!("  ");
                         plugin_name = &plugin.executables[index];
                     }
-                    check_plugin(&plugin_executable, plugin_name, &version, latest_version)?;
+
+                    check_plugin(&plugin_executable, plugin_name, latest_version)?;
                 }
             }
         }

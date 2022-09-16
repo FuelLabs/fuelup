@@ -19,7 +19,7 @@ use std::{
 use std::{collections::HashMap, process::Command};
 use tempfile::tempdir_in;
 use termcolor::Color;
-use tracing::{error, info};
+use tracing::error;
 
 use crate::{component, download::DownloadCfg};
 

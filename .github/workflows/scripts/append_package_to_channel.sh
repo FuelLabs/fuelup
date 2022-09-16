@@ -43,11 +43,10 @@ create_pkg_in_channel() {
 
     if [ "${2}" = "nightly" ]; then
         _repo="sway-nightly-binaries"
-        semver="$(curl -s https://api.github.com/repos/FuelLabs/${_repo}/releases | grep "tag_name" | grep "nightly-${date}" | grep "${_tarball_prefix}" | head -n 1 | cut -d "-" -f3)"
-        version="${semver}-nightly (${date})"
-        version_url_friendly="${semver}-nightly-${date}"
-        _tarball_prefix+="-${version_url_friendly}"
-        tag="${_tarball_prefix}"
+        version="$(curl -s https://api.github.com/repos/FuelLabs/${_repo}/releases | grep "tag_name" | grep "nightly.${date}" | grep "${_tarball_prefix}" | head -n 1 | cut -d "-" -f3- | cut -d "\"" -f1)"
+        _tarball_prefix+="-${version}"
+        # Replace '+' within string with '%2B' to be URL friendly
+        tag=$(echo "${_tarball_prefix}" | sed -r "s/\+/\%2B/g")
     fi
 
     # We need to recreate channel-fuel-latest.toml, generating new URLs and sha256 hashes for the download links.

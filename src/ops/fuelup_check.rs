@@ -66,10 +66,10 @@ fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version
                     print!("    - ");
                     bold(|s| write!(s, "{}", plugin));
                     print!(" - ");
-                    compare_and_print_versions(&version, latest_version);
+                    compare_and_print_versions(&version, latest_version)?;
                 }
                 None => {
-                    eprintln!("    - {} - Error getting version string", plugin);
+                    error!("    - {} - Error getting version string", plugin);
                 }
             };
         }
@@ -118,6 +118,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
 
     for component in Components::collect_exclude_plugins()? {
         let component_executable = toolchain.bin_path.join(&component.name);
+        let latest_version = &latest_package_versions[&component.name];
         match Command::new(&component_executable)
             .arg("--version")
             .output()
@@ -128,7 +129,8 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                 match output.split_whitespace().nth(1) {
                     Some(v) => {
                         let version = Version::parse(v)?;
-                        info!("{} : {}", &component.name, version);
+                        bold(|s| write!(s, "  {} - ", &component.name));
+                        compare_and_print_versions(&version, latest_version)?;
                     }
                     None => {
                         error!("  {} - Error getting version string", &component.name);

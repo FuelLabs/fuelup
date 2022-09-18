@@ -4,14 +4,11 @@ use crate::{
     file::read_file,
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{bail, Result};
 use semver::Version;
-use serde::{Deserialize, Deserializer};
+use serde::Deserialize;
 use sha2::{Digest, Sha256};
-use std::fmt;
-use std::str::FromStr;
 use std::{collections::HashMap, path::PathBuf};
-use time::{macros::format_description, Date};
 use toml_edit::de;
 
 pub const LATEST: &str = "latest";
@@ -33,51 +30,7 @@ pub struct Channel {
 #[derive(Debug, Deserialize)]
 pub struct Package {
     pub target: HashMap<String, HashedBinary>,
-    #[serde(deserialize_with = "package_version_from_str")]
-    pub version: PackageVersion,
-}
-
-#[derive(Debug, PartialEq, Eq, Ord, PartialOrd, Clone)]
-pub struct PackageVersion {
-    pub semver: Version,
-    pub date: Option<Date>,
-}
-
-fn package_version_from_str<'de, D>(deserializer: D) -> Result<PackageVersion, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let s = String::deserialize(deserializer)?;
-    s.parse().map_err(serde::de::Error::custom)
-}
-
-impl FromStr for PackageVersion {
-    type Err = anyhow::Error;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut elems = s.split(' ');
-        let semver_str = elems
-            .next()
-            .ok_or_else(|| anyhow!("package version string is empty"))?;
-        let date_str = elems.next();
-        let semver = semver::Version::parse(semver_str).context("failed to parse semver")?;
-        let date = match date_str {
-            None => None,
-            Some(s) => {
-                let date = Date::parse(s, format_description!("([year]-[month]-[day])"))
-                    .context("specified date is invalid")?;
-                Some(date)
-            }
-        };
-        Ok(PackageVersion { semver, date })
-    }
-}
-impl fmt::Display for PackageVersion {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.date {
-            Some(d) => write!(f, "{} ({})", self.semver, d),
-            None => write!(f, "{}", self.semver),
-        }
-    }
+    pub version: Version,
 }
 
 impl Channel {
@@ -142,12 +95,12 @@ mod tests {
         assert_eq!(channel.pkg.keys().len(), 2);
         assert!(channel.pkg.contains_key("forc"));
         assert_eq!(
-            channel.pkg["forc"].version.semver,
+            channel.pkg["forc"].version,
             Version::parse("0.17.0").unwrap()
         );
         assert!(channel.pkg.contains_key("fuel-core"));
         assert_eq!(
-            channel.pkg["fuel-core"].version.semver,
+            channel.pkg["fuel-core"].version,
             Version::parse("0.9.4").unwrap()
         );
 
@@ -187,12 +140,12 @@ mod tests {
         assert_eq!(channel.pkg.keys().len(), 2);
         assert!(channel.pkg.contains_key("forc"));
         assert_eq!(
-            channel.pkg["forc"].version.semver,
+            channel.pkg["forc"].version,
             Version::parse("0.24.3+nightly.20220915.0b69f4d4").unwrap()
         );
         assert!(channel.pkg.contains_key("fuel-core"));
         assert_eq!(
-            channel.pkg["fuel-core"].version.semver,
+            channel.pkg["fuel-core"].version,
             Version::parse("0.10.1+nightly.20220915.bd5901f").unwrap()
         );
 
@@ -233,8 +186,8 @@ mod tests {
 
         assert_eq!(cfgs.len(), 2);
         assert_eq!(cfgs[0].name, "forc");
-        assert_eq!(cfgs[0].version.semver, Version::parse("0.17.0").unwrap());
+        assert_eq!(cfgs[0].version, Version::parse("0.17.0").unwrap());
         assert_eq!(cfgs[1].name, "fuel-core");
-        assert_eq!(cfgs[1].version.semver, Version::parse("0.9.4").unwrap());
+        assert_eq!(cfgs[1].version, Version::parse("0.9.4").unwrap());
     }
 }

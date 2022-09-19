@@ -43,6 +43,11 @@ impl Components {
         Ok(components)
     }
 
+    pub fn collect() -> Result<Components> {
+        let components = Self::from_toml(COMPONENTS_TOML)?;
+        Ok(components)
+    }
+
     pub fn collect_exclude_plugins() -> Result<Vec<Component>> {
         let components = Self::from_toml(COMPONENTS_TOML)?;
 

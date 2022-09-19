@@ -1,4 +1,5 @@
 use anyhow::{anyhow, bail, Result};
+use component;
 use flate2::read::GzDecoder;
 use semver::Version;
 use serde::{Deserialize, Serialize};
@@ -15,7 +16,6 @@ use tracing::warn;
 use tracing::{error, info};
 
 use crate::channel::Package;
-use crate::component;
 use crate::constants::{
     FUELUP_RELEASE_DOWNLOAD_URL, FUELUP_REPO, FUEL_CORE_RELEASE_DOWNLOAD_URL, FUEL_CORE_REPO,
     GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL, SWAY_REPO,

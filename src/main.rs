@@ -1,5 +1,5 @@
 use anyhow::Result;
-use fuelup::component;
+use component;
 use fuelup::{fuelup_cli, proxy_cli};
 use std::panic;
 use std::path::PathBuf;

@@ -1,12 +1,11 @@
 use anyhow::Result;
+use component::{self, Components};
 use semver::Version;
 use std::str::FromStr;
 use std::{io::Write, path::Path};
 
-use crate::component::Components;
 use crate::{
     channel::Channel,
-    component,
     config::Config,
     constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME},
     file::read_file,

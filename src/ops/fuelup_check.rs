@@ -1,14 +1,15 @@
 use crate::{
     channel::Channel,
     commands::check::CheckCommand,
-    component::Components,
     config::Config,
+    download::DownloadCfg,
     fmt::{bold, colored_bold},
     path::fuelup_dir,
     target_triple::TargetTriple,
     toolchain::{OfficialToolchainDescription, Toolchain},
 };
 use anyhow::{bail, Result};
+use component::{self, Components};
 use semver::Version;
 use std::io::Write;
 use std::str::FromStr;
@@ -20,8 +21,6 @@ use std::{collections::HashMap, process::Command};
 use tempfile::tempdir_in;
 use termcolor::Color;
 use tracing::error;
-
-use crate::{component, download::DownloadCfg};
 
 fn collect_package_versions(channel: Channel) -> HashMap<String, Version> {
     let mut latest_versions: HashMap<String, Version> = HashMap::new();

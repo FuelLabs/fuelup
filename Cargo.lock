@@ -141,6 +141,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "component"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "serde",
+ "toml_edit",
+]
+
+[[package]]
 name = "cpufeatures"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -253,6 +262,7 @@ version = "0.6.0"
 dependencies = [
  "anyhow",
  "clap",
+ "component",
  "dirs",
  "flate2",
  "semver",

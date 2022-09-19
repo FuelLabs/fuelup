@@ -147,8 +147,8 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Install toml-reader
-        run: cargo install --debug --path ./.github/workflows/scripts/toml-reader
+      - name: Install print_components
+        run: cargo install --debug --path ./ci/print_components
 
       # Generate the channel TOML file here and run append_package_to_channel.sh which appends download links and hashes for forc and fuel-core to the channel TOML.
       - name: Prepare channel with compatible versions
@@ -162,7 +162,7 @@ jobs:
             touch $CHANNEL_TOML
             echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >> $CHANNEL_TOML
 
-            COMPONENTS=$(toml-reader)
+            COMPONENTS=$(print_components)
             for component in $COMPONENTS; do
               case "$component" in
                 fuel-core)

@@ -43,3 +43,11 @@ tarball_prefix = "fuel-core"
 executables = ["fuel-core"]
 repository_url = "https://github.com/FuelLabs/fuel-core"
 targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]
+
+[component.forc-wallet]
+name = "forc-wallet"
+tarball_prefix = "forc-wallet"
+is_plugin = true
+executables = ["forc-wallet"]
+repository_url = "https://github.com/FuelLabs/forc-wallet"
+targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]

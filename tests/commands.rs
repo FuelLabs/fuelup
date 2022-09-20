@@ -117,6 +117,7 @@ my_toolchain (default)
     - forc-explore - not found
     - forc-fmt - not found
     - forc-lsp - not found
+    - forc-wallet - not found
   fuel-core - not found
 "#;
         assert!(stdout.contains(expected_stdout));

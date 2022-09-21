@@ -27,7 +27,6 @@ use crate::file::hard_or_symlink_file;
 use crate::path::fuelup_bin;
 use crate::path::fuelup_dir;
 use crate::target_triple::TargetTriple;
-use crate::toolchain::DistToolchainName;
 use crate::toolchain::OfficialToolchainDescription;
 
 #[derive(Debug, Serialize, Deserialize)]

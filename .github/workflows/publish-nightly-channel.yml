@@ -30,6 +30,7 @@ jobs:
             echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >> $CHANNEL_TOML
 
             ./.github/workflows/scripts/append_package_to_channel.sh forc nightly $CHANNEL_TOML
+            ./.github/workflows/scripts/append_package_to_channel.sh forc-client nightly $CHANNEL_TOML
             ./.github/workflows/scripts/append_package_to_channel.sh fuel-core nightly $CHANNEL_TOML
 
             # Remove extra newline at the end

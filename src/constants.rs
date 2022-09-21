@@ -1,6 +1,8 @@
 use time::{format_description::FormatItem, macros::format_description};
 
 pub const SWAY_RELEASE_DOWNLOAD_URL: &str = "https://github.com/FuelLabs/sway/releases/download";
+pub const FORC_CLIENT_RELEASE_DOWNLOAD_URL: &str =
+    "https://github.com/FuelLabs/forc-client/releases/download";
 pub const FUELUP_RELEASE_DOWNLOAD_URL: &str =
     "https://github.com/FuelLabs/fuelup/releases/download";
 pub const FUEL_CORE_RELEASE_DOWNLOAD_URL: &str =

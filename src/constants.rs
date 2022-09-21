@@ -15,6 +15,8 @@ pub const FUEL_CORE_RELEASE_DOWNLOAD_URL: &str =
     "https://github.com/FuelLabs/fuel-core/releases/download";
 pub const FUELUP_GH_PAGES: &str = "https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/";
 
+pub const CHANNEL_LATEST_URL: &str =
+    "https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/channel-fuel-latest.toml";
 pub const CHANNEL_LATEST_FILE_NAME: &str = "channel-fuel-latest.toml";
 pub const CHANNEL_NIGHTLY_FILE_NAME: &str = "channel-fuel-nightly.toml";
 

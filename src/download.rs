@@ -101,19 +101,33 @@ pub fn tarball_name(name: &str, version: &Version, target: &TargetTriple) -> Res
 
 pub fn get_latest_version(name: &str) -> Result<Version> {
     let handle = ureq::builder().user_agent("fuelup").build();
-    let resp = handle.get(CHANNEL_LATEST_URL).call()?;
-
     let mut data = Vec::new();
-    resp.into_reader().read_to_end(&mut data)?;
-    let tmp_dir = tempdir_in(&fuelup_dir())?;
+    if name == component::FUELUP {
+        static FUELUP_API_URL: &str =
+            "https://api.github.com/repos/FuelLabs/fuelup/releases/latest";
+        let resp = handle.get(FUELUP_API_URL).call()?;
+        resp.into_reader().read_to_end(&mut data)?;
+        let response: LatestReleaseApiResponse =
+            serde_json::from_str(&String::from_utf8_lossy(&data))?;
 
-    if let Ok(channel) = Channel::from_dist_channel(
-        &OfficialToolchainDescription::from_str("latest")?,
-        tmp_dir.into_path(),
-    ) {
-        Ok(channel.pkg[name].version.clone())
+        let version_str = &response.tag_name["v".len()..];
+        let version = Version::parse(version_str)?;
+        Ok(version)
     } else {
-        bail!("")
+        let resp = handle.get(CHANNEL_LATEST_URL).call()?;
+
+        resp.into_reader().read_to_end(&mut data)?;
+        let tmp_dir = tempdir_in(&fuelup_dir())?;
+
+        if let Ok(channel) = Channel::from_dist_channel(
+            &OfficialToolchainDescription::from_str("latest")?,
+            tmp_dir.into_path(),
+        ) {
+            println!("{}", name);
+            Ok(channel.pkg[name].version.clone())
+        } else {
+            bail!("Failed to get 'latest' channel")
+        }
     }
 }
 

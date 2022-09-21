@@ -103,8 +103,7 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
     let handle = ureq::builder().user_agent("fuelup").build();
     let mut data = Vec::new();
     if name == component::FUELUP {
-        static FUELUP_API_URL: &str =
-            "https://api.github.com/repos/FuelLabs/fuelup/releases/latest";
+        const FUELUP_API_URL: &str = "https://api.github.com/repos/FuelLabs/fuelup/releases/latest";
         let resp = handle.get(FUELUP_API_URL).call()?;
         resp.into_reader().read_to_end(&mut data)?;
         let response: LatestReleaseApiResponse =

@@ -123,7 +123,6 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
             &OfficialToolchainDescription::from_str("latest")?,
             tmp_dir.into_path(),
         ) {
-            println!("{}", name);
             Ok(channel.pkg[name].version.clone())
         } else {
             bail!("Failed to get 'latest' channel")

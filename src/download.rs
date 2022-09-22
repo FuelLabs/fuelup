@@ -124,11 +124,15 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
             &OfficialToolchainDescription::from_str("latest")?,
             tmp_dir.into_path(),
         ) {
-            if let Some(p) = channel.pkg.get(name) {
-                Ok(p.version.clone())
-            } else {
-                bail!("'{name}' is not a valid, downloadable package in the 'latest' channel.")
-            }
+            channel
+                .pkg
+                .get(name)
+                .ok_or_else(|| {
+                    anyhow!(
+                        "'{name}' is not a valid, downloadable package in the 'latest' channel."
+                    )
+                })
+                .and_then(|p| Ok(p.version.clone()))
         } else {
             bail!("Failed to get 'latest' channel")
         }

@@ -1,19 +1,15 @@
 use anyhow::Result;
 use semver::Version;
-use std::str::FromStr;
 use std::{io::Write, path::Path};
 
 use crate::component::Components;
 use crate::{
-    channel::Channel,
     component,
     config::Config,
-    constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME},
-    file::read_file,
     fmt::{bold, print_header},
     path::fuelup_dir,
     target_triple::TargetTriple,
-    toolchain::{DistToolchainName, OfficialToolchainDescription, Toolchain},
+    toolchain::Toolchain,
 };
 
 fn exec_show_version(component: &str, component_executable: &Path) -> Result<()> {
@@ -71,47 +67,15 @@ pub fn show() -> Result<()> {
 
     println!("{} (default)", active_toolchain.name);
 
-    let channel = if active_toolchain.is_official() {
-        let description = OfficialToolchainDescription::from_str(
-            active_toolchain.name.split_once('-').unwrap_or_default().0,
-        )?;
-        let channel_file_name = match description.name {
-            DistToolchainName::Latest => CHANNEL_LATEST_FILE_NAME,
-            DistToolchainName::Nightly => CHANNEL_NIGHTLY_FILE_NAME,
-        };
-        let toml_path = active_toolchain.path.join(channel_file_name);
-        let toml = read_file("channel", &toml_path)?;
-        Some(Channel::from_toml(&toml)?)
-    } else {
-        None
-    };
-
     for component in Components::collect_exclude_plugins()? {
         bold(|s| write!(s, "  {}", &component.name));
-        if let Some(c) = channel.as_ref() {
-            let version = &c.pkg[&component.name].version;
-            println!(" : {}", version);
-        } else {
-            let component_executable = active_toolchain.bin_path.join(&component.name);
-            exec_show_version(&component.name, component_executable.as_path())?;
-        };
+        let component_executable = active_toolchain.bin_path.join(&component.name);
+        exec_show_version(&component.name, component_executable.as_path())?;
 
         if component.name == component::FORC {
             for plugin in Components::collect_plugins()? {
                 bold(|s| write!(s, "    - {}", &plugin.name));
-                if let Some(c) = channel.as_ref() {
-                    let version = &c.pkg[&component.name].version;
-
-                    if !plugin.is_main_executable() {
-                        println!();
-                        for executable in plugin.executables.iter() {
-                            bold(|s| write!(s, "      - {}", &executable));
-                            println!(" : {}", version);
-                        }
-                    } else {
-                        println!(" : {}", version);
-                    }
-                } else if !plugin.is_main_executable() {
+                if !plugin.is_main_executable() {
                     println!();
                     for executable in plugin.executables.iter() {
                         bold(|s| write!(s, "      - {}", &executable));

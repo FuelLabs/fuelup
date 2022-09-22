@@ -19,9 +19,9 @@ use tracing::{error, info};
 use crate::channel::Channel;
 use crate::channel::Package;
 use crate::component;
-use crate::constants::CHANNEL_LATEST_URL;
 use crate::constants::{
-    FUELUP_RELEASE_DOWNLOAD_URL, FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL,
+    CHANNEL_LATEST_URL, FORC_CLIENT_RELEASE_DOWNLOAD_URL, FUELUP_RELEASE_DOWNLOAD_URL,
+    FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL,
 };
 use crate::file::hard_or_symlink_file;
 use crate::path::fuelup_bin;
@@ -50,13 +50,13 @@ impl DownloadCfg {
     pub fn new(name: &str, target: TargetTriple, version: Option<Version>) -> Result<Self> {
         let version = match version {
             Some(version) => version,
-            None => get_latest_version(name).map_err(|e| {
-                anyhow!("Error getting latest tag for component: {:?}: {}", name, e)
-            })?,
+            None => get_latest_version(name)
+                .map_err(|e| anyhow!("Error getting latest tag for '{}': {}", name, e))?,
         };
 
         let release_url = match name {
             component::FORC => SWAY_RELEASE_DOWNLOAD_URL.to_string(),
+            component::FORC_CLIENT => FORC_CLIENT_RELEASE_DOWNLOAD_URL.to_string(),
             component::FUEL_CORE => FUEL_CORE_RELEASE_DOWNLOAD_URL.to_string(),
             component::FUELUP => FUELUP_RELEASE_DOWNLOAD_URL.to_string(),
             _ => bail!("Unrecognized component: {}", name),
@@ -93,6 +93,7 @@ impl DownloadCfg {
 pub fn tarball_name(name: &str, version: &Version, target: &TargetTriple) -> Result<String> {
     match name {
         component::FORC => Ok(format!("forc-binaries-{}.tar.gz", target)),
+        component::FORC_CLIENT => Ok(format!("forc-client-{}-{}.tar.gz", version, target)),
         component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version, target)),
         component::FUELUP => Ok(format!("fuelup-{}-{}.tar.gz", version, target)),
         _ => bail!("Unrecognized component: {}", name),
@@ -123,7 +124,15 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
             &OfficialToolchainDescription::from_str("latest")?,
             tmp_dir.into_path(),
         ) {
-            Ok(channel.pkg[name].version.clone())
+            channel
+                .pkg
+                .get(name)
+                .ok_or_else(|| {
+                    anyhow!(
+                        "'{name}' is not a valid, downloadable package in the 'latest' channel."
+                    )
+                })
+                .map(|p| p.version.clone())
         } else {
             bail!("Failed to get 'latest' channel")
         }

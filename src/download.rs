@@ -9,20 +9,25 @@ use std::env;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
 use std::time::Duration;
 use std::{fs, thread};
 use tar::Archive;
+use tempfile::tempdir_in;
 use tracing::warn;
 use tracing::{error, info};
 
+use crate::channel::Channel;
 use crate::channel::Package;
+use crate::constants::CHANNEL_LATEST_URL;
 use crate::constants::{
-    FUELUP_RELEASE_DOWNLOAD_URL, FUELUP_REPO, FUEL_CORE_RELEASE_DOWNLOAD_URL, FUEL_CORE_REPO,
-    GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL, SWAY_REPO,
+    FUELUP_RELEASE_DOWNLOAD_URL, FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL,
 };
 use crate::file::hard_or_symlink_file;
 use crate::path::fuelup_bin;
+use crate::path::fuelup_dir;
 use crate::target_triple::TargetTriple;
+use crate::toolchain::OfficialToolchainDescription;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
@@ -45,7 +50,7 @@ impl DownloadCfg {
     pub fn new(name: &str, target: TargetTriple, version: Option<Version>) -> Result<Self> {
         let version = match version {
             Some(version) => version,
-            None => get_latest_tag(name).map_err(|e| {
+            None => get_latest_version(name).map_err(|e| {
                 anyhow!("Error getting latest tag for component: {:?}: {}", name, e)
             })?,
         };
@@ -94,35 +99,35 @@ pub fn tarball_name(name: &str, version: &Version, target: &TargetTriple) -> Res
     }
 }
 
-pub fn get_latest_tag(name: &str) -> Result<Version> {
-    let latest_tag_url = match name {
-        component::FORC => format!(
-            "{}{}/{}",
-            GITHUB_API_REPOS_BASE_URL, SWAY_REPO, RELEASES_LATEST
-        ),
-        component::FUEL_CORE => format!(
-            "{}{}/{}",
-            GITHUB_API_REPOS_BASE_URL, FUEL_CORE_REPO, RELEASES_LATEST
-        ),
-        component::FUELUP => format!(
-            "{}{}/{}",
-            GITHUB_API_REPOS_BASE_URL, FUELUP_REPO, RELEASES_LATEST
-        ),
-        _ => bail!("Unrecognized component: {}", name),
-    };
+pub fn get_latest_version(name: &str) -> Result<Version> {
     let handle = ureq::builder().user_agent("fuelup").build();
-    let resp = handle.get(&latest_tag_url).call()?;
-
     let mut data = Vec::new();
-    resp.into_reader().read_to_end(&mut data)?;
+    if name == component::FUELUP {
+        const FUELUP_RELEASES_API_URL: &str =
+            "https://api.github.com/repos/FuelLabs/fuelup/releases/latest";
+        let resp = handle.get(FUELUP_RELEASES_API_URL).call()?;
+        resp.into_reader().read_to_end(&mut data)?;
+        let response: LatestReleaseApiResponse =
+            serde_json::from_str(&String::from_utf8_lossy(&data))?;
 
-    let response: LatestReleaseApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
+        let version_str = &response.tag_name["v".len()..];
+        let version = Version::parse(version_str)?;
+        Ok(version)
+    } else {
+        let resp = handle.get(CHANNEL_LATEST_URL).call()?;
 
-    // Given a semver version with preceding 'v' (e.g. `v1.2.3`), take the slice after 'v' (e.g. `1.2.3`).
-    let version_str = &response.tag_name["v".len()..];
-    let version = Version::parse(version_str)?;
+        resp.into_reader().read_to_end(&mut data)?;
+        let tmp_dir = tempdir_in(&fuelup_dir())?;
 
-    Ok(version)
+        if let Ok(channel) = Channel::from_dist_channel(
+            &OfficialToolchainDescription::from_str("latest")?,
+            tmp_dir.into_path(),
+        ) {
+            Ok(channel.pkg[name].version.clone())
+        } else {
+            bail!("Failed to get 'latest' channel")
+        }
+    }
 }
 
 fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {

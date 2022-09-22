@@ -29,6 +29,15 @@ create_pkg_in_channel() {
             _repo="sway"
             _tarball_prefix="forc-binaries"
             ;;
+        "forc-client")
+            _targets=("aarch64-apple-darwin" "aarch64-unknown-linux-gnu" "x86_64-apple-darwin" "x86_64-unknown-linux-gnu")
+            _repo="forc-client"
+            _tarball_prefix="forc-client"
+
+            if [ "${2}" != "nightly" ]; then
+                _tarball_prefix+="-${version}"
+            fi
+            ;;
         "fuel-core")
             _targets=("aarch64-apple-darwin" "aarch64-unknown-linux-gnu" "x86_64-apple-darwin" "x86_64-unknown-linux-gnu")
             _repo="fuel-core"

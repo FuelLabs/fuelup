@@ -50,9 +50,8 @@ impl DownloadCfg {
     pub fn new(name: &str, target: TargetTriple, version: Option<Version>) -> Result<Self> {
         let version = match version {
             Some(version) => version,
-            None => get_latest_version(name).map_err(|e| {
-                anyhow!("Error getting latest tag for component: {:?}: {}", name, e)
-            })?,
+            None => get_latest_version(name)
+                .map_err(|e| anyhow!("Error getting latest tag for '{}': {}", name, e))?,
         };
 
         let release_url = match name {
@@ -125,7 +124,11 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
             &OfficialToolchainDescription::from_str("latest")?,
             tmp_dir.into_path(),
         ) {
-            Ok(channel.pkg[name].version.clone())
+            if let Some(p) = channel.pkg.get(name) {
+                Ok(p.version.clone())
+            } else {
+                bail!("'{name}' is not a valid, downloadable package in the 'latest' channel.")
+            }
         } else {
             bail!("Failed to get 'latest' channel")
         }

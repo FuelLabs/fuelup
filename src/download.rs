@@ -19,10 +19,9 @@ use tracing::{error, info};
 use crate::channel::Channel;
 use crate::channel::Package;
 use crate::component;
-use crate::constants::CHANNEL_LATEST_URL;
-use crate::constants::FORC_CLIENT_RELEASE_DOWNLOAD_URL;
 use crate::constants::{
-    FUELUP_RELEASE_DOWNLOAD_URL, FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL,
+    CHANNEL_LATEST_URL, FORC_CLIENT_RELEASE_DOWNLOAD_URL, FUELUP_RELEASE_DOWNLOAD_URL,
+    FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL,
 };
 use crate::file::hard_or_symlink_file;
 use crate::path::fuelup_bin;
@@ -106,9 +105,9 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
     let handle = ureq::builder().user_agent("fuelup").build();
     let mut data = Vec::new();
     if name == component::FUELUP {
-        static FUELUP_API_URL: &str =
+        const FUELUP_RELEASES_API_URL: &str =
             "https://api.github.com/repos/FuelLabs/fuelup/releases/latest";
-        let resp = handle.get(FUELUP_API_URL).call()?;
+        let resp = handle.get(FUELUP_RELEASES_API_URL).call()?;
         resp.into_reader().read_to_end(&mut data)?;
         let response: LatestReleaseApiResponse =
             serde_json::from_str(&String::from_utf8_lossy(&data))?;

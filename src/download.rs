@@ -132,7 +132,7 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
                         "'{name}' is not a valid, downloadable package in the 'latest' channel."
                     )
                 })
-                .and_then(|p| Ok(p.version.clone()))
+                .map(|p| p.version.clone())
         } else {
             bail!("Failed to get 'latest' channel")
         }

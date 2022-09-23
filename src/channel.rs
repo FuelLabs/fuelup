@@ -71,28 +71,6 @@ impl Channel {
         Ok(channel)
     }
 
-    pub fn into_toml(&self) -> Result<Document> {
-        let mut document = toml_edit::Document::new();
-        document["pkg"] = implicit_table();
-
-        for (component, package) in &self.pkg {
-            document["pkg"][&component] = implicit_table();
-            document["pkg"][&component]["version"] = value(package.version.to_string());
-
-            document["pkg"][&component]["target"] = implicit_table();
-
-            for (target, bin) in &package.target {
-                document["pkg"][&component]["target"][target.to_string()] = implicit_table();
-                document["pkg"][&component]["target"][target.to_string()]["url"] =
-                    value(bin.url.clone());
-                document["pkg"][&component]["target"][target.to_string()]["hash"] =
-                    value(bin.hash.clone());
-            }
-        }
-
-        Ok(document)
-    }
-
     pub fn build_download_configs(self) -> Vec<DownloadCfg> {
         let mut cfgs = self
             .pkg

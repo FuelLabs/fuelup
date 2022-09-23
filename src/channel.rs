@@ -6,31 +6,37 @@ use crate::{
 };
 use anyhow::{bail, Result};
 use semver::Version;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::{collections::HashMap, path::PathBuf};
-use toml_edit::de;
+use std::{collections::BTreeMap, fmt::Debug, path::PathBuf};
+use toml_edit::{de, value, Document};
 
 pub const LATEST: &str = "latest";
 pub const STABLE: &str = "stable";
 pub const BETA: &str = "beta";
 pub const NIGHTLY: &str = "nightly";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct HashedBinary {
     pub url: String,
     pub hash: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Channel {
-    pub pkg: HashMap<String, Package>,
+    pub pkg: BTreeMap<String, Package>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Package {
-    pub target: HashMap<String, HashedBinary>,
+    pub target: BTreeMap<String, HashedBinary>,
     pub version: Version,
+}
+
+fn implicit_table() -> toml_edit::Item {
+    let mut tbl = toml_edit::Table::new();
+    tbl.set_implicit(true);
+    toml_edit::Item::Table(tbl)
 }
 
 impl Channel {
@@ -65,6 +71,28 @@ impl Channel {
         Ok(channel)
     }
 
+    pub fn into_toml(&self) -> Result<Document> {
+        let mut document = toml_edit::Document::new();
+        document["pkg"] = implicit_table();
+
+        for (component, package) in &self.pkg {
+            document["pkg"][&component] = implicit_table();
+            document["pkg"][&component]["version"] = value(package.version.to_string());
+
+            document["pkg"][&component]["target"] = implicit_table();
+
+            for (target, bin) in &package.target {
+                document["pkg"][&component]["target"][target.to_string()] = implicit_table();
+                document["pkg"][&component]["target"][target.to_string()]["url"] =
+                    value(bin.url.clone());
+                document["pkg"][&component]["target"][target.to_string()]["hash"] =
+                    value(bin.hash.clone());
+            }
+        }
+
+        Ok(document)
+    }
+
     pub fn build_download_configs(self) -> Vec<DownloadCfg> {
         let mut cfgs = self
             .pkg
@@ -81,6 +109,8 @@ impl Channel {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+
     use super::*;
     use crate::{download::DownloadCfg, file::read_file};
 
@@ -189,5 +219,23 @@ mod tests {
         assert_eq!(cfgs[0].version, Version::parse("0.17.0").unwrap());
         assert_eq!(cfgs[1].name, "fuel-core");
         assert_eq!(cfgs[1].version, Version::parse("0.9.4").unwrap());
+    }
+
+    #[test]
+    fn channel_into_toml() -> Result<()> {
+        let channel_path = std::env::current_dir()
+            .unwrap()
+            .join("tests/channel-fuel-nightly-example.toml");
+        let channel_file = read_file("channel-fuel-nightly-example", &channel_path).unwrap();
+        let channel = Channel::from_toml(&channel_file).unwrap();
+
+        let toml = channel.into_toml()?;
+        let path = std::env::current_dir().unwrap().join("tests/chan.toml");
+
+        fs::write(path, toml.to_string())?;
+
+        assert_eq!(channel_file.trim(), toml.to_string().trim());
+
+        Ok(())
     }
 }

@@ -1,40 +1,22 @@
-published_by = "https://github.com/FuelLabs/fuelup/actions/runs/3069664717"
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/3118577578"
 
 [pkg.forc]
-version = "0.24.4"
+version = "0.24.5"
 [pkg.forc.target.darwin_amd64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.24.4/forc-binaries-darwin_amd64.tar.gz"
-hash = "b9ad9d1615eff6c3d5e4b90f82fa0c067ebad88a4a2478c2e5291f7913c66b62"
+url = "https://github.com/FuelLabs/sway/releases/download/v0.24.5/forc-binaries-darwin_amd64.tar.gz"
+hash = "3f5105b2d45864d848b26c75808769c277b7c9ee7a7b5ab6236854e9db19572b"
 
 [pkg.forc.target.darwin_arm64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.24.4/forc-binaries-darwin_arm64.tar.gz"
-hash = "6902e89f502f6633f0111c40d80edc76ea2f0a2e5c8f73c11bbb35bd2ed8185f"
+url = "https://github.com/FuelLabs/sway/releases/download/v0.24.5/forc-binaries-darwin_arm64.tar.gz"
+hash = "fd756c714581de366d6d2c2a2f3ad0335018eb60ad448388a6e506c2d4b05051"
 
 [pkg.forc.target.linux_amd64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.24.4/forc-binaries-linux_amd64.tar.gz"
-hash = "1ca4b90745914f35052539dea87eee0a9368919e5206e12874b523d76ed8fc46"
+url = "https://github.com/FuelLabs/sway/releases/download/v0.24.5/forc-binaries-linux_amd64.tar.gz"
+hash = "62cbf1754e61bd29e3e9c27a676895a1b553a618488608527215fd38bfcd04c0"
 
 [pkg.forc.target.linux_arm64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.24.4/forc-binaries-linux_arm64.tar.gz"
-hash = "b85b81d650e2ce0f6840040e717b12300a9450f0aa858aff3280d57281002cbf"
-
-[pkg.fuel-core]
-version = "0.10.1"
-[pkg.fuel-core.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.10.1/fuel-core-0.10.1-aarch64-apple-darwin.tar.gz"
-hash = "f4f1bdf22135941d81156e9052cd6b510ca911cdc89868ec362129155daf6e0d"
-
-[pkg.fuel-core.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.10.1/fuel-core-0.10.1-aarch64-unknown-linux-gnu.tar.gz"
-hash = "1357e6dac6875b9862cd1e6d89b4f5b2cbfa46b7a7255c95c2b1d8157da707ca"
-
-[pkg.fuel-core.target.x86_64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.10.1/fuel-core-0.10.1-x86_64-apple-darwin.tar.gz"
-hash = "69277b19348046f90a3dfc2875e40885dabf9ee30a8723d538a06e8912c15431"
-
-[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.10.1/fuel-core-0.10.1-x86_64-unknown-linux-gnu.tar.gz"
-hash = "41a7e7fef7042b2f75d467c64c548763f7267fe38f9f246e04f5fd73ad1ff001"
+url = "https://github.com/FuelLabs/sway/releases/download/v0.24.5/forc-binaries-linux_arm64.tar.gz"
+hash = "58692c796cd3b57c77027bd1e5bd4cf04da3a0cb7edc18ce7e071f963cd0e75a"
 
 [pkg.forc-client]
 version = "0.24.4"
@@ -53,3 +35,21 @@ hash = "48946dd80eacc074cfda60bde31a0712c5f51f4e414aaa87f7595f2fe1ff27df"
 [pkg.forc-client.target.x86_64-unknown-linux-gnu]
 url = "https://github.com/FuelLabs/forc-client/releases/download/v0.24.4/forc-client-0.24.4-x86_64-unknown-linux-gnu.tar.gz"
 hash = "a3eeb7c95e50bf660f5bf50de0a493ffd5b6f5848960355239916e6535741d84"
+
+[pkg.fuel-core]
+version = "0.10.1"
+[pkg.fuel-core.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.10.1/fuel-core-0.10.1-aarch64-apple-darwin.tar.gz"
+hash = "f4f1bdf22135941d81156e9052cd6b510ca911cdc89868ec362129155daf6e0d"
+
+[pkg.fuel-core.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.10.1/fuel-core-0.10.1-aarch64-unknown-linux-gnu.tar.gz"
+hash = "1357e6dac6875b9862cd1e6d89b4f5b2cbfa46b7a7255c95c2b1d8157da707ca"
+
+[pkg.fuel-core.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.10.1/fuel-core-0.10.1-x86_64-apple-darwin.tar.gz"
+hash = "69277b19348046f90a3dfc2875e40885dabf9ee30a8723d538a06e8912c15431"
+
+[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.10.1/fuel-core-0.10.1-x86_64-unknown-linux-gnu.tar.gz"
+hash = "41a7e7fef7042b2f75d467c64c548763f7267fe38f9f246e04f5fd73ad1ff001"

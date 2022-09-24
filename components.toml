@@ -35,7 +35,7 @@ name = "forc-client"
 tarball_prefix = "forc-binaries"
 is_plugin = true
 executables = ["forc-deploy", "forc-run"]
-repository_url = "https://github.com/FuelLabs/sway"
+repository_url = "https://github.com/FuelLabs/forc-client"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 publish = true
 

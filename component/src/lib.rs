@@ -9,7 +9,7 @@ pub const FORC_CLIENT: &str = "forc-client";
 pub const FUEL_CORE: &str = "fuel-core";
 pub const FUELUP: &str = "fuelup";
 
-const COMPONENTS_TOML: &str = include_str!("../components.toml");
+const COMPONENTS_TOML: &str = include_str!("../../components.toml");
 
 #[derive(Debug, Deserialize)]
 pub struct Components {

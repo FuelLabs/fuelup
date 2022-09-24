@@ -1,4 +1,5 @@
 use anyhow::{anyhow, bail, Result};
+use component;
 use flate2::read::GzDecoder;
 use semver::Version;
 use serde::{Deserialize, Serialize};
@@ -18,7 +19,6 @@ use tracing::{error, info};
 
 use crate::channel::Channel;
 use crate::channel::Package;
-use crate::component;
 use crate::constants::{
     CHANNEL_LATEST_URL, FORC_CLIENT_RELEASE_DOWNLOAD_URL, FUELUP_RELEASE_DOWNLOAD_URL,
     FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL,

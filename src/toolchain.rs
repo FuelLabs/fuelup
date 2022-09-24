@@ -1,4 +1,5 @@
 use anyhow::{bail, Context, Result};
+use component::{self, Components};
 use std::fmt;
 use std::fs::{remove_dir_all, remove_file};
 use std::path::PathBuf;
@@ -7,7 +8,7 @@ use std::str::FromStr;
 use time::Date;
 use tracing::{error, info};
 
-use crate::component::Components;
+use crate::channel;
 use crate::constants::DATE_FORMAT;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
@@ -17,7 +18,6 @@ use crate::path::{
 };
 use crate::settings::SettingsFile;
 use crate::target_triple::TargetTriple;
-use crate::{channel, component};
 
 pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
     channel::LATEST,

@@ -1,0 +1,55 @@
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/3116598477"
+
+[pkg.forc]
+version = "0.24.4+nightly.20220924.f7d000fff4"
+[pkg.forc.target.darwin_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-binaries-0.24.4%2Bnightly.20220924.f7d000fff4/forc-binaries-0.24.4+nightly.20220924.f7d000fff4-darwin_amd64.tar.gz"
+hash = "1ea4bd1cdd4a8ac1bcd6395136320b50e36098878825ebe1b02f6f6a1f077aef"
+
+[pkg.forc.target.darwin_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-binaries-0.24.4%2Bnightly.20220924.f7d000fff4/forc-binaries-0.24.4+nightly.20220924.f7d000fff4-darwin_arm64.tar.gz"
+hash = "300c21321ad59648fefa1cab7f007dbb73400668301688ed44a6b5f966aaa3f2"
+
+[pkg.forc.target.linux_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-binaries-0.24.4%2Bnightly.20220924.f7d000fff4/forc-binaries-0.24.4+nightly.20220924.f7d000fff4-linux_amd64.tar.gz"
+hash = "5574017deec1565e487f783d7ed2823e0468c14a854823a4f38efac3b2e42b22"
+
+[pkg.forc.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-binaries-0.24.4%2Bnightly.20220924.f7d000fff4/forc-binaries-0.24.4+nightly.20220924.f7d000fff4-linux_arm64.tar.gz"
+hash = "cde3e5fc9f1ce85acafeff1e0620b11b07321a9167920e0e60e03976de65886c"
+
+[pkg.forc-client]
+version = "0.24.4+nightly.20220924.3db85f9b8e"
+[pkg.forc-client.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-client-0.24.4%2Bnightly.20220924.3db85f9b8e/forc-client-0.24.4+nightly.20220924.3db85f9b8e-aarch64-apple-darwin.tar.gz"
+hash = "23d510ae95135ff238eb6e2c9636f5d355d486a035359d6adc2e4de5f1b985ca"
+
+[pkg.forc-client.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-client-0.24.4%2Bnightly.20220924.3db85f9b8e/forc-client-0.24.4+nightly.20220924.3db85f9b8e-aarch64-unknown-linux-gnu.tar.gz"
+hash = "bf2a17571990054e601affa784f15a66413c1cbf662a837083f7f1a2b604d079"
+
+[pkg.forc-client.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-client-0.24.4%2Bnightly.20220924.3db85f9b8e/forc-client-0.24.4+nightly.20220924.3db85f9b8e-x86_64-apple-darwin.tar.gz"
+hash = "c1d5d331497e9c1668e848edcfe678b1ea98d53c107766bf419c08eebb475fcf"
+
+[pkg.forc-client.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-client-0.24.4%2Bnightly.20220924.3db85f9b8e/forc-client-0.24.4+nightly.20220924.3db85f9b8e-x86_64-unknown-linux-gnu.tar.gz"
+hash = "2578b26b60bd7e8a1572fc16a9280bec9c8b9edcf0e3ddb18d27962c245996a9"
+
+[pkg.fuel-core]
+version = "0.10.1+nightly.20220924.96e526e931"
+[pkg.fuel-core.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/fuel-core-0.10.1%2Bnightly.20220924.96e526e931/fuel-core-0.10.1+nightly.20220924.96e526e931-aarch64-apple-darwin.tar.gz"
+hash = "023647d02b2c5961ac71981ec6a9d9f63b0580decc037987749cca3b42a8e15e"
+
+[pkg.fuel-core.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/fuel-core-0.10.1%2Bnightly.20220924.96e526e931/fuel-core-0.10.1+nightly.20220924.96e526e931-aarch64-unknown-linux-gnu.tar.gz"
+hash = "6708bd00566ac75dcef84376fb19617b64107edffdb4480e475eb2a7059907d5"
+
+[pkg.fuel-core.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/fuel-core-0.10.1%2Bnightly.20220924.96e526e931/fuel-core-0.10.1+nightly.20220924.96e526e931-x86_64-apple-darwin.tar.gz"
+hash = "5b4752bb692e9a16b482e33b26e53a428d463ff65b438bdbacd62a23ed5e6109"
+
+[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/fuel-core-0.10.1%2Bnightly.20220924.96e526e931/fuel-core-0.10.1+nightly.20220924.96e526e931-x86_64-unknown-linux-gnu.tar.gz"
+hash = "e396ca46349673bc46df22b492131494e9953588e497cc5399bfaa389f4c193f"

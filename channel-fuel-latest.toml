@@ -35,3 +35,21 @@ hash = "69277b19348046f90a3dfc2875e40885dabf9ee30a8723d538a06e8912c15431"
 [pkg.fuel-core.target.x86_64-unknown-linux-gnu]
 url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.10.1/fuel-core-0.10.1-x86_64-unknown-linux-gnu.tar.gz"
 hash = "41a7e7fef7042b2f75d467c64c548763f7267fe38f9f246e04f5fd73ad1ff001"
+
+[pkg.forc-client]
+version = "0.24.4"
+[pkg.forc-client.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/forc-client/releases/download/v0.24.4/forc-client-0.24.4-aarch64-apple-darwin.tar.gz"
+hash = "a0179d304fea63da3cb5d58b8a0f5a5db42eb7aa19fa6fb4b58185c218aecebb"
+
+[pkg.forc-client.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/forc-client/releases/download/v0.24.4/forc-client-0.24.4-aarch64-unknown-linux-gnu.tar.gz"
+hash = "3370c7865c2b66145dd8c6c8196afe690913ada49db31c108a004514540e471f"
+
+[pkg.forc-client.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/forc-client/releases/download/v0.24.4/forc-client-0.24.4-x86_64-apple-darwin.tar.gz"
+hash = "48946dd80eacc074cfda60bde31a0712c5f51f4e414aaa87f7595f2fe1ff27df"
+
+[pkg.forc-client.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/forc-client/releases/download/v0.24.4/forc-client-0.24.4-x86_64-unknown-linux-gnu.tar.gz"
+hash = "a3eeb7c95e50bf660f5bf50de0a493ffd5b6f5848960355239916e6535741d84"

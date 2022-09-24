@@ -2,7 +2,7 @@
 name = "forc"
 tarball_prefix = "forc-binaries"
 executables = ["forc"]
-download_url = "https://github.com/FuelLabs/sway/releases/download"
+repository_url = "https://github.com/FuelLabs/sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 publish = true
 
@@ -11,7 +11,7 @@ name = "forc-fmt"
 tarball_prefix = "forc-binaries"
 is_plugin = true
 executables = ["forc-fmt"]
-download_url = "https://github.com/FuelLabs/sway/releases/download"
+repository_url = "https://github.com/FuelLabs/sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 
 [component.forc-lsp]
@@ -19,7 +19,7 @@ name = "forc-lsp"
 tarball_prefix = "forc-binaries"
 is_plugin = true
 executables = ["forc-lsp"]
-download_url = "https://github.com/FuelLabs/sway/releases/download"
+repository_url = "https://github.com/FuelLabs/sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 
 [component.forc-explore]
@@ -27,7 +27,7 @@ name = "forc-explore"
 tarball_prefix = "forc-binaries"
 is_plugin = true
 executables = ["forc-explore"]
-download_url = "https://github.com/FuelLabs/sway/releases/download"
+repository_url = "https://github.com/FuelLabs/sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 
 [component.forc-client]
@@ -35,7 +35,7 @@ name = "forc-client"
 tarball_prefix = "forc-binaries"
 is_plugin = true
 executables = ["forc-deploy", "forc-run"]
-download_url = "https://github.com/FuelLabs/forc-client/releases/download"
+repository_url = "https://github.com/FuelLabs/sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 publish = true
 
@@ -43,6 +43,6 @@ publish = true
 name = "fuel-core"
 tarball_prefix = "fuel-core"
 executables = ["fuel-core"]
-download_url = "https://github.com/FuelLabs/fuel-core/releases/download"
+repository_url = "https://github.com/FuelLabs/fuel-core"
 targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]
 publish = true

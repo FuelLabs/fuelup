@@ -21,8 +21,9 @@ pub struct Component {
     pub is_plugin: Option<bool>,
     pub tarball_prefix: String,
     pub executables: Vec<String>,
-    pub repository_url: String,
+    pub download_url: String,
     pub targets: Vec<String>,
+    pub publish: Option<bool>,
 }
 
 #[derive(Debug)]
@@ -46,6 +47,25 @@ impl Components {
     pub fn collect() -> Result<Components> {
         let components = Self::from_toml(COMPONENTS_TOML)?;
         Ok(components)
+    }
+
+    pub fn collect_publishables() -> Result<Vec<Component>> {
+        let components = Self::from_toml(COMPONENTS_TOML)?;
+
+        let mut publishables: Vec<Component> = components
+            .component
+            .keys()
+            .map(|c| {
+                components
+                    .component
+                    .get(c)
+                    .expect("Failed to parse components.toml")
+            })
+            .filter_map(|c| c.publish.and_then(|_| Some(c.clone())))
+            .collect();
+
+        publishables.sort_by_key(|c| c.name.clone());
+        Ok(publishables)
     }
 
     pub fn collect_exclude_plugins() -> Result<Vec<Component>> {
@@ -106,7 +126,6 @@ impl Components {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::component;
     #[test]
     fn test_toml() -> Result<()> {
         const TOML: &str = r#"
@@ -115,7 +134,7 @@ name = "forc-fmt"
 is_plugin = true
 tarball_prefix = "forc-binaries"
 executables = ["forc-fmt"]
-repository_url = "https://github.com/FuelLabs/sway"
+download_url = "https://github.com/FuelLabs/sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 "#;
 
@@ -129,7 +148,7 @@ targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
         );
         assert_eq!(components.component["forc-fmt"].executables, ["forc-fmt"]);
         assert_eq!(
-            components.component["forc-fmt"].repository_url,
+            components.component["forc-fmt"].download_url,
             "https://github.com/FuelLabs/sway"
         );
         assert_eq!(

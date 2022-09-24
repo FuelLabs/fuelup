@@ -1,6 +1,5 @@
 pub mod channel;
 pub mod commands;
-pub mod component;
 pub mod config;
 pub mod constants;
 pub mod download;

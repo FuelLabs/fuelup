@@ -1,10 +1,9 @@
 use anyhow::Result;
+use component::{self, Components};
 use semver::Version;
 use std::{io::Write, path::Path};
 
-use crate::component::Components;
 use crate::{
-    component,
     config::Config,
     fmt::{bold, print_header},
     path::fuelup_dir,

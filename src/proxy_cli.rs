@@ -4,8 +4,8 @@ use std::os::unix::prelude::CommandExt;
 use std::process::{Command, ExitCode, Stdio};
 use std::{env, io};
 
-use crate::component::Components;
 use crate::toolchain::Toolchain;
+use component::Components;
 
 /// Runs forc or fuel-core in proxy mode
 pub fn proxy_run(arg0: &str) -> Result<ExitCode> {

@@ -156,6 +156,7 @@ jobs:
 
             ./.github/workflows/scripts/append_package_to_channel.sh forc ${{ env.LATEST_COMPATIBLE_FORC }} $CHANNEL_TOML
             ./.github/workflows/scripts/append_package_to_channel.sh forc-client 0.24.4 $CHANNEL_TOML
+            ./.github/workflows/scripts/append_package_to_channel.sh forc-wallet 0.24.4 $CHANNEL_TOML
             ./.github/workflows/scripts/append_package_to_channel.sh fuel-core ${{ env.LATEST_COMPATIBLE_FUEL_CORE }} $CHANNEL_TOML
 
             # Remove extra newline at the end

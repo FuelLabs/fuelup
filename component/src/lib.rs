@@ -21,7 +21,7 @@ pub struct Component {
     pub is_plugin: Option<bool>,
     pub tarball_prefix: String,
     pub executables: Vec<String>,
-    pub download_url: String,
+    pub repository_name: String,
     pub targets: Vec<String>,
     pub publish: Option<bool>,
 }
@@ -134,7 +134,7 @@ name = "forc-fmt"
 is_plugin = true
 tarball_prefix = "forc-binaries"
 executables = ["forc-fmt"]
-download_url = "https://github.com/FuelLabs/sway"
+repository_name = "sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 "#;
 
@@ -148,7 +148,7 @@ targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
         );
         assert_eq!(components.component["forc-fmt"].executables, ["forc-fmt"]);
         assert_eq!(
-            components.component["forc-fmt"].download_url,
+            components.component["forc-fmt"].repository_name,
             "https://github.com/FuelLabs/sway"
         );
         assert_eq!(

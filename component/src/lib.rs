@@ -6,6 +6,7 @@ use toml_edit::de;
 
 pub const FORC: &str = "forc";
 pub const FORC_CLIENT: &str = "forc-client";
+pub const FORC_WALLET: &str = "forc-wallet";
 pub const FUEL_CORE: &str = "fuel-core";
 pub const FUELUP: &str = "fuelup";
 

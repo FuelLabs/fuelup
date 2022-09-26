@@ -68,7 +68,7 @@ impl TargetTriple {
                 Ok(Self(format!("{}_{}", os, architecture)))
             }
 
-            component::FUEL_CORE | component::FORC_CLIENT => {
+            component::FUEL_CORE | component::FORC_CLIENT | component::FORC_WALLET => {
                 let architecture = match std::env::consts::ARCH {
                     "aarch64" | "x86_64" => std::env::consts::ARCH,
                     unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),

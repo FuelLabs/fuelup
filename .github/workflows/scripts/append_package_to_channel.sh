@@ -38,6 +38,15 @@ create_pkg_in_channel() {
                 _tarball_prefix+="-${version}"
             fi
             ;;
+        "forc-wallet")
+            _targets=("aarch64-apple-darwin" "aarch64-unknown-linux-gnu" "x86_64-apple-darwin" "x86_64-unknown-linux-gnu")
+            _repo="forc-wallet"
+            _tarball_prefix="forc-wallet"
+
+            if [ "${2}" != "nightly" ]; then
+                _tarball_prefix+="-${version}"
+            fi
+            ;;
         "fuel-core")
             _targets=("aarch64-apple-darwin" "aarch64-unknown-linux-gnu" "x86_64-apple-darwin" "x86_64-unknown-linux-gnu")
             _repo="fuel-core"

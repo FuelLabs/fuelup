@@ -19,6 +19,7 @@ use tracing::{error, info};
 
 use crate::channel::Channel;
 use crate::channel::Package;
+use crate::constants::FORC_WALLET_RELEASE_DOWNLOAD_URL;
 use crate::constants::{
     CHANNEL_LATEST_URL, FORC_CLIENT_RELEASE_DOWNLOAD_URL, FUELUP_RELEASE_DOWNLOAD_URL,
     FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL,
@@ -57,6 +58,7 @@ impl DownloadCfg {
         let release_url = match name {
             component::FORC => SWAY_RELEASE_DOWNLOAD_URL.to_string(),
             component::FORC_CLIENT => FORC_CLIENT_RELEASE_DOWNLOAD_URL.to_string(),
+            component::FORC_WALLET => FORC_WALLET_RELEASE_DOWNLOAD_URL.to_string(),
             component::FUEL_CORE => FUEL_CORE_RELEASE_DOWNLOAD_URL.to_string(),
             component::FUELUP => FUELUP_RELEASE_DOWNLOAD_URL.to_string(),
             _ => bail!("Unrecognized component: {}", name),
@@ -94,6 +96,7 @@ pub fn tarball_name(name: &str, version: &Version, target: &TargetTriple) -> Res
     match name {
         component::FORC => Ok(format!("forc-binaries-{}.tar.gz", target)),
         component::FORC_CLIENT => Ok(format!("forc-client-{}-{}.tar.gz", version, target)),
+        component::FORC_WALLET => Ok(format!("forc-wallet-{}-{}.tar.gz", version, target)),
         component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version, target)),
         component::FUELUP => Ok(format!("fuelup-{}-{}.tar.gz", version, target)),
         _ => bail!("Unrecognized component: {}", name),

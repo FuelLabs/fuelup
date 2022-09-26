@@ -1,12 +1,13 @@
-use std::collections::hash_map::Keys;
-use std::collections::{BTreeMap, HashMap};
-use std::error::Error;
-
 use anyhow::{bail, Result};
 use clap::Parser;
-use component::Components;
+use component::{Component, Components};
 use semver::Version;
 use serde::{Deserialize, Serialize};
+use sha2::Digest;
+use sha2::Sha256;
+use std::collections::{BTreeMap, HashMap};
+use std::error::Error;
+use std::fs;
 use toml_edit::value;
 
 /// Parse a single key-value pair
@@ -28,7 +29,7 @@ struct Args {
     /// Component name [possible values: latest, nightly]
     pub channel: String,
     /// the TOML file name
-    pub out: String,
+    pub out_file: String,
     /// Component name [possible values: latest]
     #[clap(value_parser = parse_key_val::<String, Version>)]
     pub packages: Vec<(String, Version)>,
@@ -57,12 +58,68 @@ pub struct Package {
     pub version: Version,
 }
 
-fn get_version(channel: &str) -> Version {
-    match channel {
-        "nightly" => {}
-        "latest" => {}
-        _ => bail!("Invalid channel '{channel}'"),
-    }
+#[derive(Debug, Serialize, Deserialize)]
+struct LatestReleaseApiResponse {
+    url: String,
+    tag_name: String,
+    name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Release {
+    assets: Vec<Asset>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Asset {
+    browser_download_url: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Commit {
+    sha: String,
+}
+
+fn get_version(channel: &str, component: &Component) -> Result<Version> {
+    let handle = ureq::builder().user_agent("fuelup").build();
+    let mut data = Vec::new();
+
+    let today = chrono::Utc::now().format("%Y%m%d");
+    let today_iso = format!("{}T00:00:00Z", chrono::Utc::now().format("%Y-%m-%d"));
+
+    let url = format!(
+        "https://api.github.com/repos/FuelLabs/{}/releases/latest",
+        component.repository_name
+    );
+
+    let resp = handle.get(&url).call()?;
+
+    resp.into_reader().read_to_end(&mut data)?;
+
+    let response: LatestReleaseApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
+
+    let mut version_str = response.tag_name["v".len()..].to_string();
+
+    if channel == "nightly" {
+        let commit_api = format!(
+            "https://api.github.com/repos/FuelLabs/{}/commits",
+            component.repository_name
+        );
+        let resp = handle.get(&commit_api).query("until", &today_iso).call()?;
+
+        let mut data2 = Vec::new();
+        resp.into_reader().read_to_end(&mut data2)?;
+        let commits: Vec<Commit> = serde_json::from_str(&String::from_utf8_lossy(&data2))?;
+
+        let short_sha = commits[0].sha.chars().take(10).collect::<String>();
+
+        let build_metadata = format!("{}.{}.{}", "nightly", today, short_sha);
+        version_str = format!("{}+{}", version_str, build_metadata);
+    };
+
+    let version = Version::parse(&version_str)?;
+
+    Ok(version)
 }
 
 fn components_exists(components: &HashMap<String, Version>) -> bool {
@@ -91,7 +148,6 @@ fn validate_components(channel: &str, components: &HashMap<String, Version>) -> 
 fn main() -> Result<()> {
     let args = Args::parse();
 
-    println!("{}", args.channel);
     let mut component_versions: HashMap<String, Version> = HashMap::new();
 
     for package in args.packages {
@@ -101,30 +157,60 @@ fn main() -> Result<()> {
     validate_components(&args.channel, &component_versions)?;
 
     let components = Components::collect_publishables()?;
+
     let mut document = toml_edit::Document::new();
     document["pkg"] = implicit_table();
 
     for component in components {
+        let tag_prefix = if component.name == "forc" {
+            "forc-binaries"
+        } else {
+            &component.name
+        };
+
         let version = match component_versions.contains_key(&component.name) {
             true => component_versions[&component.name].clone(),
-            false => get_version(&args.channel),
+            false => get_version(&args.channel, &component)?,
+        };
+
+        let repo = match args.channel.as_str() {
+            "latest" => &component.repository_name,
+            "nightly" => "sway-nightly-binaries",
+            _ => bail!(""),
         };
 
         document["pkg"][&component.name] = implicit_table();
         document["pkg"][&component.name]["version"] = value(version.to_string());
-
         document["pkg"][&component.name]["target"] = implicit_table();
 
         for target in &component.targets {
+            let mut data = Vec::new();
+            let url = format!(
+                "https://github.com/FuelLabs/{}/releases/download/{}-{}/{}-{}-{}.tar.gz",
+                repo,
+                tag_prefix,
+                version.to_string().replace("+", "%2B"),
+                tag_prefix,
+                version,
+                target
+            );
+
+            println!("url: {}", url);
+
+            let res = ureq::get(&url).call()?;
+            res.into_reader().read_to_end(&mut data)?;
+            let mut hasher = Sha256::new();
+            hasher.update(data);
+            let actual_hash = format!("{:x}", hasher.finalize());
+
             document["pkg"][&component.name]["target"][target.to_string()] = implicit_table();
-            document["pkg"][&component.name]["target"][target.to_string()]["url"] =
-                value(component.download_url.clone());
-            //document["pkg"][&component.name]["target"][target.to_string()]["hash"] =
-            //value(bin.hash.clone());
+            document["pkg"][&component.name]["target"][target.to_string()]["url"] = value(url);
+            document["pkg"][&component.name]["target"][target.to_string()]["hash"] =
+                value(actual_hash);
         }
     }
 
-    println!("{}", document);
+    fs::write(args.out_file, document.to_string())?;
 
     Ok(())
 }

@@ -174,20 +174,19 @@ fn main() -> Result<()> {
             false => get_version(&args.channel, &component)?,
         };
 
-        let (repo, tag, tarball_prefix) = match args.channel.as_str() {
-            "latest" => {
-                let tarball_prefix = if tag_prefix == "forc-binaries" {
-                    tag_prefix.to_string()
-                } else {
-                    format!("{}-{}", tag_prefix, version)
-                };
-                (
-                    component.repository_name,
-                    "v".to_owned() + &version.to_string(),
-                    tarball_prefix,
-                )
-            }
-            "nightly" => (
+        let (repo, tag, tarball_prefix) = if args.channel.as_str() == "latest" {
+            let tarball_prefix = if tag_prefix == "forc-binaries" {
+                tag_prefix.to_string()
+            } else {
+                format!("{}-{}", tag_prefix, version)
+            };
+            (
+                component.repository_name,
+                "v".to_owned() + &version.to_string(),
+                tarball_prefix,
+            )
+        } else {
+            (
                 "sway-nightly-binaries".to_string(),
                 format!(
                     "{}-{}",
@@ -195,8 +194,7 @@ fn main() -> Result<()> {
                     &version.to_string().replace("+", "%2B")
                 ),
                 format!("{}-{}", tag_prefix, version),
-            ),
-            _ => bail!(""),
+            )
         };
 
         document["pkg"][&component.name] = implicit_table();

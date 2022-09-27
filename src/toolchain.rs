@@ -168,7 +168,19 @@ impl Toolchain {
     }
 
     pub fn has_component(&self, component: &str) -> bool {
-        self.bin_path.join(component).exists()
+        let executables = &Components::collect().unwrap().component[component].executables;
+
+        executables.iter().all(|e| self.bin_path.join(e).is_file())
+    }
+
+    fn can_remove(&self, component: &str) -> bool {
+        // Published components are the ones downloadable, and hence removable.
+        Components::collect_publishables()
+            .expect("Failed to collect publishable components")
+            .iter()
+            .map(|c| c.name.clone())
+            .collect::<String>()
+            .contains(component)
     }
 
     pub fn add_component(&self, download_cfg: DownloadCfg) -> Result<DownloadCfg> {
@@ -237,23 +249,31 @@ impl Toolchain {
         Ok(download_cfg)
     }
 
+    fn remove_executables(&self, component: &str) -> Result<()> {
+        let executables = &Components::collect().unwrap().component[component].executables;
+        for executable in executables {
+            remove_file(self.bin_path.join(executable))
+                .with_context(|| format!("failed to remove executable '{}'", executable))?;
+        }
+        Ok(())
+    }
+
     pub fn remove_component(&self, component: &str) -> Result<()> {
-        if self.has_component(component) {
-            info!("Removing '{}' from toolchain '{}'", component, self.name);
-            let component_path = self.bin_path.join(component);
-            remove_file(component_path)
-                .with_context(|| format!("failed to remove component '{}'", component))?;
-            // If component to remove is 'forc', silently remove forc plugins
-            if component == component::FORC {
-                for plugin in Components::collect_plugin_executables()? {
-                    let plugin_path = self.bin_path.join(plugin);
-                    remove_file(plugin_path)
-                        .with_context(|| format!("failed to remove component '{}'", component))?;
-                }
+        if self.can_remove(component) {
+            if self.has_component(component) {
+                info!("Removing '{}' from toolchain '{}'", component, self.name);
+                match self.remove_executables(component) {
+                    Ok(_) => info!("'{}' removed from toolchain '{}'", component, self.name),
+                    Err(e) => error!(
+                        "Failed to remove '{}' from toolchain '{}': {}",
+                        component, self.name, e
+                    ),
+                };
+            } else {
+                info!("'{}' not found in toolchain '{}'", component, self.name);
             }
-            info!("'{}' removed from toolchain '{}'", component, self.name);
         } else {
-            info!("'{}' not found in toolchain '{}'", component, self.name);
+            info!("'{}' is not a removable component", component);
         }
 
         Ok(())

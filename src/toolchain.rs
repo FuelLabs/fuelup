@@ -168,7 +168,10 @@ impl Toolchain {
     }
 
     pub fn has_component(&self, component: &str) -> bool {
-        let executables = &Components::collect().unwrap().component[component].executables;
+        let executables = &Components::collect()
+            .expect("Failed to collect components")
+            .component[component]
+            .executables;
 
         executables.iter().all(|e| self.bin_path.join(e).is_file())
     }

@@ -9,7 +9,7 @@ use semver::Version;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{collections::BTreeMap, fmt::Debug, path::PathBuf};
-use toml_edit::{de, value, Document};
+use toml_edit::de;
 
 pub const LATEST: &str = "latest";
 pub const STABLE: &str = "stable";
@@ -31,12 +31,6 @@ pub struct Channel {
 pub struct Package {
     pub target: BTreeMap<String, HashedBinary>,
     pub version: Version,
-}
-
-fn implicit_table() -> toml_edit::Item {
-    let mut tbl = toml_edit::Table::new();
-    tbl.set_implicit(true);
-    toml_edit::Item::Table(tbl)
 }
 
 impl Channel {
@@ -197,23 +191,5 @@ mod tests {
         assert_eq!(cfgs[0].version, Version::parse("0.17.0").unwrap());
         assert_eq!(cfgs[1].name, "fuel-core");
         assert_eq!(cfgs[1].version, Version::parse("0.9.4").unwrap());
-    }
-
-    #[test]
-    fn channel_into_toml() -> Result<()> {
-        let channel_path = std::env::current_dir()
-            .unwrap()
-            .join("tests/channel-fuel-nightly-example.toml");
-        let channel_file = read_file("channel-fuel-nightly-example", &channel_path).unwrap();
-        let channel = Channel::from_toml(&channel_file).unwrap();
-
-        let toml = channel.into_toml()?;
-        let path = std::env::current_dir().unwrap().join("tests/chan.toml");
-
-        fs::write(path, toml.to_string())?;
-
-        assert_eq!(channel_file.trim(), toml.to_string().trim());
-
-        Ok(())
     }
 }

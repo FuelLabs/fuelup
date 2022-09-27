@@ -19,6 +19,7 @@ use tracing::{error, info};
 
 use crate::channel::Channel;
 use crate::channel::Package;
+use crate::constants::FORC_CLIENT_RELEASE_DOWNLOAD_URL;
 use crate::constants::{
     CHANNEL_LATEST_URL, FUELUP_RELEASE_DOWNLOAD_URL, FUEL_CORE_RELEASE_DOWNLOAD_URL,
     SWAY_RELEASE_DOWNLOAD_URL,

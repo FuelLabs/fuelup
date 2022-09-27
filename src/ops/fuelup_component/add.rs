@@ -25,13 +25,6 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
         )
     };
 
-    if toolchain.has_component(&maybe_versioned_component) {
-        info!(
-            "{} already exists in toolchain '{}'; replacing existing version with `latest` version",
-            &maybe_versioned_component, toolchain.name
-        );
-    }
-
     let (component, version): (&str, Option<Version>) =
         match maybe_versioned_component.split_once('@') {
             Some(t) => {
@@ -47,6 +40,13 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
             }
             None => (&maybe_versioned_component, None),
         };
+
+    if toolchain.has_component(&component) {
+        info!(
+            "{} already exists in toolchain '{}'; replacing existing version with `latest` version",
+            &maybe_versioned_component, toolchain.name
+        );
+    }
 
     let download_cfg =
         DownloadCfg::new(component, TargetTriple::from_component(component)?, version)?;

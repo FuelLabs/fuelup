@@ -162,6 +162,7 @@ fn main() -> Result<()> {
     document["pkg"] = implicit_table();
 
     for component in components {
+        println!("Writing package info for component '{}'", &component.name);
         let tag_prefix = if component.name == "forc" {
             "forc-binaries"
         } else {
@@ -173,9 +174,28 @@ fn main() -> Result<()> {
             false => get_version(&args.channel, &component)?,
         };
 
-        let repo = match args.channel.as_str() {
-            "latest" => &component.repository_name,
-            "nightly" => "sway-nightly-binaries",
+        let (repo, tag, tarball_prefix) = match args.channel.as_str() {
+            "latest" => {
+                let tarball_prefix = if tag_prefix == "forc-binaries" {
+                    tag_prefix.to_string()
+                } else {
+                    format!("{}-{}", tag_prefix, version)
+                };
+                (
+                    component.repository_name,
+                    "v".to_owned() + &version.to_string(),
+                    tarball_prefix,
+                )
+            }
+            "nightly" => (
+                "sway-nightly-binaries".to_string(),
+                format!(
+                    "{}-{}",
+                    tag_prefix.to_owned(),
+                    &version.to_string().replace("+", "%2B")
+                ),
+                format!("{}-{}", tag_prefix, version),
+            ),
             _ => bail!(""),
         };
 
@@ -184,24 +204,21 @@ fn main() -> Result<()> {
         document["pkg"][&component.name]["target"] = implicit_table();
 
         for target in &component.targets {
+            println!("Adding url and hash for target '{}'", &target);
+
             let mut data = Vec::new();
             let url = format!(
-                "https://github.com/FuelLabs/{}/releases/download/{}-{}/{}-{}-{}.tar.gz",
-                repo,
-                tag_prefix,
-                version.to_string().replace("+", "%2B"),
-                tag_prefix,
-                version,
-                target
+                "https://github.com/FuelLabs/{}/releases/download/{}/{}-{}.tar.gz",
+                repo, tag, tarball_prefix, target
             );
-
-            println!("url: {}", url);
+            println!("url: {}", &url);
 
             let res = ureq::get(&url).call()?;
             res.into_reader().read_to_end(&mut data)?;
             let mut hasher = Sha256::new();
             hasher.update(data);
             let actual_hash = format!("{:x}", hasher.finalize());
+            println!("hash: {}", &actual_hash);
 
             document["pkg"][&component.name]["target"][target.to_string()] = implicit_table();
             document["pkg"][&component.name]["target"][target.to_string()]["url"] = value(url);
@@ -210,6 +227,7 @@ fn main() -> Result<()> {
         }
     }
 
+    println!("writing channel: '{}'", &args.out_file);
     fs::write(args.out_file, document.to_string())?;
 
     Ok(())

@@ -41,7 +41,7 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
             None => (&maybe_versioned_component, None),
         };
 
-    if toolchain.has_component(&component) {
+    if toolchain.has_component(component) {
         info!(
             "{} already exists in toolchain '{}'; replacing existing version with `latest` version",
             &maybe_versioned_component, toolchain.name

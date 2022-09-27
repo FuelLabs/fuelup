@@ -24,6 +24,7 @@ pub struct Component {
     pub executables: Vec<String>,
     pub repository_url: String,
     pub targets: Vec<String>,
+    pub publish: Option<bool>,
 }
 
 #[derive(Debug)]
@@ -42,6 +43,30 @@ impl Components {
     pub fn from_toml(toml: &str) -> Result<Self> {
         let components: Components = de::from_str(toml)?;
         Ok(components)
+    }
+
+    pub fn collect() -> Result<Components> {
+        let components = Self::from_toml(COMPONENTS_TOML)?;
+        Ok(components)
+    }
+
+    pub fn collect_publishables() -> Result<Vec<Component>> {
+        let components = Self::from_toml(COMPONENTS_TOML)?;
+
+        let mut publishables: Vec<Component> = components
+            .component
+            .keys()
+            .map(|c| {
+                components
+                    .component
+                    .get(c)
+                    .expect("Failed to parse components.toml")
+            })
+            .filter_map(|c| c.publish.and_then(|_| Some(c.clone())))
+            .collect();
+
+        publishables.sort_by_key(|c| c.name.clone());
+        Ok(publishables)
     }
 
     pub fn collect_exclude_plugins() -> Result<Vec<Component>> {

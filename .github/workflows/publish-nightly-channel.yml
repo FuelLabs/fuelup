@@ -22,8 +22,8 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Install print_components
-        run: cargo install --debug --path ./ci/print_components
+      - name: Install channel builder script
+        run: cargo install --debug --path ./ci/build_channel
 
       - name: Publish nightly channel
         id: setup
@@ -36,11 +36,7 @@ jobs:
             # Create header for channel
             touch $CHANNEL_TOML
             echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >> $CHANNEL_TOML
-
-            COMPONENTS=$(print_components)
-            for component in $COMPONENTS; do
-              ./.github/workflows/scripts/append_package_to_channel.sh $component nightly $CHANNEL_TOML
-            done
+            build_channel nightly $CHANNEL_TOML
 
             # Remove extra newline at the end
             truncate -s -1 $CHANNEL_TOML

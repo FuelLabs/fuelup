@@ -147,8 +147,8 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Install print_components
-        run: cargo install --debug --path ./ci/print_components
+      - name: Install channel builder script
+        run: cargo install --debug --path ./ci/build_channel
 
       # Generate the channel TOML file here and run append_package_to_channel.sh which appends download links and hashes for forc and fuel-core to the channel TOML.
       - name: Prepare channel with compatible versions
@@ -161,19 +161,7 @@ jobs:
             # Create header for channel
             touch $CHANNEL_TOML
             echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >> $CHANNEL_TOML
-
-            COMPONENTS=$(print_components)
-            for component in $COMPONENTS; do
-              case "$component" in
-                fuel-core)
-                  version=${{ env.LATEST_COMPATIBLE_FUEL_CORE }}
-                  ;;
-                *)
-                  version=${{ env.LATEST_COMPATIBLE_FORC }}
-                  ;;
-              esac
-              ./.github/workflows/scripts/append_package_to_channel.sh $component $version $CHANNEL_TOML
-            done 
+            build_channel latest $CHANNEL_TOML forc=${{ env.LATEST_COMPATIBLE_FORC }} fuel-core=${{ env.LATEST_COMPATIBLE_FUEL_CORE }}
 
             # Remove extra newline at the end
             truncate -s -1 $CHANNEL_TOML

@@ -81,8 +81,6 @@ impl Channel {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
-
     use super::*;
     use crate::{download::DownloadCfg, file::read_file};
 

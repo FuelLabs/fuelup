@@ -254,6 +254,7 @@ fn fuelup_component_add() -> Result<()> {
         let _ = cfg.fuelup(&["component", "add", "forc"]);
         expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), FORC_BINS);
 
+        let _ = cfg.fuelup(&["component", "add", "forc-client"]);
         let _ = cfg.fuelup(&["component", "add", "fuel-core@0.9.5"]);
         expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), ALL_BINS);
     })?;

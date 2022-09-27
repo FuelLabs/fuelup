@@ -8,8 +8,8 @@ publish = false
 
 [dependencies]
 anyhow = "1"
-clap = { version = "3.2", features = ["cargo", "derive", "env"] }
 chrono = "0.4"
+clap = { version = "3.2", features = ["cargo", "derive", "env"] }
 component = { path = "../../component" }
 semver = { version = "1", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }

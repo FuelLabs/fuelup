@@ -150,7 +150,7 @@ jobs:
       - name: Install build-channel script
         run: cargo install --debug --path ./ci/build-channel
 
-      # Generate the channel TOML file here and run append_package_to_channel.sh which appends download links and hashes for forc and fuel-core to the channel TOML.
+      # Generate the channel TOML file here and run build-channel script which appends download links and hashes for forc and fuel-core to the channel TOML.
       - name: Prepare channel with compatible versions
         if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
         run: |

@@ -22,7 +22,7 @@ pub struct Component {
     pub is_plugin: Option<bool>,
     pub tarball_prefix: String,
     pub executables: Vec<String>,
-    pub repository_url: String,
+    pub repository_name: String,
     pub targets: Vec<String>,
     pub publish: Option<bool>,
 }
@@ -127,7 +127,6 @@ impl Components {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::component;
     #[test]
     fn test_toml() -> Result<()> {
         const TOML: &str = r#"
@@ -136,7 +135,7 @@ name = "forc-fmt"
 is_plugin = true
 tarball_prefix = "forc-binaries"
 executables = ["forc-fmt"]
-repository_url = "https://github.com/FuelLabs/sway"
+repository_name = "sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 "#;
 
@@ -150,7 +149,7 @@ targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
         );
         assert_eq!(components.component["forc-fmt"].executables, ["forc-fmt"]);
         assert_eq!(
-            components.component["forc-fmt"].repository_url,
+            components.component["forc-fmt"].repository_name,
             "https://github.com/FuelLabs/sway"
         );
         assert_eq!(

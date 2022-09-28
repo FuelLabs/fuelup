@@ -187,7 +187,7 @@ targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
             .iter()
             .map(|c| c.name.clone())
             .collect::<Vec<String>>();
-        let mut expected = [component::FORC, component::FUEL_CORE];
+        let mut expected = ["forc", "fuel-core"];
         expected.sort();
         assert_eq!(components.len(), 2);
         assert_eq!(actual, expected);

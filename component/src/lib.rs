@@ -28,6 +28,18 @@ pub struct Component {
 
 impl Component {
     pub fn from_name(name: &str) -> Result<Self> {
+        if name == FUELUP {
+            return Ok(Component {
+                name: FUELUP.to_string(),
+                tarball_prefix: FUELUP.to_string(),
+                executables: vec![FUELUP.to_string()],
+                repository_name: FUELUP.to_string(),
+                targets: vec![FUELUP.to_string()],
+                is_plugin: Some(false),
+                publish: Some(true),
+            });
+        }
+
         let components = Components::collect().expect("Could not collect components");
 
         components

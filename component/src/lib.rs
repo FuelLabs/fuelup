@@ -4,6 +4,8 @@ use anyhow::{anyhow, Result};
 use serde::Deserialize;
 use toml_edit::de;
 
+// Keeping forc since some ways we handle forc is slightly different.
+pub const FORC: &str = "forc";
 pub const FUELUP: &str = "fuelup";
 
 const COMPONENTS_TOML: &str = include_str!("../../components.toml");

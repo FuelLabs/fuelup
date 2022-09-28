@@ -28,7 +28,7 @@ use crate::toolchain::OfficialToolchainDescription;
 
 fn github_releases_download_url(repo: &str, tag: &Version, tarball: &str) -> String {
     format!(
-        "https://github.com/FuelLabs/{}/releases/download/{}/{}",
+        "https://github.com/FuelLabs/{}/releases/download/v{}/{}",
         repo, tag, tarball
     )
 }

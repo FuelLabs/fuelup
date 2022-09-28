@@ -1,0 +1,55 @@
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/3140181178"
+
+[pkg.forc]
+version = "0.24.5+nightly.20220928.c5e543382e"
+[pkg.forc.target.darwin_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-binaries-0.24.5%2Bnightly.20220928.c5e543382e/forc-binaries-0.24.5+nightly.20220928.c5e543382e-darwin_amd64.tar.gz"
+hash = "885f8fc93e67642c0495ca0c7ef84dd699752e36a6ac6c9be8bb3106690b9f6b"
+
+[pkg.forc.target.darwin_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-binaries-0.24.5%2Bnightly.20220928.c5e543382e/forc-binaries-0.24.5+nightly.20220928.c5e543382e-darwin_arm64.tar.gz"
+hash = "b674d4cd1d11a50d77c505937e66d43f9dad9f7b506897e5a2c1bac7805b06ff"
+
+[pkg.forc.target.linux_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-binaries-0.24.5%2Bnightly.20220928.c5e543382e/forc-binaries-0.24.5+nightly.20220928.c5e543382e-linux_amd64.tar.gz"
+hash = "ce6b610328fdb2e0cc4aa61517772a71cd156ee67e4cc4c16dc8d71317e59b95"
+
+[pkg.forc.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-binaries-0.24.5%2Bnightly.20220928.c5e543382e/forc-binaries-0.24.5+nightly.20220928.c5e543382e-linux_arm64.tar.gz"
+hash = "7968d84d02ffd1a50a14f2e34a2006b725bafcdd5fac8702f810aaa94a7cfbf8"
+
+[pkg.forc-client]
+version = "0.24.4+nightly.20220928.3db85f9b8e"
+[pkg.forc-client.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-client-0.24.4%2Bnightly.20220928.3db85f9b8e/forc-client-0.24.4+nightly.20220928.3db85f9b8e-aarch64-apple-darwin.tar.gz"
+hash = "12ac15ddc3832d675a5dba9bd74b8415ccf5d54e1c358fd2e34feefc386019d1"
+
+[pkg.forc-client.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-client-0.24.4%2Bnightly.20220928.3db85f9b8e/forc-client-0.24.4+nightly.20220928.3db85f9b8e-aarch64-unknown-linux-gnu.tar.gz"
+hash = "5185c06f6ecef7ae057a83ec9658885571d65fc07567bda10e71d69d15f0d43f"
+
+[pkg.forc-client.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-client-0.24.4%2Bnightly.20220928.3db85f9b8e/forc-client-0.24.4+nightly.20220928.3db85f9b8e-x86_64-apple-darwin.tar.gz"
+hash = "aba3012576e3c4295dcc43f7416a60e1a5871bfa9041418218f26c1e2827a871"
+
+[pkg.forc-client.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-client-0.24.4%2Bnightly.20220928.3db85f9b8e/forc-client-0.24.4+nightly.20220928.3db85f9b8e-x86_64-unknown-linux-gnu.tar.gz"
+hash = "a02fcf70e3df3c63d6b45674991db59588a9ae442de61a29da76bc6c74a78750"
+
+[pkg.fuel-core]
+version = "0.10.1+nightly.20220928.5adbad9559"
+[pkg.fuel-core.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/fuel-core-0.10.1%2Bnightly.20220928.5adbad9559/fuel-core-0.10.1+nightly.20220928.5adbad9559-aarch64-apple-darwin.tar.gz"
+hash = "d8d40c70d04227cd2720248d476657cb037fcc8ed5d9fc68392b055e6c8d5b29"
+
+[pkg.fuel-core.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/fuel-core-0.10.1%2Bnightly.20220928.5adbad9559/fuel-core-0.10.1+nightly.20220928.5adbad9559-aarch64-unknown-linux-gnu.tar.gz"
+hash = "b088fd7b856f1ca8e2cad8ab0c5d5e5c7f939ea2ffe772fb89ace1ff763cb4f6"
+
+[pkg.fuel-core.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/fuel-core-0.10.1%2Bnightly.20220928.5adbad9559/fuel-core-0.10.1+nightly.20220928.5adbad9559-x86_64-apple-darwin.tar.gz"
+hash = "2a1ae01918976e0fc4d46f87e861647998a3cf608acf30c4ef718e65e4b1ac7c"
+
+[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/fuel-core-0.10.1%2Bnightly.20220928.5adbad9559/fuel-core-0.10.1+nightly.20220928.5adbad9559-x86_64-unknown-linux-gnu.tar.gz"
+hash = "c74c324789eacadc27d9536571c9323e98e49ecb9bb4268760ab022d6204cd33"

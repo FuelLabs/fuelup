@@ -58,14 +58,14 @@ impl DownloadCfg {
                 .map_err(|e| anyhow!("Error getting latest tag for '{}': {}", name, e))?,
         };
 
-        let (tarball_name, tarball_url) = if let Ok(component) = Component::from_name(name) {
+        let (tarball_name, tarball_url) = if name == FUELUP {
+            let tarball_name = tarball_name(FUELUP, &version, &target);
+            let tarball_url = github_releases_download_url(FUELUP, &version, &tarball_name);
+            (tarball_name, tarball_url)
+        } else if let Ok(component) = Component::from_name(name) {
             let tarball_name = tarball_name(&component.tarball_prefix, &version, &target);
             let tarball_url =
                 github_releases_download_url(&component.repository_name, &version, &tarball_name);
-            (tarball_name, tarball_url)
-        } else if name == FUELUP {
-            let tarball_name = tarball_name(FUELUP, &version, &target);
-            let tarball_url = github_releases_download_url(FUELUP, &version, &tarball_name);
             (tarball_name, tarball_url)
         } else {
             bail!("Unrecognized component: {}", name)

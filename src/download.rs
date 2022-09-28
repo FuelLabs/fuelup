@@ -19,10 +19,11 @@ use tracing::{error, info};
 
 use crate::channel::Channel;
 use crate::channel::Package;
+use crate::constants::FORC_CLIENT_RELEASE_DOWNLOAD_URL;
 use crate::constants::FORC_WALLET_RELEASE_DOWNLOAD_URL;
 use crate::constants::{
-    CHANNEL_LATEST_URL, FORC_CLIENT_RELEASE_DOWNLOAD_URL, FUELUP_RELEASE_DOWNLOAD_URL,
-    FUEL_CORE_RELEASE_DOWNLOAD_URL, SWAY_RELEASE_DOWNLOAD_URL,
+    CHANNEL_LATEST_URL, FUELUP_RELEASE_DOWNLOAD_URL, FUEL_CORE_RELEASE_DOWNLOAD_URL,
+    SWAY_RELEASE_DOWNLOAD_URL,
 };
 use crate::file::hard_or_symlink_file;
 use crate::path::fuelup_bin;

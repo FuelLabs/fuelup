@@ -142,6 +142,14 @@ jobs:
               echo published_by=https://github.com/FuelLabs/fuelup/actions/runs/$GITHUB_RUN_ID >> ${{ env.INCOMPATIBLE_DIR }}/$version
             done
 
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Install build-channel script
+        run: cargo install --debug --path ./ci/build-channel
+
       # Generate the channel TOML file here and run append_package_to_channel.sh which appends download links and hashes for forc and fuel-core to the channel TOML.
       - name: Prepare channel with compatible versions
         if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
@@ -153,11 +161,7 @@ jobs:
             # Create header for channel
             touch $CHANNEL_TOML
             echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >> $CHANNEL_TOML
-
-            ./.github/workflows/scripts/append_package_to_channel.sh forc ${{ env.LATEST_COMPATIBLE_FORC }} $CHANNEL_TOML
-            ./.github/workflows/scripts/append_package_to_channel.sh forc-client 0.24.4 $CHANNEL_TOML
-            ./.github/workflows/scripts/append_package_to_channel.sh forc-wallet 0.24.4 $CHANNEL_TOML
-            ./.github/workflows/scripts/append_package_to_channel.sh fuel-core ${{ env.LATEST_COMPATIBLE_FUEL_CORE }} $CHANNEL_TOML
+            build-channel latest $CHANNEL_TOML forc=${{ env.LATEST_COMPATIBLE_FORC }} fuel-core=${{ env.LATEST_COMPATIBLE_FUEL_CORE }}
 
             # Remove extra newline at the end
             truncate -s -1 $CHANNEL_TOML

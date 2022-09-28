@@ -6,9 +6,9 @@ use crate::{
 };
 use anyhow::{bail, Result};
 use semver::Version;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::BTreeMap, fmt::Debug, path::PathBuf};
 use toml_edit::de;
 
 pub const LATEST: &str = "latest";
@@ -16,20 +16,20 @@ pub const STABLE: &str = "stable";
 pub const BETA: &str = "beta";
 pub const NIGHTLY: &str = "nightly";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct HashedBinary {
     pub url: String,
     pub hash: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Channel {
-    pub pkg: HashMap<String, Package>,
+    pub pkg: BTreeMap<String, Package>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Package {
-    pub target: HashMap<String, HashedBinary>,
+    pub target: BTreeMap<String, HashedBinary>,
     pub version: Version,
 }
 

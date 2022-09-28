@@ -1,12 +1,9 @@
 use std::collections::HashMap;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use serde::Deserialize;
 use toml_edit::de;
 
-pub const FORC: &str = "forc";
-pub const FORC_CLIENT: &str = "forc-client";
-pub const FUEL_CORE: &str = "fuel-core";
 pub const FUELUP: &str = "fuelup";
 
 const COMPONENTS_TOML: &str = include_str!("../../components.toml");
@@ -25,6 +22,18 @@ pub struct Component {
     pub repository_name: String,
     pub targets: Vec<String>,
     pub publish: Option<bool>,
+}
+
+impl Component {
+    pub fn from_name(name: &str) -> Result<Self> {
+        let components = Components::collect().expect("Could not collect components");
+
+        components
+            .component
+            .get(name)
+            .ok_or_else(|| anyhow!("component with name '{}' does not exist", name))
+            .and_then(|c| Ok(c.clone()))
+    }
 }
 
 #[derive(Debug)]
@@ -48,6 +57,15 @@ impl Components {
     pub fn collect() -> Result<Components> {
         let components = Self::from_toml(COMPONENTS_TOML)?;
         Ok(components)
+    }
+
+    pub fn contains(name: &str) -> bool {
+        Self::collect_publishables()
+            .expect("Failed to collect publishable components")
+            .iter()
+            .map(|c| c.name.clone())
+            .collect::<String>()
+            .contains(name)
     }
 
     pub fn collect_publishables() -> Result<Vec<Component>> {

@@ -178,12 +178,7 @@ impl Toolchain {
 
     fn can_remove(&self, component: &str) -> bool {
         // Published components are the ones downloadable, and hence removable.
-        Components::collect_publishables()
-            .expect("Failed to collect publishable components")
-            .iter()
-            .map(|c| c.name.clone())
-            .collect::<String>()
-            .contains(component)
+        Components::contains(component)
     }
 
     pub fn add_component(&self, download_cfg: DownloadCfg) -> Result<DownloadCfg> {

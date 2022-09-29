@@ -62,6 +62,12 @@ impl TestCfg {
         SettingsFile::new(self.home.join(".fuelup").join("settings.toml"))
     }
 
+    pub fn default_toolchain(&self) -> Option<String> {
+        self.settings_file()
+            .with(|s| Ok(s.default_toolchain.clone()))
+            .unwrap()
+    }
+
     pub fn fuelup(&mut self, args: &[&str]) -> TestOutput {
         let output = Command::new(&self.fuelup_path)
             .args(args)

@@ -188,11 +188,8 @@ default toolchain set to '{name}'\n"
 
         assert_eq!(output.stdout, expected_stdout);
         assert!(cfg.toolchain_bin_dir(name).is_dir());
-        let default = cfg
-            .settings_file()
-            .with(|s| Ok(s.default_toolchain.clone()))
-            .unwrap();
-        assert_eq!(default.unwrap(), name);
+        let default = cfg.default_toolchain();
+        assert_eq!(default, Some(name.to_string()));
     })?;
 
     Ok(())

@@ -1,4 +1,5 @@
 use anyhow::Result;
+use fuelup::settings::SettingsFile;
 use std::{
     env, fs,
     path::PathBuf,
@@ -55,6 +56,10 @@ impl TestCfg {
             .join("toolchains")
             .join(toolchain)
             .join("bin")
+    }
+
+    pub fn settings_file(&self) -> SettingsFile {
+        SettingsFile::new(self.home.join(".fuelup").join("settings.toml"))
     }
 
     pub fn fuelup(&mut self, args: &[&str]) -> TestOutput {

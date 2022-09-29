@@ -26,16 +26,18 @@ pub fn new(command: NewCommand) -> Result<()> {
     let toolchain_bin_dir = toolchain_bin_dir(&name);
 
     let settings_file = settings_file();
-    if !settings_file.exists() {
-        let settings = SettingsFile::new(settings_file);
-        settings.with_mut(|s| {
-            s.default_toolchain = Some(name.clone());
-            Ok(())
-        })?;
-    }
+
+    let settings = SettingsFile::new(settings_file);
+    settings.with_mut(|s| {
+        s.default_toolchain = Some(name.clone());
+        Ok(())
+    })?;
 
     ensure_dir_exists(&toolchains_dir.join(toolchain_bin_dir))?;
-    info!("New toolchain initialized: {}", &name);
+    info!(
+        "New toolchain initialized: {name}
+default toolchain set to '{name}'"
+    );
 
     Ok(())
 }

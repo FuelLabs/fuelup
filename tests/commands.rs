@@ -224,14 +224,7 @@ fn fuelup_toolchain_new_disallowed_with_target() -> Result<()> {
 #[test]
 fn fuelup_component_add() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let output = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
-        let expected_stdout = "New toolchain initialized: my_toolchain\n";
-        assert_eq!(output.stdout, expected_stdout);
-
-        let output = cfg.fuelup(&["default", "my_toolchain"]);
-        let expected_stdout = "default toolchain set to 'my_toolchain'\n";
-        assert_eq!(output.stdout, expected_stdout);
-        assert!(cfg.toolchain_bin_dir("my_toolchain").is_dir());
+        let _ = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
 
         let _ = cfg.fuelup(&["component", "add", "forc"]);
         expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), FORC_BINS);

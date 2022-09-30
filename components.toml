@@ -46,3 +46,12 @@ executables = ["fuel-core"]
 repository_name = "fuel-core"
 targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]
 publish = true
+
+[component.forc-wallet]
+name = "forc-wallet"
+tarball_prefix = "forc-wallet"
+is_plugin = true
+executables = ["forc-wallet"]
+repository_name = "forc-wallet"
+targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]
+publish = true

@@ -1,12 +1,11 @@
 use std::collections::HashMap;
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use serde::Deserialize;
 use toml_edit::de;
 
+// Keeping forc since some ways we handle forc is slightly different.
 pub const FORC: &str = "forc";
-pub const FORC_CLIENT: &str = "forc-client";
-pub const FUEL_CORE: &str = "fuel-core";
 pub const FUELUP: &str = "fuelup";
 
 const COMPONENTS_TOML: &str = include_str!("../../components.toml");
@@ -25,6 +24,30 @@ pub struct Component {
     pub repository_name: String,
     pub targets: Vec<String>,
     pub publish: Option<bool>,
+}
+
+impl Component {
+    pub fn from_name(name: &str) -> Result<Self> {
+        if name == FUELUP {
+            return Ok(Component {
+                name: FUELUP.to_string(),
+                tarball_prefix: FUELUP.to_string(),
+                executables: vec![FUELUP.to_string()],
+                repository_name: FUELUP.to_string(),
+                targets: vec![FUELUP.to_string()],
+                is_plugin: Some(false),
+                publish: Some(true),
+            });
+        }
+
+        let components = Components::collect().expect("Could not collect components");
+
+        components
+            .component
+            .get(name)
+            .ok_or_else(|| anyhow!("component with name '{}' does not exist", name))
+            .and_then(|c| Ok(c.clone()))
+    }
 }
 
 #[derive(Debug)]
@@ -48,6 +71,15 @@ impl Components {
     pub fn collect() -> Result<Components> {
         let components = Self::from_toml(COMPONENTS_TOML)?;
         Ok(components)
+    }
+
+    pub fn contains(name: &str) -> bool {
+        Self::collect_publishables()
+            .expect("Failed to collect publishable components")
+            .iter()
+            .map(|c| c.name.clone())
+            .collect::<String>()
+            .contains(name)
     }
 
     pub fn collect_publishables() -> Result<Vec<Component>> {
@@ -167,7 +199,7 @@ targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
             .iter()
             .map(|c| c.name.clone())
             .collect::<Vec<String>>();
-        let mut expected = [component::FORC, component::FUEL_CORE];
+        let mut expected = ["forc", "fuel-core"];
         expected.sort();
         assert_eq!(components.len(), 2);
         assert_eq!(actual, expected);

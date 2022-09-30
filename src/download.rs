@@ -1,5 +1,5 @@
 use anyhow::{anyhow, bail, Result};
-use component;
+use component::{Component, FUELUP};
 use flate2::read::GzDecoder;
 use semver::Version;
 use serde::{Deserialize, Serialize};
@@ -19,16 +19,19 @@ use tracing::{error, info};
 
 use crate::channel::Channel;
 use crate::channel::Package;
-use crate::constants::FORC_CLIENT_RELEASE_DOWNLOAD_URL;
-use crate::constants::{
-    CHANNEL_LATEST_URL, FUELUP_RELEASE_DOWNLOAD_URL, FUEL_CORE_RELEASE_DOWNLOAD_URL,
-    SWAY_RELEASE_DOWNLOAD_URL,
-};
+use crate::constants::CHANNEL_LATEST_URL;
 use crate::file::hard_or_symlink_file;
 use crate::path::fuelup_bin;
 use crate::path::fuelup_dir;
 use crate::target_triple::TargetTriple;
 use crate::toolchain::OfficialToolchainDescription;
+
+fn github_releases_download_url(repo: &str, tag: &Version, tarball: &str) -> String {
+    format!(
+        "https://github.com/FuelLabs/{}/releases/download/v{}/{}",
+        repo, tag, tarball
+    )
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
@@ -55,15 +58,18 @@ impl DownloadCfg {
                 .map_err(|e| anyhow!("Error getting latest tag for '{}': {}", name, e))?,
         };
 
-        let release_url = match name {
-            component::FORC => SWAY_RELEASE_DOWNLOAD_URL.to_string(),
-            component::FORC_CLIENT => FORC_CLIENT_RELEASE_DOWNLOAD_URL.to_string(),
-            component::FUEL_CORE => FUEL_CORE_RELEASE_DOWNLOAD_URL.to_string(),
-            component::FUELUP => FUELUP_RELEASE_DOWNLOAD_URL.to_string(),
-            _ => bail!("Unrecognized component: {}", name),
+        let (tarball_name, tarball_url) = if name == FUELUP {
+            let tarball_name = tarball_name(FUELUP, &version, &target);
+            let tarball_url = github_releases_download_url(FUELUP, &version, &tarball_name);
+            (tarball_name, tarball_url)
+        } else if let Ok(component) = Component::from_name(name) {
+            let tarball_name = tarball_name(&component.tarball_prefix, &version, &target);
+            let tarball_url =
+                github_releases_download_url(&component.repository_name, &version, &tarball_name);
+            (tarball_name, tarball_url)
+        } else {
+            bail!("Unrecognized component: {}", name)
         };
-        let tarball_name = tarball_name(name, &version, &target)?;
-        let tarball_url = format!("{}/v{}/{}", &release_url, &version, &tarball_name);
 
         Ok(Self {
             name: name.to_string(),
@@ -77,7 +83,7 @@ impl DownloadCfg {
 
     pub fn from_package(name: &str, package: Package) -> Result<Self> {
         let target = TargetTriple::from_component(name)?;
-        let tarball_name = tarball_name(name, &package.version, &target)?;
+        let tarball_name = tarball_name(name, &package.version, &target);
         let tarball_url = package.target[&target.to_string()].url.clone();
         let hash = Some(package.target[&target.to_string()].hash.clone());
         Ok(Self {
@@ -91,20 +97,18 @@ impl DownloadCfg {
     }
 }
 
-pub fn tarball_name(name: &str, version: &Version, target: &TargetTriple) -> Result<String> {
-    match name {
-        component::FORC => Ok(format!("forc-binaries-{}.tar.gz", target)),
-        component::FORC_CLIENT => Ok(format!("forc-client-{}-{}.tar.gz", version, target)),
-        component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version, target)),
-        component::FUELUP => Ok(format!("fuelup-{}-{}.tar.gz", version, target)),
-        _ => bail!("Unrecognized component: {}", name),
+pub fn tarball_name(tarball_prefix: &str, version: &Version, target: &TargetTriple) -> String {
+    if tarball_prefix == "forc-binaries" {
+        format!("{}-{}.tar.gz", tarball_prefix, target)
+    } else {
+        format!("{}-{}-{}.tar.gz", tarball_prefix, version, target)
     }
 }
 
 pub fn get_latest_version(name: &str) -> Result<Version> {
     let handle = ureq::builder().user_agent("fuelup").build();
     let mut data = Vec::new();
-    if name == component::FUELUP {
+    if name == FUELUP {
         const FUELUP_RELEASES_API_URL: &str =
             "https://api.github.com/repos/FuelLabs/fuelup/releases/latest";
         let resp = handle.get(FUELUP_RELEASES_API_URL).call()?;

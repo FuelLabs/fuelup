@@ -18,6 +18,7 @@ The following is an overview of the different components:
 - [`forc-fmt`] — A Forc plugin for running the Sway code formatter.
 - [`forc-lsp`] - A Forc plugin for the Sway LSP (Language Server Protocol) implementation.
 - [`forc-client`] - A Forc plugin for interacting with a Fuel node. Contains the `forc-deploy` and `forc-run` binaries.
+- [`forc-wallet`] - A Forc plugin for managing Fuel wallets.
 
 [toolchain]: toolchains.md
 [`forc`]: https://fuellabs.github.io/sway/master/forc/index.html
@@ -26,3 +27,4 @@ The following is an overview of the different components:
 [`forc-fmt`]: https://fuellabs.github.io/sway/master/forc_fmt.html
 [`forc-lsp`]: https://fuellabs.github.io/sway/master/forc_lsp.html
 [`forc-client`]: https://fuellabs.github.io/sway/master/forc_client.html
+[`forc-wallet`]: https://github.com/FuelLabs/forc-wallet

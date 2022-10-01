@@ -3,7 +3,7 @@
 | Command                                   | Description                                                                              |
 | ----------------------------------------- | ---------------------------------------------------------------------------------------- |
 | `fuelup toolchain install latest`         | Installs the toolchain distributed by the `latest` channel                               |
-| `fuelup toolchain new my_toolchain`       | Creates a new toolchain named 'my_toolchain'                                             |
+| `fuelup toolchain new my_toolchain`       | Creates a new custom toolchain named 'my_toolchain' and sets it as the default           |
 | `fuelup toolchain uninstall my_toolchain` | Uninstalls the toolchain named 'my_toolchain'                                            |
 | `fuelup default my_toolchain`             | Sets 'my_toolchain' as the active toolchain                                              |
 | `fuelup component add forc`               | Adds _[forc]_ to the currently active custom toolchain                                   |

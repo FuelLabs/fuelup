@@ -69,10 +69,8 @@ impl Channel {
         let mut cfgs = self
             .pkg
             .into_iter()
-            .map(|(name, package)| {
-                DownloadCfg::from_package(&name, package)
-                    .expect("Could not create DownloadCfg from a package parsed in latest channel")
-            })
+            .map(|(name, package)| DownloadCfg::from_package(&name, package))
+            .filter_map(Result::ok)
             .collect::<Vec<DownloadCfg>>();
         cfgs.sort_by(|a, b| a.name.cmp(&b.name));
         cfgs

@@ -229,10 +229,18 @@ fn fuelup_component_add() -> Result<()> {
 
         let _ = cfg.fuelup(&["component", "add", "forc"]);
         expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), FORC_BINS);
+    })?;
 
-        let _ = cfg.fuelup(&["component", "add", "forc-client"]);
-        let _ = cfg.fuelup(&["component", "add", "fuel-core@0.9.5"]);
-        expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), ALL_BINS);
+    Ok(())
+}
+
+#[test]
+fn fuelup_component_add_with_version() -> Result<()> {
+    testcfg::setup(FuelupState::Empty, &|cfg| {
+        let _ = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
+
+        let _ = cfg.fuelup(&["component", "add", "forc@0.24.5"]);
+        expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), FORC_BINS);
     })?;
 
     Ok(())

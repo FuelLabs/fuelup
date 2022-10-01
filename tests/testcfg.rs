@@ -34,6 +34,7 @@ pub static ALL_BINS: &[&str] = &[
     "forc-fmt",
     "forc-lsp",
     "forc-run",
+    "forc-wallet",
     "fuel-core",
 ];
 

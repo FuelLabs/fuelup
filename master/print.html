@@ -312,7 +312,7 @@ Keep in mind that compatibility between <code>forc</code> and <code>fuel-core</c
 <p>Many <code>fuelup</code> commands deal with <em>toolchains</em>, a single installation of the
 Fuel toolchain. <code>fuelup</code> supports <strong>two</strong> types of toolchains.</p>
 <ol>
-<li>Official toolchains which track the official release <a href="concepts/channels/index.html">channels</a> (only <em>latest</em> for now);</li>
+<li>Official toolchains which track the official release <a href="concepts/channels/index.html">channels</a> (<em>latest</em> and <em>nightly</em>);</li>
 <li>Custom toolchains and install individual components in a modular manner.</li>
 </ol>
 <h2 id="toolchain-specification"><a class="header" href="#toolchain-specification">Toolchain specification</a></h2>
@@ -334,9 +334,6 @@ modular manner, and to specify specific versions of components to install.</p>
 <p>To init a new, empty toolchain:</p>
 <pre><code class="language-sh">fuelup toolchain new my_toolchain
 </code></pre>
-<p>Activate the toolchain:</p>
-<pre><code class="language-sh">fuelup default my_toolchain
-</code></pre>
 <p>Now you can add/remove components to/from the toolchain as you wish:</p>
 <pre><code class="language-sh">fuelup component add forc
 </code></pre>
@@ -357,6 +354,7 @@ modular manner, and to specify specific versions of components to install.</p>
 <li><a href="https://fuellabs.github.io/sway/master/forc_fmt.html"><code>forc-fmt</code></a> — A Forc plugin for running the Sway code formatter.</li>
 <li><a href="https://fuellabs.github.io/sway/master/forc_lsp.html"><code>forc-lsp</code></a> - A Forc plugin for the Sway LSP (Language Server Protocol) implementation.</li>
 <li><a href="https://fuellabs.github.io/sway/master/forc_client.html"><code>forc-client</code></a> - A Forc plugin for interacting with a Fuel node. Contains the <code>forc-deploy</code> and <code>forc-run</code> binaries.</li>
+<li><a href="https://github.com/FuelLabs/forc-wallet"><code>forc-wallet</code></a> - A Forc plugin for managing Fuel wallets.</li>
 </ul>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="proxies"><a class="header" href="#proxies">Proxies</a></h1>
 <p><code>fuelup</code> provides wrappers for the common Fuel toolchain
@@ -397,7 +395,7 @@ interface for <em>fuelup</em> - the fuelup CLI should be used to query and set s
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>fuelup toolchain install latest</code></td><td>Installs the toolchain distributed by the <code>latest</code> channel</td></tr>
-<tr><td><code>fuelup toolchain new my_toolchain</code></td><td>Creates a new toolchain named 'my_toolchain'</td></tr>
+<tr><td><code>fuelup toolchain new my_toolchain</code></td><td>Creates a new custom toolchain named 'my_toolchain' and sets it as the default</td></tr>
 <tr><td><code>fuelup toolchain uninstall my_toolchain</code></td><td>Uninstalls the toolchain named 'my_toolchain'</td></tr>
 <tr><td><code>fuelup default my_toolchain</code></td><td>Sets 'my_toolchain' as the active toolchain</td></tr>
 <tr><td><code>fuelup component add forc</code></td><td>Adds <em><a href="https://github.com/FuelLabs/sway/tree/master/forc">forc</a></em> to the currently active custom toolchain</td></tr>

@@ -18,25 +18,6 @@ hash = "9c9cc6810404818ebd473a8aae840f817b89aefd749ebb4d0497c09c7a59d131"
 url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-binaries-0.24.5%2Bnightly.20221002.6f7b9a022d/forc-binaries-0.24.5+nightly.20221002.6f7b9a022d-darwin_arm64.tar.gz"
 hash = "43153f73d6c5f3fe1611e0d0ccb81cdf9546b3a43b41cbc4d8affff10c141314"
 
-[pkg.forc-client]
-version = "0.24.4+nightly.20221002.3db85f9b8e"
-
-[pkg.forc-client.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-client-0.24.4%2Bnightly.20221002.3db85f9b8e/forc-client-0.24.4+nightly.20221002.3db85f9b8e-aarch64-unknown-linux-gnu.tar.gz"
-hash = "1a622d8649ac510c088d69f01367ba168a292b2e88e19eda6ad5f68ecbd528f5"
-
-[pkg.forc-client.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-client-0.24.4%2Bnightly.20221002.3db85f9b8e/forc-client-0.24.4+nightly.20221002.3db85f9b8e-x86_64-unknown-linux-gnu.tar.gz"
-hash = "bb91a0265fd474d66c9bb0094e89a633aa03b7bd182f232e3aebc68bdd03f73b"
-
-[pkg.forc-client.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-client-0.24.4%2Bnightly.20221002.3db85f9b8e/forc-client-0.24.4+nightly.20221002.3db85f9b8e-aarch64-apple-darwin.tar.gz"
-hash = "38e43d8a95c559ec7c4e598bdd7e27e65820ecd8409d019504e4d1c15381ac27"
-
-[pkg.forc-client.target.x86_64-apple-darwin]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-client-0.24.4%2Bnightly.20221002.3db85f9b8e/forc-client-0.24.4+nightly.20221002.3db85f9b8e-x86_64-apple-darwin.tar.gz"
-hash = "ec62114a15294fb99e8765f3ec5857bf4b1e8607ce8dfe1df5af93a9074bc748"
-
 [pkg.forc-wallet]
 version = "0.1.2+nightly.20221002.9473052e88"
 

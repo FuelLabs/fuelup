@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{collections::BTreeMap, fmt::Debug, path::PathBuf};
 use toml_edit::de;
+use tracing::warn;
 
 pub const LATEST: &str = "latest";
 pub const STABLE: &str = "stable";
@@ -69,7 +70,15 @@ impl Channel {
         let mut cfgs = self
             .pkg
             .into_iter()
-            .map(|(name, package)| DownloadCfg::from_package(&name, package))
+            .map(|(name, package)| {
+                DownloadCfg::from_package(&name, package).map_err(|_| {
+                    warn!(
+                        "Failed to recognize component: '{}'.
+If this component should be downloadable, try running `fuelup self update` and re-run the installation.",
+                        &name
+                    )
+                })
+            })
             .filter_map(Result::ok)
             .collect::<Vec<DownloadCfg>>();
         cfgs.sort_by(|a, b| a.name.cmp(&b.name));

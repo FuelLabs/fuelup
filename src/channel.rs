@@ -5,6 +5,7 @@ use crate::{
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
 use anyhow::{bail, Result};
+use component::Components;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -69,8 +70,9 @@ impl Channel {
         let mut cfgs = self
             .pkg
             .into_iter()
-            .map(|(name, package)| {
-                DownloadCfg::from_package(&name, package)
+            .filter(|(component_name, _)| Components::contains_published(component_name))
+            .map(|(published_component_name, package)| {
+                DownloadCfg::from_package(&published_component_name, package)
                     .expect("Could not create DownloadCfg from a package parsed in latest channel")
             })
             .collect::<Vec<DownloadCfg>>();

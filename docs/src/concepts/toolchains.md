@@ -3,7 +3,7 @@
 Many `fuelup` commands deal with _toolchains_, a single installation of the
 Fuel toolchain. `fuelup` supports **two** types of toolchains.
 
-1. Official toolchains which track the official release [channels] (only _latest_ for now);
+1. Official toolchains which track the official release [channels] (_latest_ and _nightly_);
 2. Custom toolchains and install individual components in a modular manner.
 
 [channels]: channels/index.md
@@ -37,12 +37,6 @@ To init a new, empty toolchain:
 
 ```sh
 fuelup toolchain new my_toolchain
-```
-
-Activate the toolchain:
-
-```sh
-fuelup default my_toolchain
 ```
 
 Now you can add/remove components to/from the toolchain as you wish:

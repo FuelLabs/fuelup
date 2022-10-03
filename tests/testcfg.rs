@@ -29,9 +29,11 @@ pub const FORC_BINS: &[&str] = &["forc", "forc-explore", "forc-fmt", "forc-lsp"]
 
 pub static ALL_BINS: &[&str] = &[
     "forc",
+    "forc-deploy",
     "forc-explore",
     "forc-fmt",
     "forc-lsp",
+    "forc-run",
     "forc-wallet",
     "fuel-core",
 ];

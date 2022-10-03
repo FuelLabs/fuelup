@@ -50,15 +50,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
         };
     }
 
-    let channel_file_name = match description.name {
-        DistToolchainName::Latest => CHANNEL_LATEST_FILE_NAME,
-        DistToolchainName::Nightly => CHANNEL_NIGHTLY_FILE_NAME,
-    };
     if errored_bins.is_empty() {
-        fs::copy(
-            tmp_dir_path.join(channel_file_name),
-            toolchain.path.join(channel_file_name),
-        )?;
         info!("\nInstalled:\n{}", installed_bins);
         info!("\nThe Fuel toolchain is installed and up to date");
     } else if installed_bins.is_empty() {

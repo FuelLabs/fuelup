@@ -178,7 +178,7 @@ impl Toolchain {
 
     fn can_remove(&self, component: &str) -> bool {
         // Published components are the ones downloadable, and hence removable.
-        Components::contains(component)
+        Components::contains_published(component)
     }
 
     pub fn add_component(&self, download_cfg: DownloadCfg) -> Result<DownloadCfg> {

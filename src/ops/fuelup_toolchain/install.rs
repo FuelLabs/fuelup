@@ -1,12 +1,10 @@
-use crate::constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME};
 use crate::download::DownloadCfg;
 use crate::path::{fuelup_dir, settings_file};
 use crate::settings::SettingsFile;
-use crate::toolchain::{DistToolchainName, OfficialToolchainDescription, Toolchain};
+use crate::toolchain::{OfficialToolchainDescription, Toolchain};
 use crate::{channel::Channel, commands::toolchain::InstallCommand};
 use anyhow::{bail, Result};
 use std::fmt::Write;
-use std::fs;
 use std::str::FromStr;
 use tempfile::tempdir_in;
 use tracing::{error, info};
@@ -31,7 +29,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let tmp_dir_path = tmp_dir.into_path();
 
     let cfgs: Vec<DownloadCfg> =
-        if let Ok(channel) = Channel::from_dist_channel(&description, tmp_dir_path.clone()) {
+        if let Ok(channel) = Channel::from_dist_channel(&description, tmp_dir_path) {
             channel.build_download_configs()
         } else {
             bail!("Could not build download configs from channel")

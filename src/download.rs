@@ -13,7 +13,6 @@ use std::str::FromStr;
 use std::time::Duration;
 use std::{fs, thread};
 use tar::Archive;
-use tempfile::tempdir_in;
 use tracing::warn;
 use tracing::{error, info};
 
@@ -22,7 +21,6 @@ use crate::channel::Package;
 use crate::constants::CHANNEL_LATEST_URL;
 use crate::file::hard_or_symlink_file;
 use crate::path::fuelup_bin;
-use crate::path::fuelup_dir;
 use crate::target_triple::TargetTriple;
 use crate::toolchain::OfficialToolchainDescription;
 
@@ -124,9 +122,6 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
 
         resp.into_reader().read_to_end(&mut data)?;
         {
-            let tmp_dir = tempdir_in(&fuelup_dir())?;
-            println!("tmp: {}", tmp_dir.path().display());
-
             if let Ok(channel) =
                 Channel::from_dist_channel(&OfficialToolchainDescription::from_str("latest")?)
             {

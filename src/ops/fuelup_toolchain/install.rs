@@ -1,8 +1,7 @@
-use crate::constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME};
 use crate::download::DownloadCfg;
 use crate::path::settings_file;
 use crate::settings::SettingsFile;
-use crate::toolchain::{DistToolchainName, OfficialToolchainDescription, Toolchain};
+use crate::toolchain::{OfficialToolchainDescription, Toolchain};
 use crate::{channel::Channel, commands::toolchain::InstallCommand};
 use anyhow::{bail, Result};
 use std::fmt::Write;

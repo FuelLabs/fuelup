@@ -13,7 +13,6 @@ use std::str::FromStr;
 use std::time::Duration;
 use std::{fs, thread};
 use tar::Archive;
-use tempfile::tempdir_in;
 use tracing::warn;
 use tracing::{error, info};
 
@@ -22,7 +21,6 @@ use crate::channel::Package;
 use crate::constants::CHANNEL_LATEST_URL;
 use crate::file::hard_or_symlink_file;
 use crate::path::fuelup_bin;
-use crate::path::fuelup_dir;
 use crate::target_triple::TargetTriple;
 use crate::toolchain::OfficialToolchainDescription;
 
@@ -123,23 +121,22 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
         let resp = handle.get(CHANNEL_LATEST_URL).call()?;
 
         resp.into_reader().read_to_end(&mut data)?;
-        let tmp_dir = tempdir_in(&fuelup_dir())?;
-
-        if let Ok(channel) = Channel::from_dist_channel(
-            &OfficialToolchainDescription::from_str("latest")?,
-            tmp_dir.into_path(),
-        ) {
-            channel
-                .pkg
-                .get(name)
-                .ok_or_else(|| {
-                    anyhow!(
+        {
+            if let Ok(channel) =
+                Channel::from_dist_channel(&OfficialToolchainDescription::from_str("latest")?)
+            {
+                channel
+                    .pkg
+                    .get(name)
+                    .ok_or_else(|| {
+                        anyhow!(
                         "'{name}' is not a valid, downloadable package in the 'latest' channel."
                     )
-                })
-                .map(|p| p.version.clone())
-        } else {
-            bail!("Failed to get 'latest' channel")
+                    })
+                    .map(|p| p.version.clone())
+            } else {
+                bail!("Failed to get 'latest' channel")
+            }
         }
     }
 }
@@ -158,6 +155,47 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
 
     fs::remove_file(&tar_path)?;
     Ok(())
+}
+
+pub fn download(url: &str, hasher: &mut Sha256) -> Result<Vec<u8>> {
+    const RETRY_ATTEMPTS: u8 = 4;
+    const RETRY_DELAY_SECS: u64 = 3;
+
+    // auto detect http proxy setting.
+    let handle = if let Ok(proxy) = env::var("http_proxy") {
+        ureq::builder()
+            .user_agent("fuelup")
+            .proxy(ureq::Proxy::new(proxy)?)
+            .build()
+    } else {
+        ureq::builder().user_agent("fuelup").build()
+    };
+
+    for _ in 1..RETRY_ATTEMPTS {
+        match handle.get(url).call() {
+            Ok(response) => {
+                let mut data = Vec::new();
+                response.into_reader().read_to_end(&mut data)?;
+
+                hasher.update(data.clone());
+                return Ok(data);
+            }
+            Err(ureq::Error::Status(404, r)) => {
+                // We've reached download_file stage, which means the tag must be correct.
+                error!("Failed to download from {}", &url);
+                let retry: Option<u64> = r.header("retry-after").and_then(|h| h.parse().ok());
+                let retry = retry.unwrap_or(RETRY_DELAY_SECS);
+                info!("Retrying..");
+                thread::sleep(Duration::from_secs(retry));
+            }
+            Err(e) => {
+                // handle other status code and non-status code errors
+                bail!("Unexpected error: {}", e.to_string());
+            }
+        }
+    }
+
+    bail!("Could not read file");
 }
 
 pub fn download_file(url: &str, path: &PathBuf, hasher: &mut Sha256) -> Result<()> {

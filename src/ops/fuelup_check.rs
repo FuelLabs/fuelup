@@ -4,7 +4,6 @@ use crate::{
     config::Config,
     download::DownloadCfg,
     fmt::{bold, colored_bold},
-    path::fuelup_dir,
     target_triple::TargetTriple,
     toolchain::{OfficialToolchainDescription, Toolchain},
 };
@@ -18,7 +17,6 @@ use std::{
     path::Path,
 };
 use std::{collections::HashMap, process::Command};
-use tempfile::tempdir_in;
 use termcolor::Color;
 use tracing::error;
 
@@ -105,10 +103,7 @@ fn check_fuelup() -> Result<()> {
 fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
     let description = OfficialToolchainDescription::from_str(toolchain)?;
 
-    let fuelup_dir = fuelup_dir();
-    let tmp_dir = tempdir_in(&fuelup_dir)?;
-
-    let dist_channel = Channel::from_dist_channel(&description, tmp_dir.into_path())?;
+    let dist_channel = Channel::from_dist_channel(&description)?;
     let latest_package_versions = collect_package_versions(dist_channel);
 
     let toolchain = Toolchain::new(toolchain)?;

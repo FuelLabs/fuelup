@@ -1,7 +1,6 @@
 use crate::{
     constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME, FUELUP_GH_PAGES},
-    download::{download_file, DownloadCfg},
-    file::read_file,
+    download::{download, DownloadCfg},
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };
 use anyhow::{bail, Result};
@@ -9,7 +8,7 @@ use component::Components;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::{collections::BTreeMap, fmt::Debug, path::PathBuf};
+use std::{collections::BTreeMap, fmt::Debug};
 use toml_edit::de;
 
 pub const LATEST: &str = "latest";
@@ -35,27 +34,16 @@ pub struct Package {
 }
 
 impl Channel {
-    pub fn from_dist_channel(
-        desc: &OfficialToolchainDescription,
-        dst_path: PathBuf,
-    ) -> Result<Self> {
+    pub fn from_dist_channel(desc: &OfficialToolchainDescription) -> Result<Self> {
         let channel_file_name = match desc.name {
             DistToolchainName::Latest => CHANNEL_LATEST_FILE_NAME,
             DistToolchainName::Nightly => CHANNEL_NIGHTLY_FILE_NAME,
         };
         let channel_url = FUELUP_GH_PAGES.to_owned() + channel_file_name;
         let mut hasher = Sha256::new();
-        let toml = match download_file(&channel_url, &dst_path.join(channel_file_name), &mut hasher)
-        {
-            Ok(_) => {
-                let toml_path = dst_path.join(channel_file_name);
-                read_file(channel_file_name, &toml_path)?
-            }
-            Err(_) => bail!(
-                "Could not download {} to {}",
-                &channel_url,
-                dst_path.display()
-            ),
+        let toml = match download(&channel_url, &mut hasher) {
+            Ok(t) => String::from_utf8(t)?,
+            Err(_) => bail!("Could not read {}", &channel_url),
         };
 
         Self::from_toml(&toml)

@@ -1,12 +1,11 @@
 use crate::download::DownloadCfg;
-use crate::path::{fuelup_dir, settings_file};
+use crate::path::settings_file;
 use crate::settings::SettingsFile;
 use crate::toolchain::{OfficialToolchainDescription, Toolchain};
 use crate::{channel::Channel, commands::toolchain::InstallCommand};
 use anyhow::{bail, Result};
 use std::fmt::Write;
 use std::str::FromStr;
-use tempfile::tempdir_in;
 use tracing::{error, info};
 
 pub fn install(command: InstallCommand) -> Result<()> {
@@ -24,16 +23,11 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let mut errored_bins = String::new();
     let mut installed_bins = String::new();
 
-    let fuelup_dir = fuelup_dir();
-    let tmp_dir = tempdir_in(&fuelup_dir)?;
-    let tmp_dir_path = tmp_dir.into_path();
-
-    let cfgs: Vec<DownloadCfg> =
-        if let Ok(channel) = Channel::from_dist_channel(&description, tmp_dir_path) {
-            channel.build_download_configs()
-        } else {
-            bail!("Could not build download configs from channel")
-        };
+    let cfgs: Vec<DownloadCfg> = if let Ok(channel) = Channel::from_dist_channel(&description) {
+        channel.build_download_configs()
+    } else {
+        bail!("Could not build download configs from channel")
+    };
 
     info!(
         "Downloading: {}",

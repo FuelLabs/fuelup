@@ -13,7 +13,7 @@ use crate::constants::DATE_FORMAT;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
-    ensure_dir_exists, fuelup_bin, fuelup_bin_dir, fuelup_dir, fuelup_tmp_dir, settings_file,
+    ensure_dir_exists, fuelup_bin, fuelup_bin_dir, fuelup_tmp_dir, settings_file,
     toolchain_bin_dir, toolchain_dir,
 };
 use crate::settings::SettingsFile;

@@ -73,7 +73,7 @@ impl Components {
         Ok(components)
     }
 
-    pub fn contains(name: &str) -> bool {
+    pub fn contains_published(name: &str) -> bool {
         Self::collect_publishables()
             .expect("Failed to collect publishable components")
             .iter()

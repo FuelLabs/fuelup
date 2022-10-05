@@ -117,7 +117,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
 
     for component in Components::collect_exclude_plugins()? {
         let component_executable = toolchain.bin_path.join(&component.name);
-        let latest_version = &latest_package_versions[&component.name];
+        let mut latest_version = &latest_package_versions[&component.name];
         match Command::new(&component_executable)
             .arg("--version")
             .output()
@@ -138,7 +138,6 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
             }
             Err(_) => bail!(""),
         };
-        let latest_version = &latest_package_versions[&component.name];
 
         if verbose && component.name == component::FORC {
             for plugin in component::Components::collect_plugins()? {
@@ -154,6 +153,10 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                     if !plugin.is_main_executable() {
                         print!("  ");
                         plugin_name = &plugin.executables[index];
+                    }
+
+                    if latest_package_versions.contains_key(&plugin.name) {
+                        latest_version = &latest_package_versions[&plugin.name];
                     }
 
                     check_plugin(&plugin_executable, plugin_name, latest_version)?;

@@ -4,7 +4,7 @@ use std::{env, path::Path};
 
 mod testcfg;
 
-use testcfg::{FuelupState, ALL_BINS, FORC_BINS};
+use testcfg::{FuelupState, ALL_BINS};
 
 fn expect_files_exist(dir: &Path, expected: &[&str]) {
     let mut actual: Vec<String> = dir
@@ -227,8 +227,8 @@ fn fuelup_component_add() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let _ = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
 
-        let _ = cfg.fuelup(&["component", "add", "forc"]);
-        expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), FORC_BINS);
+        let _ = cfg.fuelup(&["component", "add", "fuel-core"]);
+        expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), &["fuel-core"]);
     })?;
 
     Ok(())
@@ -239,8 +239,8 @@ fn fuelup_component_add_with_version() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let _ = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
 
-        let _ = cfg.fuelup(&["component", "add", "forc@0.24.5"]);
-        expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), FORC_BINS);
+        let _ = cfg.fuelup(&["component", "add", "fuel-core@0.9.8"]);
+        expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), &["fuel-core"]);
     })?;
 
     Ok(())

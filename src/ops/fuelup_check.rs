@@ -4,7 +4,6 @@ use crate::{
     config::Config,
     download::DownloadCfg,
     fmt::{bold, colored_bold},
-    path::fuelup_dir,
     target_triple::TargetTriple,
     toolchain::{OfficialToolchainDescription, Toolchain},
 };
@@ -18,7 +17,6 @@ use std::{
     path::Path,
 };
 use std::{collections::HashMap, process::Command};
-use tempfile::tempdir_in;
 use termcolor::Color;
 use tracing::error;
 
@@ -105,10 +103,7 @@ fn check_fuelup() -> Result<()> {
 fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
     let description = OfficialToolchainDescription::from_str(toolchain)?;
 
-    let fuelup_dir = fuelup_dir();
-    let tmp_dir = tempdir_in(&fuelup_dir)?;
-
-    let dist_channel = Channel::from_dist_channel(&description, tmp_dir.into_path())?;
+    let dist_channel = Channel::from_dist_channel(&description)?;
     let latest_package_versions = collect_package_versions(dist_channel);
 
     let toolchain = Toolchain::new(toolchain)?;
@@ -117,7 +112,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
 
     for component in Components::collect_exclude_plugins()? {
         let component_executable = toolchain.bin_path.join(&component.name);
-        let latest_version = &latest_package_versions[&component.name];
+        let mut latest_version = &latest_package_versions[&component.name];
         match Command::new(&component_executable)
             .arg("--version")
             .output()
@@ -138,7 +133,6 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
             }
             Err(_) => bail!(""),
         };
-        let latest_version = &latest_package_versions[&component.name];
 
         if verbose && component.name == component::FORC {
             for plugin in component::Components::collect_plugins()? {
@@ -154,6 +148,10 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                     if !plugin.is_main_executable() {
                         print!("  ");
                         plugin_name = &plugin.executables[index];
+                    }
+
+                    if latest_package_versions.contains_key(&plugin.name) {
+                        latest_version = &latest_package_versions[&plugin.name];
                     }
 
                     check_plugin(&plugin_executable, plugin_name, latest_version)?;

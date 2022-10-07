@@ -34,7 +34,8 @@ fn fuelup_version() -> Result<()> {
 #[test]
 fn fuelup_toolchain_install_latest() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        cfg.fuelup(&["toolchain", "install", "latest"]);
+        let output = cfg.fuelup(&["toolchain", "install", "latest"]);
+        assert!(output.status.success());
 
         for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
             let toolchain_dir = entry.unwrap();
@@ -45,13 +46,6 @@ fn fuelup_toolchain_install_latest() -> Result<()> {
                 toolchain_dir.file_name().to_str().unwrap()
             );
             assert!(toolchain_dir.file_type().unwrap().is_dir());
-
-            expect_files_exist(&toolchain_dir.path().join("bin"), ALL_BINS);
-
-            let output = cfg.fuelup(&["check"]);
-            assert!(output.stdout.contains("forc - Up to date"));
-            // TODO: uncomment once new fuel-core is released and this works
-            // assert!(stdout.contains("fuel-core - Up to date"));
         }
     })?;
 
@@ -61,7 +55,8 @@ fn fuelup_toolchain_install_latest() -> Result<()> {
 #[test]
 fn fuelup_toolchain_install_nightly() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        cfg.fuelup(&["toolchain", "install", "nightly"]);
+        let output = cfg.fuelup(&["toolchain", "install", "nightly"]);
+        assert!(output.status.success());
 
         for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
             let toolchain_dir = entry.unwrap();
@@ -72,8 +67,6 @@ fn fuelup_toolchain_install_nightly() -> Result<()> {
                 toolchain_dir.file_name().to_str().unwrap()
             );
             assert!(toolchain_dir.file_type().unwrap().is_dir());
-
-            expect_files_exist(&toolchain_dir.path().join("bin"), ALL_BINS);
         }
     })?;
 

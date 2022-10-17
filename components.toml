@@ -37,7 +37,6 @@ is_plugin = true
 executables = ["forc-deploy", "forc-run"]
 repository_name = "forc-client"
 targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]
-publish = true
 
 [component.fuel-core]
 name = "fuel-core"

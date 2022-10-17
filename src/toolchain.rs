@@ -13,8 +13,8 @@ use crate::constants::DATE_FORMAT;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
-    ensure_dir_exists, fuelup_bin, fuelup_bin_dir, fuelup_dir, settings_file, toolchain_bin_dir,
-    toolchain_dir,
+    ensure_dir_exists, fuelup_bin, fuelup_bin_dir, fuelup_tmp_dir, settings_file,
+    toolchain_bin_dir, toolchain_dir,
 };
 use crate::settings::SettingsFile;
 use crate::target_triple::TargetTriple;
@@ -215,10 +215,12 @@ impl Toolchain {
 
             // Little hack here to download core and std lib upon installing `forc`
             if download_cfg.name == component::FORC {
+                let fuelup_tmp_dir = fuelup_tmp_dir();
+                ensure_dir_exists(&fuelup_tmp_dir)?;
                 let forc_bin_path = self.bin_path.join(component::FORC);
                 let temp_project = tempfile::Builder::new()
                     .prefix("temp-project")
-                    .tempdir_in(fuelup_dir())?;
+                    .tempdir_in(fuelup_tmp_dir)?;
                 let temp_project_path = temp_project.path().to_str().unwrap();
                 if Command::new(&forc_bin_path)
                     .args(["init", "--path", temp_project_path])

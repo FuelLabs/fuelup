@@ -114,18 +114,12 @@ impl FromStr for OfficialToolchainDescription {
                 date: None,
                 target: None,
             })
-        } else if let Ok((_, _)) = parse_metadata(metadata.to_string()) {
-            bail!(
-                "You may not specify a date or target for official toolchain name '{}' yet.",
-                name
-            );
-
-            // TODO: uncomment once specifying date and target is supported
-            // Ok(Self {
-            //     name: DistToolchainName::from_str(name)?,
-            //     date,
-            //     target,
-            // })
+        } else if let Ok((date, target)) = parse_metadata(metadata.to_string()) {
+            Ok(Self {
+                name: DistToolchainName::from_str(name)?,
+                date,
+                target,
+            })
         } else {
             bail!("Invalid official toolchain name '{}'", s);
         }

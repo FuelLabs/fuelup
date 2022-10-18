@@ -110,14 +110,15 @@ impl FromStr for OfficialToolchainDescription {
                 date: None,
                 target: None,
             })
-        } else if let Ok((date, target)) = parse_metadata(metadata.to_string()) {
-            Ok(Self {
-                name: DistToolchainName::from_str(name)?,
-                date,
-                target,
-            })
         } else {
-            bail!("Invalid official toolchain name '{}'", s);
+            match parse_metadata(metadata.to_string()) {
+                Ok((date, target)) => Ok(Self {
+                    name: DistToolchainName::from_str(name)?,
+                    date,
+                    target,
+                }),
+                Err(e) => bail!("Invalid toolchain metadata within input '{}' - {}", s, e),
+            }
         }
     }
 }

@@ -100,8 +100,7 @@ fn fuelup_toolchain_install_malformed_date() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let output = cfg.fuelup(&["toolchain", "install", "nightly-2022-08-31-"]);
 
-        let expected_stdout =
-            "You specified target '-': specifying a target is not supported yet.\n";
+        let expected_stdout = "Invalid official toolchain name 'nightly-2022-08-31-'\n";
 
         assert!(output.status.success());
         assert_eq!(output.stdout, expected_stdout);

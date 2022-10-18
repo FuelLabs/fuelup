@@ -1,32 +1,27 @@
 use crate::{
-    channel::{Channel, PackageVersion},
+    channel::Channel,
     commands::check::CheckCommand,
-    component::SUPPORTED_PLUGINS,
     config::Config,
-    constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME},
-    file::read_file,
+    download::DownloadCfg,
     fmt::{bold, colored_bold},
-    path::fuelup_dir,
     target_triple::TargetTriple,
-    toolchain::{DistToolchainName, OfficialToolchainDescription, Toolchain},
+    toolchain::{OfficialToolchainDescription, Toolchain},
 };
-use anyhow::Result;
+use anyhow::{bail, Result};
+use component::{self, Components};
 use semver::Version;
-use std::collections::HashMap;
 use std::io::Write;
 use std::str::FromStr;
 use std::{
     cmp::Ordering::{Equal, Greater, Less},
     path::Path,
 };
-use tempfile::tempdir_in;
+use std::{collections::HashMap, process::Command};
 use termcolor::Color;
 use tracing::error;
 
-use crate::{component, download::DownloadCfg};
-
-fn collect_package_versions(channel: Channel) -> HashMap<String, PackageVersion> {
-    let mut latest_versions: HashMap<String, PackageVersion> = HashMap::new();
+fn collect_package_versions(channel: Channel) -> HashMap<String, Version> {
+    let mut latest_versions: HashMap<String, Version> = HashMap::new();
 
     for (name, package) in channel.pkg.into_iter() {
         latest_versions.insert(name, package.version);
@@ -35,10 +30,7 @@ fn collect_package_versions(channel: Channel) -> HashMap<String, PackageVersion>
     latest_versions
 }
 
-fn compare_and_print_versions(
-    current_version: &PackageVersion,
-    latest_version: &PackageVersion,
-) -> Result<()> {
+fn compare_and_print_versions(current_version: &Version, latest_version: &Version) -> Result<()> {
     match current_version.cmp(latest_version) {
         Less => {
             colored_bold(Color::Yellow, |s| write!(s, "Update available"));
@@ -58,21 +50,36 @@ fn compare_and_print_versions(
     Ok(())
 }
 
-fn check_plugin(
-    plugin_executable: &Path,
-    plugin: &str,
-    current_version: &PackageVersion,
-    latest_version: &PackageVersion,
-) -> Result<()> {
-    if plugin_executable.is_file() {
-        print!("    - ");
-        bold(|s| write!(s, "{}", plugin));
-        print!(" - ");
-        compare_and_print_versions(current_version, latest_version)?;
-    } else {
-        print!("  ");
-        bold(|s| write!(s, "{}", &plugin));
-        println!(" - not installed");
+fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version) -> Result<()> {
+    match std::process::Command::new(&plugin_executable)
+        .arg("--version")
+        .output()
+    {
+        Ok(o) => {
+            let output = String::from_utf8_lossy(&o.stdout).into_owned();
+            match output.split_whitespace().nth(1) {
+                Some(v) => {
+                    let version = Version::parse(v)?;
+                    print!("    - ");
+                    bold(|s| write!(s, "{}", plugin));
+                    print!(" - ");
+                    compare_and_print_versions(&version, latest_version)?;
+                }
+                None => {
+                    error!("    - {} - Error getting version string", plugin);
+                }
+            };
+        }
+        Err(e) => {
+            print!("    - ");
+            bold(|s| write!(s, "{}", plugin));
+            print!(" - ");
+            if plugin_executable.exists() {
+                println!("execution error - {}", e);
+            } else {
+                println!("not found");
+            }
+        }
     }
     Ok(())
 }
@@ -86,13 +93,7 @@ fn check_fuelup() -> Result<()> {
         None,
     ) {
         bold(|s| write!(s, "{} - ", component::FUELUP));
-        compare_and_print_versions(
-            &PackageVersion {
-                semver: fuelup_version,
-                date: None,
-            },
-            &fuelup_download_cfg.version,
-        )?;
+        compare_and_print_versions(&fuelup_version, &fuelup_download_cfg.version)?;
     } else {
         error!("Failed to create DownloadCfg for component 'fuelup'; skipping check for 'fuelup'");
     }
@@ -102,50 +103,59 @@ fn check_fuelup() -> Result<()> {
 fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
     let description = OfficialToolchainDescription::from_str(toolchain)?;
 
-    let fuelup_dir = fuelup_dir();
-    let tmp_dir = tempdir_in(&fuelup_dir)?;
-
-    let dist_channel = Channel::from_dist_channel(&description, tmp_dir.into_path())?;
+    let dist_channel = Channel::from_dist_channel(&description)?;
     let latest_package_versions = collect_package_versions(dist_channel);
 
     let toolchain = Toolchain::new(toolchain)?;
 
-    let channel_file_name = match description.name {
-        DistToolchainName::Latest => CHANNEL_LATEST_FILE_NAME,
-        DistToolchainName::Nightly => CHANNEL_NIGHTLY_FILE_NAME,
-    };
-    let toml_path = toolchain.path.join(channel_file_name);
-    let toml = read_file("channel", &toml_path)?;
-    let channel = Channel::from_toml(&toml)?;
-
     bold(|s| writeln!(s, "{}", &toolchain.name));
 
-    for component in [component::FORC, component::FUEL_CORE] {
-        let version = &channel.pkg[component].version;
-        let latest_version = &latest_package_versions[component];
+    for component in Components::collect_exclude_plugins()? {
+        let component_executable = toolchain.bin_path.join(&component.name);
+        let mut latest_version = &latest_package_versions[&component.name];
+        match Command::new(&component_executable)
+            .arg("--version")
+            .output()
+        {
+            Ok(o) => {
+                let output = String::from_utf8_lossy(&o.stdout).into_owned();
 
-        let component_executable = toolchain.bin_path.join(component);
-
-        if component_executable.is_file() {
-            bold(|s| write!(s, "  {} - ", &component));
-            compare_and_print_versions(version, latest_version)?;
-        } else {
-            print!("  ");
-            bold(|s| write!(s, "{}", &component));
-            println!(" - not installed");
-        }
-
-        if verbose && component == component::FORC {
-            for plugin in SUPPORTED_PLUGINS {
-                if plugin == &component::FORC_DEPLOY {
-                    bold(|s| writeln!(s, "    - forc-client"));
+                match output.split_whitespace().nth(1) {
+                    Some(v) => {
+                        let version = Version::parse(v)?;
+                        bold(|s| write!(s, "  {} - ", &component.name));
+                        compare_and_print_versions(&version, latest_version)?;
+                    }
+                    None => {
+                        error!("  {} - Error getting version string", &component.name);
+                    }
                 }
-                if plugin == &component::FORC_RUN || plugin == &component::FORC_DEPLOY {
-                    print!("  ");
+            }
+            Err(_) => bail!(""),
+        };
+
+        if verbose && component.name == component::FORC {
+            for plugin in component::Components::collect_plugins()? {
+                if !plugin.is_main_executable() {
+                    bold(|s| writeln!(s, "    - {}", plugin.name));
                 }
 
-                let plugin_executable = toolchain.bin_path.join(&plugin);
-                check_plugin(&plugin_executable, plugin, version, latest_version)?;
+                for (index, executable) in plugin.executables.iter().enumerate() {
+                    let plugin_executable = toolchain.bin_path.join(executable);
+
+                    let mut plugin_name = &plugin.name;
+
+                    if !plugin.is_main_executable() {
+                        print!("  ");
+                        plugin_name = &plugin.executables[index];
+                    }
+
+                    if latest_package_versions.contains_key(&plugin.name) {
+                        latest_version = &latest_package_versions[&plugin.name];
+                    }
+
+                    check_plugin(&plugin_executable, plugin_name, latest_version)?;
+                }
             }
         }
     }

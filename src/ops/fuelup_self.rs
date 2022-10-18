@@ -1,10 +1,10 @@
 use anyhow::{bail, Result};
+use component;
 use std::{fs, path::Path};
 use tempfile::tempdir_in;
 use tracing::{error, info};
 
 use crate::{
-    component,
     download::{download_file_and_unpack, unpack_bins, DownloadCfg},
     path::{fuelup_bin, fuelup_bin_dir},
     target_triple::TargetTriple,

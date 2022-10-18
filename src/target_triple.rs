@@ -1,5 +1,5 @@
-use crate::component;
 use anyhow::{bail, Result};
+use component::{self, Component};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
@@ -59,7 +59,7 @@ impl TargetTriple {
     }
 
     pub fn from_component(component: &str) -> Result<Self> {
-        match component {
+        match Component::from_name(component).map(|c| c.name)?.as_str() {
             component::FORC => {
                 let os = match std::env::consts::OS {
                     "macos" => "darwin",
@@ -74,8 +74,7 @@ impl TargetTriple {
 
                 Ok(Self(format!("{}_{}", os, architecture)))
             }
-
-            component::FUEL_CORE => {
+            _ => {
                 let architecture = match std::env::consts::ARCH {
                     "aarch64" | "x86_64" => std::env::consts::ARCH,
                     unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
@@ -94,26 +93,6 @@ impl TargetTriple {
 
                 Ok(Self(format!("{}-{}-{}", architecture, vendor, os)))
             }
-            component::FUELUP => {
-                let architecture = match std::env::consts::ARCH {
-                    "aarch64" | "x86_64" => std::env::consts::ARCH,
-                    unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
-                };
-
-                let vendor = match std::env::consts::OS {
-                    "macos" => "apple",
-                    _ => "unknown",
-                };
-
-                let os = match std::env::consts::OS {
-                    "macos" => "darwin",
-                    "linux" => "linux-gnu",
-                    unsupported_os => bail!("Unsupported os: {}", unsupported_os),
-                };
-
-                Ok(Self(format!("{}-{}-{}", architecture, vendor, os)))
-            }
-            _ => bail!("Unrecognized component: {}", component),
         }
     }
 }

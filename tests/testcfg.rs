@@ -1,4 +1,5 @@
 use anyhow::Result;
+use fuelup::settings::SettingsFile;
 use fuelup::target_triple::TargetTriple;
 use std::{
     env, fs,
@@ -33,15 +34,6 @@ pub struct TestOutput {
 
 pub const DATE: &str = "2022-08-30";
 
-pub const FORC_BINS: &[&str] = &[
-    "forc",
-    "forc-deploy",
-    "forc-explore",
-    "forc-fmt",
-    "forc-lsp",
-    "forc-run",
-];
-
 pub static ALL_BINS: &[&str] = &[
     "forc",
     "forc-deploy",
@@ -49,6 +41,7 @@ pub static ALL_BINS: &[&str] = &[
     "forc-fmt",
     "forc-lsp",
     "forc-run",
+    "forc-wallet",
     "fuel-core",
 ];
 
@@ -71,6 +64,16 @@ impl TestCfg {
             .join("toolchains")
             .join(toolchain)
             .join("bin")
+    }
+
+    pub fn settings_file(&self) -> SettingsFile {
+        SettingsFile::new(self.home.join(".fuelup").join("settings.toml"))
+    }
+
+    pub fn default_toolchain(&self) -> Option<String> {
+        self.settings_file()
+            .with(|s| Ok(s.default_toolchain.clone()))
+            .unwrap()
     }
 
     pub fn fuelup(&mut self, args: &[&str]) -> TestOutput {

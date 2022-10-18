@@ -1,14 +1,11 @@
-use crate::constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME};
 use crate::download::DownloadCfg;
-use crate::path::{fuelup_dir, settings_file};
+use crate::path::settings_file;
 use crate::settings::SettingsFile;
-use crate::toolchain::{DistToolchainName, OfficialToolchainDescription, Toolchain};
+use crate::toolchain::{OfficialToolchainDescription, Toolchain};
 use crate::{channel::Channel, commands::toolchain::InstallCommand};
 use anyhow::{bail, Result};
 use std::fmt::Write;
-use std::fs;
 use std::str::FromStr;
-use tempfile::tempdir_in;
 use tracing::{error, info};
 
 pub fn install(command: InstallCommand) -> Result<()> {
@@ -28,16 +25,11 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let mut errored_bins = String::new();
     let mut installed_bins = String::new();
 
-    let fuelup_dir = fuelup_dir();
-    let tmp_dir = tempdir_in(&fuelup_dir)?;
-    let tmp_dir_path = tmp_dir.into_path();
-
-    let cfgs: Vec<DownloadCfg> =
-        if let Ok(channel) = Channel::from_dist_channel(&description, tmp_dir_path.clone()) {
-            channel.build_download_configs()
-        } else {
-            bail!("Could not build download configs from channel")
-        };
+    let cfgs: Vec<DownloadCfg> = if let Ok(channel) = Channel::from_dist_channel(&description) {
+        channel.build_download_configs()
+    } else {
+        bail!("Could not build download configs from channel")
+    };
 
     info!(
         "Downloading: {}",
@@ -54,15 +46,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
         };
     }
 
-    let channel_file_name = match description.name {
-        DistToolchainName::Latest => CHANNEL_LATEST_FILE_NAME,
-        DistToolchainName::Nightly => CHANNEL_NIGHTLY_FILE_NAME,
-    };
     if errored_bins.is_empty() {
-        fs::copy(
-            tmp_dir_path.join(channel_file_name),
-            toolchain.path.join(channel_file_name),
-        )?;
         info!("\nInstalled:\n{}", installed_bins);
         info!("\nThe Fuel toolchain is installed and up to date");
     } else if installed_bins.is_empty() {

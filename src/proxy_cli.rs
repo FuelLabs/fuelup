@@ -4,28 +4,26 @@ use std::os::unix::prelude::CommandExt;
 use std::process::{Command, ExitCode, Stdio};
 use std::{env, io};
 
-use crate::component;
 use crate::toolchain::Toolchain;
+use component::Components;
 
 /// Runs forc or fuel-core in proxy mode
 pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
     let cmd_args: Vec<_> = env::args_os().skip(1).collect();
     let toolchain = Toolchain::from_settings()?;
 
-    if !cmd_args.is_empty()
-        && component::SUPPORTED_PLUGINS
-            .contains(&cmd_args[0].to_str().expect("Failed to parse cmd args"))
-    {
-        let plugin = &format!("{}-{}", arg0, &cmd_args[0].to_string_lossy());
-        direct_proxy(plugin, &cmd_args[1..], toolchain)?;
-    } else {
-        direct_proxy(arg0, &cmd_args, toolchain)?;
+    if !cmd_args.is_empty() {
+        let plugin = format!("{}-{}", arg0, &cmd_args[0].to_string_lossy());
+        if Components::collect_plugin_executables()?.contains(&plugin) {
+            direct_proxy(&plugin, &cmd_args[1..], &toolchain)?;
+        }
     }
 
+    direct_proxy(arg0, &cmd_args, &toolchain)?;
     Ok(ExitCode::SUCCESS)
 }
 
-fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: Toolchain) -> io::Result<ExitCode> {
+fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io::Result<ExitCode> {
     let bin_path = toolchain.bin_path.join(proc_name);
     let mut cmd = Command::new(bin_path);
 

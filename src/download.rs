@@ -1,28 +1,35 @@
 use anyhow::{anyhow, bail, Result};
+use component::{Component, FUELUP};
 use flate2::read::GzDecoder;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
 use sha2::Sha256;
+use std::env;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
 use std::time::Duration;
 use std::{fs, thread};
 use tar::Archive;
 use tracing::warn;
 use tracing::{error, info};
 
+use crate::channel::Channel;
 use crate::channel::Package;
-use crate::channel::PackageVersion;
-use crate::component;
-use crate::constants::{
-    FUELUP_RELEASE_DOWNLOAD_URL, FUELUP_REPO, FUEL_CORE_RELEASE_DOWNLOAD_URL, FUEL_CORE_REPO,
-    GITHUB_API_REPOS_BASE_URL, RELEASES_LATEST, SWAY_RELEASE_DOWNLOAD_URL, SWAY_REPO,
-};
+use crate::constants::CHANNEL_LATEST_URL;
 use crate::file::hard_or_symlink_file;
 use crate::path::fuelup_bin;
 use crate::target_triple::TargetTriple;
+use crate::toolchain::OfficialToolchainDescription;
+
+fn github_releases_download_url(repo: &str, tag: &Version, tarball: &str) -> String {
+    format!(
+        "https://github.com/FuelLabs/{}/releases/download/v{}/{}",
+        repo, tag, tarball
+    )
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
@@ -35,32 +42,32 @@ struct LatestReleaseApiResponse {
 pub struct DownloadCfg {
     pub name: String,
     pub target: TargetTriple,
-    pub version: PackageVersion,
+    pub version: Version,
     tarball_name: String,
     tarball_url: String,
     hash: Option<String>,
 }
 
 impl DownloadCfg {
-    pub fn new(name: &str, target: TargetTriple, version: Option<PackageVersion>) -> Result<Self> {
+    pub fn new(name: &str, target: TargetTriple, version: Option<Version>) -> Result<Self> {
         let version = match version {
             Some(version) => version,
-            None => PackageVersion {
-                semver: get_latest_tag(name).map_err(|e| {
-                    anyhow!("Error getting latest tag for component: {:?}: {}", name, e)
-                })?,
-                date: None,
-            },
+            None => get_latest_version(name)
+                .map_err(|e| anyhow!("Error getting latest tag for '{}': {}", name, e))?,
         };
 
-        let release_url = match name {
-            component::FORC => SWAY_RELEASE_DOWNLOAD_URL.to_string(),
-            component::FUEL_CORE => FUEL_CORE_RELEASE_DOWNLOAD_URL.to_string(),
-            component::FUELUP => FUELUP_RELEASE_DOWNLOAD_URL.to_string(),
-            _ => bail!("Unrecognized component: {}", name),
+        let (tarball_name, tarball_url) = if name == FUELUP {
+            let tarball_name = tarball_name(FUELUP, &version, &target);
+            let tarball_url = github_releases_download_url(FUELUP, &version, &tarball_name);
+            (tarball_name, tarball_url)
+        } else if let Ok(component) = Component::from_name(name) {
+            let tarball_name = tarball_name(&component.tarball_prefix, &version, &target);
+            let tarball_url =
+                github_releases_download_url(&component.repository_name, &version, &tarball_name);
+            (tarball_name, tarball_url)
+        } else {
+            bail!("Unrecognized component: {}", name)
         };
-        let tarball_name = tarball_name(name, &version, &target)?;
-        let tarball_url = format!("{}/v{}/{}", &release_url, &version.semver, &tarball_name);
 
         Ok(Self {
             name: name.to_string(),
@@ -74,7 +81,7 @@ impl DownloadCfg {
 
     pub fn from_package(name: &str, package: Package) -> Result<Self> {
         let target = TargetTriple::from_component(name)?;
-        let tarball_name = tarball_name(name, &package.version, &target)?;
+        let tarball_name = tarball_name(name, &package.version, &target);
         let tarball_url = package.target[&target.to_string()].url.clone();
         let hash = Some(package.target[&target.to_string()].hash.clone());
         Ok(Self {
@@ -88,57 +95,50 @@ impl DownloadCfg {
     }
 }
 
-pub fn tarball_name(name: &str, version: &PackageVersion, target: &TargetTriple) -> Result<String> {
-    let version_string = if let Some(date) = version.date {
-        version.semver.to_string() + "-" + &date.to_string()
+pub fn tarball_name(tarball_prefix: &str, version: &Version, target: &TargetTriple) -> String {
+    if tarball_prefix == "forc-binaries" {
+        format!("{}-{}.tar.gz", tarball_prefix, target)
     } else {
-        version.semver.to_string()
-    };
-
-    match name {
-        component::FORC => {
-            let postfix = if version.date.is_some() {
-                version_string + "-" + &target.to_string()
-            } else {
-                target.to_string()
-            };
-            Ok(format!("forc-binaries-{}.tar.gz", postfix))
-        }
-        component::FUEL_CORE => Ok(format!("fuel-core-{}-{}.tar.gz", version_string, target)),
-        component::FUELUP => Ok(format!("fuelup-{}-{}.tar.gz", version_string, target)),
-        _ => bail!("Unrecognized component: {}", name),
+        format!("{}-{}-{}.tar.gz", tarball_prefix, version, target)
     }
 }
 
-pub fn get_latest_tag(name: &str) -> Result<Version> {
-    let latest_tag_url = match name {
-        component::FORC => format!(
-            "{}{}/{}",
-            GITHUB_API_REPOS_BASE_URL, SWAY_REPO, RELEASES_LATEST
-        ),
-        component::FUEL_CORE => format!(
-            "{}{}/{}",
-            GITHUB_API_REPOS_BASE_URL, FUEL_CORE_REPO, RELEASES_LATEST
-        ),
-        component::FUELUP => format!(
-            "{}{}/{}",
-            GITHUB_API_REPOS_BASE_URL, FUELUP_REPO, RELEASES_LATEST
-        ),
-        _ => bail!("Unrecognized component: {}", name),
-    };
+pub fn get_latest_version(name: &str) -> Result<Version> {
     let handle = ureq::builder().user_agent("fuelup").build();
-    let resp = handle.get(&latest_tag_url).call()?;
-
     let mut data = Vec::new();
-    resp.into_reader().read_to_end(&mut data)?;
+    if name == FUELUP {
+        const FUELUP_RELEASES_API_URL: &str =
+            "https://api.github.com/repos/FuelLabs/fuelup/releases/latest";
+        let resp = handle.get(FUELUP_RELEASES_API_URL).call()?;
+        resp.into_reader().read_to_end(&mut data)?;
+        let response: LatestReleaseApiResponse =
+            serde_json::from_str(&String::from_utf8_lossy(&data))?;
 
-    let response: LatestReleaseApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
+        let version_str = &response.tag_name["v".len()..];
+        let version = Version::parse(version_str)?;
+        Ok(version)
+    } else {
+        let resp = handle.get(CHANNEL_LATEST_URL).call()?;
 
-    // Given a semver version with preceding 'v' (e.g. `v1.2.3`), take the slice after 'v' (e.g. `1.2.3`).
-    let version_str = &response.tag_name["v".len()..];
-    let version = Version::parse(version_str)?;
-
-    Ok(version)
+        resp.into_reader().read_to_end(&mut data)?;
+        {
+            if let Ok(channel) =
+                Channel::from_dist_channel(&OfficialToolchainDescription::from_str("latest")?)
+            {
+                channel
+                    .pkg
+                    .get(name)
+                    .ok_or_else(|| {
+                        anyhow!(
+                        "'{name}' is not a valid, downloadable package in the 'latest' channel."
+                    )
+                    })
+                    .map(|p| p.version.clone())
+            } else {
+                bail!("Failed to get 'latest' channel")
+            }
+        }
+    }
 }
 
 fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
@@ -157,11 +157,61 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
     Ok(())
 }
 
+pub fn download(url: &str, hasher: &mut Sha256) -> Result<Vec<u8>> {
+    const RETRY_ATTEMPTS: u8 = 4;
+    const RETRY_DELAY_SECS: u64 = 3;
+
+    // auto detect http proxy setting.
+    let handle = if let Ok(proxy) = env::var("http_proxy") {
+        ureq::builder()
+            .user_agent("fuelup")
+            .proxy(ureq::Proxy::new(proxy)?)
+            .build()
+    } else {
+        ureq::builder().user_agent("fuelup").build()
+    };
+
+    for _ in 1..RETRY_ATTEMPTS {
+        match handle.get(url).call() {
+            Ok(response) => {
+                let mut data = Vec::new();
+                response.into_reader().read_to_end(&mut data)?;
+
+                hasher.update(data.clone());
+                return Ok(data);
+            }
+            Err(ureq::Error::Status(404, r)) => {
+                // We've reached download_file stage, which means the tag must be correct.
+                error!("Failed to download from {}", &url);
+                let retry: Option<u64> = r.header("retry-after").and_then(|h| h.parse().ok());
+                let retry = retry.unwrap_or(RETRY_DELAY_SECS);
+                info!("Retrying..");
+                thread::sleep(Duration::from_secs(retry));
+            }
+            Err(e) => {
+                // handle other status code and non-status code errors
+                bail!("Unexpected error: {}", e.to_string());
+            }
+        }
+    }
+
+    bail!("Could not read file");
+}
+
 pub fn download_file(url: &str, path: &PathBuf, hasher: &mut Sha256) -> Result<()> {
     const RETRY_ATTEMPTS: u8 = 4;
     const RETRY_DELAY_SECS: u64 = 3;
 
-    let handle = ureq::builder().user_agent("fuelup").build();
+    // auto detect http proxy setting.
+    let handle = if let Ok(proxy) = env::var("http_proxy") {
+        ureq::builder()
+            .user_agent("fuelup")
+            .proxy(ureq::Proxy::new(proxy)?)
+            .build()
+    } else {
+        ureq::builder().user_agent("fuelup").build()
+    };
+
     let mut file = OpenOptions::new().write(true).create(true).open(&path)?;
 
     for _ in 1..RETRY_ATTEMPTS {

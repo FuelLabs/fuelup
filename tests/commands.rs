@@ -4,9 +4,7 @@ use std::{env, path::Path};
 
 mod testcfg;
 
-use testcfg::{FuelupState, ALL_BINS};
-
-use crate::testcfg::{DATE, FORC_BINS};
+use testcfg::{FuelupState, ALL_BINS, DATE};
 
 fn expect_files_exist(dir: &Path, expected: &[&str]) {
     let mut actual: Vec<String> = dir
@@ -36,7 +34,8 @@ fn fuelup_version() -> Result<()> {
 #[test]
 fn fuelup_toolchain_install_latest() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        cfg.fuelup(&["toolchain", "install", "latest"]);
+        let output = cfg.fuelup(&["toolchain", "install", "latest"]);
+        assert!(output.status.success());
 
         for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
             let toolchain_dir = entry.unwrap();
@@ -47,14 +46,6 @@ fn fuelup_toolchain_install_latest() -> Result<()> {
                 toolchain_dir.file_name().to_str().unwrap()
             );
             assert!(toolchain_dir.file_type().unwrap().is_dir());
-
-            expect_files_exist(&toolchain_dir.path().join("bin"), ALL_BINS);
-
-            let output = cfg.fuelup(&["check"]);
-            println!("{:?}", output);
-            assert!(output.stdout.contains("forc - Up to date"));
-            // TODO: uncomment once new fuel-core is released and this works
-            // assert!(stdout.contains("fuel-core - Up to date"));
         }
     })?;
 
@@ -64,7 +55,8 @@ fn fuelup_toolchain_install_latest() -> Result<()> {
 #[test]
 fn fuelup_toolchain_install_nightly() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        cfg.fuelup(&["toolchain", "install", "nightly"]);
+        let output = cfg.fuelup(&["toolchain", "install", "nightly"]);
+        assert!(output.status.success());
 
         for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
             let toolchain_dir = entry.unwrap();
@@ -75,8 +67,6 @@ fn fuelup_toolchain_install_nightly() -> Result<()> {
                 toolchain_dir.file_name().to_str().unwrap()
             );
             assert!(toolchain_dir.file_type().unwrap().is_dir());
-
-            expect_files_exist(&toolchain_dir.path().join("bin"), ALL_BINS);
         }
     })?;
 
@@ -205,12 +195,13 @@ active toolchain
 ----------------
 my_toolchain (default)
   forc - not found
+    - forc-client
+      - forc-deploy - not found
+      - forc-run - not found
+    - forc-explore - not found
     - forc-fmt - not found
     - forc-lsp - not found
-    - forc-explore - not found
-    - forc-client
-      - forc-run - not found
-      - forc-deploy - not found
+    - forc-wallet - not found
   fuel-core - not found
 "#
         );
@@ -332,14 +323,17 @@ fn fuelup_default_nightly_and_nightly_date() -> Result<()> {
 #[test]
 fn fuelup_toolchain_new() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let output = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
-        let expected_stdout = "New toolchain initialized: my_toolchain\n";
-        assert_eq!(output.stdout, expected_stdout);
-        assert!(cfg.toolchain_bin_dir("my_toolchain").is_dir());
+        let name = "my-toolchain";
+        let output = cfg.fuelup(&["toolchain", "new", name]);
+        let expected_stdout = format!(
+            "New toolchain initialized: {name}
+default toolchain set to '{name}'\n"
+        );
 
-        let output = cfg.fuelup(&["default", "my_toolchain"]);
-        let expected_stdout = "default toolchain set to 'my_toolchain'\n";
         assert_eq!(output.stdout, expected_stdout);
+        assert!(cfg.toolchain_bin_dir(name).is_dir());
+        let default = cfg.default_toolchain();
+        assert_eq!(default, Some(name.to_string()));
     })?;
 
     Ok(())
@@ -372,45 +366,24 @@ fn fuelup_toolchain_new_disallowed_with_target() -> Result<()> {
 }
 
 #[test]
-fn fuelup_toolchain_new_and_set_default() -> Result<()> {
-    let latest = format!("latest-{}", TargetTriple::from_host().unwrap());
+fn fuelup_component_add() -> Result<()> {
+    testcfg::setup(FuelupState::Empty, &|cfg| {
+        let _ = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
 
-    testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
-        let output = cfg.fuelup(&["default"]);
-        let expected_stdout = format!("{} (default)\n", latest);
-        assert_eq!(output.stdout, expected_stdout);
-        assert!(!cfg.toolchain_bin_dir("my_toolchain").is_dir());
-
-        let output = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
-        let expected_stdout = "New toolchain initialized: my_toolchain\n";
-        assert_eq!(output.stdout, expected_stdout);
-        assert!(cfg.toolchain_bin_dir("my_toolchain").is_dir());
-
-        let output = cfg.fuelup(&["default", "my_toolchain"]);
-        let expected_stdout = "default toolchain set to 'my_toolchain'\n";
-        assert_eq!(output.stdout, expected_stdout);
+        let _ = cfg.fuelup(&["component", "add", "fuel-core"]);
+        expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), &["fuel-core"]);
     })?;
 
     Ok(())
 }
 
 #[test]
-fn fuelup_component_add() -> Result<()> {
+fn fuelup_component_add_with_version() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let output = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
-        let expected_stdout = "New toolchain initialized: my_toolchain\n";
-        assert_eq!(output.stdout, expected_stdout);
+        let _ = cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
 
-        let output = cfg.fuelup(&["default", "my_toolchain"]);
-        let expected_stdout = "default toolchain set to 'my_toolchain'\n";
-        assert_eq!(output.stdout, expected_stdout);
-        assert!(cfg.toolchain_bin_dir("my_toolchain").is_dir());
-
-        let _ = cfg.fuelup(&["component", "add", "forc"]);
-        expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), FORC_BINS);
-
-        let _ = cfg.fuelup(&["component", "add", "fuel-core@0.9.5"]);
-        expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), ALL_BINS);
+        let _ = cfg.fuelup(&["component", "add", "fuel-core@0.9.8"]);
+        expect_files_exist(&cfg.toolchain_bin_dir("my_toolchain"), &["fuel-core"]);
     })?;
 
     Ok(())

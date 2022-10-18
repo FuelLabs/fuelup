@@ -1,21 +1,23 @@
 use anyhow::{bail, Context, Result};
+use component::{self, Components};
 use std::fmt;
 use std::fs::{remove_dir_all, remove_file};
 use std::path::PathBuf;
+use std::process::Command;
 use std::str::FromStr;
 use time::Date;
-use tracing::info;
+use tracing::{error, info};
 
-use crate::component::SUPPORTED_PLUGINS;
+use crate::channel;
 use crate::constants::DATE_FORMAT;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
-    ensure_dir_exists, fuelup_bin, fuelup_bin_dir, settings_file, toolchain_bin_dir, toolchain_dir,
+    ensure_dir_exists, fuelup_bin, fuelup_bin_dir, fuelup_tmp_dir, settings_file,
+    toolchain_bin_dir, toolchain_dir,
 };
 use crate::settings::SettingsFile;
 use crate::target_triple::TargetTriple;
-use crate::{channel, component};
 
 pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
     channel::LATEST,
@@ -181,7 +183,17 @@ impl Toolchain {
     }
 
     pub fn has_component(&self, component: &str) -> bool {
-        self.bin_path.join(component).exists()
+        let executables = &Components::collect()
+            .expect("Failed to collect components")
+            .component[component]
+            .executables;
+
+        executables.iter().all(|e| self.bin_path.join(e).is_file())
+    }
+
+    fn can_remove(&self, component: &str) -> bool {
+        // Published components are the ones downloadable, and hence removable.
+        Components::contains_published(component)
     }
 
     pub fn add_component(&self, download_cfg: DownloadCfg) -> Result<DownloadCfg> {
@@ -215,28 +227,68 @@ impl Toolchain {
 
         if let Ok(downloaded) = unpack_bins(&self.bin_path, &fuelup_bin_dir) {
             link_to_fuelup(downloaded)?;
+
+            // Little hack here to download core and std lib upon installing `forc`
+            if download_cfg.name == component::FORC {
+                let fuelup_tmp_dir = fuelup_tmp_dir();
+                ensure_dir_exists(&fuelup_tmp_dir)?;
+                let forc_bin_path = self.bin_path.join(component::FORC);
+                let temp_project = tempfile::Builder::new()
+                    .prefix("temp-project")
+                    .tempdir_in(fuelup_tmp_dir)?;
+                let temp_project_path = temp_project.path().to_str().unwrap();
+                if Command::new(&forc_bin_path)
+                    .args(["init", "--path", temp_project_path])
+                    .stdout(std::process::Stdio::null())
+                    .status()
+                    .is_ok()
+                {
+                    info!("Fetching core forc dependencies");
+                    if Command::new(forc_bin_path)
+                        .args(["check", "--path", temp_project_path])
+                        .stdout(std::process::Stdio::null())
+                        .status()
+                        .is_err()
+                    {
+                        error!("Failed to fetch core forc dependencies");
+                    };
+                };
+            }
         };
+
+        info!(
+            "Installed {} v{} for toolchain '{}'",
+            download_cfg.name, download_cfg.version, self.name
+        );
 
         Ok(download_cfg)
     }
 
+    fn remove_executables(&self, component: &str) -> Result<()> {
+        let executables = &Components::collect().unwrap().component[component].executables;
+        for executable in executables {
+            remove_file(self.bin_path.join(executable))
+                .with_context(|| format!("failed to remove executable '{}'", executable))?;
+        }
+        Ok(())
+    }
+
     pub fn remove_component(&self, component: &str) -> Result<()> {
-        if self.has_component(component) {
-            info!("Removing '{}' from toolchain '{}'", component, self.name);
-            let component_path = self.bin_path.join(component);
-            remove_file(component_path)
-                .with_context(|| format!("failed to remove component '{}'", component))?;
-            // If component to remove is 'forc', silently remove forc plugins
-            if component == component::FORC {
-                for component in SUPPORTED_PLUGINS {
-                    let component_path = self.bin_path.join(component);
-                    remove_file(component_path)
-                        .with_context(|| format!("failed to remove component '{}'", component))?;
-                }
+        if self.can_remove(component) {
+            if self.has_component(component) {
+                info!("Removing '{}' from toolchain '{}'", component, self.name);
+                match self.remove_executables(component) {
+                    Ok(_) => info!("'{}' removed from toolchain '{}'", component, self.name),
+                    Err(e) => error!(
+                        "Failed to remove '{}' from toolchain '{}': {}",
+                        component, self.name, e
+                    ),
+                };
+            } else {
+                info!("'{}' not found in toolchain '{}'", component, self.name);
             }
-            info!("'{}' removed from toolchain '{}'", component, self.name);
         } else {
-            info!("'{}' not found in toolchain '{}'", component, self.name);
+            info!("'{}' is not a removable component", component);
         }
 
         Ok(())

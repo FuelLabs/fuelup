@@ -21,13 +21,31 @@ create_new_pkg() {
 create_pkg_in_channel() {
     CHANNEL_TOML_NAME=$3
     version=$2
-    date="$(date +'%Y-%m-%d')"
+    date="$(date +'%Y%m%d')"
     tag="v${2}"
     case "${1}" in
         "forc")
             _targets=("darwin_amd64" "darwin_arm64" "linux_amd64" "linux_arm64")
             _repo="sway"
             _tarball_prefix="forc-binaries"
+            ;;
+        "forc-client")
+            _targets=("aarch64-apple-darwin" "aarch64-unknown-linux-gnu" "x86_64-apple-darwin" "x86_64-unknown-linux-gnu")
+            _repo="forc-client"
+            _tarball_prefix="forc-client"
+
+            if [ "${2}" != "nightly" ]; then
+                _tarball_prefix+="-${version}"
+            fi
+            ;;
+        "forc-wallet")
+            _targets=("aarch64-apple-darwin" "aarch64-unknown-linux-gnu" "x86_64-apple-darwin" "x86_64-unknown-linux-gnu")
+            _repo="forc-wallet"
+            _tarball_prefix="forc-wallet"
+
+            if [ "${2}" != "nightly" ]; then
+                _tarball_prefix+="-${version}"
+            fi
             ;;
         "fuel-core")
             _targets=("aarch64-apple-darwin" "aarch64-unknown-linux-gnu" "x86_64-apple-darwin" "x86_64-unknown-linux-gnu")
@@ -43,11 +61,10 @@ create_pkg_in_channel() {
 
     if [ "${2}" = "nightly" ]; then
         _repo="sway-nightly-binaries"
-        semver="$(curl -s https://api.github.com/repos/FuelLabs/${_repo}/releases | grep "tag_name" | grep "nightly-${date}" | grep "${_tarball_prefix}" | head -n 1 | cut -d "-" -f3)"
-        version="${semver}-nightly (${date})"
-        version_url_friendly="${semver}-nightly-${date}"
-        _tarball_prefix+="-${version_url_friendly}"
-        tag="${_tarball_prefix}"
+        version="$(curl -s https://api.github.com/repos/FuelLabs/${_repo}/releases | grep "tag_name" | grep "nightly.${date}" | grep "${_tarball_prefix}" | head -n 1 | cut -d "-" -f3- | cut -d "\"" -f1)"
+        _tarball_prefix+="-${version}"
+        # Replace '+' within string with '%2B' to be URL friendly
+        tag=$(echo "${_tarball_prefix}" | sed -r "s/\+/\%2B/g")
     fi
 
     # We need to recreate channel-fuel-latest.toml, generating new URLs and sha256 hashes for the download links.
@@ -68,22 +85,13 @@ create_pkg_in_channel() {
 }
 
 main() {
-    FORC_LATEST_VERSION=$1
-    FUEL_CORE_LATEST_VERSION=$2
-    GITHUB_RUN_ID=$3
-    CHANNEL_TOML_NAME=$4
-    mv "$CHANNEL_TOML_NAME" channel.tmp.toml
-    # Cleanup tmp and downloaded tars/bin folders
-    trap 'rm channel.tmp.toml *.tar.gz' ERR EXIT
+    COMPONENT=$1
+    VERSION=$2
+    CHANNEL_TOML_NAME=$3
+    trap 'rm *.tar.gz' ERR EXIT
 
-    echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >>"$CHANNEL_TOML_NAME"
+    create_pkg_in_channel "${COMPONENT}" "${VERSION}" "${CHANNEL_TOML_NAME}"
 
-    create_pkg_in_channel forc "${FORC_LATEST_VERSION}" "${CHANNEL_TOML_NAME}"
-    create_pkg_in_channel fuel-core "${FUEL_CORE_LATEST_VERSION}" "${CHANNEL_TOML_NAME}"
-
-    # remove newline at the end
-    truncate -s -1 "$CHANNEL_TOML_NAME"
-    printf "Done.\n"
     exit 0
 }
 

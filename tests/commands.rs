@@ -179,6 +179,8 @@ fn fuelup_show() -> Result<()> {
         );
         assert!(lines.next().unwrap().contains("fuelup home: "));
 
+        println!("{}", stdout);
+
         let target = TargetTriple::from_host().unwrap();
         let expected_stdout = &format!(
             r#"
@@ -456,7 +458,7 @@ fn fuelup_component_remove_disallowed() -> Result<()> {
 
         let expected_stdout = format!(
             r#"Removing specific components is reserved for custom toolchains.
-You are currently using '{nightly_date}'.
+You are currently using '{latest}'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
 "#

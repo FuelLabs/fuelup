@@ -71,11 +71,7 @@ fn parse_metadata(metadata: String) -> Result<(Option<Date>, Option<TargetTriple
             if second.is_empty() {
                 Ok((Some(d), None))
             } else {
-                let target = if second != "-" {
-                    second.trim_start_matches('-')
-                } else {
-                    second
-                };
+                let target = second.trim_start_matches('-');
                 bail!(
                     "You specified target '{}': specifying a target is not supported yet.",
                     target

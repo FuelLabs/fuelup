@@ -181,12 +181,13 @@ fn fuelup_show() -> Result<()> {
 
         let target = TargetTriple::from_host().unwrap();
         let expected_stdout = &format!(
-            r#"installed toolchains
+            r#"
+installed toolchains
 --------------------
 my_toolchain (default)
+nightly-{target}
 latest-{target}
 nightly-2022-08-30-{target}
-nightly-{target}
 
 active toolchain
 ----------------

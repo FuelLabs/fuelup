@@ -40,9 +40,11 @@ impl Config {
                     e.file_type().map(|f| f.is_dir()).unwrap_or(false)
                         && RESERVED_TOOLCHAIN_NAMES.iter().any(|t| {
                             e.file_name().to_string_lossy()
-                                == t.to_string()
-                                    + "-"
-                                    + &TargetTriple::from_host().unwrap_or_default().to_string()
+                                == format!(
+                                    "{}-{}",
+                                    t.to_string(),
+                                    &TargetTriple::from_host().unwrap_or_default().to_string()
+                                )
                         })
                 })
                 .map(|e| e.file_name().into_string().ok().unwrap_or_default())

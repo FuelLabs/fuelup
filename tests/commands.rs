@@ -179,8 +179,6 @@ fn fuelup_show() -> Result<()> {
         );
         assert!(lines.next().unwrap().contains("fuelup home: "));
 
-        println!("{}", stdout);
-
         let target = TargetTriple::from_host().unwrap();
         let expected_stdout = &format!(
             r#"

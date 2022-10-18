@@ -90,7 +90,7 @@ If this component should be downloadable, try running `fuelup self update` and r
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{constants::DATE_FORMAT, download::DownloadCfg, file::read_file};
+    use crate::{download::DownloadCfg, file::read_file};
 
     #[test]
     fn channel_from_toml() {

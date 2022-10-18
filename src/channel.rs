@@ -1,5 +1,8 @@
 use crate::{
-    constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME, FUELUP_GH_PAGES},
+    constants::{
+        CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME, DATE_FORMAT_URL_FRIENDLY,
+        FUELUP_GH_PAGES,
+    },
     download::{download, DownloadCfg},
     toolchain::{DistToolchainName, OfficialToolchainDescription},
 };

@@ -453,11 +453,13 @@ fn fuelup_component_remove_disallowed() -> Result<()> {
         expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
         let output = cfg.fuelup(&["component", "remove", "forc"]);
 
-        let expected_stdout = r#"Removing specific components is reserved for custom toolchains.
-You are currently using 'latest-x86_64-apple-darwin'.
+        let expected_stdout = format!(
+            r#"Removing specific components is reserved for custom toolchains.
+You are currently using '{nightly_date}'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#;
+"#
+        );
         assert_eq!(output.stdout, expected_stdout);
         expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
     })?;

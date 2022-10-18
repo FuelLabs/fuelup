@@ -98,9 +98,10 @@ fn fuelup_toolchain_install_nightly_date() -> Result<()> {
 #[test]
 fn fuelup_toolchain_install_malformed_date() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let output = cfg.fuelup(&["toolchain", "install", "nightly-2022-08-31-"]);
+        let toolchain = "nightly-2022-08-31-";
+        let output = cfg.fuelup(&["toolchain", "install", toolchain]);
 
-        let expected_stdout = "Invalid official toolchain name 'nightly-2022-08-31-'\n";
+        let expected_stdout = format!("Invalid toolchain metadata within input '{toolchain}' - You specified target '': specifying a target is not supported yet.\n");
 
         assert!(output.status.success());
         assert_eq!(output.stdout, expected_stdout);
@@ -112,14 +113,11 @@ fn fuelup_toolchain_install_malformed_date() -> Result<()> {
 #[test]
 fn fuelup_toolchain_install_date_target_disallowed() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let output = cfg.fuelup(&[
-            "toolchain",
-            "install",
-            "nightly-2022-08-31-x86_64-apple-darwin",
-        ]);
+        let toolchain = "nightly-2022-08-31-x86_64-apple-darwin";
+        let output = cfg.fuelup(&["toolchain", "install", toolchain]);
 
         let expected_stdout =
-            "You specified target 'x86_64-apple-darwin': specifying a target is not supported yet.\n";
+            format!("Invalid toolchain metadata within input '{toolchain}' - You specified target 'x86_64-apple-darwin': specifying a target is not supported yet.\n");
 
         assert!(output.status.success());
         assert_eq!(output.stdout, expected_stdout);

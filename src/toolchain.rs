@@ -353,6 +353,7 @@ mod tests {
             let toolchain = channel::NIGHTLY.to_owned() + "-" + DATE + "-" + target;
             assert!(OfficialToolchainDescription::from_str(&toolchain).is_err());
             // TODO: Uncomment once target specification is supported
+            // see issue #237: https://github.com/FuelLabs/fuelup/issues/237
             // assert_eq!(
             //     desc.name,
             //     DistToolchainName::from_str(channel::NIGHTLY).unwrap()
@@ -396,6 +397,7 @@ mod tests {
     fn test_parse_metadata_date_target() -> Result<()> {
         assert!(parse_metadata(DATE_TARGET_APPLE.to_string()).is_err());
         // TODO: Uncomment once target specification is supported
+        // see issue #237: https://github.com/FuelLabs/fuelup/issues/237
         //assert_eq!(DATE, date.unwrap().to_string());
         //assert_eq!(TARGET_X86_APPLE, target.unwrap().to_string());
         Ok(())

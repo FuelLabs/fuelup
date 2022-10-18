@@ -332,7 +332,7 @@ mod tests {
 
     #[test]
     fn test_parse_nightly_date() -> Result<()> {
-        let toolchain = channel::NIGHTLY.to_owned() + "-" + DATE;
+        let toolchain = format!("{}-{}", channel::NIGHTLY.to_owned(), DATE);
         let desc = OfficialToolchainDescription::from_str(&toolchain).unwrap();
 
         assert_eq!(desc.name, DistToolchainName::from_str("nightly").unwrap());

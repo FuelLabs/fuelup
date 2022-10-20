@@ -184,10 +184,10 @@ fn fuelup_show() -> Result<()> {
             r#"
 installed toolchains
 --------------------
-my_toolchain (default)
-nightly-{target}
 latest-{target}
+my_toolchain (default)
 nightly-2022-08-30-{target}
+nightly-{target}
 
 active toolchain
 ----------------

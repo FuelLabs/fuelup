@@ -4,18 +4,40 @@ use std::path::PathBuf;
 use anyhow::Result;
 use std::io;
 
-use crate::path::toolchains_dir;
-use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
+use crate::file::{read_file, write_file};
+use crate::path::{ensure_dir_exists, hashes_dir, toolchains_dir};
+use crate::toolchain::{OfficialToolchainDescription, RESERVED_TOOLCHAIN_NAMES};
 
 pub struct Config {
     toolchains_dir: PathBuf,
+    hashes_dir: PathBuf,
 }
 
 impl Config {
     pub(crate) fn from_env() -> Result<Self> {
         Ok(Self {
             toolchains_dir: toolchains_dir(),
+            hashes_dir: hashes_dir(),
         })
+    }
+
+    pub(crate) fn hash_exists(
+        &self,
+        description: &OfficialToolchainDescription,
+        hash: &str,
+    ) -> bool {
+        let hash_path = self.hashes_dir.join(description.to_string());
+
+        match read_file("hash", &hash_path) {
+            Ok(h) => h == hash,
+            _ => false,
+        }
+    }
+
+    pub(crate) fn save_hash(self, toolchain: &str, hash: &str) -> Result<()> {
+        ensure_dir_exists(&self.hashes_dir)?;
+        write_file(&self.hashes_dir.join(toolchain), hash)?;
+        Ok(())
     }
 
     pub(crate) fn list_toolchains(&self) -> Result<Vec<String>> {

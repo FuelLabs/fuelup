@@ -35,7 +35,7 @@ pub struct Package {
 }
 
 impl Channel {
-    pub fn from_dist_channel(desc: &OfficialToolchainDescription) -> Result<Self> {
+    pub fn from_dist_channel(desc: &OfficialToolchainDescription) -> Result<(Self, String)> {
         let channel_file_name = match desc.name {
             DistToolchainName::Latest => CHANNEL_LATEST_FILE_NAME,
             DistToolchainName::Nightly => CHANNEL_NIGHTLY_FILE_NAME,
@@ -47,7 +47,8 @@ impl Channel {
             Err(_) => bail!("Could not read {}", &channel_url),
         };
 
-        Self::from_toml(&toml)
+        let actual_hash = format!("{:x}", hasher.finalize());
+        Ok((Self::from_toml(&toml)?, actual_hash))
     }
 
     pub fn from_toml(toml: &str) -> Result<Self> {

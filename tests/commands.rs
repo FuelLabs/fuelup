@@ -203,6 +203,8 @@ my_toolchain (default)
   fuel-core - not found
 "#
         );
+        println!("{}", stdout);
+        println!("{}", expected_stdout);
         assert!(stdout.contains(expected_stdout));
     })?;
     Ok(())

@@ -20,7 +20,7 @@ pub fn uninstall(command: UninstallCommand) -> Result<()> {
 
         let config = Config::from_env()?;
 
-        if toolchain.exists() && config.hash_exists(&description) {
+        if config.hash_exists(&description) {
             let hash_file = config.hashes_dir().join(description.to_string());
             fs::remove_file(hash_file)?;
         };

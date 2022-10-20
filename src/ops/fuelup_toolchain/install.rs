@@ -1,4 +1,4 @@
-use crate::download::DownloadCfg;
+use crate::config::Config;
 use crate::path::settings_file;
 use crate::settings::SettingsFile;
 use crate::toolchain::{OfficialToolchainDescription, Toolchain};
@@ -23,8 +23,14 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let mut errored_bins = String::new();
     let mut installed_bins = String::new();
 
-    let cfgs: Vec<DownloadCfg> = if let Ok(channel) = Channel::from_dist_channel(&description) {
-        channel.build_download_configs()
+    let config = Config::from_env()?;
+
+    let (cfgs, hash) = if let Ok((channel, hash)) = Channel::from_dist_channel(&description) {
+        if config.hash_exists(&description, &hash) {
+            info!("'{}' is already installed and up to date", toolchain.name);
+            return Ok(());
+        };
+        (channel.build_download_configs(), hash)
     } else {
         bail!("Could not build download configs from channel")
     };
@@ -43,6 +49,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
     }
 
     if errored_bins.is_empty() {
+        config.save_hash(&toolchain.name, &hash)?;
         info!("\nInstalled:\n{}", installed_bins);
         info!("\nThe Fuel toolchain is installed and up to date");
     } else if installed_bins.is_empty() {

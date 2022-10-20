@@ -97,7 +97,7 @@ impl FromStr for OfficialToolchainDescription {
             Ok(Self {
                 name: DistToolchainName::from_str(name)?,
                 date: None,
-                target: None,
+                target: TargetTriple::from_host().ok(),
             })
         } else if let Ok((_, _)) = parse_metadata(metadata.to_string()) {
             bail!(

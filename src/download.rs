@@ -121,22 +121,21 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
         let resp = handle.get(CHANNEL_LATEST_URL).call()?;
 
         resp.into_reader().read_to_end(&mut data)?;
+
+        if let Ok((channel, _)) =
+            Channel::from_dist_channel(&OfficialToolchainDescription::from_str("latest")?)
         {
-            if let Ok(channel) =
-                Channel::from_dist_channel(&OfficialToolchainDescription::from_str("latest")?)
-            {
-                channel
-                    .pkg
-                    .get(name)
-                    .ok_or_else(|| {
-                        anyhow!(
+            channel
+                .pkg
+                .get(name)
+                .ok_or_else(|| {
+                    anyhow!(
                         "'{name}' is not a valid, downloadable package in the 'latest' channel."
                     )
-                    })
-                    .map(|p| p.version.clone())
-            } else {
-                bail!("Failed to get 'latest' channel")
-            }
+                })
+                .map(|p| p.version.clone())
+        } else {
+            bail!("Failed to get 'latest' channel")
         }
     }
 }

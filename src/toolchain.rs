@@ -347,7 +347,7 @@ mod tests {
             TARGET_X86_APPLE,
             TARGET_X86_LINUX,
         ] {
-            let toolchain = channel::NIGHTLY.to_owned() + "-" + DATE + "-" + target;
+            let toolchain = format!("{}-{}-{}", channel::NIGHTLY.to_owned(), DATE, target);
             assert!(OfficialToolchainDescription::from_str(&toolchain).is_err());
             // TODO: Uncomment once target specification is supported
             // see issue #237: https://github.com/FuelLabs/fuelup/issues/237

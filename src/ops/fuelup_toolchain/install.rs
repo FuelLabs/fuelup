@@ -26,7 +26,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let config = Config::from_env()?;
 
     let (cfgs, hash) = if let Ok((channel, hash)) = Channel::from_dist_channel(&description) {
-        if config.hash_exists(&description, &hash) {
+        if config.hash_matches(&description, &hash) {
             info!("'{}' is already installed and up to date", toolchain.name);
             return Ok(());
         };

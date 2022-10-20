@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anyhow::Result;
 use std::io;
@@ -21,8 +21,8 @@ impl Config {
         })
     }
 
-    pub(crate) fn hashes_dir(self) -> PathBuf {
-        self.hashes_dir
+    pub(crate) fn hashes_dir(&self) -> &Path {
+        self.hashes_dir.as_path()
     }
 
     pub(crate) fn hash_matches(

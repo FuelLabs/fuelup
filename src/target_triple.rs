@@ -19,7 +19,7 @@ impl TargetTriple {
         };
 
         if !["aarch64", "x86_64"].contains(&architecture) {
-            bail!("unsupported architecture: '{}'", architecture);
+            bail!("Unsupported architecture: '{}'", architecture);
         }
 
         let (vendor, os) = match rest.split_once('-') {
@@ -28,11 +28,11 @@ impl TargetTriple {
         };
 
         if !["apple", "unknown"].contains(&vendor) {
-            bail!("unsupported vendor: '{}'", vendor);
+            bail!("Unsupported vendor: '{}'", vendor);
         }
 
         if !["darwin", "linux-gnu"].contains(&os) {
-            bail!("unsupported os: '{}'", os);
+            bail!("Unsupported os: '{}'", os);
         }
 
         Ok(Self(s.to_string()))

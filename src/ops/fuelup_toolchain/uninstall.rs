@@ -1,10 +1,11 @@
-use std::str::FromStr;
-
 use anyhow::Result;
+use std::fs;
+use std::str::FromStr;
 use tracing::info;
 
 use crate::{
     commands::toolchain::UninstallCommand,
+    config::Config,
     toolchain::{OfficialToolchainDescription, Toolchain},
 };
 
@@ -16,6 +17,13 @@ pub fn uninstall(command: UninstallCommand) -> Result<()> {
     if toolchain.is_official() {
         let description = OfficialToolchainDescription::from_str(&name)?;
         toolchain = Toolchain::from(&description.to_string())?;
+
+        let config = Config::from_env()?;
+
+        if toolchain.exists() && config.hash_exists(&description) {
+            let hash_file = config.hashes_dir().join(description.to_string());
+            fs::remove_file(hash_file)?;
+        };
     }
 
     if !toolchain.exists() {

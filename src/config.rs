@@ -21,7 +21,11 @@ impl Config {
         })
     }
 
-    pub(crate) fn hash_exists(
+    pub(crate) fn hashes_dir(self) -> PathBuf {
+        self.hashes_dir
+    }
+
+    pub(crate) fn hash_matches(
         &self,
         description: &OfficialToolchainDescription,
         hash: &str,
@@ -32,6 +36,10 @@ impl Config {
             Ok(h) => h == hash,
             _ => false,
         }
+    }
+
+    pub(crate) fn hash_exists(&self, description: &OfficialToolchainDescription) -> bool {
+        self.hashes_dir.join(description.to_string()).is_file()
     }
 
     pub(crate) fn save_hash(self, toolchain: &str, hash: &str) -> Result<()> {

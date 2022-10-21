@@ -1,0 +1,57 @@
+
+[pkg.forc]
+version = "0.26.0+nightly.20221021.0e84d98a06"
+
+[pkg.forc.target.linux_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-binaries-0.26.0%2Bnightly.20221021.0e84d98a06/forc-binaries-0.26.0+nightly.20221021.0e84d98a06-linux_amd64.tar.gz"
+hash = "ba1cfe486d226a9cc2b0c0e8fc5103d0c36a119ae59890ce8854bd91eedb75dc"
+
+[pkg.forc.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-binaries-0.26.0%2Bnightly.20221021.0e84d98a06/forc-binaries-0.26.0+nightly.20221021.0e84d98a06-linux_arm64.tar.gz"
+hash = "d9a747277c6f2b9e5d4e884be4049642a157f25d0b4aa70389b5fa12dd325f0b"
+
+[pkg.forc.target.darwin_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-binaries-0.26.0%2Bnightly.20221021.0e84d98a06/forc-binaries-0.26.0+nightly.20221021.0e84d98a06-darwin_amd64.tar.gz"
+hash = "e6c155dbeb8ef6abbca2bf39611aa8afa76fa99d1d78614a1c0a38df9e1aae49"
+
+[pkg.forc.target.darwin_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-binaries-0.26.0%2Bnightly.20221021.0e84d98a06/forc-binaries-0.26.0+nightly.20221021.0e84d98a06-darwin_arm64.tar.gz"
+hash = "cd245c1a0ad91ede0e1682c6fb15c43fbb8818a71e11b889524baf7d033ba0f1"
+
+[pkg.forc-wallet]
+version = "0.1.2+nightly.20221021.ad1d7830b9"
+
+[pkg.forc-wallet.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-wallet-0.1.2%2Bnightly.20221021.ad1d7830b9/forc-wallet-0.1.2+nightly.20221021.ad1d7830b9-aarch64-unknown-linux-gnu.tar.gz"
+hash = "b9377bf24c1d317e7a9f1411fc9b3e34ce0c6ffa901ff4e0b0bd6ebd8573af46"
+
+[pkg.forc-wallet.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-wallet-0.1.2%2Bnightly.20221021.ad1d7830b9/forc-wallet-0.1.2+nightly.20221021.ad1d7830b9-x86_64-unknown-linux-gnu.tar.gz"
+hash = "c0f73515f6170994e9deefa9d82f9038e9fea618e4cd31e6696a9afcc721340c"
+
+[pkg.forc-wallet.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-wallet-0.1.2%2Bnightly.20221021.ad1d7830b9/forc-wallet-0.1.2+nightly.20221021.ad1d7830b9-aarch64-apple-darwin.tar.gz"
+hash = "1c3080ddc8bc40b31f7816ef6d6867abbba92568a2e73d96a3484568d737204b"
+
+[pkg.forc-wallet.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/forc-wallet-0.1.2%2Bnightly.20221021.ad1d7830b9/forc-wallet-0.1.2+nightly.20221021.ad1d7830b9-x86_64-apple-darwin.tar.gz"
+hash = "08998cb702db1eab8df71ed22bf33828571e230cb23e61afd04bf619cad65146"
+
+[pkg.fuel-core]
+version = "0.11.2+nightly.20221021.5df9fe8fd7"
+
+[pkg.fuel-core.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/fuel-core-0.11.2%2Bnightly.20221021.5df9fe8fd7/fuel-core-0.11.2+nightly.20221021.5df9fe8fd7-aarch64-unknown-linux-gnu.tar.gz"
+hash = "6603ed453a0056694cb86604f2a7514a6799b930d15f2d487e982cea16203db5"
+
+[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/fuel-core-0.11.2%2Bnightly.20221021.5df9fe8fd7/fuel-core-0.11.2+nightly.20221021.5df9fe8fd7-x86_64-unknown-linux-gnu.tar.gz"
+hash = "f5663d93edd572a15797f927add7a2a852e551b83cc8ca35c6630d61317d5c60"
+
+[pkg.fuel-core.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/fuel-core-0.11.2%2Bnightly.20221021.5df9fe8fd7/fuel-core-0.11.2+nightly.20221021.5df9fe8fd7-aarch64-apple-darwin.tar.gz"
+hash = "132724f206e756c71348b2c41aa1327cf1a301743848bc77fa5817ddbac301c4"
+
+[pkg.fuel-core.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/fuel-core-0.11.2%2Bnightly.20221021.5df9fe8fd7/fuel-core-0.11.2+nightly.20221021.5df9fe8fd7-x86_64-apple-darwin.tar.gz"
+hash = "6025efcf3f83fa105d7895bd5685f7e55dec3fdf5e898a9e933f9f9bb2c6bac6"

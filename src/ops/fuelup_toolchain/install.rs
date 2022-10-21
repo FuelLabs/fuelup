@@ -27,6 +27,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
 
     let config = Config::from_env()?;
 
+    let toolchain = Toolchain::from_path(&description.to_string())?;
     let (cfgs, hash) = if let Ok((channel, hash)) = Channel::from_dist_channel(&description) {
         if config.hash_matches(&description, &hash) {
             info!("'{}' is already installed and up to date", toolchain.name);
@@ -44,7 +45,6 @@ pub fn install(command: InstallCommand) -> Result<()> {
             .collect::<String>()
     );
 
-    let toolchain = Toolchain::from_path(&description.to_string())?;
     for cfg in cfgs {
         match toolchain.add_component(cfg) {
             Ok(cfg) => writeln!(installed_bins, "- {} {}", cfg.name, cfg.version)?,

@@ -60,13 +60,24 @@ pub struct OfficialToolchainDescription {
 }
 
 fn parse_metadata(metadata: String) -> Result<(Option<Date>, Option<TargetTriple>)> {
+    if metadata.is_empty() {
+        return Ok((None, None));
+    }
+
     let (first, second) = metadata.split_at(std::cmp::min(10, metadata.len()));
 
     match Date::parse(first, DATE_FORMAT) {
-        Ok(d) => match TargetTriple::new(second.trim_start_matches('-')) {
-            Ok(t) => Ok((Some(d), Some(t))),
-            Err(_) => Ok((Some(d), None)),
-        },
+        Ok(d) => {
+            if second.is_empty() {
+                Ok((Some(d), None))
+            } else {
+                let target = second.trim_start_matches('-');
+                bail!(
+                    "You specified target '{}': specifying a target is not supported yet.",
+                    target
+                );
+            }
+        }
         Err(_) => match TargetTriple::new(&metadata) {
             Ok(t) => Ok((None, Some(t))),
             Err(_) => bail!("Failed to parse date or target"),
@@ -99,20 +110,15 @@ impl FromStr for OfficialToolchainDescription {
                 date: None,
                 target: TargetTriple::from_host().ok(),
             })
-        } else if let Ok((_, _)) = parse_metadata(metadata.to_string()) {
-            bail!(
-                "You may not specify a date or target for official toolchain name '{}' yet.",
-                name
-            );
-
-            // TODO: uncomment once specifying date and target is supported
-            // Ok(Self {
-            //     name: DistToolchainName::from_str(name)?,
-            //     date,
-            //     target,
-            // })
         } else {
-            bail!("Invalid official toolchain name '{}'", s);
+            match parse_metadata(metadata.to_string()) {
+                Ok((date, target)) => Ok(Self {
+                    name: DistToolchainName::from_str(name)?,
+                    date,
+                    target,
+                }),
+                Err(e) => bail!("Invalid toolchain metadata within input '{}' - {}", s, e),
+            }
         }
     }
 }
@@ -135,7 +141,7 @@ impl Toolchain {
         })
     }
 
-    pub fn from(toolchain: &str) -> Result<Self> {
+    pub fn from_path(toolchain: &str) -> Result<Self> {
         Ok(Self {
             name: toolchain.to_string(),
             path: toolchain_dir(toolchain),
@@ -299,8 +305,6 @@ mod tests {
     const TARGET_X86_LINUX: &str = "x86_64-unknown-linux-gnu";
     const TARGET_ARM_LINUX: &str = "aarch64-unknown-linux-gnu";
 
-    const NIGHTLY_DATE: &str = "nightly-2022-08-29";
-
     #[test]
     fn test_parse_name() -> Result<()> {
         for name in [channel::LATEST, channel::NIGHTLY] {
@@ -325,12 +329,12 @@ mod tests {
 
     #[test]
     fn test_parse_nightly_date() -> Result<()> {
-        assert!(OfficialToolchainDescription::from_str(NIGHTLY_DATE).is_err());
+        let toolchain = format!("{}-{}", channel::NIGHTLY.to_owned(), DATE);
+        let desc = OfficialToolchainDescription::from_str(&toolchain).unwrap();
 
-        // TODO: uncomment once specifying date and target is supporting
-        //assert_eq!(desc.name, DistToolchainName::from_str("nightly").unwrap());
-        //assert_eq!(desc.date.unwrap().to_string(), DATE);
-        //assert_eq!(desc.target, None);
+        assert_eq!(desc.name, DistToolchainName::from_str("nightly").unwrap());
+        assert_eq!(desc.date.unwrap().to_string(), DATE);
+        assert_eq!(desc.target, None);
 
         Ok(())
     }
@@ -343,15 +347,16 @@ mod tests {
             TARGET_X86_APPLE,
             TARGET_X86_LINUX,
         ] {
-            let input = channel::NIGHTLY.to_owned() + "-" + DATE + "-" + target;
-            assert!(OfficialToolchainDescription::from_str(&input).is_err());
-            // TODO: uncomment once specifying date and target is supporting
-            //   assert_eq!(
-            //       desc.name,
-            //       DistToolchainName::from_str(channel::NIGHTLY).unwrap()
-            //   );
-            //   assert_eq!(desc.date.unwrap().to_string(), DATE);
-            //   assert_eq!(desc.target.unwrap().to_string(), target);
+            let toolchain = format!("{}-{}-{}", channel::NIGHTLY.to_owned(), DATE, target);
+            assert!(OfficialToolchainDescription::from_str(&toolchain).is_err());
+            // TODO: Uncomment once target specification is supported
+            // see issue #237: https://github.com/FuelLabs/fuelup/issues/237
+            // assert_eq!(
+            //     desc.name,
+            //     DistToolchainName::from_str(channel::NIGHTLY).unwrap()
+            // );
+            // assert_eq!(desc.date.unwrap().to_string(), DATE);
+            // assert_eq!(desc.target.unwrap().to_string(), target);
         }
 
         Ok(())
@@ -367,12 +372,11 @@ mod tests {
         ] {
             for name in [channel::LATEST, channel::NIGHTLY] {
                 let toolchain = name.to_owned() + "-" + target;
-                assert!(OfficialToolchainDescription::from_str(&toolchain).is_err());
+                let desc = OfficialToolchainDescription::from_str(&toolchain).unwrap();
 
-                // TODO: uncomment once specifying date and target is supporting
-                // assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
-                // assert!(desc.date.is_none());
-                // assert_eq!(desc.target.unwrap().to_string(), target);
+                assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
+                assert!(desc.date.is_none());
+                assert_eq!(desc.target.unwrap().to_string(), target);
             }
         }
 
@@ -388,9 +392,11 @@ mod tests {
 
     #[test]
     fn test_parse_metadata_date_target() -> Result<()> {
-        let (date, target) = parse_metadata(DATE_TARGET_APPLE.to_string())?;
-        assert_eq!(DATE, date.unwrap().to_string());
-        assert_eq!(TARGET_X86_APPLE, target.unwrap().to_string());
+        assert!(parse_metadata(DATE_TARGET_APPLE.to_string()).is_err());
+        // TODO: Uncomment once target specification is supported
+        // see issue #237: https://github.com/FuelLabs/fuelup/issues/237
+        //assert_eq!(DATE, date.unwrap().to_string());
+        //assert_eq!(TARGET_X86_APPLE, target.unwrap().to_string());
         Ok(())
     }
 

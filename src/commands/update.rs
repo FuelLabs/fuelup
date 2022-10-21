@@ -6,8 +6,8 @@ use crate::ops::fuelup_update;
 #[derive(Debug, Parser)]
 pub struct UpdateCommand {}
 
-pub fn exec(command: UpdateCommand) -> Result<()> {
-    fuelup_update::update(command)?;
+pub fn exec() -> Result<()> {
+    fuelup_update::update()?;
 
     Ok(())
 }

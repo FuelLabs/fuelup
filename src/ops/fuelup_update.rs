@@ -1,6 +1,5 @@
 use crate::{
     channel::Channel,
-    commands::update::UpdateCommand,
     config::Config,
     toolchain::{OfficialToolchainDescription, Toolchain},
 };
@@ -9,21 +8,19 @@ use std::fmt::Write;
 use std::str::FromStr;
 use tracing::{error, info};
 
-pub fn update(command: UpdateCommand) -> Result<()> {
+pub fn update() -> Result<()> {
     let config = Config::from_env()?;
 
     for toolchain in config.list_official_toolchains()? {
         let mut errored_bins = String::new();
         let mut installed_bins = String::new();
 
-        println!("{}", toolchain);
         let description = OfficialToolchainDescription::from_str(&toolchain)?;
-        println!("{}", description);
 
         let (cfgs, hash) = if let Ok((channel, hash)) = Channel::from_dist_channel(&description) {
             if config.hash_matches(&description, &hash) {
                 info!("'{}' is already installed and up to date", toolchain);
-                return Ok(());
+                continue;
             };
             (channel.build_download_configs(), hash)
         } else {
@@ -37,7 +34,7 @@ pub fn update(command: UpdateCommand) -> Result<()> {
                 .collect::<String>()
         );
         for cfg in cfgs {
-            let toolchain = Toolchain::from(&description.name.to_string())?;
+            let toolchain = Toolchain::from_path(&description.name.to_string())?;
             match toolchain.add_component(cfg) {
                 Ok(cfg) => writeln!(installed_bins, "- {} {}", cfg.name, cfg.version)?,
                 Err(e) => writeln!(errored_bins, "- {}", e)?,

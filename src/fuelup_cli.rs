@@ -51,6 +51,6 @@ pub fn fuelup_cli() -> Result<()> {
         },
         Commands::Show(_command) => show::exec(),
         Commands::Toolchain(command) => toolchain::exec(command),
-        Commands::Update(command) => update::exec(command),
+        Commands::Update(_command) => update::exec(),
     }
 }

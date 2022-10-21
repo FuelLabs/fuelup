@@ -42,7 +42,7 @@ impl Config {
         self.hashes_dir.join(description.to_string()).is_file()
     }
 
-    pub(crate) fn save_hash(self, toolchain: &str, hash: &str) -> Result<()> {
+    pub(crate) fn save_hash(&self, toolchain: &str, hash: &str) -> Result<()> {
         ensure_dir_exists(&self.hashes_dir)?;
         write_file(&self.hashes_dir.join(toolchain), hash)?;
         Ok(())

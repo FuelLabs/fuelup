@@ -26,10 +26,10 @@ pub fn exec(command: DefaultCommand) -> Result<()> {
         }
     };
 
-    let mut new_default = Toolchain::from(&toolchain)?;
+    let mut new_default = Toolchain::from_path(&toolchain)?;
 
     if let Ok(description) = OfficialToolchainDescription::from_str(&toolchain) {
-        new_default = Toolchain::from(&description.to_string())?;
+        new_default = Toolchain::from_path(&description.to_string())?;
     }
 
     if !new_default.exists() {

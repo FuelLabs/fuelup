@@ -11,14 +11,16 @@ use tracing::{error, info};
 pub fn install(command: InstallCommand) -> Result<()> {
     let InstallCommand { name } = command;
 
-    let toolchain = Toolchain::new(&name)?;
     let description = OfficialToolchainDescription::from_str(&name)?;
 
-    let settings = SettingsFile::new(settings_file());
-    settings.with_mut(|s| {
-        s.default_toolchain = Some(toolchain.name.clone());
-        Ok(())
-    })?;
+    let settings_file = settings_file();
+    if !settings_file.exists() {
+        let settings = SettingsFile::new(settings_file);
+        settings.with_mut(|s| {
+            s.default_toolchain = Some(description.to_string());
+            Ok(())
+        })?;
+    }
 
     let mut errored_bins = String::new();
     let mut installed_bins = String::new();
@@ -35,6 +37,8 @@ pub fn install(command: InstallCommand) -> Result<()> {
             .map(|c| c.name.clone() + " ")
             .collect::<String>()
     );
+
+    let toolchain = Toolchain::from_path(&description.to_string())?;
     for cfg in cfgs {
         match toolchain.add_component(cfg) {
             Ok(cfg) => writeln!(installed_bins, "- {} {}", cfg.name, cfg.version)?,

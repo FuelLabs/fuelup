@@ -8,3 +8,4 @@ pub const CHANNEL_LATEST_FILE_NAME: &str = "channel-fuel-latest.toml";
 pub const CHANNEL_NIGHTLY_FILE_NAME: &str = "channel-fuel-nightly.toml";
 
 pub const DATE_FORMAT: &[FormatItem] = format_description!("[year]-[month]-[day]");
+pub const DATE_FORMAT_URL_FRIENDLY: &[FormatItem] = format_description!("[year]/[month]/[day]");

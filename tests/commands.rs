@@ -127,6 +127,31 @@ fn fuelup_toolchain_install_date_target_disallowed() -> Result<()> {
 }
 
 #[test]
+fn fuelup_update() -> Result<()> {
+    testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+        for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
+            let toolchain_dir = entry.unwrap();
+            println!("{:?}", toolchain_dir);
+        }
+        let output = cfg.fuelup(&["update"]);
+        assert!(output.status.success());
+
+        for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
+            let toolchain_dir = entry.unwrap();
+            let expected_toolchain_name =
+                "latest-".to_owned() + &TargetTriple::from_host().unwrap().to_string();
+            assert_eq!(
+                expected_toolchain_name,
+                toolchain_dir.file_name().to_str().unwrap()
+            );
+            assert!(toolchain_dir.file_type().unwrap().is_dir());
+        }
+    })?;
+
+    Ok(())
+}
+
+#[test]
 fn fuelup_toolchain_uninstall() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let toolchains = ["latest", "nightly", &format!("nightly-{}", DATE)];

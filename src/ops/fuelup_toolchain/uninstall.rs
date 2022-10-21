@@ -12,11 +12,11 @@ use crate::{
 pub fn uninstall(command: UninstallCommand) -> Result<()> {
     let UninstallCommand { name } = command;
 
-    let mut toolchain = Toolchain::from(&name)?;
+    let mut toolchain = Toolchain::from_path(&name)?;
 
     if toolchain.is_official() {
         let description = OfficialToolchainDescription::from_str(&name)?;
-        toolchain = Toolchain::from(&description.to_string())?;
+        toolchain = Toolchain::from_path(&description.to_string())?;
 
         let config = Config::from_env()?;
 

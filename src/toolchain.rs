@@ -307,7 +307,7 @@ mod tests {
             let desc = OfficialToolchainDescription::from_str(name)?;
             assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
             assert_eq!(desc.date, None);
-            assert_eq!(desc.target, None);
+            assert_eq!(desc.target, Some(TargetTriple::from_host().unwrap()));
         }
 
         Ok(())

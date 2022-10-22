@@ -1,8 +1,8 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use anyhow::Result;
-use std::io;
+use anyhow::{bail, Result};
+use std::io::{self, ErrorKind};
 
 use crate::file::{read_file, write_file};
 use crate::path::{ensure_dir_exists, hashes_dir, toolchains_dir};
@@ -30,12 +30,15 @@ impl Config {
         &self,
         description: &OfficialToolchainDescription,
         hash: &str,
-    ) -> bool {
+    ) -> Result<bool> {
         let hash_path = self.hashes_dir.join(description.to_string());
 
-        match read_file("hash", &hash_path) {
-            Ok(h) => h == hash,
-            _ => false,
+        match fs::read_to_string(&hash_path) {
+            Ok(h) => Ok(h == hash),
+            Err(e) => match e.kind() {
+                ErrorKind::NotFound => Ok(false),
+                _ => bail!("Failed to read hash from hash file"),
+            },
         }
     }
 

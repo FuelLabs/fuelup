@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use anyhow::{bail, Result};
 use std::io::{self, ErrorKind};
 
-use crate::file::{read_file, write_file};
+use crate::file::write_file;
 use crate::path::{ensure_dir_exists, hashes_dir, toolchains_dir};
 use crate::target_triple::TargetTriple;
 use crate::toolchain::{OfficialToolchainDescription, RESERVED_TOOLCHAIN_NAMES};

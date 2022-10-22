@@ -38,6 +38,7 @@ pub struct Package {
 }
 
 impl Channel {
+    /// The returned `String` is a sha256 hash of the downloaded toolchain TOML bytes.
     pub fn from_dist_channel(desc: &OfficialToolchainDescription) -> Result<(Self, String)> {
         let channel_file_name = match desc.name {
             DistToolchainName::Latest => CHANNEL_LATEST_FILE_NAME,

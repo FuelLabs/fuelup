@@ -18,7 +18,7 @@ pub fn update() -> Result<()> {
         let description = OfficialToolchainDescription::from_str(&toolchain)?;
 
         let (cfgs, hash) = if let Ok((channel, hash)) = Channel::from_dist_channel(&description) {
-            if config.hash_matches(&description, &hash) {
+            if let Ok(true) = config.hash_matches(&description, &hash) {
                 info!("'{}' is already installed and up to date", toolchain);
                 continue;
             };

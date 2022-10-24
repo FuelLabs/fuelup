@@ -103,7 +103,7 @@ fn check_fuelup() -> Result<()> {
 fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
     let description = OfficialToolchainDescription::from_str(toolchain)?;
 
-    let dist_channel = Channel::from_dist_channel(&description)?;
+    let (dist_channel, _) = Channel::from_dist_channel(&description)?;
     let latest_package_versions = collect_package_versions(dist_channel);
 
     let toolchain = Toolchain::new(toolchain)?;

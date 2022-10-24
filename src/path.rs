@@ -24,6 +24,10 @@ pub fn settings_file() -> PathBuf {
     fuelup_dir().join("settings.toml")
 }
 
+pub fn hashes_dir() -> PathBuf {
+    fuelup_dir().join("hashes")
+}
+
 pub fn toolchains_dir() -> PathBuf {
     fuelup_dir().join("toolchains")
 }

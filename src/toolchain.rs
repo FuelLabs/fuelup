@@ -224,10 +224,9 @@ impl Toolchain {
                 let fuelup_tmp_dir = fuelup_tmp_dir();
                 ensure_dir_exists(&fuelup_tmp_dir)?;
                 let forc_bin_path = self.bin_path.join(component::FORC);
-                let temp_project = tempfile::Builder::new()
-                    .prefix("temp-project")
-                    .tempdir_in(fuelup_tmp_dir)?;
+                let temp_project = tempfile::Builder::new().prefix("temp-project").tempdir()?;
                 let temp_project_path = temp_project.path().to_str().unwrap();
+                println!("temp: {}", temp_project_path);
                 if Command::new(&forc_bin_path)
                     .args(["init", "--path", temp_project_path])
                     .stdout(std::process::Stdio::null())

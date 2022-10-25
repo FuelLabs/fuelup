@@ -11,8 +11,7 @@ use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 pub enum ToolchainCommand {
     /// Install or update a given toolchain
     ///
-    /// Currently, we only support installation of the 'latest' toolchain:
-    /// `fuelup toolchain install latest`
+    /// Currently, we support the installation of both 'latest' and 'nightly' toolchains.
     Install(InstallCommand),
     /// Create a new custom toolchain
     New(NewCommand),
@@ -22,7 +21,7 @@ pub enum ToolchainCommand {
 
 #[derive(Debug, Parser)]
 pub struct InstallCommand {
-    /// Toolchain name [possible values: latest]
+    /// Toolchain name [possible values: latest, nightly]
     pub name: String,
 }
 

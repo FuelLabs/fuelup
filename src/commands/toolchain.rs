@@ -11,7 +11,7 @@ use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 pub enum ToolchainCommand {
     /// Install or update a given toolchain
     ///
-    /// Currently, we support installation of both 'latest' and 'nightly' toolchains.
+    /// Currently, we support the installation of both 'latest' and 'nightly' toolchains.
     Install(InstallCommand),
     /// Create a new custom toolchain
     New(NewCommand),

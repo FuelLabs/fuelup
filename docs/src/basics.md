@@ -13,11 +13,11 @@ The Fuel toolchain is distributed on one [release channel]: latest (with nightly
 `fuelup` uses the `latest` channel by default, which
 represents the latest release of the Fuel toolchain.
 
-When new versions of the components within the Fuel toolchain are released,
-simply type `fuelup toolchain install latest` to update:
+When new versions of the components within an official Fuel toolchain (`latest` or `nightly`)
+are released, simply type `fuelup update` to update:
 
 ```sh
-fuelup toolchain install latest
+fuelup update
 ```
 
 ## Keeping `fuelup` up to date

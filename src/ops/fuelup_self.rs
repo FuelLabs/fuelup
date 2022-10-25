@@ -1,7 +1,7 @@
 use anyhow::{bail, Result};
 use component;
 use std::{fs, path::Path};
-use tempfile::tempdir_in;
+use tempfile::tempdir;
 use tracing::{error, info};
 
 use crate::{
@@ -28,7 +28,7 @@ pub fn self_update() -> Result<()> {
     let fuelup_bin_dir = fuelup_bin_dir();
     let fuelup_backup = fuelup_bin_dir.join("fuelup-backup");
 
-    let fuelup_new_dir = tempdir_in(&fuelup_bin_dir)?;
+    let fuelup_new_dir = tempdir()?;
     let fuelup_new_dir_path = fuelup_new_dir.path();
     let fuelup_new = fuelup_new_dir_path.join(component::FUELUP);
 

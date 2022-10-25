@@ -6,7 +6,7 @@ use std::{
     path::{Path, PathBuf},
     process::{Command, ExitStatus},
 };
-use tempfile::tempdir_in;
+use tempfile::tempdir;
 
 pub enum FuelupState {
     AllInstalled,
@@ -124,7 +124,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
         .expect("fuelup's directory")
         .to_path_buf();
 
-    let testdir = tempdir_in(&root).unwrap();
+    let testdir = tempdir().unwrap();
     let tmp_home = testdir.path();
 
     let tmp_fuelup_root_path = tmp_home.join(".fuelup");

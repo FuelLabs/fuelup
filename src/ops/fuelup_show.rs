@@ -74,7 +74,7 @@ pub fn show() -> Result<()> {
             for plugin in Components::collect_plugins()? {
                 bold(|s| write!(s, "    - {}", &plugin.name));
                 if !plugin.is_main_executable() {
-                    println!();
+                    info!("");
                     for executable in plugin.executables.iter() {
                         bold(|s| write!(s, "      - {}", &executable));
                         let plugin_executable = active_toolchain.bin_path.join(&executable);

@@ -17,7 +17,7 @@ const UNCHANGED: &str = "unchanged";
 pub fn update() -> Result<()> {
     let config = Config::from_env()?;
     let toolchains = config.list_official_toolchains()?;
-    let mut message: Vec<(String, String)> = Vec::with_capacity(toolchains.len());
+    let mut summary: Vec<(String, String)> = Vec::with_capacity(toolchains.len());
 
     for toolchain in toolchains {
         let mut installed_bins = String::new();
@@ -29,7 +29,7 @@ pub fn update() -> Result<()> {
         let (cfgs, hash) = if let Ok((channel, hash)) = Channel::from_dist_channel(&description) {
             if let Ok(true) = config.hash_matches(&description, &hash) {
                 info!("'{}' already installed and up to date", description);
-                message.push((format!("{} {}", toolchain, UNCHANGED), "".to_string()));
+                summary.push((format!("{} {}", toolchain, UNCHANGED), "".to_string()));
                 continue;
             };
             (channel.build_download_configs(), hash)
@@ -64,20 +64,24 @@ pub fn update() -> Result<()> {
             errored_bins = format!("  failed to update:\n{}", errored_bins);
         };
 
-        message.push((
+        summary.push((
             format!("{} {}\n", toolchain, status),
             format!("{}{}", installed_bins, errored_bins),
         ));
     }
 
     info!("");
-    for msg in message {
-        if !msg.0.matches(UPDATED).collect::<String>().is_empty() {
-            colored_bold(Color::Green, |s| write!(s, "{}", msg.0));
+    for (toolchain_info, components_info) in summary {
+        if !toolchain_info
+            .matches(UPDATED)
+            .collect::<String>()
+            .is_empty()
+        {
+            colored_bold(Color::Green, |s| write!(s, "{}", toolchain_info));
         } else {
-            bold(|s| write!(s, "{}", msg.0));
+            bold(|s| write!(s, "{}", toolchain_info));
         }
-        info!("{}", msg.1);
+        info!("{}", components_info);
     }
 
     Ok(())

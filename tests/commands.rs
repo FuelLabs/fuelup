@@ -194,7 +194,6 @@ fn fuelup_check() -> Result<()> {
 fn fuelup_show() -> Result<()> {
     testcfg::setup(FuelupState::AllInstalled, &|cfg| {
         cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
-        cfg.fuelup(&["default", "my_toolchain"]);
         let stdout = cfg.fuelup(&["show"]).stdout;
 
         let mut lines = stdout.lines();
@@ -215,7 +214,7 @@ nightly-2022-08-30-{target}
 nightly-{target}
 
 active toolchain
-----------------
+-----------------
 my_toolchain (default)
   forc - not found
     - forc-client

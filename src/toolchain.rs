@@ -203,7 +203,7 @@ impl Toolchain {
         }
 
         info!(
-            "Adding component {} v{} to '{}'",
+            "\nAdding component {} v{} to '{}'",
             &download_cfg.name, &download_cfg.version, self.name
         );
 

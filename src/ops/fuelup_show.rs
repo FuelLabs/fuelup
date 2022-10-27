@@ -2,6 +2,7 @@ use anyhow::Result;
 use component::{self, Components};
 use semver::Version;
 use std::{io::Write, path::Path};
+use tracing::{error, info};
 
 use crate::{
     config::Config,
@@ -11,7 +12,7 @@ use crate::{
     toolchain::Toolchain,
 };
 
-fn exec_show_version(component: &str, component_executable: &Path) -> Result<()> {
+fn exec_show_version(component_executable: &Path) -> Result<()> {
     match std::process::Command::new(component_executable)
         .arg("--version")
         .output()
@@ -21,19 +22,19 @@ fn exec_show_version(component: &str, component_executable: &Path) -> Result<()>
             match output.split_whitespace().nth(1) {
                 Some(v) => {
                     let version = Version::parse(v)?;
-                    println!(" : {}", version);
+                    info!(" : {}", version);
                 }
                 None => {
-                    eprintln!("  {} - Error getting version string", component);
+                    error!(" : Error getting version string");
                 }
             };
         }
         Err(e) => {
             print!(" - ");
             if component_executable.exists() {
-                println!("execution error - {}", e);
+                error!("execution error - {}", e);
             } else {
-                println!("not found");
+                error!("not found");
             }
         }
     }
@@ -43,11 +44,10 @@ fn exec_show_version(component: &str, component_executable: &Path) -> Result<()>
 
 pub fn show() -> Result<()> {
     bold(|s| write!(s, "Default host: "));
-    println!("{}", TargetTriple::from_host()?);
+    info!("{}", TargetTriple::from_host()?);
 
     bold(|s| write!(s, "fuelup home: "));
-    println!("{}", fuelup_dir().display());
-    println!();
+    info!("{}\n", fuelup_dir().display());
 
     print_header("installed toolchains");
     let cfg = Config::from_env()?;
@@ -55,35 +55,34 @@ pub fn show() -> Result<()> {
 
     for toolchain in cfg.list_toolchains()? {
         if toolchain == active_toolchain.name {
-            println!("{} (default)", toolchain);
+            info!("{} (default)", toolchain);
         } else {
-            println!("{}", toolchain);
+            info!("{}", toolchain);
         }
     }
 
-    println!();
-    print_header("active toolchain");
+    print_header("\nactive toolchain");
 
-    println!("{} (default)", active_toolchain.name);
+    info!("{} (default)", active_toolchain.name);
 
     for component in Components::collect_exclude_plugins()? {
         bold(|s| write!(s, "  {}", &component.name));
         let component_executable = active_toolchain.bin_path.join(&component.name);
-        exec_show_version(&component.name, component_executable.as_path())?;
+        exec_show_version(component_executable.as_path())?;
 
         if component.name == component::FORC {
             for plugin in Components::collect_plugins()? {
                 bold(|s| write!(s, "    - {}", &plugin.name));
                 if !plugin.is_main_executable() {
-                    println!();
+                    info!("");
                     for executable in plugin.executables.iter() {
                         bold(|s| write!(s, "      - {}", &executable));
                         let plugin_executable = active_toolchain.bin_path.join(&executable);
-                        exec_show_version(executable, plugin_executable.as_path())?;
+                        exec_show_version(plugin_executable.as_path())?;
                     }
                 } else {
                     let plugin_executable = active_toolchain.bin_path.join(&plugin.name);
-                    exec_show_version(&plugin.name, plugin_executable.as_path())?;
+                    exec_show_version(plugin_executable.as_path())?;
                 }
             }
         }

@@ -1,12 +1,12 @@
 use anyhow::{bail, Result};
 use component;
 use std::{fs, path::Path};
-use tempfile::tempdir;
+use tempfile;
 use tracing::{error, info};
 
 use crate::{
     download::{download_file_and_unpack, unpack_bins, DownloadCfg},
-    path::fuelup_bin,
+    path::{fuelup_bin, fuelup_bin_dir},
     target_triple::TargetTriple,
 };
 
@@ -26,9 +26,9 @@ pub fn self_update() -> Result<()> {
 
     let fuelup_bin = fuelup_bin();
 
-    let fuelup_new_dir = tempdir()?;
+    let fuelup_new_dir = tempfile::tempdir()?;
     let fuelup_new_dir_path = fuelup_new_dir.path();
-    let fuelup_backup = fuelup_new_dir.path().join("fuelup-backup");
+    let fuelup_backup = fuelup_new_dir_path.join("fuelup-backup");
     let fuelup_new = fuelup_new_dir_path.join(component::FUELUP);
 
     if let Err(e) = attempt_install_self(download_cfg, fuelup_new_dir_path) {
@@ -38,16 +38,23 @@ pub fn self_update() -> Result<()> {
     };
 
     if fuelup_bin.exists() {
+        // Unlink the original 'fuelup', since we cannot write over a running executable.
+        fs::remove_file(&fuelup_bin)?;
+    }
+
+    if fuelup_backup.exists() {
         // Make a backup of fuelup within /tmp, in case download fails.
-        if let Err(e) = fs::copy(&fuelup_bin, &fuelup_backup) {
-            bail!(
-                "Failed moving {} to {}: {}",
-                &fuelup_bin.display(),
-                &fuelup_backup.display(),
-                e
-            );
-        }
+        fs::remove_file(&fuelup_backup)?;
     };
+
+    if let Err(e) = fs::copy(&fuelup_bin, &fuelup_backup) {
+        bail!(
+            "Failed moving {} to {}: {}",
+            &fuelup_bin.display(),
+            &fuelup_backup.display(),
+            e
+        );
+    }
 
     info!(
         "Moving {} to {}",

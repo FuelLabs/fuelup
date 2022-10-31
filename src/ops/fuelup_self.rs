@@ -38,22 +38,22 @@ pub fn self_update() -> Result<()> {
     };
 
     if fuelup_bin.exists() {
+        if fuelup_backup.exists() {
+            fs::remove_file(&fuelup_backup)?;
+        };
+
+        // Make a backup of fuelup within /tmp, in case download fails.
+        if let Err(e) = fs::copy(&fuelup_bin, &fuelup_backup) {
+            bail!(
+                "Failed moving {} to {}: {}",
+                &fuelup_bin.display(),
+                &fuelup_backup.display(),
+                e
+            );
+        }
+
         // Unlink the original 'fuelup', since we cannot write over a running executable.
         fs::remove_file(&fuelup_bin)?;
-    }
-
-    if fuelup_backup.exists() {
-        // Make a backup of fuelup within /tmp, in case download fails.
-        fs::remove_file(&fuelup_backup)?;
-    };
-
-    if let Err(e) = fs::copy(&fuelup_bin, &fuelup_backup) {
-        bail!(
-            "Failed moving {} to {}: {}",
-            &fuelup_bin.display(),
-            &fuelup_backup.display(),
-            e
-        );
     }
 
     info!(

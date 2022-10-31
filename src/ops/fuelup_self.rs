@@ -6,7 +6,7 @@ use tracing::{error, info};
 
 use crate::{
     download::{download_file_and_unpack, unpack_bins, DownloadCfg},
-    path::{fuelup_bin, fuelup_bin_dir},
+    path::fuelup_bin,
     target_triple::TargetTriple,
 };
 

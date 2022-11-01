@@ -44,6 +44,7 @@ struct File {
 
 #[derive(Debug, Serialize, Deserialize)]
 struct WorkflowRun {
+    name: String,
     head_branch: String,
     html_url: String,
 }
@@ -83,6 +84,7 @@ fn collect_new_versions(channel: &Document, repo: &str) -> Result<Vec<Version>> 
     let new_versions: Vec<Version> = response
         .workflow_runs
         .iter()
+        .filter(|r| r.name == "CI")
         .map_while(|r| {
             // Fine to unwrap here since branches strictly follow the format v"x.y.z"
             Version::from_str(&r.head_branch[1..])

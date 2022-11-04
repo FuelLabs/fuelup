@@ -152,7 +152,7 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
         );
     };
 
-    fs::remove_file(&tar_path)?;
+    fs::remove_file(tar_path)?;
     Ok(())
 }
 
@@ -211,7 +211,7 @@ pub fn download_file(url: &str, path: &PathBuf, hasher: &mut Sha256) -> Result<(
         ureq::builder().user_agent("fuelup").build()
     };
 
-    let mut file = OpenOptions::new().write(true).create(true).open(&path)?;
+    let mut file = OpenOptions::new().write(true).create(true).open(path)?;
 
     for _ in 1..RETRY_ATTEMPTS {
         match handle.get(url).call() {
@@ -291,7 +291,7 @@ pub fn link_to_fuelup(bins: Vec<PathBuf>) -> Result<()> {
 
 pub fn unpack_bins(dir: &Path, dst_dir: &Path) -> Result<Vec<PathBuf>> {
     let mut downloaded: Vec<PathBuf> = Vec::new();
-    for entry in std::fs::read_dir(&dir)? {
+    for entry in std::fs::read_dir(dir)? {
         let sub_path = entry?.path();
 
         if sub_path.is_dir() {

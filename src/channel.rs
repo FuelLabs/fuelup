@@ -18,7 +18,7 @@ use tracing::warn;
 pub const LATEST: &str = "latest";
 pub const STABLE: &str = "stable";
 pub const BETA: &str = "beta";
-pub const BETA1: &str = "beta-1";
+pub const BETA1: &str = "beta1";
 pub const NIGHTLY: &str = "nightly";
 
 #[derive(Debug, Deserialize, Serialize)]

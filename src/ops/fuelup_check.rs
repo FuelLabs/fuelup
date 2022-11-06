@@ -51,7 +51,7 @@ fn compare_and_print_versions(current_version: &Version, latest_version: &Versio
 }
 
 fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version) -> Result<()> {
-    match std::process::Command::new(&plugin_executable)
+    match std::process::Command::new(plugin_executable)
         .arg("--version")
         .output()
     {

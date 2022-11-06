@@ -77,7 +77,7 @@ pub fn show() -> Result<()> {
                     info!("");
                     for executable in plugin.executables.iter() {
                         bold(|s| write!(s, "      - {}", &executable));
-                        let plugin_executable = active_toolchain.bin_path.join(&executable);
+                        let plugin_executable = active_toolchain.bin_path.join(executable);
                         exec_show_version(plugin_executable.as_path())?;
                     }
                 } else {

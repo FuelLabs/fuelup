@@ -129,9 +129,6 @@ fn fuelup_toolchain_install_date_target_disallowed() -> Result<()> {
 #[test]
 fn fuelup_update() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
-        for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
-            let toolchain_dir = entry.unwrap();
-        }
         let output = cfg.fuelup(&["update"]);
         assert!(output.status.success());
 

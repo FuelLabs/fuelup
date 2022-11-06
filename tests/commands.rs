@@ -181,6 +181,18 @@ fn fuelup_toolchain_uninstall() -> Result<()> {
 }
 
 #[test]
+fn fuelup_toolchain_uninstall_active_switches_default() -> Result<()> {
+    testcfg::setup(FuelupState::LatestAndCustomInstalled, &|cfg| {
+        cfg.fuelup(&["toolchain", "uninstall", "latest"]);
+        let stdout = cfg.fuelup(&["default"]).stdout;
+
+        assert_eq!(stdout, "my-toolchain (default)\n")
+    })?;
+
+    Ok(())
+}
+
+#[test]
 fn fuelup_check() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let output = cfg.fuelup(&["check"]);

@@ -36,20 +36,16 @@ pub fn uninstall(command: UninstallCommand) -> Result<()> {
             info!("toolchain '{}' uninstalled", &toolchain.name);
             let active_toolchain = Toolchain::from_settings()?;
             if active_toolchain.name == toolchain.name {
-                for toolchain in config
-                    .list_toolchains()?
-                    .into_iter()
-                    .filter_map(|t| Some(t))
-                {
+                for toolchain in config.list_toolchains()? {
                     if fuelup_default::default(Some(toolchain)).is_ok() {
                         return Ok(());
-                    } else {
-                        bail!(
-                        "Could not set default toolchain after uninstallation of currently used toolchain. 
-                        Please run `fuelup default <toolchain>` to manually switch your current toolchain."
-                        )
                     }
                 }
+
+                bail!(
+                "Could not set default toolchain after uninstallation of currently used toolchain. 
+                Please run `fuelup default <toolchain>` to manually switch your current toolchain."
+                )
             }
         }
         Err(e) => {

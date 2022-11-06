@@ -28,6 +28,7 @@ pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum DistToolchainName {
+    Beta1,
     Latest,
     Nightly,
 }
@@ -37,6 +38,7 @@ impl fmt::Display for DistToolchainName {
         match self {
             DistToolchainName::Latest => write!(f, "{}", channel::LATEST),
             DistToolchainName::Nightly => write!(f, "{}", channel::NIGHTLY),
+            DistToolchainName::Beta1 => write!(f, "{}", channel::BETA1),
         }
     }
 }
@@ -47,6 +49,7 @@ impl FromStr for DistToolchainName {
         match s {
             channel::LATEST => Ok(Self::Latest),
             channel::NIGHTLY => Ok(Self::Nightly),
+            channel::BETA1 => Ok(Self::Beta1),
             _ => bail!("Unknown name for toolchain: {}", s),
         }
     }

@@ -1,7 +1,7 @@
 use anyhow::{bail, Result};
 use std::fs;
 use std::str::FromStr;
-use tracing::info;
+use tracing::{error, info};
 
 use crate::{
     commands::toolchain::UninstallCommand,
@@ -42,7 +42,7 @@ pub fn uninstall(command: UninstallCommand) -> Result<()> {
                     }
                 }
 
-                bail!(
+                error!(
                 "Could not set default toolchain after uninstallation of currently used toolchain. 
                 Please run `fuelup default <toolchain>` to manually switch your current toolchain."
                 )

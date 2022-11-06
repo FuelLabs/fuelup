@@ -131,7 +131,6 @@ fn fuelup_update() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
             let toolchain_dir = entry.unwrap();
-            println!("{:?}", toolchain_dir);
         }
         let output = cfg.fuelup(&["update"]);
         assert!(output.status.success());
@@ -221,9 +220,9 @@ fn fuelup_show() -> Result<()> {
 installed toolchains
 --------------------
 latest-{target}
+nightly-{target}
 my_toolchain (default)
 nightly-2022-08-30-{target}
-nightly-{target}
 
 active toolchain
 -----------------

@@ -6,6 +6,14 @@ repository_name = "sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 publish = true
 
+[component.forc-doc]
+name = "forc-doc"
+tarball_prefix = "forc-binaries"
+is_plugin = true
+executables = ["forc-doc"]
+repository_name = "sway"
+targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
+
 [component.forc-fmt]
 name = "forc-fmt"
 tarball_prefix = "forc-binaries"

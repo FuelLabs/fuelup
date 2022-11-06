@@ -173,7 +173,7 @@ fn fuelup_toolchain_uninstall() -> Result<()> {
             let output = cfg.fuelup(&["toolchain", "uninstall", toolchain]);
             let expected_stdout = format!("toolchain '{}' uninstalled\n", toolchain_with_target);
 
-            assert_eq!(output.stdout, expected_stdout);
+            assert!(output.stdout.contains(&expected_stdout));
         }
     })?;
 

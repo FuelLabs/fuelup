@@ -20,7 +20,7 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
     };
 
     let new_default = match OfficialToolchainDescription::from_str(&toolchain) {
-        Ok(desc) => Toolchain::from_path(&description.to_string())?,
+        Ok(desc) => Toolchain::from_path(&desc.to_string())?,
         Err(_) => Toolchain::from_path(&toolchain)?,
     };
 

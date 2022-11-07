@@ -11,7 +11,6 @@ use tracing::{error, info};
 use crate::channel;
 use crate::constants::DATE_FORMAT;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
-use crate::fmt::format_toolchain_with_target;
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
     ensure_dir_exists, fuelup_bin, fuelup_bin_dir, fuelup_tmp_dir, settings_file,
@@ -134,7 +133,7 @@ pub struct Toolchain {
 impl Toolchain {
     pub fn new(name: &str) -> Result<Self> {
         let target = TargetTriple::from_host()?;
-        let toolchain = format_toolchain_with_target(name);
+        let toolchain = format!("{}-{}", name, target);
         Ok(Self {
             name: toolchain.clone(),
             path: toolchain_dir(&toolchain),

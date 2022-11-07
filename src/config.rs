@@ -5,8 +5,8 @@ use anyhow::{bail, Result};
 use std::io::{self, ErrorKind};
 
 use crate::file::write_file;
+use crate::fmt::format_toolchain_with_target;
 use crate::path::{ensure_dir_exists, hashes_dir, toolchains_dir};
-use crate::target_triple::TargetTriple;
 use crate::toolchain::{OfficialToolchainDescription, RESERVED_TOOLCHAIN_NAMES};
 
 pub struct Config {
@@ -54,13 +54,28 @@ impl Config {
 
     pub(crate) fn list_toolchains(&self) -> Result<Vec<String>> {
         if self.toolchains_dir.is_dir() {
-            let mut toolchains: Vec<String> = fs::read_dir(&self.toolchains_dir)?
+            let mut custom_toolchains: Vec<String> = vec![];
+            let mut toolchains: Vec<String> = vec![];
+
+            for dir_entry in fs::read_dir(&self.toolchains_dir)?
                 .filter_map(io::Result::ok)
                 .filter(|e| e.file_type().map(|f| f.is_dir()).unwrap_or(false))
-                .map(|e| e.file_name().into_string().ok().unwrap_or_default())
-                .collect();
-            toolchains.sort();
+            {
+                let toolchain = dir_entry.file_name().to_string_lossy().to_string();
+                if RESERVED_TOOLCHAIN_NAMES
+                    .iter()
+                    .any(|t| toolchain == format_toolchain_with_target(t))
+                {
+                    toolchains.push(toolchain)
+                } else {
+                    custom_toolchains.push(toolchain)
+                }
+            }
 
+            toolchains.sort();
+            custom_toolchains.sort();
+
+            toolchains.extend(custom_toolchains);
             Ok(toolchains)
         } else {
             Ok(Vec::new())
@@ -74,12 +89,7 @@ impl Config {
                 .filter(|e| {
                     e.file_type().map(|f| f.is_dir()).unwrap_or(false)
                         && RESERVED_TOOLCHAIN_NAMES.iter().any(|t| {
-                            e.file_name().to_string_lossy()
-                                == format!(
-                                    "{}-{}",
-                                    t,
-                                    &TargetTriple::from_host().unwrap_or_default().to_string()
-                                )
+                            e.file_name().to_string_lossy() == format_toolchain_with_target(t)
                         })
                 })
                 .map(|e| e.file_name().into_string().ok().unwrap_or_default())

@@ -1,5 +1,5 @@
 use anyhow::Result;
-use fuelup::{channel, target_triple::TargetTriple};
+use fuelup::{channel, fmt::format_toolchain_with_target, target_triple::TargetTriple};
 use std::{env, path::Path};
 
 mod testcfg;
@@ -129,10 +129,6 @@ fn fuelup_toolchain_install_date_target_disallowed() -> Result<()> {
 #[test]
 fn fuelup_update() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
-        for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
-            let toolchain_dir = entry.unwrap();
-            println!("{:?}", toolchain_dir);
-        }
         let output = cfg.fuelup(&["update"]);
         assert!(output.status.success());
 
@@ -156,8 +152,7 @@ fn fuelup_toolchain_uninstall() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let toolchains = ["latest", "nightly", &format!("nightly-{}", DATE)];
         for toolchain in toolchains {
-            let toolchain_with_target =
-                format!("{}-{}", toolchain, TargetTriple::from_host().unwrap());
+            let toolchain_with_target = format_toolchain_with_target(toolchain);
             let output = cfg.fuelup(&["toolchain", "uninstall", toolchain]);
             let expected_stdout = format!("toolchain '{}' does not exist\n", toolchain_with_target);
 
@@ -168,13 +163,24 @@ fn fuelup_toolchain_uninstall() -> Result<()> {
     testcfg::setup(FuelupState::AllInstalled, &|cfg| {
         let toolchains = ["latest", "nightly", &format!("nightly-{}", DATE)];
         for toolchain in toolchains {
-            let toolchain_with_target =
-                format!("{}-{}", toolchain, TargetTriple::from_host().unwrap());
+            let toolchain_with_target = format_toolchain_with_target(toolchain);
             let output = cfg.fuelup(&["toolchain", "uninstall", toolchain]);
             let expected_stdout = format!("toolchain '{}' uninstalled\n", toolchain_with_target);
 
-            assert_eq!(output.stdout, expected_stdout);
+            assert!(output.stdout.contains(&expected_stdout));
         }
+    })?;
+
+    Ok(())
+}
+
+#[test]
+fn fuelup_toolchain_uninstall_active_switches_default() -> Result<()> {
+    testcfg::setup(FuelupState::LatestAndCustomInstalled, &|cfg| {
+        cfg.fuelup(&["toolchain", "uninstall", "latest"]);
+        let stdout = cfg.fuelup(&["default"]).stdout;
+
+        assert_eq!(stdout, "my-toolchain (default)\n")
     })?;
 
     Ok(())
@@ -209,9 +215,9 @@ fn fuelup_show() -> Result<()> {
 installed toolchains
 --------------------
 latest-{target}
+nightly-{target}
 my_toolchain (default)
 nightly-2022-08-30-{target}
-nightly-{target}
 
 active toolchain
 -----------------
@@ -260,7 +266,7 @@ fn fuelup_default_empty() -> Result<()> {
 
 #[test]
 fn fuelup_default() -> Result<()> {
-    let latest = format!("latest-{}", TargetTriple::from_host().unwrap());
+    let latest = format_toolchain_with_target("latest");
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["default"]);
         let expected_stdout = format!("{} (default)\n", latest);
@@ -414,8 +420,8 @@ fn fuelup_component_add_with_version() -> Result<()> {
 
 #[test]
 fn fuelup_component_add_disallowed() -> Result<()> {
-    let latest = format!("latest-{}", TargetTriple::from_host().unwrap());
-    let nightly = format!("nightly-{}", TargetTriple::from_host().unwrap());
+    let latest = format_toolchain_with_target("latest");
+    let nightly = format_toolchain_with_target("nightly");
     let nightly_date = format!("nightly-{}-{}", DATE, TargetTriple::from_host().unwrap());
 
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
@@ -470,7 +476,7 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
 
 #[test]
 fn fuelup_component_remove_disallowed() -> Result<()> {
-    let latest = format!("latest-{}", TargetTriple::from_host().unwrap());
+    let latest = format_toolchain_with_target("latest");
     let nightly_date = format!("nightly-{}-{}", DATE, TargetTriple::from_host().unwrap());
 
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
@@ -484,7 +490,7 @@ fn fuelup_component_remove_disallowed() -> Result<()> {
 You are currently using '{latest}'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#
+"#,
         );
         assert_eq!(output.stdout, expected_stdout);
         expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);

@@ -1,11 +1,7 @@
-use std::str::FromStr;
-
-use crate::toolchain::OfficialToolchainDescription;
-use anyhow::{bail, Result};
+use anyhow::Result;
 use clap::Parser;
-use tracing::info;
 
-use crate::{path::settings_file, settings::SettingsFile, toolchain::Toolchain};
+use crate::ops::fuelup_default;
 
 #[derive(Debug, Parser)]
 pub struct DefaultCommand {
@@ -16,32 +12,5 @@ pub struct DefaultCommand {
 pub fn exec(command: DefaultCommand) -> Result<()> {
     let DefaultCommand { toolchain } = command;
 
-    let current_toolchain = Toolchain::from_settings()?;
-
-    let toolchain = match toolchain {
-        Some(toolchain) => toolchain,
-        None => {
-            info!("{} (default)", current_toolchain.name);
-            return Ok(());
-        }
-    };
-
-    let mut new_default = Toolchain::from_path(&toolchain)?;
-
-    if let Ok(description) = OfficialToolchainDescription::from_str(&toolchain) {
-        new_default = Toolchain::from_path(&description.to_string())?;
-    }
-
-    if !new_default.exists() {
-        bail!("Toolchain with name '{}' does not exist", &new_default.name);
-    };
-
-    let settings = SettingsFile::new(settings_file());
-    settings.with_mut(|s| {
-        s.default_toolchain = Some(new_default.name.clone());
-        Ok(())
-    })?;
-    info!("default toolchain set to '{}'", new_default.name);
-
-    Ok(())
+    fuelup_default::default(toolchain)
 }

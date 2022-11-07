@@ -22,13 +22,14 @@ use crate::target_triple::TargetTriple;
 
 pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
     channel::LATEST,
-    channel::BETA,
+    channel::BETA_1,
     channel::NIGHTLY,
     channel::STABLE,
 ];
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum DistToolchainName {
+    Beta1,
     Latest,
     Nightly,
 }
@@ -38,6 +39,7 @@ impl fmt::Display for DistToolchainName {
         match self {
             DistToolchainName::Latest => write!(f, "{}", channel::LATEST),
             DistToolchainName::Nightly => write!(f, "{}", channel::NIGHTLY),
+            DistToolchainName::Beta1 => write!(f, "{}", channel::BETA_1),
         }
     }
 }
@@ -48,6 +50,7 @@ impl FromStr for DistToolchainName {
         match s {
             channel::LATEST => Ok(Self::Latest),
             channel::NIGHTLY => Ok(Self::Nightly),
+            channel::BETA_1 => Ok(Self::Beta1),
             _ => bail!("Unknown name for toolchain: {}", s),
         }
     }
@@ -118,7 +121,17 @@ impl FromStr for OfficialToolchainDescription {
                     date,
                     target,
                 }),
-                Err(e) => bail!("Invalid toolchain metadata within input '{}' - {}", s, e),
+                Err(e) => {
+                    if s == channel::BETA_1 {
+                        Ok(Self {
+                            name: DistToolchainName::from_str(s)?,
+                            date: None,
+                            target: TargetTriple::from_host().ok(),
+                        })
+                    } else {
+                        bail!("Invalid toolchain metadata within input '{}' - {}", s, e)
+                    }
+                }
             }
         }
     }

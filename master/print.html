@@ -185,7 +185,7 @@ fuelup and getting started.</p>
 <p>Release notes for <em>fuelup</em> may be found under <a href="https://github.com/FuelLabs/fuelup/releases">Releases</a> in our GitHub repository.</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
 <p><code>fuelup</code> installs <code>forc</code> and <code>fuel-core</code>, and other plugins like
-<code>forc-client</code>, <code>forc-fmt</code>, <code>forc-lsp</code> and <code>forc-explore</code> to Fuelup's <code>bin</code> directory.
+<code>forc-client</code> and <code>forc-fmt</code> to Fuelup's <code>bin</code> directory.
 On Unix it is located at <code>$HOME/.fuelup/bin</code>.</p>
 <p>This directory can automatically be in your <code>PATH</code> environment variable if
 allowed in the installation step (explained below), which means you can run them from the shell without further configuration.</p>
@@ -194,7 +194,7 @@ allowed in the installation step (explained below), which means you can run them
 <p>Run the following command:</p>
 <pre><code class="language-sh">curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh
 </code></pre>
-<p>This will install <code>forc</code>, <code>forc-client</code>, <code>forc-fmt</code>, <code>forc-explore</code>, <code>forc-lsp</code> as well as <code>fuel-core</code> in <code>~/.fuelup/bin</code>. The script will ask for permission to add <code>~/.fuelup/bin</code> to your <code>PATH</code>.</p>
+<p>This will install <code>forc</code>, <code>forc-client</code>, <code>forc-fmt</code>, <code>forc-lsp</code>, <code>forc-wallet</code> as well as <code>fuel-core</code> in <code>~/.fuelup/bin</code>. The script will ask for permission to add <code>~/.fuelup/bin</code> to your <code>PATH</code>.</p>
 <p>Otherwise, you can also pass <code>--no-modify-path</code> so that <code>fuelup-init</code> does not modify your <code>PATH</code> and will not ask for permission to do so:</p>
 <pre><code class="language-sh">curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh -s -- --no-modify-path
 </code></pre>
@@ -203,7 +203,6 @@ allowed in the installation step (explained below), which means you can run them
 forc --version
 fuel-core --version
 forc-deploy --version
-forc-explore --version
 forc-fmt --version
 forc-lsp --version
 forc-run --version
@@ -343,17 +342,19 @@ modular manner, and to specify specific versions of components to install.</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="components"><a class="header" href="#components">Components</a></h1>
 <p>Each <a href="concepts/toolchains.html">toolchain</a> has several &quot;components&quot;, which are tools used to develop on Fuel.</p>
 <p>The <code>fuelup component</code> command is used to manage the installed components.</p>
-<p>Components can be added to a already-installed toolchain with the <code>fuelup component</code> command:</p>
-<pre><code class="language-sh">fuelup component add fuel-core
+<p>Components can be added to an already-installed toolchain with the <code>fuelup component</code> command:</p>
+<pre><code class="language-sh">fuelup component add forc
 </code></pre>
-<p>The following is an overview of the different components:</p>
+<p>In custom toolchains, you also have the choice of adding a specific version of a component:</p>
+<pre><code class="language-sh">fuelup component add forc@0.30.1
+</code></pre>
+<h2 id="components-overview"><a class="header" href="#components-overview">Components overview</a></h2>
+<p>The following is an overview of components installable through <code>fuelup</code>:</p>
 <ul>
-<li><a href="https://fuellabs.github.io/sway/master/forc/index.html"><code>forc</code></a> — The Fuel Orchestrator, a suite of tools to work with the Fuel ecosystem.</li>
+<li><a href="https://fuellabs.github.io/sway/master/forc/index.html"><code>forc</code></a> — The Fuel Orchestrator, a suite of tools to work with the Fuel ecosystem. This comes
+with some built-in plugin executables, namely <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_client/index.html"><code>forc-client</code></a>, <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_fmt.html"><code>forc-fmt</code></a> and <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_lsp.html"><code>forc-lsp</code></a>.</li>
 <li><a href="https://github.com/FuelLabs/fuel-core"><code>fuel-core</code></a> — Full node implementation of the Fuel v2 protocol, written in Rust.</li>
-<li><a href="https://fuellabs.github.io/sway/master/forc_explore.html"><code>forc-explore</code></a> — A Forc plugin for running the Fuel Block Explorer.</li>
-<li><a href="https://fuellabs.github.io/sway/master/forc_fmt.html"><code>forc-fmt</code></a> — A Forc plugin for running the Sway code formatter.</li>
-<li><a href="https://fuellabs.github.io/sway/master/forc_lsp.html"><code>forc-lsp</code></a> - A Forc plugin for the Sway LSP (Language Server Protocol) implementation.</li>
-<li><a href="https://fuellabs.github.io/sway/master/forc_client.html"><code>forc-client</code></a> - A Forc plugin for interacting with a Fuel node. Contains the <code>forc-deploy</code> and <code>forc-run</code> binaries.</li>
+<li><a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_explore.html"><code>forc-explore</code></a> — A Forc plugin for running the Fuel Block Explorer.</li>
 <li><a href="https://github.com/FuelLabs/forc-wallet"><code>forc-wallet</code></a> - A Forc plugin for managing Fuel wallets.</li>
 </ul>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="proxies"><a class="header" href="#proxies">Proxies</a></h1>

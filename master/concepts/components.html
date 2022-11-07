@@ -172,17 +172,19 @@
                         <h1 id="components"><a class="header" href="#components">Components</a></h1>
 <p>Each <a href="toolchains.html">toolchain</a> has several &quot;components&quot;, which are tools used to develop on Fuel.</p>
 <p>The <code>fuelup component</code> command is used to manage the installed components.</p>
-<p>Components can be added to a already-installed toolchain with the <code>fuelup component</code> command:</p>
-<pre><code class="language-sh">fuelup component add fuel-core
+<p>Components can be added to an already-installed toolchain with the <code>fuelup component</code> command:</p>
+<pre><code class="language-sh">fuelup component add forc
 </code></pre>
-<p>The following is an overview of the different components:</p>
+<p>In custom toolchains, you also have the choice of adding a specific version of a component:</p>
+<pre><code class="language-sh">fuelup component add forc@0.30.1
+</code></pre>
+<h2 id="components-overview"><a class="header" href="#components-overview">Components overview</a></h2>
+<p>The following is an overview of components installable through <code>fuelup</code>:</p>
 <ul>
-<li><a href="https://fuellabs.github.io/sway/master/forc/index.html"><code>forc</code></a> — The Fuel Orchestrator, a suite of tools to work with the Fuel ecosystem.</li>
+<li><a href="https://fuellabs.github.io/sway/master/forc/index.html"><code>forc</code></a> — The Fuel Orchestrator, a suite of tools to work with the Fuel ecosystem. This comes
+with some built-in plugin executables, namely <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_client/index.html"><code>forc-client</code></a>, <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_fmt.html"><code>forc-fmt</code></a> and <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_lsp.html"><code>forc-lsp</code></a>.</li>
 <li><a href="https://github.com/FuelLabs/fuel-core"><code>fuel-core</code></a> — Full node implementation of the Fuel v2 protocol, written in Rust.</li>
-<li><a href="https://fuellabs.github.io/sway/master/forc_explore.html"><code>forc-explore</code></a> — A Forc plugin for running the Fuel Block Explorer.</li>
-<li><a href="https://fuellabs.github.io/sway/master/forc_fmt.html"><code>forc-fmt</code></a> — A Forc plugin for running the Sway code formatter.</li>
-<li><a href="https://fuellabs.github.io/sway/master/forc_lsp.html"><code>forc-lsp</code></a> - A Forc plugin for the Sway LSP (Language Server Protocol) implementation.</li>
-<li><a href="https://fuellabs.github.io/sway/master/forc_client.html"><code>forc-client</code></a> - A Forc plugin for interacting with a Fuel node. Contains the <code>forc-deploy</code> and <code>forc-run</code> binaries.</li>
+<li><a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_explore.html"><code>forc-explore</code></a> — A Forc plugin for running the Fuel Block Explorer.</li>
 <li><a href="https://github.com/FuelLabs/forc-wallet"><code>forc-wallet</code></a> - A Forc plugin for managing Fuel wallets.</li>
 </ul>
 

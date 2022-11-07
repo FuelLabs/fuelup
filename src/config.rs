@@ -5,8 +5,8 @@ use anyhow::{bail, Result};
 use std::io::{self, ErrorKind};
 
 use crate::file::write_file;
+use crate::fmt::format_toolchain_with_target;
 use crate::path::{ensure_dir_exists, hashes_dir, toolchains_dir};
-use crate::target_triple::TargetTriple;
 use crate::toolchain::{OfficialToolchainDescription, RESERVED_TOOLCHAIN_NAMES};
 
 pub struct Config {
@@ -62,14 +62,10 @@ impl Config {
                 .filter(|e| e.file_type().map(|f| f.is_dir()).unwrap_or(false))
             {
                 let toolchain = dir_entry.file_name().to_string_lossy().to_string();
-                if RESERVED_TOOLCHAIN_NAMES.iter().any(|t| {
-                    toolchain
-                        == format!(
-                            "{}-{}",
-                            t,
-                            &TargetTriple::from_host().unwrap_or_default().to_string()
-                        )
-                }) {
+                if RESERVED_TOOLCHAIN_NAMES
+                    .iter()
+                    .any(|t| toolchain == format_toolchain_with_target(&t))
+                {
                     toolchains.push(toolchain)
                 } else {
                     custom_toolchains.push(toolchain)
@@ -93,12 +89,7 @@ impl Config {
                 .filter(|e| {
                     e.file_type().map(|f| f.is_dir()).unwrap_or(false)
                         && RESERVED_TOOLCHAIN_NAMES.iter().any(|t| {
-                            e.file_name().to_string_lossy()
-                                == format!(
-                                    "{}-{}",
-                                    t,
-                                    &TargetTriple::from_host().unwrap_or_default().to_string()
-                                )
+                            e.file_name().to_string_lossy() == format_toolchain_with_target(&t)
                         })
                 })
                 .map(|e| e.file_name().into_string().ok().unwrap_or_default())

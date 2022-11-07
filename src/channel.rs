@@ -1,7 +1,7 @@
 use crate::{
     constants::{
-        CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME, DATE_FORMAT_URL_FRIENDLY,
-        FUELUP_GH_PAGES,
+        CHANNEL_BETA_1_FILE_NAME, CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME,
+        DATE_FORMAT_URL_FRIENDLY, FUELUP_GH_PAGES,
     },
     download::{download, DownloadCfg},
     toolchain::{DistToolchainName, OfficialToolchainDescription},
@@ -17,7 +17,7 @@ use tracing::warn;
 
 pub const LATEST: &str = "latest";
 pub const STABLE: &str = "stable";
-pub const BETA: &str = "beta";
+pub const BETA_1: &str = "beta-1";
 pub const NIGHTLY: &str = "nightly";
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -43,6 +43,7 @@ impl Channel {
         let channel_file_name = match desc.name {
             DistToolchainName::Latest => CHANNEL_LATEST_FILE_NAME,
             DistToolchainName::Nightly => CHANNEL_NIGHTLY_FILE_NAME,
+            DistToolchainName::Beta1 => CHANNEL_BETA_1_FILE_NAME,
         };
 
         let mut channel_url = FUELUP_GH_PAGES.to_owned();

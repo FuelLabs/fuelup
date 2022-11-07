@@ -220,6 +220,7 @@ my_toolchain (default)
     - forc-client
       - forc-deploy - not found
       - forc-run - not found
+    - forc-doc - not found
     - forc-explore - not found
     - forc-fmt - not found
     - forc-lsp - not found

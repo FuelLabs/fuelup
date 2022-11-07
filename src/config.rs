@@ -64,7 +64,7 @@ impl Config {
                 let toolchain = dir_entry.file_name().to_string_lossy().to_string();
                 if RESERVED_TOOLCHAIN_NAMES
                     .iter()
-                    .any(|t| toolchain == format_toolchain_with_target(&t))
+                    .any(|t| toolchain == format_toolchain_with_target(t))
                 {
                     toolchains.push(toolchain)
                 } else {
@@ -89,7 +89,7 @@ impl Config {
                 .filter(|e| {
                     e.file_type().map(|f| f.is_dir()).unwrap_or(false)
                         && RESERVED_TOOLCHAIN_NAMES.iter().any(|t| {
-                            e.file_name().to_string_lossy() == format_toolchain_with_target(&t)
+                            e.file_name().to_string_lossy() == format_toolchain_with_target(t)
                         })
                 })
                 .map(|e| e.file_name().into_string().ok().unwrap_or_default())

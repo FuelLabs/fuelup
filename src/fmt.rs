@@ -38,6 +38,6 @@ pub fn format_toolchain_with_target(toolchain: &str) -> String {
     format!(
         "{}-{}",
         toolchain,
-        TargetTriple::from_host().unwrap_or_default().to_string()
+        TargetTriple::from_host().unwrap_or_default()
     )
 }

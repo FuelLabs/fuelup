@@ -19,11 +19,10 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
         }
     };
 
-    let mut new_default = Toolchain::from_path(&toolchain)?;
-
-    if let Ok(description) = OfficialToolchainDescription::from_str(&toolchain) {
-        new_default = Toolchain::from_path(&description.to_string())?;
-    }
+    let new_default = match OfficialToolchainDescription::from_str(&toolchain) {
+        Ok(desc) => Toolchain::from_path(&description.to_string())?,
+        Err(_) => Toolchain::from_path(&toolchain)?,
+    };
 
     if !new_default.exists() {
         bail!("Toolchain with name '{}' does not exist", &new_default.name);

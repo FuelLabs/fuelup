@@ -9,7 +9,7 @@ use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 
 #[derive(Debug, Parser)]
 pub enum ToolchainCommand {
-    /// Install or update a channel toolchain
+    /// Install or update a distributable toolchain
     Install(InstallCommand),
     /// Create a new custom toolchain
     New(NewCommand),
@@ -25,7 +25,7 @@ pub struct InstallCommand {
 
 #[derive(Debug, Parser)]
 pub struct NewCommand {
-    /// Custom toolchain name. Names starting with channel toolchain names are not allowed.
+    /// Custom toolchain name. Names starting with distributable toolchain names are not allowed.
     #[clap(value_parser = name_allowed)]
     pub name: String,
 }

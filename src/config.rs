@@ -7,7 +7,7 @@ use std::io::{self, ErrorKind};
 use crate::file::write_file;
 use crate::fmt::format_toolchain_with_target;
 use crate::path::{ensure_dir_exists, hashes_dir, toolchains_dir};
-use crate::toolchain::{OfficialToolchainDescription, RESERVED_TOOLCHAIN_NAMES};
+use crate::toolchain::{DistToolchainDescription, RESERVED_TOOLCHAIN_NAMES};
 
 pub struct Config {
     toolchains_dir: PathBuf,
@@ -28,7 +28,7 @@ impl Config {
 
     pub(crate) fn hash_matches(
         &self,
-        description: &OfficialToolchainDescription,
+        description: &DistToolchainDescription,
         hash: &str,
     ) -> Result<bool> {
         let hash_path = self.hashes_dir.join(description.to_string());
@@ -42,7 +42,7 @@ impl Config {
         }
     }
 
-    pub(crate) fn hash_exists(&self, description: &OfficialToolchainDescription) -> bool {
+    pub(crate) fn hash_exists(&self, description: &DistToolchainDescription) -> bool {
         self.hashes_dir.join(description.to_string()).is_file()
     }
 
@@ -82,7 +82,7 @@ impl Config {
         }
     }
 
-    pub(crate) fn list_official_toolchains(&self) -> Result<Vec<String>> {
+    pub(crate) fn list_dist_toolchains(&self) -> Result<Vec<String>> {
         if self.toolchains_dir.is_dir() {
             let toolchains: Vec<String> = fs::read_dir(&self.toolchains_dir)?
                 .filter_map(io::Result::ok)

@@ -7,7 +7,7 @@ use crate::{
     commands::toolchain::UninstallCommand,
     config::Config,
     ops::fuelup_default,
-    toolchain::{OfficialToolchainDescription, Toolchain},
+    toolchain::{DistToolchainDescription, Toolchain},
 };
 
 pub fn uninstall(command: UninstallCommand) -> Result<()> {
@@ -16,8 +16,8 @@ pub fn uninstall(command: UninstallCommand) -> Result<()> {
     let mut toolchain = Toolchain::from_path(&name)?;
 
     let config = Config::from_env()?;
-    if toolchain.is_official() {
-        let description = OfficialToolchainDescription::from_str(&name)?;
+    if toolchain.is_distributed() {
+        let description = DistToolchainDescription::from_str(&name)?;
         toolchain = Toolchain::from_path(&description.to_string())?;
 
         if config.hash_exists(&description) {

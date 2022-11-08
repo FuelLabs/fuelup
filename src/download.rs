@@ -22,7 +22,7 @@ use crate::constants::CHANNEL_LATEST_URL;
 use crate::file::hard_or_symlink_file;
 use crate::path::fuelup_bin;
 use crate::target_triple::TargetTriple;
-use crate::toolchain::OfficialToolchainDescription;
+use crate::toolchain::DistToolchainDescription;
 
 fn github_releases_download_url(repo: &str, tag: &Version, tarball: &str) -> String {
     format!(
@@ -123,7 +123,7 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
         resp.into_reader().read_to_end(&mut data)?;
 
         if let Ok((channel, _)) =
-            Channel::from_dist_channel(&OfficialToolchainDescription::from_str("latest")?)
+            Channel::from_dist_channel(&DistToolchainDescription::from_str("latest")?)
         {
             channel
                 .pkg

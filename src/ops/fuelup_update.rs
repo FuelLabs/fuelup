@@ -2,7 +2,7 @@ use crate::{
     channel::Channel,
     config::Config,
     fmt::{bold, colored_bold},
-    toolchain::{OfficialToolchainDescription, Toolchain},
+    toolchain::{DistToolchainDescription, Toolchain},
 };
 use anyhow::{bail, Result};
 use std::io::Write;
@@ -16,14 +16,14 @@ const UNCHANGED: &str = "unchanged";
 
 pub fn update() -> Result<()> {
     let config = Config::from_env()?;
-    let toolchains = config.list_official_toolchains()?;
+    let toolchains = config.list_dist_toolchains()?;
     let mut summary: Vec<(String, String)> = Vec::with_capacity(toolchains.len());
 
     for toolchain in toolchains {
         let mut installed_bins = String::new();
         let mut errored_bins = String::new();
 
-        let description = OfficialToolchainDescription::from_str(&toolchain)?;
+        let description = DistToolchainDescription::from_str(&toolchain)?;
         info!("updating the '{}' toolchain", description);
 
         let (cfgs, hash) = if let Ok((channel, hash)) = Channel::from_dist_channel(&description) {

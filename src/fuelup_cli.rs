@@ -35,7 +35,7 @@ enum Commands {
     Toolchain(ToolchainCommand),
     /// Show the active and installed toolchains, as well as the host and fuelup home
     Show(ShowCommand),
-    /// Updates the official toolchains, if already installed
+    /// Updates the distributable toolchains, if already installed
     Update(UpdateCommand),
 }
 

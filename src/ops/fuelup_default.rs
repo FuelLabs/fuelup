@@ -5,7 +5,7 @@ use tracing::info;
 use crate::{
     path::settings_file,
     settings::SettingsFile,
-    toolchain::{OfficialToolchainDescription, Toolchain},
+    toolchain::{DistToolchainDescription, Toolchain},
 };
 
 pub fn default(toolchain: Option<String>) -> Result<()> {
@@ -19,7 +19,7 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
         }
     };
 
-    let new_default = match OfficialToolchainDescription::from_str(&toolchain) {
+    let new_default = match DistToolchainDescription::from_str(&toolchain) {
         Ok(desc) => Toolchain::from_path(&desc.to_string())?,
         Err(_) => Toolchain::from_path(&toolchain)?,
     };

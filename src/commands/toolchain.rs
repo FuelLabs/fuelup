@@ -9,9 +9,7 @@ use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 
 #[derive(Debug, Parser)]
 pub enum ToolchainCommand {
-    /// Install or update a given toolchain
-    ///
-    /// Currently, we support the installation of both 'latest' and 'nightly' toolchains.
+    /// Install or update a distributable toolchain
     Install(InstallCommand),
     /// Create a new custom toolchain
     New(NewCommand),
@@ -21,13 +19,13 @@ pub enum ToolchainCommand {
 
 #[derive(Debug, Parser)]
 pub struct InstallCommand {
-    /// Toolchain name [possible values: latest, nightly]
+    /// Toolchain name [possible values: latest, beta-1, nightly]
     pub name: String,
 }
 
 #[derive(Debug, Parser)]
 pub struct NewCommand {
-    /// Custom toolchain name. Names starting with 'latest' are not allowed.
+    /// Custom toolchain name. Names starting with distributable toolchain names are not allowed.
     #[clap(value_parser = name_allowed)]
     pub name: String,
 }
@@ -52,7 +50,7 @@ fn name_allowed(s: &str) -> Result<String> {
 
     if RESERVED_TOOLCHAIN_NAMES.contains(&name) {
         bail!(
-            "Cannot use official toolchain name '{}' as a custom toolchain name",
+            "Cannot use distributable toolchain name '{}' as a custom toolchain name",
             s
         )
     } else {

@@ -1,7 +1,7 @@
 use crate::config::Config;
 use crate::path::settings_file;
 use crate::settings::SettingsFile;
-use crate::toolchain::{OfficialToolchainDescription, Toolchain};
+use crate::toolchain::{DistToolchainDescription, Toolchain};
 use crate::{channel::Channel, commands::toolchain::InstallCommand};
 use anyhow::{bail, Result};
 use std::fmt::Write;
@@ -11,7 +11,7 @@ use tracing::{error, info};
 pub fn install(command: InstallCommand) -> Result<()> {
     let InstallCommand { name } = command;
 
-    let description = OfficialToolchainDescription::from_str(&name)?;
+    let description = DistToolchainDescription::from_str(&name)?;
 
     let settings_file = settings_file();
     if !settings_file.exists() {

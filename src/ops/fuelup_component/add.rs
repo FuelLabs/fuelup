@@ -15,7 +15,7 @@ pub fn add(command: AddCommand) -> Result<()> {
     } = command;
 
     let toolchain = Toolchain::from_settings()?;
-    if toolchain.is_official() {
+    if toolchain.is_distributed() {
         bail!(
             "Installing specific components is reserved for custom toolchains.
 You are currently using '{}'.

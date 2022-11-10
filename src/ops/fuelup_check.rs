@@ -5,7 +5,7 @@ use crate::{
     download::DownloadCfg,
     fmt::{bold, colored_bold},
     target_triple::TargetTriple,
-    toolchain::{OfficialToolchainDescription, Toolchain},
+    toolchain::{DistToolchainDescription, Toolchain},
 };
 use anyhow::{bail, Result};
 use component::{self, Components};
@@ -101,7 +101,7 @@ fn check_fuelup() -> Result<()> {
 }
 
 fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
-    let description = OfficialToolchainDescription::from_str(toolchain)?;
+    let description = DistToolchainDescription::from_str(toolchain)?;
 
     let (dist_channel, _) = Channel::from_dist_channel(&description)?;
     let latest_package_versions = collect_package_versions(dist_channel);
@@ -167,7 +167,7 @@ pub fn check(command: CheckCommand) -> Result<()> {
 
     let cfg = Config::from_env()?;
 
-    for toolchain in cfg.list_official_toolchains()? {
+    for toolchain in cfg.list_dist_toolchains()? {
         // TODO: remove once date/target are supported
         let name = toolchain.split_once('-').unwrap_or_default().0;
         check_toolchain(name, verbose)?;

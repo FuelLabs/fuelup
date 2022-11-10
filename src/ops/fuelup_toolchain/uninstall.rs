@@ -7,24 +7,25 @@ use crate::{
     commands::toolchain::UninstallCommand,
     config::Config,
     ops::fuelup_default,
-    toolchain::{OfficialToolchainDescription, Toolchain},
+    toolchain::{DistToolchainDescription, Toolchain},
 };
 
 pub fn uninstall(command: UninstallCommand) -> Result<()> {
     let UninstallCommand { name } = command;
 
-    let mut toolchain = Toolchain::from_path(&name)?;
-
     let config = Config::from_env()?;
-    if toolchain.is_official() {
-        let description = OfficialToolchainDescription::from_str(&name)?;
-        toolchain = Toolchain::from_path(&description.to_string())?;
 
-        if config.hash_exists(&description) {
-            let hash_file = config.hashes_dir().join(description.to_string());
-            fs::remove_file(hash_file)?;
-        };
-    }
+    let toolchain = match DistToolchainDescription::from_str(&name) {
+        Ok(desc) => {
+            if config.hash_exists(&desc) {
+                let hash_file = config.hashes_dir().join(desc.to_string());
+                fs::remove_file(hash_file)?;
+            };
+
+            Toolchain::from_path(&desc.to_string())?
+        }
+        Err(_) => Toolchain::from_path(&name)?,
+    };
 
     if !toolchain.exists() {
         info!("toolchain '{}' does not exist", &toolchain.name);

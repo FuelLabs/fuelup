@@ -56,7 +56,7 @@ impl FromStr for DistToolchainName {
 }
 
 #[derive(Debug)]
-pub struct OfficialToolchainDescription {
+pub struct DistToolchainDescription {
     pub name: DistToolchainName,
     pub date: Option<Date>,
     pub target: Option<TargetTriple>,
@@ -88,7 +88,7 @@ fn parse_metadata(metadata: String) -> Result<(Option<Date>, Option<TargetTriple
     }
 }
 
-impl fmt::Display for OfficialToolchainDescription {
+impl fmt::Display for DistToolchainDescription {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let target = TargetTriple::from_host().unwrap_or_default();
         match self.date {
@@ -98,11 +98,11 @@ impl fmt::Display for OfficialToolchainDescription {
     }
 }
 
-impl FromStr for OfficialToolchainDescription {
+impl FromStr for DistToolchainDescription {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
         if s.ends_with('-') && s.matches('-').count() == 1 {
-            bail!("Invalid official toolchain name '{}'", s);
+            bail!("Invalid distributable toolchain name '{}'", s);
         }
 
         let (name, metadata) = s.split_once('-').unwrap_or((s, ""));
@@ -178,7 +178,7 @@ impl Toolchain {
         })
     }
 
-    pub fn is_official(&self) -> bool {
+    pub fn is_distributed(&self) -> bool {
         RESERVED_TOOLCHAIN_NAMES.contains(&self.name.split_once('-').unwrap_or((&self.name, "")).0)
     }
 
@@ -319,7 +319,7 @@ mod tests {
     #[test]
     fn test_parse_name() -> Result<()> {
         for name in [channel::LATEST, channel::NIGHTLY] {
-            let desc = OfficialToolchainDescription::from_str(name)?;
+            let desc = DistToolchainDescription::from_str(name)?;
             assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
             assert_eq!(desc.date, None);
             assert_eq!(desc.target, Some(TargetTriple::from_host().unwrap()));
@@ -332,7 +332,7 @@ mod tests {
     fn test_parse_name_should_fail() -> Result<()> {
         let inputs = ["latest-2", "nightly-toolchain"];
         for name in inputs {
-            assert!(OfficialToolchainDescription::from_str(name).is_err());
+            assert!(DistToolchainDescription::from_str(name).is_err());
         }
 
         Ok(())
@@ -341,7 +341,7 @@ mod tests {
     #[test]
     fn test_parse_nightly_date() -> Result<()> {
         let toolchain = format!("{}-{}", channel::NIGHTLY.to_owned(), DATE);
-        let desc = OfficialToolchainDescription::from_str(&toolchain).unwrap();
+        let desc = DistToolchainDescription::from_str(&toolchain).unwrap();
 
         assert_eq!(desc.name, DistToolchainName::from_str("nightly").unwrap());
         assert_eq!(desc.date.unwrap().to_string(), DATE);
@@ -359,7 +359,7 @@ mod tests {
             TARGET_X86_LINUX,
         ] {
             let toolchain = format!("{}-{}-{}", channel::NIGHTLY.to_owned(), DATE, target);
-            assert!(OfficialToolchainDescription::from_str(&toolchain).is_err());
+            assert!(DistToolchainDescription::from_str(&toolchain).is_err());
             // TODO: Uncomment once target specification is supported
             // see issue #237: https://github.com/FuelLabs/fuelup/issues/237
             // assert_eq!(
@@ -383,7 +383,7 @@ mod tests {
         ] {
             for name in [channel::LATEST, channel::NIGHTLY] {
                 let toolchain = name.to_owned() + "-" + target;
-                let desc = OfficialToolchainDescription::from_str(&toolchain).unwrap();
+                let desc = DistToolchainDescription::from_str(&toolchain).unwrap();
 
                 assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
                 assert!(desc.date.is_none());

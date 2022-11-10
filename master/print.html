@@ -311,7 +311,7 @@ Keep in mind that compatibility between <code>forc</code> and <code>fuel-core</c
 <p>Many <code>fuelup</code> commands deal with <em>toolchains</em>, a single installation of the
 Fuel toolchain. <code>fuelup</code> supports <strong>two</strong> types of toolchains.</p>
 <ol>
-<li>Official toolchains which track the official release <a href="concepts/channels/index.html">channels</a> (<em>latest</em> and <em>nightly</em>);</li>
+<li>Distributable toolchains which track the official release <a href="concepts/channels/index.html">channels</a> (<em>latest</em> and <em>nightly</em>);</li>
 <li>Custom toolchains and install individual components in a modular manner.</li>
 </ol>
 <h2 id="toolchain-specification"><a class="header" href="#toolchain-specification">Toolchain specification</a></h2>
@@ -375,7 +375,7 @@ installed <code>fuelup</code> via <code>fuelup-init</code>:</p>
 <p>The Fuel toolchain is distributed on one <a href="concepts/channels/index.html">release channel</a>: latest (with nightly being a WIP).
 <code>fuelup</code> uses the <code>latest</code> channel by default, which
 represents the latest release of the Fuel toolchain.</p>
-<p>When new versions of the components within an official Fuel toolchain (<code>latest</code> or <code>nightly</code>)
+<p>When new versions of the components within an distributable Fuel toolchain (<code>latest</code> or <code>nightly</code>)
 are released, simply type <code>fuelup update</code> to update:</p>
 <pre><code class="language-sh">fuelup update
 </code></pre>
@@ -403,7 +403,7 @@ interface for <em>fuelup</em> - the fuelup CLI should be used to query and set s
 <tr><td><code>fuelup component add fuel-core@0.9.5</code></td><td>Adds <em><a href="https://github.com/FuelLabs/fuel-core">fuel-core</a></em> v0.9.5 to the currently active custom toolchain</td></tr>
 <tr><td><code>fuelup component remove forc</code></td><td>Removes <em>forc</em> from the currently active custom toolchain</td></tr>
 <tr><td><code>fuelup self update</code></td><td>Updates <em>fuelup</em></td></tr>
-<tr><td><code>fuelup check</code></td><td>Checks for updates to official toolchains</td></tr>
+<tr><td><code>fuelup check</code></td><td>Checks for updates to distributable toolchains</td></tr>
 <tr><td><code>fuelup show</code></td><td>Shows the active toolchain and installed toolchains, as well as the host and fuelup home</td></tr>
 <tr><td><code>fuelup toolchain help</code></td><td>Shows the <code>help</code> page for a subcommand (like <code>toolchain</code>)</td></tr>
 </tbody></table>

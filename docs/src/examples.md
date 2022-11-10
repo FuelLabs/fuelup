@@ -10,7 +10,7 @@
 | `fuelup component add fuel-core@0.9.5`    | Adds _[fuel-core]_ v0.9.5 to the currently active custom toolchain                       |
 | `fuelup component remove forc`            | Removes _forc_ from the currently active custom toolchain                                |
 | `fuelup self update`                      | Updates _fuelup_                                                                         |
-| `fuelup check`                            | Checks for updates to official toolchains                                                |
+| `fuelup check`                            | Checks for updates to distributable toolchains                                           |
 | `fuelup show`                             | Shows the active toolchain and installed toolchains, as well as the host and fuelup home |
 | `fuelup toolchain help`                   | Shows the `help` page for a subcommand (like `toolchain`)                                |
 

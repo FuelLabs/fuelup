@@ -52,7 +52,7 @@ fn name_allowed(s: &str) -> Result<String> {
 
     if RESERVED_TOOLCHAIN_NAMES.contains(&name) {
         bail!(
-            "Cannot use official toolchain name '{}' as a custom toolchain name",
+            "Cannot use distributable toolchain name '{}' as a custom toolchain name",
             s
         )
     } else {

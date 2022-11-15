@@ -8,7 +8,7 @@ use std::str::FromStr;
 use time::Date;
 use tracing::{error, info};
 
-use crate::channel;
+use crate::channel::{self, is_beta_toolchain};
 use crate::constants::DATE_FORMAT;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
@@ -22,6 +22,7 @@ use crate::target_triple::TargetTriple;
 pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
     channel::LATEST,
     channel::BETA_1,
+    channel::BETA_2,
     channel::NIGHTLY,
     channel::STABLE,
 ];
@@ -29,6 +30,7 @@ pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
 #[derive(Debug, Eq, PartialEq)]
 pub enum DistToolchainName {
     Beta1,
+    Beta2,
     Latest,
     Nightly,
 }
@@ -39,6 +41,7 @@ impl fmt::Display for DistToolchainName {
             DistToolchainName::Latest => write!(f, "{}", channel::LATEST),
             DistToolchainName::Nightly => write!(f, "{}", channel::NIGHTLY),
             DistToolchainName::Beta1 => write!(f, "{}", channel::BETA_1),
+            DistToolchainName::Beta2 => write!(f, "{}", channel::BETA_2),
         }
     }
 }
@@ -50,6 +53,7 @@ impl FromStr for DistToolchainName {
             channel::LATEST => Ok(Self::Latest),
             channel::NIGHTLY => Ok(Self::Nightly),
             channel::BETA_1 => Ok(Self::Beta1),
+            channel::BETA_2 => Ok(Self::Beta2),
             _ => bail!("Unknown name for toolchain: {}", s),
         }
     }
@@ -121,7 +125,7 @@ impl FromStr for DistToolchainDescription {
                     target,
                 }),
                 Err(e) => {
-                    if s == channel::BETA_1 {
+                    if is_beta_toolchain(s) {
                         Ok(Self {
                             name: DistToolchainName::from_str(s)?,
                             date: None,

@@ -191,12 +191,18 @@ impl Toolchain {
     }
 
     pub fn has_component(&self, component: &str) -> bool {
-        let executables = &Components::collect()
+        if let Some(component) = Components::collect()
             .expect("Failed to collect components")
-            .component[component]
-            .executables;
-
-        executables.iter().all(|e| self.bin_path.join(e).is_file())
+            .component
+            .get(component)
+        {
+            component
+                .executables
+                .iter()
+                .all(|e| self.bin_path.join(e).is_file())
+        } else {
+            false
+        }
     }
 
     fn can_remove(&self, component: &str) -> bool {

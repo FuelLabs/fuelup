@@ -17,6 +17,7 @@ pub enum FuelupState {
     LatestAndCustomInstalled,
     LatestAndNightlyInstalled,
     NightlyAndNightlyDateInstalled,
+    Beta1Installed,
 }
 
 pub struct TestCfg {
@@ -140,6 +141,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     let target = TargetTriple::from_host().unwrap();
     let latest = format!("latest-{}", target);
     let nightly = format!("nightly-{}", target);
+    let beta_1 = format!("beta-1-{}", target);
 
     match state {
         FuelupState::Empty => {}
@@ -187,6 +189,14 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
                 &format!("nightly-{}-{}", DATE, target),
             )?;
             setup_settings_file(&tmp_fuelup_root_path, &nightly)?;
+        }
+        FuelupState::Beta1Installed => {
+            setup_toolchain(&tmp_fuelup_root_path, &beta_1)?;
+            setup_toolchain(
+                &tmp_fuelup_root_path,
+                &format!("beta-1-{}-{}", DATE, target),
+            )?;
+            setup_settings_file(&tmp_fuelup_root_path, &beta_1)?;
         }
     }
 

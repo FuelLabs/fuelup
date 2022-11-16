@@ -193,6 +193,26 @@ fn fuelup_check() -> Result<()> {
         assert!(output.status.success());
     })?;
 
+    // Test that only the 'latest' toolchain shows.
+    testcfg::setup(FuelupState::LatestAndCustomInstalled, &|cfg| {
+        let output = cfg.fuelup(&["check"]);
+        assert_eq!(
+            output.stdout,
+            format!("latest-{}\n\n", TargetTriple::from_host().unwrap())
+        );
+        assert!(output.status.success());
+    })?;
+
+    // Test that toolchain names with '-' inside are parsed correctly.
+    testcfg::setup(FuelupState::Beta1Installed, &|cfg| {
+        let output = cfg.fuelup(&["check"]);
+        assert_eq!(
+            output.stdout,
+            format!("beta-1-{}\n\n", TargetTriple::from_host().unwrap())
+        );
+        assert!(output.status.success());
+    })?;
+
     Ok(())
 }
 

@@ -168,9 +168,7 @@ pub fn check(command: CheckCommand) -> Result<()> {
     let cfg = Config::from_env()?;
 
     for toolchain in cfg.list_dist_toolchains()? {
-        // TODO: remove once date/target are supported
-        let name = toolchain.split_once('-').unwrap_or_default().0;
-        check_toolchain(name, verbose)?;
+        check_toolchain(&toolchain, verbose)?;
     }
 
     check_fuelup()?;

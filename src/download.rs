@@ -303,7 +303,12 @@ pub fn unpack_bins(dir: &Path, dst_dir: &Path) -> Result<Vec<PathBuf>> {
                     &bin_file_name.to_string_lossy(),
                     dir.display()
                 );
-                fs::copy(bin_file.path(), dir.join(&bin_file_name))?;
+
+                let dst_bin_file = dir.join(&bin_file_name);
+                if dst_bin_file.exists() {
+                    fs::remove_file(&dst_bin_file)?;
+                }
+                fs::copy(bin_file.path(), dst_bin_file)?;
                 downloaded.push(dst_dir.join(bin_file_name));
             }
 

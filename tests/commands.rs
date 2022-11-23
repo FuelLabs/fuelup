@@ -252,6 +252,7 @@ my_toolchain (default)
     - forc-lsp - not found
     - forc-wallet - not found
   fuel-core - not found
+  fuel-indexer - not found
 "#
         );
         assert!(stdout.contains(expected_stdout));

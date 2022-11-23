@@ -67,7 +67,6 @@ publish = true
 [component.fuel-indexer]
 name = "fuel-indexer"
 tarball_prefix = "fuel-indexer"
-is_plugin = true
 executables = ["fuel-indexer"]
 repository_name = "fuel-indexer"
 targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]

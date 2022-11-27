@@ -9,7 +9,6 @@ on:
 jobs:
   update-components:
     name: Update components (${{ matrix.channel }})
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

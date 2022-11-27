@@ -18,6 +18,12 @@ jobs:
       - name: checkout master
         uses: actions/checkout@v3
 
+      - name: checkout gh-pages 
+        uses: actions/checkout@v3
+        with:
+          path: gh-pages
+          ref: gh-pages
+
       - name: Install toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -29,7 +35,7 @@ jobs:
       - name: Setup env
         run: |
             mkdir -p ./channel-fuel-${{ matrix.channel }}.toml.d/
-            echo "CHANNEL_TOML=channel-fuel-${{ matrix.channel }}.toml" >> $GITHUB_ENV
+            echo "CHANNEL_TOML=gh-pages/channel-fuel-${{ matrix.channel }}.toml" >> $GITHUB_ENV
 
       - name: Publish latest channel
         if: matrix.channel == 'latest'

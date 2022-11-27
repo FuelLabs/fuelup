@@ -5,12 +5,19 @@ on:
   push:
     branches:
       - bing/ci-update-components-yml
+  pull_request:
+    types:
+      - closed
+    paths:
+      - 'components.toml'
 
 jobs:
   update-components:
     name: Update components (${{ matrix.channel }})
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         channel: ["latest", "nightly"]
     steps:
@@ -25,13 +32,28 @@ jobs:
       - name: Install build-channel script
         run: cargo install --debug --path ./ci/build-channel
 
-      - name: Publish ${{ matrix.channel }} channel
+      - name: Setup env
         run: |
             mkdir -p ./channel-fuel-${{ matrix.channel }}.toml.d/
+            echo "CHANNEL_TOML=channel-fuel-${{ matrix.channel }}.toml" >> $GITHUB_ENV
 
-            CHANNEL_TOML="channel-fuel-${{ matrix.channel }}.toml"
+      - name: Publish latest channel
+        if: matrix.channel == 'latest'
+        run: |
+            PUBLISHED_FORC_VERSION=$(grep -m 1 'forc' $CHANNEL_TOML | grep 'version' | cut -d '"' -f2)
+            PUBLISHED_FUEL_CORE_VERSION=$(grep -m 1 'fuel-core' $CHANNEL_TOML | grep 'version' | cut -d '"' -f2)
 
-            build-channel ${{ matrix.channel }} $CHANNEL_TOML $GITHUB_RUN_ID
+            build-channel ${{ matrix.channel }} $CHANNEL_TOML $GITHUB_RUN_ID forc=$PUBLISHED_FORC_VERSION fuel-core=$PUBLISHED_FUEL_CORE_VERSION
+            cp $CHANNEL_TOML ./channel-fuel-${{ matrix.channel }}.toml.d/
+
+      - name: Publish nightly channel
+        if: matrix.channel == 'nightly'
+        id: setup-nightly
+        run: |
+            build-channel nightly $CHANNEL_TOML $GITHUB_RUN_ID
+
+            archive_dir=$(date +'%Y/%m/%d')
+            echo "::set-output name=archive_dir::channels/nightly/$archive_dir"
 
             cp $CHANNEL_TOML ./channel-fuel-${{ matrix.channel }}.toml.d/
 
@@ -42,13 +64,6 @@ jobs:
           publish_dir: ./channel-fuel-${{ matrix.channel }}.toml.d/
           keep_files: true
           destination_dir: ./
-
-      - name: Prepare nightly archive
-        if: matrix.channel == 'nightly'
-        id: setup-nightly
-        run: |
-            archive_dir=$(date +'%Y/%m/%d')
-            echo "::set-output name=archive_dir::channels/nightly/$archive_dir"
 
       - name: Deploy nightly channel (archive)
         if: matrix.channel == 'nightly'

@@ -1,0 +1,67 @@
+name: Update Components
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - bing/ci-update-components-yml
+    paths:
+      - 'components.toml'
+
+env:
+  NIGHTLY_CHANNEL_DIR: ./channel-fuel-nightly.toml.d/
+
+jobs:
+  update-components:
+    name: Update components (${{ matrix.channel }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        channel: ["latest", "nightly"]
+    steps:
+      - name: checkout master
+        uses: actions/checkout@v3
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Install build-channel script
+        run: cargo install --debug --path ./ci/build-channel
+
+      - name: Publish ${{ matrix.channel }} channel
+        id: setup
+        run: |
+            mkdir -p ./channel-fuel-${{ matrix.channel }}.toml.d/
+
+            CHANNEL_TOML="channel-fuel-${{ matrix.channel }}.toml"
+
+            build-channel ${{ matrix.channel }} $CHANNEL_TOML $GITHUB_RUN_ID
+
+            cp $CHANNEL_TOML ./channel-fuel-${{ matrix.channel }}.toml.d/
+
+
+      - name: Deploy ${{ matrix.channel }} channel
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
+          keep_files: true
+          destination_dir: ./
+
+      - name: Publish ${{ matrix.channel }} channel
+        if: matrix.channel == 'nightly'
+        id: setup-nightly
+        run: |
+            archive_dir=$(date +'%Y/%m/%d')
+            echo "::set-output name=archive_dir::channels/nightly/$archive_dir"
+
+      - name: Deploy nightly channel (archive)
+        if: matrix.channel == 'nightly'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
+          keep_files: true
+          destination_dir: ${{ steps.setup.outputs.archive_dir }}

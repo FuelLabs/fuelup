@@ -5,8 +5,6 @@ on:
   push:
     branches:
       - bing/ci-update-components-yml
-    paths:
-      - 'components.toml'
 
 jobs:
   update-components:

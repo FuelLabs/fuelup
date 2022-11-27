@@ -8,9 +8,6 @@ on:
     paths:
       - 'components.toml'
 
-env:
-  NIGHTLY_CHANNEL_DIR: ./channel-fuel-nightly.toml.d/
-
 jobs:
   update-components:
     name: Update components (${{ matrix.channel }})
@@ -31,7 +28,6 @@ jobs:
         run: cargo install --debug --path ./ci/build-channel
 
       - name: Publish ${{ matrix.channel }} channel
-        id: setup
         run: |
             mkdir -p ./channel-fuel-${{ matrix.channel }}.toml.d/
 
@@ -41,16 +37,15 @@ jobs:
 
             cp $CHANNEL_TOML ./channel-fuel-${{ matrix.channel }}.toml.d/
 
-
       - name: Deploy ${{ matrix.channel }} channel
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
+          publish_dir: ./channel-fuel-${{ matrix.channel }}.toml.d/
           keep_files: true
           destination_dir: ./
 
-      - name: Publish ${{ matrix.channel }} channel
+      - name: Prepare nightly archive
         if: matrix.channel == 'nightly'
         id: setup-nightly
         run: |
@@ -62,6 +57,6 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
+          publish_dir: ./channel-fuel-nightly.toml.d/
           keep_files: true
-          destination_dir: ${{ steps.setup.outputs.archive_dir }}
+          destination_dir: ${{ steps.setup-nightly.outputs.archive_dir }}

@@ -34,22 +34,22 @@ jobs:
       - name: Publish latest channel
         if: matrix.channel == 'latest'
         run: |
-            PUBLISHED_FORC_VERSION=$(grep -m 1 'forc' $CHANNEL_TOML | grep 'version' | cut -d '"' -f2)
-            PUBLISHED_FUEL_CORE_VERSION=$(grep -m 1 'fuel-core' $CHANNEL_TOML | grep 'version' | cut -d '"' -f2)
+            PUBLISHED_FORC_VERSION=$(grep -m 1 'forc' ${{ env.CHANNEL_TOML }} | grep 'version' | cut -d '"' -f2)
+            PUBLISHED_FUEL_CORE_VERSION=$(grep -m 1 'fuel-core' ${{ env.CHANNEL_TOML }} | grep 'version' | cut -d '"' -f2)
 
             build-channel ${{ matrix.channel }} $CHANNEL_TOML $GITHUB_RUN_ID forc=$PUBLISHED_FORC_VERSION fuel-core=$PUBLISHED_FUEL_CORE_VERSION
-            cp $CHANNEL_TOML ./channel-fuel-${{ matrix.channel }}.toml.d/
+            cp ${{ env.CHANNEL_TOML }}./channel-fuel-${{ matrix.channel }}.toml.d/
 
       - name: Publish nightly channel
         if: matrix.channel == 'nightly'
         id: setup-nightly
         run: |
-            build-channel nightly $CHANNEL_TOML $GITHUB_RUN_ID
+            build-channel nightly ${{ env.CHANNEL_TOML }} $GITHUB_RUN_ID
 
             archive_dir=$(date +'%Y/%m/%d')
             echo "::set-output name=archive_dir::channels/nightly/$archive_dir"
 
-            cp $CHANNEL_TOML ./channel-fuel-${{ matrix.channel }}.toml.d/
+            cp ${{ env.CHANNEL_TOML }} ./channel-fuel-${{ matrix.channel }}.toml.d/
 
       - name: Deploy ${{ matrix.channel }} channel
         uses: peaceiris/actions-gh-pages@v3

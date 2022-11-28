@@ -1,9 +1,11 @@
+use crate::{
+    commands::component::ListCommand, download::get_latest_version, fmt::bold, toolchain::Toolchain,
+};
 use anyhow::Result;
 use component::Components;
 use semver::Version;
+use std::io::Write;
 use tracing::info;
-
-use crate::{commands::component::ListCommand, download::get_latest_version, toolchain::Toolchain};
 
 fn format_installed_component_info(
     name: &str,
@@ -35,7 +37,12 @@ fn format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
 pub fn list(_command: ListCommand) -> Result<()> {
     let toolchain = Toolchain::from_settings()?;
 
-    let mut installed_components_summary = String::from("Installed:\n");
+    let toolchain_name = format!("{}", toolchain.name);
+
+    // use write! instead of writeln! here to prevent this from printing first.
+    bold(|s| write!(s, "{}", toolchain_name));
+
+    let mut installed_components_summary = String::from("\nInstalled:\n");
     let mut available_components_summary = String::from("Installable:\n");
 
     let components = Components::collect_publishables()?;
@@ -87,7 +94,6 @@ pub fn list(_command: ListCommand) -> Result<()> {
             }
         }
     }
-
     info!(
         "{}\n{}",
         installed_components_summary, available_components_summary

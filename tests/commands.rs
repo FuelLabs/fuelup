@@ -536,3 +536,17 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
     })?;
     Ok(())
 }
+
+#[test]
+fn fuelup_completions() -> Result<()> {
+    testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+        let shells = ["zsh", "bash", "fish", "powershell", "elvish"];
+        for shell in shells {
+            let output = cfg.fuelup(&["completions", "--shell", shell]);
+
+            assert!(output.status.success());
+        }
+    })?;
+
+    Ok(())
+}

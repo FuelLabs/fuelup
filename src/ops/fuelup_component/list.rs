@@ -5,12 +5,33 @@ use tracing::info;
 
 use crate::{commands::component::ListCommand, download::get_latest_version, toolchain::Toolchain};
 
-fn format_installed_component_info(name: &str, version: &str, version_info: &str) -> String {
-    format!("  {name} {version} ({version_info})\n")
+fn format_installed_component_info(
+    name: &str,
+    version: Option<String>,
+    version_info: &str,
+) -> String {
+    if let Some(v) = version {
+        format!("  {name} {v} ({version_info})\n")
+    } else {
+        format!("  {name} : failed getting current version\n")
+    }
 }
 
 fn format_installable_component_info(name: &str, latest_version: &str) -> String {
     format!("  {name} (latest: {latest_version})\n")
+}
+
+fn format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
+    format!(
+        "    - {}\n",
+        &String::from(
+            plugin_executables
+                .iter()
+                .filter(|c| c.to_string() != component::FORC)
+                .map(|s| format!("{s} "))
+                .collect::<String>(),
+        )
+    )
 }
 
 pub fn list(_command: ListCommand) -> Result<()> {
@@ -21,8 +42,10 @@ pub fn list(_command: ListCommand) -> Result<()> {
 
     let components = Components::collect_publishables()?;
     for component in components {
-        let latest_version = get_latest_version(&component.name)
-            .map_or_else(|_| "failed getting version".to_string(), |v| v.to_string());
+        let latest_version = get_latest_version(&component.name).map_or_else(
+            |_| String::from("failed to get latest version"),
+            |v| v.to_string(),
+        );
         if toolchain.has_component(&component.name) {
             let exec_path = toolchain.bin_path.join(&component.name);
 
@@ -32,27 +55,38 @@ pub fn list(_command: ListCommand) -> Result<()> {
             {
                 let output = String::from_utf8_lossy(&o.stdout).into_owned();
                 output.split_whitespace().nth(1).map_or_else(
-                    || String::default(),
-                    |v| Version::parse(v).map_or_else(|_| String::default(), |v| v.to_string()),
+                    || None,
+                    |v| Version::parse(v).map_or_else(|_| None, |v| Some(v.to_string())),
                 )
             } else {
-                String::default()
+                None
             };
 
-            let version_info = match latest_version == current_version {
+            let version_info = match Some(&latest_version) == current_version.as_ref() {
                 true => "up-to-date".to_string(),
-                false => format!("latest: {latest_version}"),
+                false => format!("latest: {}", &latest_version),
             };
+
             installed_components_summary.push_str(&format_installed_component_info(
                 &component.name,
-                &format!("v{current_version}"),
+                current_version,
                 &version_info,
             ));
+
+            if component.name == component::FORC {
+                installed_components_summary
+                    .push_str(&format_forc_default_plugins(component.executables))
+            }
         } else {
             available_components_summary.push_str(&format_installable_component_info(
                 &component.name,
                 &latest_version,
             ));
+
+            if component.name == component::FORC {
+                available_components_summary
+                    .push_str(&format_forc_default_plugins(component.executables))
+            }
         }
     }
 

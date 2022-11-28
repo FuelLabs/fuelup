@@ -37,10 +37,8 @@ fn format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
 pub fn list(_command: ListCommand) -> Result<()> {
     let toolchain = Toolchain::from_settings()?;
 
-    let toolchain_name = format!("{}", toolchain.name);
-
     // use write! instead of writeln! here to prevent this from printing first.
-    bold(|s| write!(s, "{}", toolchain_name));
+    bold(|s| write!(s, "{}", toolchain.name));
 
     let mut installed_components_summary = String::from("\nInstalled:\n");
     let mut available_components_summary = String::from("Installable:\n");

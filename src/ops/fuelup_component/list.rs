@@ -24,13 +24,11 @@ fn format_installable_component_info(name: &str, latest_version: &str) -> String
 fn format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
     format!(
         "    - {}\n",
-        &String::from(
-            plugin_executables
-                .iter()
-                .filter(|c| c.to_string() != component::FORC)
-                .map(|s| format!("{s} "))
-                .collect::<String>(),
-        )
+        plugin_executables
+            .iter()
+            .filter(|c| *c != component::FORC)
+            .map(|s| format!("{s} "))
+            .collect::<String>(),
     )
 }
 

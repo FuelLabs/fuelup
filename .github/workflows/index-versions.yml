@@ -38,7 +38,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: install
-          args: --debug --path ./scripts/compare-versions
+          args: --debug --path ./ci/compare-versions
       - name: Compare versions and set variables for tests if needed
         id: set-version-matrix
         run: |

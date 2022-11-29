@@ -252,6 +252,7 @@ my_toolchain (default)
     - forc-lsp - not found
     - forc-wallet - not found
   fuel-core - not found
+  fuel-indexer - not found
 "#
         );
         assert!(stdout.contains(expected_stdout));
@@ -533,5 +534,19 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
         assert_eq!(output.stdout, expected_stdout);
         expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
     })?;
+    Ok(())
+}
+
+#[test]
+fn fuelup_completions() -> Result<()> {
+    testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+        let shells = ["zsh", "bash", "fish", "powershell", "elvish"];
+        for shell in shells {
+            let output = cfg.fuelup(&["completions", "--shell", shell]);
+
+            assert!(output.status.success());
+        }
+    })?;
+
     Ok(())
 }

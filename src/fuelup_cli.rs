@@ -23,7 +23,7 @@ pub struct Cli {
 enum Commands {
     /// Check for updates to Fuel toolchains and fuelup
     Check(CheckCommand),
-    /// Generate shell competions
+    /// Generate shell completions
     Completions(CompletionsCommand),
     /// Add or remove components from the currently active toolchain
     #[clap(subcommand)]

@@ -13,6 +13,7 @@
 | `fuelup check`                            | Checks for updates to distributable toolchains                                           |
 | `fuelup show`                             | Shows the active toolchain and installed toolchains, as well as the host and fuelup home |
 | `fuelup toolchain help`                   | Shows the `help` page for a subcommand (like `toolchain`)                                |
+| `fuelup completions --shell=zsh`          | Generate shell completions for ZSH                                                       |
 
 [forc]: https://github.com/FuelLabs/sway/tree/master/forc
 [fuel-core]: https://github.com/FuelLabs/fuel-core

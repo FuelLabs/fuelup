@@ -30,6 +30,8 @@ struct Args {
     pub channel: String,
     /// the TOML file name
     pub out_file: String,
+    /// the Github run ID
+    pub github_run_id: String,
     /// Component name [possible values: latest]
     #[clap(value_parser = parse_key_val::<String, Version>)]
     pub packages: Vec<(String, Version)>,
@@ -226,7 +228,14 @@ fn main() -> Result<()> {
     }
 
     println!("writing channel: '{}'", &args.out_file);
-    fs::write(args.out_file, document.to_string())?;
+
+    let mut channel_str = String::new();
+    channel_str.push_str(&format!(
+        "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/{}\"\n",
+        args.github_run_id
+    ));
+    channel_str.push_str(&document.to_string());
+    fs::write(&args.out_file, channel_str.to_string())?;
 
     Ok(())
 }

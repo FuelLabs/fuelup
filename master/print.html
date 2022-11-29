@@ -393,6 +393,69 @@ help for each subcommand is also available.</p>
 <p><em>fuelup</em> has a <a href="https://github.com/toml-lang/toml">TOML</a> settings file at
 <code>.fuelup/settings.toml</code>. The schema for this file is not part of the public
 interface for <em>fuelup</em> - the fuelup CLI should be used to query and set settings.</p>
+<h2 id="generate-shell-completions"><a class="header" href="#generate-shell-completions">Generate Shell Completions</a></h2>
+<p>Enable tab completion for Bash, Fish, Zsh, or PowerShell. The script prints output on <code>stdout</code>,
+allowing one to re-direct the output to the file of their choosing. Where you place the file will
+depend on which shell, and which operating system you are using. Your particular configuration may
+also determine where these scripts need to be placed.</p>
+<p>Here are some common set ups for the supported shells under Unix and similar operating systems
+(such as GNU/Linux). For these settings to take effect, you may have to log out and log back in to
+your shell session.</p>
+<h3 id="bash"><a class="header" href="#bash">BASH</a></h3>
+<p>Completion files are commonly stored in <code>/etc/bash_completion.d/</code> for system-wide commands, but can
+be stored in <code>~/.local/share/bash-completion/completions</code> for user-specific commands.</p>
+<pre><code class="language-sh">mkdir -p ~/.local/share/bash-completion/completions
+fuelup completions --shell=bash &gt;&gt; ~/.local/share/bash-completion/completions/fuelup
+</code></pre>
+<h2 id="bash-macoshomebrew"><a class="header" href="#bash-macoshomebrew">BASH (macOS/Homebrew)</a></h2>
+<p>Homebrew stores bash completion files within the Homebrew directory. With the <code>bash-completion</code> brew
+formula installed.</p>
+<pre><code class="language-sh">mkdir -p $(brew --prefix)/etc/bash_completion.d
+fuelup completions --shell=bash &gt; $(brew --prefix)/etc/bash_completion.d/fuelup.bash-completion
+</code></pre>
+<h3 id="fish"><a class="header" href="#fish">FISH</a></h3>
+<p>Fish completion files are commonly stored in <code>$HOME/.config/fish/completions</code>.</p>
+<pre><code class="language-sh">mkdir -p ~/.config/fish/completions
+fuelup completions --shell=fish &gt; ~/.config/fish/completions/fuelup.fish
+</code></pre>
+<h3 id="zsh"><a class="header" href="#zsh">ZSH</a></h3>
+<p>ZSH completions are commonly stored in any directory listed in your <code>$fpath</code> variable. To use these
+completions, you must either add the generated script to one of those directories, or add your own
+to this list.</p>
+<p>Adding a custom directory is often the safest bet if you are unsure of which directory to use. First
+create the directory; for this example we'll create a hidden directory inside our <code>$HOME</code> directory:</p>
+<pre><code class="language-sh">mkdir ~/.zfunc
+</code></pre>
+<p>Then add the following lines to your <code>.zshrc</code> just before <code>compinit</code>:</p>
+<pre><code class="language-sh">fpath+=~/.zfunc
+</code></pre>
+<p>Now you can install the completions script using the following command:</p>
+<pre><code class="language-sh">fuelup completions --shell=zsh &gt; ~/.zfunc/_fuelup
+</code></pre>
+<h3 id="powershell"><a class="header" href="#powershell">POWERSHELL</a></h3>
+<p>The powershell completion scripts require PowerShell v5.0+ (which comes with Windows 10, but can be
+downloaded separately for windows 7 or 8.1).</p>
+<p>First, check if a profile has already been set</p>
+<pre><code class="language-sh">Test-Path $profile
+</code></pre>
+<p>If the above command returns <code>False</code> run the following</p>
+<pre><code class="language-sh">New-Item -path $profile -type file -force
+</code></pre>
+<p>Now open the file provided by <code>$profile</code> (if you used the <code>New-Item</code> command it will be
+<code>${env:USERPROFILE}\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1</code>).</p>
+<p>Next, we either save the completions file into our profile, or into a separate file and source it
+inside our profile. To save the completions into our profile simply use</p>
+<pre><code class="language-sh">fuelup completions --shell=powershell &gt;&gt; ${env:USERPROFILE}\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1
+</code></pre>
+<h3 id="elvish"><a class="header" href="#elvish">ELVISH</a></h3>
+<p>Elvish completions are commonly stored in <a href="https://elv.sh/ref/epm.html#the-epm-managed-directory"><code>epm</code></a>-managed
+directories.</p>
+<pre><code class="language-sh">fuelup completions --shell=elvish &gt; ~/.local/share/elvish/lib/fuelup.elv
+</code></pre>
+<p>Then in <a href="https://elv.sh/ref/command.html#rc-file"><code>rc.elv</code></a>, add the following line to activate the
+generated completions.</p>
+<pre><code class="language-sh">use fuelup
+</code></pre>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>fuelup toolchain install latest</code></td><td>Installs the toolchain distributed by the <code>latest</code> channel</td></tr>
@@ -406,6 +469,7 @@ interface for <em>fuelup</em> - the fuelup CLI should be used to query and set s
 <tr><td><code>fuelup check</code></td><td>Checks for updates to distributable toolchains</td></tr>
 <tr><td><code>fuelup show</code></td><td>Shows the active toolchain and installed toolchains, as well as the host and fuelup home</td></tr>
 <tr><td><code>fuelup toolchain help</code></td><td>Shows the <code>help</code> page for a subcommand (like <code>toolchain</code>)</td></tr>
+<tr><td><code>fuelup completions --shell=zsh</code></td><td>Generate shell completions for ZSH</td></tr>
 </tbody></table>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="contributing-to-fuelup"><a class="header" href="#contributing-to-fuelup">Contributing To Fuelup</a></h1>
 <p>Thanks for your interest in contributing to <code>fuelup</code>! This document outlines the process for installing and setting up <code>fuelup</code>, as well as some conventions on contributing to <code>fuelup</code>.</p>

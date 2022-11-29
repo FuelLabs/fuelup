@@ -33,13 +33,7 @@ jobs:
 
             CHANNEL_TOML="channel-fuel-nightly.toml"
 
-            # Create header for channel
-            touch $CHANNEL_TOML
-            echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >> $CHANNEL_TOML
-            build-channel nightly $CHANNEL_TOML
-
-            # Remove extra newline at the end
-            truncate -s -1 $CHANNEL_TOML
+            build-channel nightly $CHANNEL_TOML $GITHUB_RUN_ID
 
             cp $CHANNEL_TOML ${{ env.NIGHTLY_CHANNEL_DIR }}
 

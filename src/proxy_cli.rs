@@ -1,5 +1,6 @@
 use anyhow::Result;
 use std::ffi::OsString;
+use std::io::{Error, ErrorKind};
 use std::os::unix::prelude::CommandExt;
 use std::process::{Command, ExitCode, Stdio};
 use std::{env, io};
@@ -30,9 +31,19 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
     cmd.args(args);
     cmd.stdin(Stdio::inherit());
 
-    return exec(&mut cmd);
+    return exec(&mut cmd, proc_name, toolchain);
 
-    fn exec(cmd: &mut Command) -> io::Result<ExitCode> {
-        Err(cmd.exec())
+    fn exec(cmd: &mut Command, proc_name: &str, toolchain: &Toolchain) -> io::Result<ExitCode> {
+        let error = cmd.exec();
+        match error.kind() {
+            ErrorKind::NotFound => Err(Error::new(
+                ErrorKind::NotFound,
+                format!(
+                    "component '{}' not found in currently active toolchain '{}'",
+                    proc_name, toolchain.name
+                ),
+            )),
+            _ => Err(error),
+        }
     }
 }

@@ -179,17 +179,6 @@ fn fuelup_update_conflict() -> Result<()> {
         assert!(output.stdout.contains(has_duplicate_cargo_uninstall_message));
         assert!(output.stdout.contains(has_duplicate_overshadow_message));
         assert!(output.stdout.contains(has_duplicate_overshadow_cargo_uninstall_message));
-
-        for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
-            let toolchain_dir = entry.unwrap();
-            let expected_toolchain_name =
-                "latest-".to_owned() + &TargetTriple::from_host().unwrap().to_string();
-            assert_eq!(
-                expected_toolchain_name,
-                toolchain_dir.file_name().to_str().unwrap()
-            );
-            assert!(toolchain_dir.file_type().unwrap().is_dir());
-        }
     })?;
 
     Ok(())

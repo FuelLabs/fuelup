@@ -131,6 +131,54 @@ fn fuelup_update() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["update"]);
         assert!(output.status.success());
+        assert!(!output.stdout.contains("warning:"));
+
+        for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
+            let toolchain_dir = entry.unwrap();
+            let expected_toolchain_name =
+                "latest-".to_owned() + &TargetTriple::from_host().unwrap().to_string();
+            assert_eq!(
+                expected_toolchain_name,
+                toolchain_dir.file_name().to_str().unwrap()
+            );
+            assert!(toolchain_dir.file_type().unwrap().is_dir());
+        }
+    })?;
+
+    Ok(())
+}
+
+#[cfg(unix)]
+#[test]
+fn fuelup_update_conflict() -> Result<()> {
+    testcfg::setup(FuelupState::LatestToolchainInstalledWithConflict, &|cfg| {
+        let output = cfg.fuelup(&["update"]);
+
+        let has_duplicate_message = &format!(
+            "warning: 'forc' found in PATH at {}. This will take precedence over 'forc' to be installed at {}.",
+            cfg.home.join(".local/bin/forc").display(),
+            cfg.home.join(".fuelup/bin/forc").display()
+        );
+        let has_duplicate_cargo_uninstall_message = 
+            &format!("warning: 'fuel-core' found in PATH at {}. This will take precedence over 'fuel-core' to be installed at {}. You may want to execute 'cargo uninstall fuel-core'.\n",
+                cfg.home.join(".cargo/bin/fuel-core").display(),
+                cfg.home.join(".fuelup/bin/fuel-core").display()
+            );
+        let has_duplicate_overshadow_message = &format!("warning: 'forc-wallet' found in PATH at {}. 'forc-wallet' already installed at {} which will be overshadowed by the copy at {}.",
+                cfg.home.join(".local/bin/forc-wallet").display(),
+                cfg.home.join(".fuelup/bin/forc-wallet").display(),
+                cfg.home.join(".local/bin/forc-wallet").display(),
+            );
+        let has_duplicate_overshadow_cargo_uninstall_message = &format!("warning: 'forc-explore' found in PATH at {}. 'forc-explore' already installed at {} which will be overshadowed by the copy at {}. You may want to execute 'cargo uninstall forc-explore'",
+                cfg.home.join(".cargo/bin/forc-explore").display(),
+                cfg.home.join(".fuelup/bin/forc-explore").display(),
+                cfg.home.join(".cargo/bin/forc-explore").display(),
+            );
+        assert!(output.status.success());
+        assert!(output.stdout.contains(has_duplicate_message));
+        assert!(output.stdout.contains(has_duplicate_cargo_uninstall_message));
+        assert!(output.stdout.contains(has_duplicate_overshadow_message));
+        assert!(output.stdout.contains(has_duplicate_overshadow_cargo_uninstall_message));
 
         for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
             let toolchain_dir = entry.unwrap();

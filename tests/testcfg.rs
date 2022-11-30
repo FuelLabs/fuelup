@@ -13,7 +13,7 @@ pub enum FuelupState {
     AllInstalled,
     Empty,
     LatestToolchainInstalled,
-    LatestToolchainInstalledWithConflict,
+    FuelupUpdateConflict,
     NightlyInstalled,
     NightlyDateInstalled,
     LatestAndCustomInstalled,
@@ -185,7 +185,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
         }
-        FuelupState::LatestToolchainInstalledWithConflict => {
+        FuelupState::FuelupUpdateConflict => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
 

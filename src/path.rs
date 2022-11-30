@@ -84,10 +84,7 @@ pub fn warn_existing_fuel_executables() -> Result<()> {
 
                     if is_executable(&maybe_fuelup_executable) {
                         message.push_str(&format!(
-                            "
-
-                            fuelup found '{}' already installed at {} which will be overshadowed by the copy at {}.
-                            ",
+                            " '{}' already installed at {} which will be overshadowed by the copy at {}.",
                             c.name,
                             &maybe_fuelup_executable.display(),
                             path

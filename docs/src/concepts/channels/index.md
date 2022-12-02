@@ -4,10 +4,12 @@
 
 | Channel       | Source          | Integration Tested   | Update Frequency         | Available |
 | ------------- | --------------- | -------------------- | ------------------------ | --------- |
-| **[latest]**  | published bins  | ✔️                   | checked every 30 minutes | ✔️        |
-| **[nightly]** | `master` branch | ➖                   | nightly (1:00 AM UTC)    | ✔️        |
-| **beta**      | published bins  | ✔️                   | every 6 weeks            | ➖        |
-| **stable**    | published bins  | ✔️ + successful beta | every 6 weeks            | ➖        |
+| **[latest]**  | published bins  | ✔️                    | checked every 30 minutes  | ✔️         |
+| **[nightly]** | `master` branch | ➖                   | nightly (1:00 AM UTC)     | ✔️         |
+| **[beta-1]**  | published bins  | ➖                   | only when necessary       | ✔️         |
+| **[beta-2]**  | published bins  | ➖                   | only when necessary       | ✔️         |
 
 [latest]: latest.html
 [nightly]: nightly.html
+[beta-1]: beta-1.html
+[beta-2]: beta-2.html

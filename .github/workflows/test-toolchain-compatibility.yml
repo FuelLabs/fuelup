@@ -155,16 +155,9 @@ jobs:
         if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
         run: |
             mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
-
             CHANNEL_TOML="channel-fuel-latest.toml"
 
-            # Create header for channel
-            touch $CHANNEL_TOML
-            echo -e "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" >> $CHANNEL_TOML
-            build-channel latest $CHANNEL_TOML forc=${{ env.LATEST_COMPATIBLE_FORC }} fuel-core=${{ env.LATEST_COMPATIBLE_FUEL_CORE }}
-
-            # Remove extra newline at the end
-            truncate -s -1 $CHANNEL_TOML
+            build-channel latest $CHANNEL_TOML $GITHUB_RUN_ID forc=${{ env.LATEST_COMPATIBLE_FORC }} fuel-core=${{ env.LATEST_COMPATIBLE_FUEL_CORE }}
 
             cp $CHANNEL_TOML ${{ env.LATEST_CHANNEL_DIR }}
 

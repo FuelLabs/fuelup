@@ -170,7 +170,7 @@ fn fuelup_update_conflict() -> Result<()> {
             );
         // 3) duplicate fuel executable found in PATH and in FUELUP_HOME but not in CARGO_HOME.
         //    fuelup's version is overshadowed by the duplicate.
-        let has_duplicate_overshadow_message = &format!("warning: 'forc-wallet' found in PATH at {}. 'forc-wallet' already installed at {} which will be overshadowed by the copy at {}.",
+        let has_duplicate_overshadow_message = &format!("warning: 'forc-wallet' found in PATH at {}. This will take precedence over 'forc-wallet', already installed at {}. Consider uninstalling {}, or re-arranging your PATH to give fuelup priority.",
                 cfg.home.join(".local/bin/forc-wallet").display(),
                 cfg.home.join(".fuelup/bin/forc-wallet").display(),
                 cfg.home.join(".local/bin/forc-wallet").display(),
@@ -178,7 +178,7 @@ fn fuelup_update_conflict() -> Result<()> {
         // 4) duplicate fuel executable found in PATH and in FUELUP_HOME and CARGO_HOME.
         //    fuelup's version is overshadowed by the duplicate. `cargo uninstall` is a possible
         //    action and therefore a suggestion by fuelup.
-        let has_duplicate_overshadow_cargo_uninstall_message = &format!("warning: 'forc-explore' found in PATH at {}. 'forc-explore' already installed at {} which will be overshadowed by the copy at {}. You may want to execute 'cargo uninstall forc-explore'",
+        let has_duplicate_overshadow_cargo_uninstall_message = &format!("warning: 'forc-explore' found in PATH at {}. This will take precedence over 'forc-explore', already installed at {}. Consider uninstalling {}, or re-arranging your PATH to give fuelup priority. You may want to execute 'cargo uninstall forc-explore'.",
                 cfg.home.join(".cargo/bin/forc-explore").display(),
                 cfg.home.join(".fuelup/bin/forc-explore").display(),
                 cfg.home.join(".cargo/bin/forc-explore").display(),

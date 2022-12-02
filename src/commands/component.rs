@@ -1,7 +1,7 @@
 use anyhow::Result;
 use clap::Parser;
 
-use crate::ops::fuelup_component::{add::add, remove::remove};
+use crate::ops::fuelup_component::{add::add, list::list, remove::remove};
 
 #[derive(Debug, Parser)]
 pub enum ComponentCommand {
@@ -9,6 +9,8 @@ pub enum ComponentCommand {
     Add(AddCommand),
     /// Remove a component from the currently active custom toolchain
     Remove(RemoveCommand),
+    /// List installed and installable components
+    List(ListCommand),
 }
 
 #[derive(Debug, Parser)]
@@ -23,10 +25,14 @@ pub struct RemoveCommand {
     pub component: String,
 }
 
+#[derive(Debug, Parser)]
+pub struct ListCommand {}
+
 pub fn exec(command: ComponentCommand) -> Result<()> {
     match command {
         ComponentCommand::Add(command) => add(command)?,
         ComponentCommand::Remove(command) => remove(command)?,
+        ComponentCommand::List(command) => list(command)?,
     };
 
     Ok(())

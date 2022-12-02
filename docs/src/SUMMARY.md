@@ -8,6 +8,8 @@
   - [Channels](concepts/channels/index.md)
     - [latest](concepts/channels/latest.md)
     - [nightly](concepts/channels/nightly.md)
+    - [beta-1](concepts/channels/beta-1.md)
+    - [beta-2](concepts/channels/beta-2.md)
   - [Toolchains](concepts/toolchains.md)
   - [Components](concepts/components.md)
   - [Proxies](concepts/proxies.md)

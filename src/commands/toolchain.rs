@@ -19,7 +19,7 @@ pub enum ToolchainCommand {
 
 #[derive(Debug, Parser)]
 pub struct InstallCommand {
-    /// Toolchain name [possible values: latest, beta-1, nightly]
+    /// Toolchain name [possible values: latest, beta-1, beta-2, nightly]
     pub name: String,
 }
 

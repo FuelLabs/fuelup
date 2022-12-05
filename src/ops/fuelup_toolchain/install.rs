@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::path::settings_file;
+use crate::path::{settings_file, warn_existing_fuel_executables};
 use crate::settings::SettingsFile;
 use crate::toolchain::{DistToolchainDescription, Toolchain};
 use crate::{channel::Channel, commands::toolchain::InstallCommand};
@@ -26,6 +26,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let mut installed_bins = String::new();
 
     let config = Config::from_env()?;
+    warn_existing_fuel_executables()?;
 
     let toolchain = Toolchain::from_path(&description.to_string())?;
     let (cfgs, hash) = if let Ok((channel, hash)) = Channel::from_dist_channel(&description) {

@@ -2,6 +2,7 @@ use crate::{
     channel::Channel,
     config::Config,
     fmt::{bold, colored_bold},
+    path::warn_existing_fuel_executables,
     toolchain::{DistToolchainDescription, Toolchain},
 };
 use anyhow::{bail, Result};
@@ -18,6 +19,8 @@ pub fn update() -> Result<()> {
     let config = Config::from_env()?;
     let toolchains = config.list_dist_toolchains()?;
     let mut summary: Vec<(String, String)> = Vec::with_capacity(toolchains.len());
+
+    warn_existing_fuel_executables()?;
 
     for toolchain in toolchains {
         let mut installed_bins = String::new();

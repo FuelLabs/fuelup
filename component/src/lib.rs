@@ -46,7 +46,7 @@ impl Component {
             .component
             .get(name)
             .ok_or_else(|| anyhow!("component with name '{}' does not exist", name))
-            .and_then(|c| Ok(c.clone()))
+            .map(|c| c.clone())
     }
 }
 
@@ -94,7 +94,7 @@ impl Components {
                     .get(c)
                     .expect("Failed to parse components.toml")
             })
-            .filter_map(|c| c.publish.and_then(|_| Some(c.clone())))
+            .filter_map(|c| c.publish.map(|_| c.clone()))
             .collect();
 
         publishables.sort_by_key(|c| c.name.clone());

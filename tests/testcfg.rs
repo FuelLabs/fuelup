@@ -133,7 +133,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     fs::create_dir(&tmp_fuelup_root_path).unwrap();
     fs::create_dir(&tmp_fuelup_bin_dir_path).unwrap();
     fs::create_dir(&tmp_fuelup_root_path.join("toolchains")).unwrap();
-    fs::copy(
+    fs::hard_link(
         root.parent().unwrap().join("fuelup"),
         &tmp_fuelup_bin_dir_path.join("fuelup"),
     )?;

@@ -48,6 +48,15 @@ impl Component {
             .ok_or_else(|| anyhow!("component with name '{}' does not exist", name))
             .and_then(|c| Ok(c.clone()))
     }
+
+    pub fn is_default_forc_plugin(name: &str) -> bool {
+        (Self::from_name(FORC)
+            .unwrap()
+            .executables
+            .contains(&name.to_string())
+            && name != FORC)
+            || name == "forc-client"
+    }
 }
 
 #[derive(Debug)]

@@ -180,10 +180,7 @@ targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
             "forc-binaries"
         );
         assert_eq!(components.component["forc-fmt"].executables, ["forc-fmt"]);
-        assert_eq!(
-            components.component["forc-fmt"].repository_name,
-            "https://github.com/FuelLabs/sway"
-        );
+        assert_eq!(components.component["forc-fmt"].repository_name, "sway");
         assert_eq!(
             components.component["forc-fmt"].targets,
             ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
@@ -199,9 +196,9 @@ targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
             .iter()
             .map(|c| c.name.clone())
             .collect::<Vec<String>>();
-        let mut expected = ["forc", "fuel-core"];
+        let mut expected = ["forc", "fuel-core", "fuel-indexer"];
         expected.sort();
-        assert_eq!(components.len(), 2);
+        assert_eq!(components.len(), 3);
         assert_eq!(actual, expected);
         Ok(())
     }

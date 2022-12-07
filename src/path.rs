@@ -1,8 +1,11 @@
 use anyhow::{bail, Result};
+use component::Components;
+use std::env;
 use std::{
     fs,
     path::{Path, PathBuf},
 };
+use tracing::warn;
 
 use dirs;
 
@@ -50,4 +53,82 @@ pub fn ensure_dir_exists(path: &Path) -> Result<()> {
             .or_else(|e| bail!("Failed to create directory {}: {}", path.display(), e))?
     }
     Ok(())
+}
+
+pub fn warn_existing_fuel_executables() -> Result<()> {
+    let components = Components::collect_publishables()?.into_iter();
+
+    fn search_directories() -> Vec<PathBuf> {
+        if let Some(val) = env::var_os("PATH") {
+            return env::split_paths(&val).collect();
+        }
+        vec![]
+    }
+
+    let mut summary = String::new();
+
+    for c in components {
+        for e in c.executables {
+            if let Some(path) = search_directories()
+                .into_iter()
+                .map(|d| d.join(e.clone()))
+                .find(|f| is_executable(f))
+            {
+                let path = path.to_str().unwrap_or_default();
+                let mut message = String::new();
+                let fuelup_bin_dir = fuelup_bin_dir();
+                if !path.contains(fuelup_bin_dir.to_str().unwrap()) {
+                    let maybe_fuelup_executable = fuelup_bin_dir.join(&e);
+
+                    message.push_str(&format!("warning: '{e}' found in PATH at {path}."));
+
+                    if is_executable(&maybe_fuelup_executable) {
+                        message.push_str(&format!(
+                            " This will take precedence over '{}', already installed at {}. Consider uninstalling {}, or re-arranging your PATH to give fuelup priority.",
+                            c.name,
+                            &maybe_fuelup_executable.display(),
+                            path
+                        ));
+                    } else {
+                        message.push_str(&format!(
+                            " This will take precedence over '{}' to be installed at {}.",
+                            c.name,
+                            &maybe_fuelup_executable.display()
+                        ));
+                    }
+                }
+
+                if let Ok(cargo_home) = std::env::var("CARGO_HOME") {
+                    if path.contains(&cargo_home) {
+                        message.push_str(&format!(
+                            " You may want to execute 'cargo uninstall {}'.",
+                            c.name
+                        ));
+                    }
+                }
+
+                if !message.is_empty() {
+                    summary.push_str(&message);
+                    summary.push('\n');
+                }
+            }
+        }
+    }
+
+    warn!("{}", summary);
+
+    Ok(())
+}
+
+#[cfg(unix)]
+pub fn is_executable(path: &Path) -> bool {
+    use std::os::unix::prelude::*;
+    std::fs::metadata(path)
+        .map(|metadata| metadata.is_file() && metadata.permissions().mode() & 0o111 != 0)
+        .unwrap_or(false)
+}
+
+#[cfg(windows)]
+pub fn is_executable(path: &Path) -> bool {
+    path.is_file()
 }

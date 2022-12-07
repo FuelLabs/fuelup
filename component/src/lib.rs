@@ -51,7 +51,7 @@ impl Component {
 
     pub fn is_default_forc_plugin(name: &str) -> bool {
         (Self::from_name(FORC)
-            .unwrap()
+            .expect("there must always be a `forc` component")
             .executables
             .contains(&name.to_string())
             && name != FORC)
@@ -223,18 +223,5 @@ targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
     #[test]
     fn test_collect_plugin_executables() {
         assert!(Components::collect_plugin_executables().is_ok());
-    }
-
-    #[test]
-    fn test_is_default_forc_plugin() {
-        let executables = Components::collect_plugin_executables().unwrap();
-
-        for executable in executables.iter() {
-            if ["forc-lsp", "forc-doc", "forc-client", "forc-fmt"].contains(&executable.as_str()) {
-                assert!(Component::is_default_forc_plugin(&executable));
-            } else {
-                assert!(!Component::is_default_forc_plugin(&executable));
-            }
-        }
     }
 }

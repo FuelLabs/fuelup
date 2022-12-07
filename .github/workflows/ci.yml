@@ -267,7 +267,7 @@ jobs:
           asset_content_type: application/gzipa
 
   update-latest-channel:
-    name: Do post-release checks
+    name: Re-publish the latest channel
     needs: [cancel-previous-runs, build-release]
     if: github.event_name == 'release' && github.event.action == 'published'
     runs-on: ubuntu-latest

@@ -4,7 +4,7 @@
 
 **To start using fuelup**, refer to our [Quickstart](https://github.com/FuelLabs/fuelup#quickstart) below. You can also learn more at [The Fuelup Book](https://fuellabs.github.io/fuelup/master/).
 
-**To start developing fuelup itself**, learn more at in the [Contributions chapter](https://fuellabs.github.io/fuelup/master/contributing_to_fuelup.html) of the book.
+**To start developing fuelup itself**, learn more in the [Contributions chapter](https://fuellabs.github.io/fuelup/master/contributing_to_fuelup.html) of the book.
 
 ## Quickstart
 

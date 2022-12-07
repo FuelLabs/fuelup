@@ -8,6 +8,7 @@ use sha2::Sha256;
 use std::collections::{BTreeMap, HashMap};
 use std::error::Error;
 use std::fs;
+use std::io::Read;
 use toml_edit::value;
 
 /// Parse a single key-value pair

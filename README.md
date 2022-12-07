@@ -2,6 +2,10 @@
 
 `fuelup` installs the Fuel toolchain from our official release channels, enabling you to easily keep the toolchain updated.
 
+**To start using fuelup**, refer to our [Quickstart](https://github.com/FuelLabs/fuelup#quickstart) below. You can also learn more at [The Fuelup Book](https://fuellabs.github.io/fuelup/master/).
+
+**To start developing fuelup itself**, learn more at in the [Contributions chapter](https://fuellabs.github.io/fuelup/master/contributing_to_fuelup.html) of the book.
+
 ## Quickstart
 
 Currently, this script supports Linux/macOS systems only. For other systems, please [read the Installation chapter](https://fuellabs.github.io/fuelup/master/installation/other.html).
@@ -12,7 +16,7 @@ Installation is simple: all you need is `fuelup-init.sh`, which downloads the co
 curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh
 ```
 
-This will install `forc` and its accompanying plugins, as well as `fuel-core` in `~/.fuelup/bin`. Please read the [Components chapter](https://fuellabs.github.io/fuelup/master/concepts/components.html) for more info on the components installed.
+This will automatically install `forc`, its accompanying plugins, `fuel-core` and other key components in `~/.fuelup/bin`. Please read the [Components chapter](https://fuellabs.github.io/fuelup/master/concepts/components.html) for more info on the components installed.
 
 The script will ask for permission to add `~/.fuelup/bin` to your `PATH`.
 
@@ -27,16 +31,6 @@ If you just want `fuelup` without automatically installing the `latest` toolchai
 ```sh
 curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh -s -- --skip-toolchain-installation
 ```
-
-## Book
-
-For more details on how `fuelup` works, as well as usage examples, please refer to [The Fuelup Book](https://fuellabs.github.io/fuelup/master/).
-
-## Contributing to Fuelup
-
-We welcome contributions to fuelup!
-
-Please see the [Contributing To Fuelup](https://fuellabs.github.io/fuelup/master/contributing_to_fuelup.html) of The Fuelup Book for guidelines and instructions to help you get started.
 
 ## License
 

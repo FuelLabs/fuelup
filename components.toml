@@ -1,7 +1,7 @@
 [component.forc]
 name = "forc"
 tarball_prefix = "forc-binaries"
-executables = ["forc", "forc-fmt", "forc-lsp", "forc-doc"]
+executables = ["forc", "forc-fmt", "forc-lsp", "forc-doc", "forc-deploy", "forc-run"]
 repository_name = "sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 publish = true
@@ -30,6 +30,14 @@ executables = ["forc-lsp"]
 repository_name = "sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 
+[component.forc-client]
+name = "forc-client"
+tarball_prefix = "forc-client"
+is_plugin = true
+executables = ["forc-deploy", "forc-run"]
+repository_name = "sway"
+targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
+
 [component.forc-explore]
 name = "forc-explore"
 tarball_prefix = "forc-explore"
@@ -38,14 +46,6 @@ executables = ["forc-explore"]
 repository_name = "forc-explorer"
 targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]
 publish = true
-
-[component.forc-client]
-name = "forc-client"
-tarball_prefix = "forc-client"
-is_plugin = true
-executables = ["forc-deploy", "forc-run"]
-repository_name = "forc-client"
-targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]
 
 [component.fuel-core]
 name = "fuel-core"

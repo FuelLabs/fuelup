@@ -36,3 +36,6 @@ toml_edit = { version = "0.13", features = ["serde", "easy"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["ansi", "env-filter", "json"] }
 ureq = "2.4"
+
+[workspace]
+members = ["component", "ci/build-channel", "ci/compare-versions"]

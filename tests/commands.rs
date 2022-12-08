@@ -300,6 +300,7 @@ my_toolchain (default)
     - forc-doc - not found
     - forc-explore - not found
     - forc-fmt - not found
+    - forc-index - not found
     - forc-lsp - not found
     - forc-wallet - not found
   fuel-core - not found

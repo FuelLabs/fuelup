@@ -71,3 +71,12 @@ executables = ["fuel-indexer"]
 repository_name = "fuel-indexer"
 targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]
 publish = true
+
+[component.forc-index]
+name = "forc-index"
+tarball_prefix = "forc-index"
+is_plugin = true
+executables = ["forc-index"]
+repository_name = "fuel-indexer"
+targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]
+publish = true

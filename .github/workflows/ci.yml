@@ -80,7 +80,7 @@ jobs:
           command: fmt
           args: --all -- --check
 
-  cargo-test:
+  cargo-test-workspace:
     needs: cancel-previous-runs
     runs-on: ubuntu-latest
     steps:
@@ -93,7 +93,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --locked
+          args: --locked --workspace
 
   lint-toml-files:
     needs: cancel-previous-runs

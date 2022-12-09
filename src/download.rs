@@ -260,11 +260,8 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path)
     let tarball_path = dst_dir_path.join(&download_cfg.tarball_name);
 
     let mut hasher = Sha256::new();
-    if download_file(&download_cfg.tarball_url, &tarball_path, &mut hasher).is_err() {
-        bail!(
-            "Failed to download {} - the release may not exist or may not be ready yet.",
-            &download_cfg.tarball_name
-        );
+    if let Err(e) = download_file(&download_cfg.tarball_url, &tarball_path, &mut hasher) {
+        bail!("Failed to download {} - {}", &download_cfg.tarball_name, e);
     };
 
     let actual_hash = format!("{:x}", hasher.finalize());

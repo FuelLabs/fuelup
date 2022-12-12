@@ -7,6 +7,8 @@ use toml_edit::de;
 // Keeping forc since some ways we handle forc is slightly different.
 pub const FORC: &str = "forc";
 pub const FUELUP: &str = "fuelup";
+// forc-client is handled differently - its actual binaries are 'forc-run' and 'forc-deploy'
+pub const FORC_CLIENT: &str = "forc-client";
 
 const COMPONENTS_TOML: &str = include_str!("../../components.toml");
 
@@ -47,6 +49,15 @@ impl Component {
             .get(name)
             .ok_or_else(|| anyhow!("component with name '{}' does not exist", name))
             .map(|c| c.clone())
+    }
+
+    pub fn is_default_forc_plugin(name: &str) -> bool {
+        (Self::from_name(FORC)
+            .expect("there must always be a `forc` component")
+            .executables
+            .contains(&name.to_string())
+            && name != FORC)
+            || name == FORC_CLIENT
     }
 }
 

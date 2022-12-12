@@ -7,6 +7,8 @@ use toml_edit::de;
 // Keeping forc since some ways we handle forc is slightly different.
 pub const FORC: &str = "forc";
 pub const FUELUP: &str = "fuelup";
+// forc-client is handled differently - its actual binaries are 'forc-run' and 'forc-deploy'
+pub const FORC_CLIENT: &str = "forc-client";
 
 const COMPONENTS_TOML: &str = include_str!("../../components.toml");
 
@@ -55,7 +57,7 @@ impl Component {
             .executables
             .contains(&name.to_string())
             && name != FORC)
-            || name == "forc-client"
+            || name == FORC_CLIENT
     }
 }
 

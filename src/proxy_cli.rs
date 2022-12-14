@@ -8,7 +8,7 @@ use std::{env, io};
 
 use crate::file;
 use crate::path::{get_fuel_toolchain, toolchains_dir};
-use crate::toolchain::{DistToolchainDescription, DistToolchainName, Toolchain};
+use crate::toolchain::{DistToolchainDescription, Toolchain};
 use crate::toolchain_override::ToolchainOverride;
 use component::Components;
 
@@ -45,11 +45,8 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
                 Err(_) => to.toolchain.name,
             };
             (
-                toolchains_dir()
-                    .join(name.to_string())
-                    .join("bin")
-                    .join(proc_name),
-                name.to_string(),
+                toolchains_dir().join(&name).join("bin").join(proc_name),
+                name,
             )
         }
         None => (

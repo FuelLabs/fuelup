@@ -150,11 +150,9 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                             plugin_name = &plugin.executables[index];
                         }
 
-                        if latest_package_versions.contains_key(&plugin.name) {
-                            latest_version = &latest_package_versions[&plugin.name];
+                        if let Some(latest_version) = latest_package_versions.get(&plugin.name) {
+                            check_plugin(&plugin_executable, plugin_name, latest_version)?;
                         }
-
-                        check_plugin(&plugin_executable, plugin_name, latest_version)?;
                     }
                 }
             }

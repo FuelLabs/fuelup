@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use anyhow::{bail, Result};
+use component::Component;
 use semver::Version;
 use tracing::info;
 
@@ -40,6 +41,13 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
             }
             None => (&maybe_versioned_component, None),
         };
+
+    if Component::is_default_forc_plugin(component) {
+        bail!(
+            "'{}' is a default plugin that comes with core forc; please do 'fuelup component add forc' if you would like to install or update it.",
+            &maybe_versioned_component
+        );
+    }
 
     if toolchain.has_component(component) {
         info!(

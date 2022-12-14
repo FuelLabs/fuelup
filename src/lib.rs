@@ -12,3 +12,4 @@ pub mod proxy_cli;
 pub mod settings;
 pub mod target_triple;
 pub mod toolchain;
+pub mod toolchain_override;

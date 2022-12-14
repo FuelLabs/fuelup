@@ -120,6 +120,28 @@ pub fn warn_existing_fuel_executables() -> Result<()> {
     Ok(())
 }
 
+fn find_parent_dir_with_file(starter_path: &Path, file_name: &str) -> Option<PathBuf> {
+    let mut path = std::fs::canonicalize(starter_path).ok()?;
+    let empty_path = PathBuf::from("/");
+    while path != empty_path {
+        path.push(file_name);
+        if path.exists() {
+            path.pop();
+            return Some(path);
+        } else {
+            path.pop();
+            path.pop();
+        }
+    }
+    None
+}
+
+pub fn get_fuel_toolchain() -> Option<PathBuf> {
+    let parent_dir =
+        find_parent_dir_with_file(&std::env::current_dir().unwrap(), "fuel-toolchain.toml");
+    parent_dir.map(|p| p.join("fuel-toolchain.toml"))
+}
+
 #[cfg(unix)]
 pub fn is_executable(path: &Path) -> bool {
     use std::os::unix::prelude::*;

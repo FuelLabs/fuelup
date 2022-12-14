@@ -3,9 +3,13 @@ use std::ffi::OsString;
 use std::io::{Error, ErrorKind};
 use std::os::unix::prelude::CommandExt;
 use std::process::{Command, ExitCode, Stdio};
+use std::str::FromStr;
 use std::{env, io};
 
-use crate::toolchain::Toolchain;
+use crate::file;
+use crate::path::{get_fuel_toolchain, toolchains_dir};
+use crate::toolchain::{DistToolchainDescription, DistToolchainName, Toolchain};
+use crate::toolchain_override::ToolchainOverride;
 use component::Components;
 
 /// Runs forc or fuel-core in proxy mode
@@ -25,7 +29,29 @@ pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
 }
 
 fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io::Result<ExitCode> {
-    let bin_path = toolchain.bin_path.join(proc_name);
+    let mut toolchain_override: Option<ToolchainOverride> = None;
+
+    if let Some(fuel_toolchain_toml_file) = get_fuel_toolchain() {
+        let fuel_toolchain_toml =
+            file::read_file("fuel-toolchain", &fuel_toolchain_toml_file).unwrap();
+
+        toolchain_override = ToolchainOverride::parse(&fuel_toolchain_toml).ok();
+    }
+
+    let bin_path = match toolchain_override {
+        Some(to) => {
+            let name = match DistToolchainDescription::from_str(&to.toolchain.name) {
+                Ok(n) => n.to_string(),
+                Err(_) => to.toolchain.name,
+            };
+            toolchains_dir()
+                .join(name.to_string())
+                .join("bin")
+                .join(proc_name)
+        }
+        None => toolchain.bin_path.join(proc_name),
+    };
+
     let mut cmd = Command::new(bin_path);
 
     cmd.args(args);

@@ -111,50 +111,51 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
     bold(|s| writeln!(s, "{}", &toolchain.name));
 
     for component in Components::collect_exclude_plugins()? {
-        let component_executable = toolchain.bin_path.join(&component.name);
-        let mut latest_version = &latest_package_versions[&component.name];
-        match Command::new(&component_executable)
-            .arg("--version")
-            .output()
-        {
-            Ok(o) => {
-                let output = String::from_utf8_lossy(&o.stdout).into_owned();
+        if let Some(mut latest_version) = latest_package_versions.get(&component.name) {
+            let component_executable = toolchain.bin_path.join(&component.name);
+            match Command::new(&component_executable)
+                .arg("--version")
+                .output()
+            {
+                Ok(o) => {
+                    let output = String::from_utf8_lossy(&o.stdout).into_owned();
 
-                match output.split_whitespace().last() {
-                    Some(v) => {
-                        let version = Version::parse(v)?;
-                        bold(|s| write!(s, "  {} - ", &component.name));
-                        compare_and_print_versions(&version, latest_version)?;
-                    }
-                    None => {
-                        error!("  {} - Error getting version string", &component.name);
+                    match output.split_whitespace().last() {
+                        Some(v) => {
+                            let version = Version::parse(v)?;
+                            bold(|s| write!(s, "  {} - ", &component.name));
+                            compare_and_print_versions(&version, latest_version)?;
+                        }
+                        None => {
+                            error!("  {} - Error getting version string", &component.name);
+                        }
                     }
                 }
-            }
-            Err(_) => bail!(""),
-        };
+                Err(_) => error!("  {} - Error getting version string", &component.name),
+            };
 
-        if verbose && component.name == component::FORC {
-            for plugin in component::Components::collect_plugins()? {
-                if !plugin.is_main_executable() {
-                    bold(|s| writeln!(s, "    - {}", plugin.name));
-                }
-
-                for (index, executable) in plugin.executables.iter().enumerate() {
-                    let plugin_executable = toolchain.bin_path.join(executable);
-
-                    let mut plugin_name = &plugin.name;
-
+            if verbose && component.name == component::FORC {
+                for plugin in component::Components::collect_plugins()? {
                     if !plugin.is_main_executable() {
-                        print!("  ");
-                        plugin_name = &plugin.executables[index];
+                        bold(|s| writeln!(s, "    - {}", plugin.name));
                     }
 
-                    if latest_package_versions.contains_key(&plugin.name) {
-                        latest_version = &latest_package_versions[&plugin.name];
-                    }
+                    for (index, executable) in plugin.executables.iter().enumerate() {
+                        let plugin_executable = toolchain.bin_path.join(executable);
 
-                    check_plugin(&plugin_executable, plugin_name, latest_version)?;
+                        let mut plugin_name = &plugin.name;
+
+                        if !plugin.is_main_executable() {
+                            print!("  ");
+                            plugin_name = &plugin.executables[index];
+                        }
+
+                        if latest_package_versions.contains_key(&plugin.name) {
+                            latest_version = &latest_package_versions[&plugin.name];
+                        }
+
+                        check_plugin(&plugin_executable, plugin_name, latest_version)?;
+                    }
                 }
             }
         }

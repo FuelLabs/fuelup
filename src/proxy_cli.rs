@@ -38,18 +38,24 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
         toolchain_override = ToolchainOverride::parse(&fuel_toolchain_toml).ok();
     }
 
-    let bin_path = match toolchain_override {
+    let (bin_path, toolchain_name) = match toolchain_override {
         Some(to) => {
             let name = match DistToolchainDescription::from_str(&to.toolchain.name) {
                 Ok(n) => n.to_string(),
                 Err(_) => to.toolchain.name,
             };
-            toolchains_dir()
-                .join(name.to_string())
-                .join("bin")
-                .join(proc_name)
+            (
+                toolchains_dir()
+                    .join(name.to_string())
+                    .join("bin")
+                    .join(proc_name),
+                name.to_string(),
+            )
         }
-        None => toolchain.bin_path.join(proc_name),
+        None => (
+            toolchain.bin_path.join(proc_name),
+            toolchain.name.to_owned(),
+        ),
     };
 
     let mut cmd = Command::new(bin_path);
@@ -57,16 +63,16 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
     cmd.args(args);
     cmd.stdin(Stdio::inherit());
 
-    return exec(&mut cmd, proc_name, toolchain);
+    return exec(&mut cmd, proc_name, &toolchain_name);
 
-    fn exec(cmd: &mut Command, proc_name: &str, toolchain: &Toolchain) -> io::Result<ExitCode> {
+    fn exec(cmd: &mut Command, proc_name: &str, toolchain_name: &str) -> io::Result<ExitCode> {
         let error = cmd.exec();
         match error.kind() {
             ErrorKind::NotFound => Err(Error::new(
                 ErrorKind::NotFound,
                 format!(
                     "component '{}' not found in currently active toolchain '{}'",
-                    proc_name, toolchain.name
+                    proc_name, toolchain_name
                 ),
             )),
             _ => Err(error),

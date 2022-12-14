@@ -57,7 +57,7 @@ pub fn list(_command: ListCommand) -> Result<()> {
                 .output()
             {
                 let output = String::from_utf8_lossy(&o.stdout).into_owned();
-                output.split_whitespace().nth(1).map_or_else(
+                output.split_whitespace().last().map_or_else(
                     || None,
                     |v| Version::parse(v).map_or_else(|_| None, |v| Some(v.to_string())),
                 )

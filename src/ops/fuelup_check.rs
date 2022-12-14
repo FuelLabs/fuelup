@@ -7,7 +7,7 @@ use crate::{
     target_triple::TargetTriple,
     toolchain::{DistToolchainDescription, Toolchain},
 };
-use anyhow::{bail, Result};
+use anyhow::Result;
 use component::{self, Components};
 use semver::Version;
 use std::io::Write;
@@ -111,7 +111,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
     bold(|s| writeln!(s, "{}", &toolchain.name));
 
     for component in Components::collect_exclude_plugins()? {
-        if let Some(mut latest_version) = latest_package_versions.get(&component.name) {
+        if let Some(latest_version) = latest_package_versions.get(&component.name) {
             let component_executable = toolchain.bin_path.join(&component.name);
             match Command::new(&component_executable)
                 .arg("--version")

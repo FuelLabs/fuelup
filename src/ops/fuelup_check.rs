@@ -57,7 +57,7 @@ fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version
     {
         Ok(o) => {
             let output = String::from_utf8_lossy(&o.stdout).into_owned();
-            match output.split_whitespace().nth(1) {
+            match output.split_whitespace().last() {
                 Some(v) => {
                     let version = Version::parse(v)?;
                     print!("    - ");
@@ -120,7 +120,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
             Ok(o) => {
                 let output = String::from_utf8_lossy(&o.stdout).into_owned();
 
-                match output.split_whitespace().nth(1) {
+                match output.split_whitespace().last() {
                     Some(v) => {
                         let version = Version::parse(v)?;
                         bold(|s| write!(s, "  {} - ", &component.name));

@@ -10,6 +10,7 @@ use crate::{
     path::fuelup_dir,
     target_triple::TargetTriple,
     toolchain::Toolchain,
+    toolchain_override::ToolchainOverride,
 };
 
 fn exec_show_version(component_executable: &Path) -> Result<()> {
@@ -51,14 +52,26 @@ pub fn show() -> Result<()> {
 
     print_header("installed toolchains");
     let cfg = Config::from_env()?;
-    let active_toolchain = Toolchain::from_settings()?;
+    let mut active_toolchain = Toolchain::from_settings()?;
+
+    let to = ToolchainOverride::from_file();
 
     for toolchain in cfg.list_toolchains()? {
+        let mut message = toolchain.clone();
         if toolchain == active_toolchain.name {
-            info!("{} (default)", toolchain);
-        } else {
-            info!("{}", toolchain);
+            message.push_str(" (default)")
         }
+
+        if let Some(to) = to.as_ref() {
+            if toolchain == to.toolchain.name {
+                message.push_str(" (override)")
+            }
+        }
+        info!("{}", message)
+    }
+
+    if let Some(to) = to.as_ref() {
+        active_toolchain = Toolchain::from_path(&to.toolchain.name)?;
     }
 
     print_header("\nactive toolchain");

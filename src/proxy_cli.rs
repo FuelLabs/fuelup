@@ -7,10 +7,8 @@ use std::str::FromStr;
 use std::{env, io};
 use tracing::warn;
 
-use crate::download::DownloadCfg;
 use crate::file;
 use crate::path::get_fuel_toolchain;
-use crate::target_triple::TargetTriple;
 use crate::toolchain::{DistToolchainDescription, Toolchain};
 use crate::toolchain_override::ToolchainOverride;
 use component::Components;
@@ -31,24 +29,6 @@ pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
     Ok(ExitCode::SUCCESS)
 }
 
-fn install_from_override(toolchain: &Toolchain, components: &[String], called: &str) -> Result<()> {
-    for component in components {
-        if !toolchain.has_component(component) {
-            let target_triple = TargetTriple::from_component(component)
-                .unwrap_or_else(|_| panic!("Failed to create target triple for '{}'", component));
-            if let Ok(download_cfg) = DownloadCfg::new(called, target_triple, None) {
-                toolchain.add_component(download_cfg).unwrap_or_else(|_| {
-                    panic!(
-                        "Failed to add component '{}' to toolchain '{}'",
-                        component, toolchain.name,
-                    )
-                });
-            }
-        }
-    }
-    Ok(())
-}
-
 fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io::Result<ExitCode> {
     let mut toolchain_override: Option<ToolchainOverride> = None;
 
@@ -66,27 +46,18 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
         Some(to) => {
             let name = match DistToolchainDescription::from_str(&to.toolchain.name) {
                 Ok(n) => n.to_string(),
-                Err(_) => to.toolchain.name,
+                Err(_) => to.toolchain.name.clone(),
             };
 
             let toolchain = Toolchain::from_path(&name)
                 .unwrap_or_else(|_| panic!("Failed to create toolchain '{}' from path", &name));
-            match to.toolchain.components.as_deref() {
-                    Some([]) | None => warn!(
-                        "warning: overriding toolchain '{}' in fuel-toolchain.toml does not have any components listed",
-                        &name
-                    ),
 
-                    Some(components) => {
-                        if let Err(e) = install_from_override(&toolchain, components, proc_name) {
-
-                            warn!(
-                                "warning: could not install toolchain from fuel-toolchain.toml: {}",
-                                e
-                            )
-                        }
-                }
-                    };
+            if let Err(e) = to.install_components(&toolchain, proc_name) {
+                warn!(
+                    "warning: could not install toolchain from fuel-toolchain.toml: {}",
+                    e
+                )
+            }
             (toolchain.bin_path.join(proc_name), name)
         }
         None => (

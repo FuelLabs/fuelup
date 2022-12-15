@@ -1,6 +1,9 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use toml_edit::de;
+use tracing::warn;
+
+use crate::{download::DownloadCfg, target_triple::TargetTriple, toolchain::Toolchain};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ToolchainOverride {
@@ -17,5 +20,33 @@ impl ToolchainOverride {
     pub(crate) fn parse(toml: &str) -> Result<Self> {
         let _override: ToolchainOverride = de::from_str(toml)?;
         Ok(_override)
+    }
+
+    pub fn install_components(&self, toolchain: &Toolchain, called: &str) -> Result<()> {
+        match self.toolchain.components.as_deref() {
+            Some([]) | None => warn!(
+                "warning: overriding toolchain '{}' in fuel-toolchain.toml does not have any components listed",
+                &self.toolchain.name
+            ),
+            Some(components) => {
+                for component in components {
+                    if !toolchain.has_component(component) {
+                        let target_triple = TargetTriple::from_component(component).unwrap_or_else(|_| {
+                            panic!("Failed to create target triple for '{}'", component)
+                        });
+
+                        if let Ok(download_cfg) = DownloadCfg::new(called, target_triple, None) {
+                            toolchain.add_component(download_cfg).unwrap_or_else(|_| {
+                                panic!(
+                                    "Failed to add component '{}' to toolchain '{}'",
+                                    component, toolchain.name,
+                                )
+                            });
+                        }
+                    }
+                }
+            }
+        };
+        Ok(())
     }
 }

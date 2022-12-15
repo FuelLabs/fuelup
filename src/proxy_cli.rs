@@ -33,16 +33,16 @@ pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
 
 fn install_from_override(toolchain: &Toolchain, components: &[String], called: &str) -> Result<()> {
     for component in components {
-        if !toolchain.has_component(&component) {
-            let target_triple = TargetTriple::from_component(&component).expect(&format!(
-                "Failed to create target triple for '{}'",
-                component
-            ));
+        if !toolchain.has_component(component) {
+            let target_triple = TargetTriple::from_component(component)
+                .unwrap_or_else(|_| panic!("Failed to create target triple for '{}'", component));
             if let Ok(download_cfg) = DownloadCfg::new(called, target_triple, None) {
-                toolchain.add_component(download_cfg).expect(&format!(
-                    "Failed to add component '{}' to toolchain '{}'",
-                    component, toolchain.name,
-                ));
+                toolchain.add_component(download_cfg).unwrap_or_else(|_| {
+                    panic!(
+                        "Failed to add component '{}' to toolchain '{}'",
+                        component, toolchain.name,
+                    )
+                });
             }
         }
     }
@@ -70,7 +70,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
             };
 
             let toolchain = Toolchain::from_path(&name)
-                .expect(&format!("Failed to create toolchain '{}' from path", &name));
+                .unwrap_or_else(|_| panic!("Failed to create toolchain '{}' from path", &name));
             match to.toolchain.components.as_deref() {
                     Some([]) | None => warn!(
                         "warning: overriding toolchain '{}' in fuel-toolchain.toml does not have any components listed",
@@ -78,7 +78,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
                     ),
 
                     Some(components) => {
-                        if let Err(e) = install_from_override(&toolchain, &components, proc_name) {
+                        if let Err(e) = install_from_override(&toolchain, components, proc_name) {
 
                             warn!(
                                 "warning: could not install toolchain from fuel-toolchain.toml: {}",

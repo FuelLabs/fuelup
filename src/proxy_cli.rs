@@ -7,8 +7,6 @@ use std::str::FromStr;
 use std::{env, io};
 use tracing::warn;
 
-use crate::file;
-use crate::path::get_fuel_toolchain;
 use crate::toolchain::{DistToolchainDescription, Toolchain};
 use crate::toolchain_override::ToolchainOverride;
 use component::Components;
@@ -30,17 +28,7 @@ pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
 }
 
 fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io::Result<ExitCode> {
-    let mut toolchain_override: Option<ToolchainOverride> = None;
-
-    if let Some(fuel_toolchain_toml_file) = get_fuel_toolchain() {
-        if let Ok(fuel_toolchain_toml) =
-            file::read_file("fuel-toolchain", &fuel_toolchain_toml_file)
-        {
-            toolchain_override = ToolchainOverride::parse(&fuel_toolchain_toml)
-                .map(Option::Some)
-                .expect("Failed parsing fuel-toolchain.toml at project root");
-        }
-    }
+    let toolchain_override: Option<ToolchainOverride> = ToolchainOverride::from_file();
 
     let (bin_path, toolchain_name) = match toolchain_override {
         Some(to) => {

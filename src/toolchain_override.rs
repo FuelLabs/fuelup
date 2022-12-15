@@ -3,7 +3,10 @@ use serde::{Deserialize, Serialize};
 use toml_edit::de;
 use tracing::warn;
 
-use crate::{download::DownloadCfg, target_triple::TargetTriple, toolchain::Toolchain};
+use crate::{
+    download::DownloadCfg, file, path::get_fuel_toolchain_toml, target_triple::TargetTriple,
+    toolchain::Toolchain,
+};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ToolchainOverride {
@@ -20,6 +23,19 @@ impl ToolchainOverride {
     pub(crate) fn parse(toml: &str) -> Result<Self> {
         let _override: ToolchainOverride = de::from_str(toml)?;
         Ok(_override)
+    }
+
+    pub fn from_file() -> Option<ToolchainOverride> {
+        if let Some(fuel_toolchain_toml_file) = get_fuel_toolchain_toml() {
+            match file::read_file("fuel-toolchain", &fuel_toolchain_toml_file) {
+                Ok(f) => ToolchainOverride::parse(&f)
+                    .map(Option::Some)
+                    .expect("Failed parsing fuel-toolchain.toml at project root"),
+                Err(_) => None,
+            }
+        } else {
+            None
+        }
     }
 
     pub fn install_components(&self, toolchain: &Toolchain, called: &str) -> Result<()> {

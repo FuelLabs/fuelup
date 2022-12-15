@@ -136,7 +136,7 @@ fn find_parent_dir_with_file(starter_path: &Path, file_name: &str) -> Option<Pat
     None
 }
 
-pub fn get_fuel_toolchain() -> Option<PathBuf> {
+pub fn get_fuel_toolchain_toml() -> Option<PathBuf> {
     let parent_dir =
         find_parent_dir_with_file(&std::env::current_dir().unwrap(), "fuel-toolchain.toml");
     parent_dir.map(|p| p.join("fuel-toolchain.toml"))

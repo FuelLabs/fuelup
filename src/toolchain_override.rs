@@ -10,6 +10,7 @@ pub struct ToolchainOverride {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ToolchainCfg {
     pub name: String,
+    pub components: Option<Vec<String>>,
 }
 
 impl ToolchainOverride {

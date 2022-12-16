@@ -239,29 +239,35 @@ fn fuelup_toolchain_uninstall_active_switches_default() -> Result<()> {
 
 #[test]
 fn fuelup_check() -> Result<()> {
+    let latest = format!("latest-{}\n", TargetTriple::from_host().unwrap());
+    let beta_1 = format!("beta-1-{}\n", TargetTriple::from_host().unwrap());
+    let forc = "forc -";
+    let fuel_core = "fuel-core -";
+    let fuel_indexer = "fuel-indexer -";
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let output = cfg.fuelup(&["check"]);
-        assert!(output.status.success());
+        assert!(!output.stdout.contains(&latest));
+        assert!(!output.stdout.contains(forc));
+        assert!(!output.stdout.contains(fuel_core));
+        assert!(!output.stdout.contains(fuel_indexer));
     })?;
 
     // Test that only the 'latest' toolchain shows.
     testcfg::setup(FuelupState::LatestAndCustomInstalled, &|cfg| {
         let output = cfg.fuelup(&["check"]);
-        assert_eq!(
-            output.stdout,
-            format!("latest-{}\n\n", TargetTriple::from_host().unwrap())
-        );
-        assert!(output.status.success());
+        assert!(output.stdout.contains(&latest));
+        assert!(output.stdout.contains(forc));
+        assert!(output.stdout.contains(fuel_core));
+        assert!(output.stdout.contains(fuel_indexer));
     })?;
 
     // Test that toolchain names with '-' inside are parsed correctly.
     testcfg::setup(FuelupState::Beta1Installed, &|cfg| {
         let output = cfg.fuelup(&["check"]);
-        assert_eq!(
-            output.stdout,
-            format!("beta-1-{}\n\n", TargetTriple::from_host().unwrap())
-        );
-        assert!(output.status.success());
+        assert!(output.stdout.contains(&beta_1));
+        assert!(output.stdout.contains(forc));
+        assert!(output.stdout.contains(fuel_core));
+        assert!(!output.stdout.contains(fuel_indexer));
     })?;
 
     Ok(())

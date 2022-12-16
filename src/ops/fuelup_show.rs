@@ -20,7 +20,7 @@ fn exec_show_version(component_executable: &Path) -> Result<()> {
     {
         Ok(o) => {
             let output = String::from_utf8_lossy(&o.stdout).into_owned();
-            match output.split_whitespace().nth(1) {
+            match output.split_whitespace().last() {
                 Some(v) => {
                     let version = Version::parse(v)?;
                     info!(" : {}", version);

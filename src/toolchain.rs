@@ -8,7 +8,7 @@ use std::str::FromStr;
 use time::Date;
 use tracing::{error, info};
 
-use crate::channel::{self, is_beta_toolchain};
+use crate::channel::{self, is_apps_repo_toolchain, is_beta_toolchain};
 use crate::constants::DATE_FORMAT;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
@@ -129,7 +129,7 @@ impl FromStr for DistToolchainDescription {
                     target,
                 }),
                 Err(e) => {
-                    if is_beta_toolchain(s) {
+                    if is_beta_toolchain(s) || is_apps_repo_toolchain(s) {
                         Ok(Self {
                             name: DistToolchainName::from_str(s)?,
                             date: None,

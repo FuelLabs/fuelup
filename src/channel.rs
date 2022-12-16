@@ -44,6 +44,10 @@ pub fn is_beta_toolchain(name: &str) -> bool {
     name == BETA_1 || name == BETA_2
 }
 
+pub fn is_apps_repo_toolchain(name: &str) -> bool {
+    name == APPS_REPO
+}
+
 impl Channel {
     /// The returned `String` is a sha256 hash of the downloaded toolchain TOML bytes.
     pub fn from_dist_channel(desc: &DistToolchainDescription) -> Result<(Self, String)> {

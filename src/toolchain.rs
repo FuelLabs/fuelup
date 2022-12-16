@@ -21,6 +21,7 @@ use crate::target_triple::TargetTriple;
 
 pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
     channel::LATEST,
+    channel::APPS_REPO,
     channel::BETA_1,
     channel::BETA_2,
     channel::NIGHTLY,
@@ -29,6 +30,7 @@ pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum DistToolchainName {
+    AppsRepo,
     Beta1,
     Beta2,
     Latest,
@@ -42,6 +44,7 @@ impl fmt::Display for DistToolchainName {
             DistToolchainName::Nightly => write!(f, "{}", channel::NIGHTLY),
             DistToolchainName::Beta1 => write!(f, "{}", channel::BETA_1),
             DistToolchainName::Beta2 => write!(f, "{}", channel::BETA_2),
+            DistToolchainName::AppsRepo => write!(f, "{}", channel::APPS_REPO),
         }
     }
 }
@@ -54,6 +57,7 @@ impl FromStr for DistToolchainName {
             channel::NIGHTLY => Ok(Self::Nightly),
             channel::BETA_1 => Ok(Self::Beta1),
             channel::BETA_2 => Ok(Self::Beta2),
+            channel::APPS_REPO => Ok(Self::AppsRepo),
             _ => bail!("Unknown name for toolchain: {}", s),
         }
     }

@@ -1,6 +1,7 @@
 use anyhow::Result;
 use fuelup::settings::SettingsFile;
 use fuelup::target_triple::TargetTriple;
+use fuelup::toolchain_override::{ToolchainCfg, ToolchainOverride};
 use std::os::unix::fs::OpenOptionsExt;
 use std::{
     env, fs,
@@ -20,8 +21,11 @@ pub enum FuelupState {
     LatestAndNightlyInstalled,
     NightlyAndNightlyDateInstalled,
     Beta1Installed,
+    LatestAndNightlyWithBetaOverride,
+    LatestAndCustomWithCustomOverride,
 }
 
+#[derive(Debug)]
 pub struct TestCfg {
     pub fuelup_path: PathBuf,
     pub root: PathBuf,
@@ -82,6 +86,7 @@ impl TestCfg {
     pub fn fuelup(&mut self, args: &[&str]) -> TestOutput {
         let output = Command::new(&self.fuelup_path)
             .args(args)
+            .current_dir(&self.home)
             .env("HOME", &self.home)
             .env("CARGO_HOME", self.home.join(".cargo").to_str().unwrap())
             .env(
@@ -95,6 +100,7 @@ impl TestCfg {
             .env("TERM", "dumb")
             .output()
             .expect("Failed to execute command");
+
         let stdout = String::from_utf8(output.stdout).unwrap();
         let stderr = String::from_utf8(output.stderr).unwrap();
         TestOutput {
@@ -142,6 +148,15 @@ fn setup_settings_file(settings_dir: &Path, default_toolchain: &str) -> Result<(
         format!("default_toolchain = \"{}\"", default_toolchain),
     )
     .expect("Failed to copy settings");
+    Ok(())
+}
+
+fn setup_override_file(override_dir: &Path, override_str: ToolchainOverride) -> Result<()> {
+    let path = override_dir.join("fuel-toolchain.toml");
+
+    let document = override_str.to_string()?;
+
+    fs::write(path, document).expect("Failed to write fuel-toolchain.toml");
     Ok(())
 }
 
@@ -241,6 +256,28 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
                 &format!("beta-1-{}-{}", DATE, target),
             )?;
             setup_settings_file(&tmp_fuelup_root_path, &beta_1)?;
+        }
+        FuelupState::LatestAndNightlyWithBetaOverride => {
+            setup_toolchain(&tmp_fuelup_root_path, &latest)?;
+            setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
+            setup_settings_file(&tmp_fuelup_root_path, &latest)?;
+            setup_override_file(
+                &tmp_home,
+                ToolchainOverride {
+                    toolchain: ToolchainCfg::new(beta_1, None),
+                },
+            )?;
+        }
+        FuelupState::LatestAndCustomWithCustomOverride => {
+            setup_toolchain(&tmp_fuelup_root_path, &latest)?;
+            setup_toolchain(&tmp_fuelup_root_path, "my-toolchain")?;
+            setup_settings_file(&tmp_fuelup_root_path, &latest)?;
+            setup_override_file(
+                &tmp_home,
+                ToolchainOverride {
+                    toolchain: ToolchainCfg::new("my-toolchain".to_string(), None),
+                },
+            )?;
         }
     }
 

@@ -319,6 +319,79 @@ my_toolchain (default)
 }
 
 #[test]
+fn fuelup_show_override() -> Result<()> {
+    testcfg::setup(FuelupState::LatestAndNightlyWithBetaOverride, &|cfg| {
+        let stdout = cfg.fuelup(&["show"]).stdout;
+
+        let mut lines = stdout.lines();
+        assert_eq!(
+            lines.next().unwrap(),
+            &format!("Default host: {}", TargetTriple::from_host().unwrap())
+        );
+        assert!(lines.next().unwrap().contains("fuelup home: "));
+
+        let target = TargetTriple::from_host().unwrap();
+        let expected_stdout = &format!(
+            r#"
+installed toolchains
+--------------------
+latest-{target} (default)
+nightly-{target}
+
+active toolchain
+-----------------
+beta-1-{target} (override)
+  forc - not found
+    - forc-client
+      - forc-deploy - not found
+      - forc-run - not found
+    - forc-doc - not found
+    - forc-explore - not found
+    - forc-fmt - not found
+    - forc-index - not found
+    - forc-lsp - not found
+    - forc-wallet - not found
+  fuel-core - not found
+  fuel-indexer - not found
+"#
+        );
+        assert!(stdout.contains(expected_stdout));
+    })?;
+    Ok(())
+}
+
+#[test]
+fn fuelup_show_override_custom_toolchain() -> Result<()> {
+    testcfg::setup(FuelupState::LatestAndCustomWithCustomOverride, &|cfg| {
+        let stdout = cfg.fuelup(&["show"]).stdout;
+
+        let mut lines = stdout.lines();
+        assert_eq!(
+            lines.next().unwrap(),
+            &format!("Default host: {}", TargetTriple::from_host().unwrap())
+        );
+        assert!(lines.next().unwrap().contains("fuelup home: "));
+
+        let target = TargetTriple::from_host().unwrap();
+        let expected_stdout = &format!(
+            r#"
+installed toolchains
+--------------------
+latest-{target} (default)
+my-toolchain (override)
+
+active toolchain
+-----------------
+my-toolchain (override)
+"#
+        );
+        assert!(stdout.contains(expected_stdout));
+    })?;
+
+    Ok(())
+}
+
+#[test]
 fn fuelup_self_update() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["self", "update"]);
@@ -422,6 +495,19 @@ fn fuelup_default_nightly_and_nightly_date() -> Result<()> {
             DATE,
             TargetTriple::from_host().unwrap()
         );
+        assert_eq!(output.stdout, expected_stdout);
+    })?;
+
+    Ok(())
+}
+
+#[test]
+fn fuelup_default_override() -> Result<()> {
+    testcfg::setup(FuelupState::LatestAndNightlyWithBetaOverride, &|cfg| {
+        let output = cfg.fuelup(&["default"]);
+        let triple = TargetTriple::from_host().unwrap();
+        let expected_stdout = format!("latest-{triple} (default), beta-1-{triple} (override)\n");
+
         assert_eq!(output.stdout, expected_stdout);
     })?;
 

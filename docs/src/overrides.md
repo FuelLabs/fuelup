@@ -58,4 +58,3 @@ components = []
 [`fuel-toolchain.toml`]: overrides.md#the-toolchain-file
 [custom toolchain]: concepts/toolchains.md#custom-toolchains
 [`latest`]: concepts/channels/latest.md
-

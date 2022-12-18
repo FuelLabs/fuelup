@@ -5,7 +5,7 @@
 
 Currently, the only way of overriding toolchains is through the [`fuel-toolchain.toml`] file.
 
-# The toolchain file
+## The toolchain file
 
 Using the `fuel-toolchain.toml` file is a way to have projects 'pinned' to specific versions of Sway and have this information reflected in their source repository.
 

@@ -54,7 +54,7 @@ pub fn show() -> Result<()> {
     let cfg = Config::from_env()?;
     let mut active_toolchain = Toolchain::from_settings()?;
 
-    let to = ToolchainOverride::from_file();
+    let toolchain_override = ToolchainOverride::from_file();
     let mut active_toolchain_description = String::new();
 
     for toolchain in cfg.list_toolchains()? {
@@ -63,7 +63,7 @@ pub fn show() -> Result<()> {
             message.push_str(" (default)")
         }
 
-        if let Some(to) = to.as_ref() {
+        if let Some(to) = toolchain_override.as_ref() {
             if toolchain == to.toolchain.name {
                 message.push_str(" (override)");
             }
@@ -71,7 +71,7 @@ pub fn show() -> Result<()> {
         info!("{}", message)
     }
 
-    if let Some(to) = to.as_ref() {
+    if let Some(to) = toolchain_override.as_ref() {
         active_toolchain = Toolchain::from_path(&to.toolchain.name)?;
         active_toolchain_description.push_str("(override)");
     } else {

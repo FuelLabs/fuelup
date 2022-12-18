@@ -1,6 +1,7 @@
 use anyhow::Result;
 use component::{self, Components};
 use semver::Version;
+use std::str::FromStr;
 use std::{io::Write, path::Path};
 use tracing::{error, info};
 
@@ -9,7 +10,7 @@ use crate::{
     fmt::{bold, print_header},
     path::fuelup_dir,
     target_triple::TargetTriple,
-    toolchain::Toolchain,
+    toolchain::{DistToolchainDescription, Toolchain},
     toolchain_override::ToolchainOverride,
 };
 
@@ -57,22 +58,32 @@ pub fn show() -> Result<()> {
     let toolchain_override = ToolchainOverride::from_file();
     let mut active_toolchain_description = String::new();
 
+    let override_name = if let Some(toolchain_override) = toolchain_override.as_ref() {
+        match DistToolchainDescription::from_str(&toolchain_override.toolchain.name) {
+            Ok(desc) => Some(desc.to_string()),
+            Err(_) => Some(toolchain_override.toolchain.name.clone()),
+        }
+    } else {
+        None
+    };
+
     for toolchain in cfg.list_toolchains()? {
         let mut message = toolchain.clone();
         if toolchain == active_toolchain.name {
             message.push_str(" (default)")
         }
 
-        if let Some(to) = toolchain_override.as_ref() {
-            if toolchain == to.toolchain.name {
-                message.push_str(" (override)");
-            }
+        if Some(toolchain) == override_name {
+            message.push_str(" (override)");
         }
         info!("{}", message)
     }
 
-    if let Some(to) = toolchain_override.as_ref() {
-        active_toolchain = Toolchain::from_path(&to.toolchain.name)?;
+    if let Some(name) = override_name {
+        if name == active_toolchain.name {
+            active_toolchain_description.push_str("(default) ");
+        }
+        active_toolchain = Toolchain::from_path(&name)?;
         active_toolchain_description.push_str("(override)");
     } else {
         active_toolchain_description.push_str("(default)");

@@ -55,6 +55,7 @@ pub fn show() -> Result<()> {
     let mut active_toolchain = Toolchain::from_settings()?;
 
     let to = ToolchainOverride::from_file();
+    let mut active_toolchain_description = String::new();
 
     for toolchain in cfg.list_toolchains()? {
         let mut message = toolchain.clone();
@@ -64,7 +65,7 @@ pub fn show() -> Result<()> {
 
         if let Some(to) = to.as_ref() {
             if toolchain == to.toolchain.name {
-                message.push_str(" (override)")
+                message.push_str(" (override)");
             }
         }
         info!("{}", message)
@@ -72,11 +73,14 @@ pub fn show() -> Result<()> {
 
     if let Some(to) = to.as_ref() {
         active_toolchain = Toolchain::from_path(&to.toolchain.name)?;
-    }
+        active_toolchain_description.push_str("(override)");
+    } else {
+        active_toolchain_description.push_str("(default)");
+    };
 
     print_header("\nactive toolchain");
 
-    info!("{} (default)", active_toolchain.name);
+    info!("{} {}", active_toolchain.name, active_toolchain_description);
 
     for component in Components::collect_exclude_plugins()? {
         bold(|s| write!(s, "  {}", &component.name));

@@ -17,7 +17,11 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
         None => {
             let mut current_default = format!("{} (default)", current_toolchain.name);
             if let Some(to) = ToolchainOverride::from_file() {
-                current_default.push_str(&format!(", {} (override)", to.toolchain.name))
+                let name = match DistToolchainDescription::from_str(&to.toolchain.name) {
+                    Ok(desc) => desc.to_string(),
+                    Err(_) => to.toolchain.name,
+                };
+                current_default.push_str(&format!(", {} (override)", name))
             }
 
             info!("{}", current_default);

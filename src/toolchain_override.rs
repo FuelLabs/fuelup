@@ -1,6 +1,6 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use toml_edit::de;
+use toml_edit::{de, ser, Document};
 use tracing::warn;
 
 use crate::{
@@ -19,10 +19,24 @@ pub struct ToolchainCfg {
     pub components: Option<Vec<String>>,
 }
 
+impl ToolchainCfg {
+    pub fn new(name: String, components: Option<Vec<String>>) -> Self {
+        Self { name, components }
+    }
+}
+
 impl ToolchainOverride {
     pub(crate) fn parse(toml: &str) -> Result<Self> {
         let _override: ToolchainOverride = de::from_str(toml)?;
         Ok(_override)
+    }
+
+    pub(crate) fn to_toml(&self) -> std::result::Result<Document, ser::Error> {
+        ser::to_document(&self)
+    }
+
+    pub fn to_string(&self) -> Result<String> {
+        Ok(self.to_toml()?.to_string())
     }
 
     pub fn from_file() -> Option<ToolchainOverride> {

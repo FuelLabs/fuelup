@@ -35,7 +35,7 @@ pub struct Component {
 
 impl Component {
     pub fn new(name: String, version: Option<Version>) -> Self {
-        return Self { name, version };
+        Self { name, version }
     }
 }
 
@@ -98,7 +98,7 @@ impl FromStr for Component {
 
 impl ToolchainCfg {
     pub fn new(name: String, components: Option<Vec<Component>>) -> Self {
-        return Self { name, components };
+        Self { name, components }
     }
 }
 

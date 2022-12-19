@@ -10,6 +10,25 @@ use crate::{
     toolchain::Toolchain,
 };
 
+pub fn split_versioned_component(
+    maybe_versioned_component: &str,
+) -> Result<(String, Option<Version>)> {
+    match maybe_versioned_component.split_once('@') {
+        Some(t) => {
+            let v = match Version::from_str(t.1) {
+                Ok(v) => Some(v),
+                Err(e) => bail!(
+                    "Invalid version input '{}' while adding component: {}",
+                    t.1,
+                    e
+                ),
+            };
+            Ok((t.0.to_string(), v))
+        }
+        None => Ok((maybe_versioned_component.to_string(), None)),
+    }
+}
+
 pub fn add(command: AddCommand) -> Result<()> {
     let AddCommand {
         maybe_versioned_component,
@@ -26,38 +45,28 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
         )
     };
 
-    let (component, version): (&str, Option<Version>) =
-        match maybe_versioned_component.split_once('@') {
-            Some(t) => {
-                let v = match Version::from_str(t.1) {
-                    Ok(v) => Some(v),
-                    Err(e) => bail!(
-                        "Invalid version input '{}' while adding component: {}",
-                        t.1,
-                        e
-                    ),
-                };
-                (t.0, v)
-            }
-            None => (&maybe_versioned_component, None),
-        };
+    let (component, version): (String, Option<Version>) =
+        split_versioned_component(&maybe_versioned_component)?;
 
-    if Component::is_default_forc_plugin(component) {
+    if Component::is_default_forc_plugin(&component) {
         bail!(
             "'{}' is a default plugin that comes with core forc; please do 'fuelup component add forc' if you would like to install or update it.",
             &maybe_versioned_component
         );
     }
 
-    if toolchain.has_component(component) {
+    if toolchain.has_component(&component) {
         info!(
             "{} already exists in toolchain '{}'; replacing existing version with `latest` version",
             &maybe_versioned_component, toolchain.name
         );
     }
 
-    let download_cfg =
-        DownloadCfg::new(component, TargetTriple::from_component(component)?, version)?;
+    let download_cfg = DownloadCfg::new(
+        &component,
+        TargetTriple::from_component(&component)?,
+        version,
+    )?;
     toolchain.add_component(download_cfg)?;
 
     Ok(())

@@ -1,7 +1,7 @@
 use anyhow::Result;
 use fuelup::settings::SettingsFile;
 use fuelup::target_triple::TargetTriple;
-use fuelup::toolchain_override::{ToolchainCfg, ToolchainOverride};
+use fuelup::toolchain_override::{Component, ToolchainCfg, ToolchainOverride};
 use std::os::unix::fs::OpenOptionsExt;
 use std::{
     env, fs,
@@ -272,10 +272,11 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_toolchain(&tmp_fuelup_root_path, "my-toolchain")?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
+            let forc = Component::new("forc".to_string(), None);
             setup_override_file(
                 tmp_home,
                 ToolchainOverride {
-                    toolchain: ToolchainCfg::new("my-toolchain".to_string(), None),
+                    toolchain: ToolchainCfg::new("my-toolchain".to_string(), Some(vec![forc])),
                 },
             )?;
         }

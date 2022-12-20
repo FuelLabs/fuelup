@@ -1,5 +1,8 @@
 use anyhow::Result;
-use fuelup::{channel, fmt::format_toolchain_with_target, target_triple::TargetTriple};
+use fuelup::{
+    channel, constants::FUEL_TOOLCHAIN_TOML_FILE, fmt::format_toolchain_with_target,
+    target_triple::TargetTriple,
+};
 use std::{env, path::Path};
 
 mod testcfg;
@@ -331,6 +334,7 @@ fn fuelup_show_override() -> Result<()> {
         assert!(lines.next().unwrap().contains("fuelup home: "));
 
         let target = TargetTriple::from_host().unwrap();
+        println!("stdout: {}", stdout);
         let expected_stdout = &format!(
             r#"
 installed toolchains
@@ -340,7 +344,7 @@ nightly-{target}
 
 active toolchain
 -----------------
-beta-1-{target} (override)
+beta-1-{target} (override), path: {}
   forc - not found
     - forc-client
       - forc-deploy - not found
@@ -353,7 +357,8 @@ beta-1-{target} (override)
     - forc-wallet - not found
   fuel-core - not found
   fuel-indexer - not found
-"#
+"#,
+            cfg.home.join(FUEL_TOOLCHAIN_TOML_FILE).display()
         );
         assert!(stdout.contains(expected_stdout));
     })?;
@@ -382,8 +387,9 @@ my-toolchain (override)
 
 active toolchain
 -----------------
-my-toolchain (override)
-"#
+my-toolchain (override), path: {}
+"#,
+            cfg.home.join(FUEL_TOOLCHAIN_TOML_FILE).display()
         );
         assert!(stdout.contains(expected_stdout));
     })?;

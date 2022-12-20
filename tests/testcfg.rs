@@ -152,12 +152,11 @@ fn setup_settings_file(settings_dir: &Path, default_toolchain: &str) -> Result<(
     Ok(())
 }
 
-fn setup_override_file(override_dir: &Path, override_str: ToolchainOverride) -> Result<()> {
-    let path = override_dir.join(FUEL_TOOLCHAIN_TOML_FILE);
+fn setup_override_file(toolchain_override: ToolchainOverride) -> Result<()> {
+    let document = toolchain_override.to_string()?;
 
-    let document = override_str.to_string()?;
-
-    fs::write(path, document).expect(&format!("Failed to write {}", FUEL_TOOLCHAIN_TOML_FILE));
+    fs::write(toolchain_override.path, document)
+        .expect(&format!("Failed to write {}", FUEL_TOOLCHAIN_TOML_FILE));
     Ok(())
 }
 
@@ -262,23 +261,19 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
-            setup_override_file(
-                tmp_home,
-                ToolchainOverride {
-                    toolchain: ToolchainCfg::new(beta_1, None),
-                },
-            )?;
+            setup_override_file(ToolchainOverride {
+                toolchain: ToolchainCfg::new(beta_1, None),
+                path: tmp_home.join(FUEL_TOOLCHAIN_TOML_FILE),
+            })?;
         }
         FuelupState::LatestAndCustomWithCustomOverride => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_toolchain(&tmp_fuelup_root_path, "my-toolchain")?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
-            setup_override_file(
-                tmp_home,
-                ToolchainOverride {
-                    toolchain: ToolchainCfg::new("my-toolchain".to_string(), None),
-                },
-            )?;
+            setup_override_file(ToolchainOverride {
+                toolchain: ToolchainCfg::new("my-toolchain".to_string(), None),
+                path: tmp_home.join(FUEL_TOOLCHAIN_TOML_FILE),
+            })?;
         }
     }
 

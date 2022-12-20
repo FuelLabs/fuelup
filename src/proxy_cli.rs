@@ -41,7 +41,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
             let toolchain = Toolchain::from_path(&name)
                 .unwrap_or_else(|_| panic!("Failed to create toolchain '{}' from path", &name));
 
-            if let Err(e) = to.install_components(&toolchain, proc_name) {
+            if let Err(e) = to.install_missing_components(&toolchain, proc_name) {
                 warn!(
                     "warning: could not install toolchain from {}: {}",
                     FUEL_TOOLCHAIN_TOML_FILE, e

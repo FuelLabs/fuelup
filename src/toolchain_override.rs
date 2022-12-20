@@ -58,7 +58,7 @@ impl ToolchainOverride {
         }
     }
 
-    pub fn install_components(&self, toolchain: &Toolchain, called: &str) -> Result<()> {
+    pub fn install_missing_components(&self, toolchain: &Toolchain, called: &str) -> Result<()> {
         match self.toolchain.components.as_deref() {
             Some([]) | None => warn!(
                 "warning: overriding toolchain '{}' in {} does not have any components listed",

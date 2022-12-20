@@ -47,10 +47,13 @@ impl ToolchainOverride {
             match file::read_file(FUEL_TOOLCHAIN_TOML_FILE, &fuel_toolchain_toml_file) {
                 Ok(f) => ToolchainOverride::parse(&f)
                     .map(Option::Some)
-                    .expect(&format!(
-                        "Failed parsing {} at project root",
-                        FUEL_TOOLCHAIN_TOML_FILE
-                    )),
+                    .unwrap_or_else(|_| {
+                        warn!(
+                            "Failed parsing {} at project root, using default toolchain instead",
+                            FUEL_TOOLCHAIN_TOML_FILE
+                        );
+                        None
+                    }),
                 Err(_) => None,
             }
         } else {

@@ -1,4 +1,5 @@
 use anyhow::Result;
+use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;
 use fuelup::settings::SettingsFile;
 use fuelup::target_triple::TargetTriple;
 use fuelup::toolchain_override::{ToolchainCfg, ToolchainOverride};
@@ -152,11 +153,11 @@ fn setup_settings_file(settings_dir: &Path, default_toolchain: &str) -> Result<(
 }
 
 fn setup_override_file(override_dir: &Path, override_str: ToolchainOverride) -> Result<()> {
-    let path = override_dir.join("fuel-toolchain.toml");
+    let path = override_dir.join(FUEL_TOOLCHAIN_TOML_FILE);
 
     let document = override_str.to_string()?;
 
-    fs::write(path, document).expect("Failed to write fuel-toolchain.toml");
+    fs::write(path, document).expect(&format!("Failed to write {}", FUEL_TOOLCHAIN_TOML_FILE));
     Ok(())
 }
 

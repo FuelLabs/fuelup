@@ -9,6 +9,8 @@ use tracing::warn;
 
 use dirs;
 
+use crate::constants::FUEL_TOOLCHAIN_TOML_FILE;
+
 pub const FUELUP_DIR: &str = ".fuelup";
 
 pub fn fuelup_dir() -> PathBuf {
@@ -138,8 +140,8 @@ fn find_parent_dir_with_file(starter_path: &Path, file_name: &str) -> Option<Pat
 
 pub fn get_fuel_toolchain_toml() -> Option<PathBuf> {
     let parent_dir =
-        find_parent_dir_with_file(&std::env::current_dir().unwrap(), "fuel-toolchain.toml");
-    parent_dir.map(|p| p.join("fuel-toolchain.toml"))
+        find_parent_dir_with_file(&std::env::current_dir().unwrap(), FUEL_TOOLCHAIN_TOML_FILE);
+    parent_dir.map(|p| p.join(FUEL_TOOLCHAIN_TOML_FILE))
 }
 
 #[cfg(unix)]

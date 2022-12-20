@@ -7,6 +7,7 @@ use std::str::FromStr;
 use std::{env, io};
 use tracing::warn;
 
+use crate::constants::FUEL_TOOLCHAIN_TOML_FILE;
 use crate::toolchain::{DistToolchainDescription, Toolchain};
 use crate::toolchain_override::ToolchainOverride;
 use component::Components;
@@ -42,8 +43,8 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
 
             if let Err(e) = to.install_components(&toolchain, proc_name) {
                 warn!(
-                    "warning: could not install toolchain from fuel-toolchain.toml: {}",
-                    e
+                    "warning: could not install toolchain from {}: {}",
+                    FUEL_TOOLCHAIN_TOML_FILE, e
                 )
             }
             (toolchain.bin_path.join(proc_name), name)

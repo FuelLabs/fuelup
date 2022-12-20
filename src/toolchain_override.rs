@@ -4,8 +4,8 @@ use toml_edit::{de, ser, Document};
 use tracing::warn;
 
 use crate::{
-    download::DownloadCfg, file, path::get_fuel_toolchain_toml, target_triple::TargetTriple,
-    toolchain::Toolchain,
+    constants::FUEL_TOOLCHAIN_TOML_FILE, download::DownloadCfg, file,
+    path::get_fuel_toolchain_toml, target_triple::TargetTriple, toolchain::Toolchain,
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -44,10 +44,13 @@ impl ToolchainOverride {
 
     pub fn from_file() -> Option<ToolchainOverride> {
         if let Some(fuel_toolchain_toml_file) = get_fuel_toolchain_toml() {
-            match file::read_file("fuel-toolchain", &fuel_toolchain_toml_file) {
+            match file::read_file(FUEL_TOOLCHAIN_TOML_FILE, &fuel_toolchain_toml_file) {
                 Ok(f) => ToolchainOverride::parse(&f)
                     .map(Option::Some)
-                    .expect("Failed parsing fuel-toolchain.toml at project root"),
+                    .expect(&format!(
+                        "Failed parsing {} at project root",
+                        FUEL_TOOLCHAIN_TOML_FILE
+                    )),
                 Err(_) => None,
             }
         } else {
@@ -58,15 +61,16 @@ impl ToolchainOverride {
     pub fn install_components(&self, toolchain: &Toolchain, called: &str) -> Result<()> {
         match self.toolchain.components.as_deref() {
             Some([]) | None => warn!(
-                "warning: overriding toolchain '{}' in fuel-toolchain.toml does not have any components listed",
-                &self.toolchain.channel
+                "warning: overriding toolchain '{}' in {} does not have any components listed",
+                &self.toolchain.channel, FUEL_TOOLCHAIN_TOML_FILE
             ),
             Some(components) => {
                 for component in components {
                     if !toolchain.has_component(component) {
-                        let target_triple = TargetTriple::from_component(component).unwrap_or_else(|_| {
-                            panic!("Failed to create target triple for '{}'", component)
-                        });
+                        let target_triple =
+                            TargetTriple::from_component(component).unwrap_or_else(|_| {
+                                panic!("Failed to create target triple for '{}'", component)
+                            });
 
                         if let Ok(download_cfg) = DownloadCfg::new(called, target_triple, None) {
                             toolchain.add_component(download_cfg).unwrap_or_else(|_| {

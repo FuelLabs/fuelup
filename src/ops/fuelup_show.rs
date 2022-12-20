@@ -59,9 +59,9 @@ pub fn show() -> Result<()> {
     let mut active_toolchain_description = String::new();
 
     let override_name = if let Some(toolchain_override) = toolchain_override.as_ref() {
-        match DistToolchainDescription::from_str(&toolchain_override.toolchain.name) {
+        match DistToolchainDescription::from_str(&toolchain_override.toolchain.channel) {
             Ok(desc) => Some(desc.to_string()),
-            Err(_) => Some(toolchain_override.toolchain.name.clone()),
+            Err(_) => Some(toolchain_override.toolchain.channel.clone()),
         }
     } else {
         None

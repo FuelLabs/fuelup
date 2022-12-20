@@ -15,13 +15,16 @@ pub struct ToolchainOverride {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ToolchainCfg {
-    pub name: String,
+    pub channel: String,
     pub components: Option<Vec<String>>,
 }
 
 impl ToolchainCfg {
-    pub fn new(name: String, components: Option<Vec<String>>) -> Self {
-        Self { name, components }
+    pub fn new(channel: String, components: Option<Vec<String>>) -> Self {
+        Self {
+            channel,
+            components,
+        }
     }
 }
 
@@ -56,7 +59,7 @@ impl ToolchainOverride {
         match self.toolchain.components.as_deref() {
             Some([]) | None => warn!(
                 "warning: overriding toolchain '{}' in fuel-toolchain.toml does not have any components listed",
-                &self.toolchain.name
+                &self.toolchain.channel
             ),
             Some(components) => {
                 for component in components {

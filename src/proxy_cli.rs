@@ -32,9 +32,9 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
 
     let (bin_path, toolchain_name) = match toolchain_override {
         Some(to) => {
-            let name = match DistToolchainDescription::from_str(&to.toolchain.name) {
+            let name = match DistToolchainDescription::from_str(&to.toolchain.channel) {
                 Ok(n) => n.to_string(),
-                Err(_) => to.toolchain.name.clone(),
+                Err(_) => to.toolchain.channel.clone(),
             };
 
             let toolchain = Toolchain::from_path(&name)

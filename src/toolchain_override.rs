@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use toml_edit::{de, ser, Document};
-use tracing::warn;
+use tracing::{info, warn};
 
 use crate::{
     constants::FUEL_TOOLCHAIN_TOML_FILE, download::DownloadCfg, file,
@@ -70,6 +70,10 @@ impl ToolchainOverride {
                         let target_triple = TargetTriple::from_component(component)?;
 
                         if let Ok(download_cfg) = DownloadCfg::new(called, target_triple, None) {
+                            info!(
+                                "installing missing component '{}' specified in {}",
+                                component, FUEL_TOOLCHAIN_TOML_FILE
+                            );
                             toolchain.add_component(download_cfg)?;
                         };
                     }

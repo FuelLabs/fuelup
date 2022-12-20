@@ -156,7 +156,7 @@ fn setup_override_file(toolchain_override: ToolchainOverride) -> Result<()> {
     let document = toolchain_override.to_string()?;
 
     fs::write(toolchain_override.path, document)
-        .expect(&format!("Failed to write {}", FUEL_TOOLCHAIN_TOML_FILE));
+        .unwrap_or_else(|_| panic!("Failed to write {}", FUEL_TOOLCHAIN_TOML_FILE));
     Ok(())
 }
 

@@ -67,19 +67,11 @@ impl ToolchainOverride {
             Some(components) => {
                 for component in components {
                     if !toolchain.has_component(component) {
-                        let target_triple =
-                            TargetTriple::from_component(component).unwrap_or_else(|_| {
-                                panic!("Failed to create target triple for '{}'", component)
-                            });
+                        let target_triple = TargetTriple::from_component(component)?;
 
                         if let Ok(download_cfg) = DownloadCfg::new(called, target_triple, None) {
-                            toolchain.add_component(download_cfg).unwrap_or_else(|_| {
-                                panic!(
-                                    "Failed to add component '{}' to toolchain '{}'",
-                                    component, toolchain.name,
-                                )
-                            });
-                        }
+                            toolchain.add_component(download_cfg)?;
+                        };
                     }
                 }
             }

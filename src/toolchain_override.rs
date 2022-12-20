@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use toml_edit::{de, ser, Document};
@@ -11,6 +13,7 @@ use crate::{
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ToolchainOverride {
     pub toolchain: ToolchainCfg,
+    pub path: PathBuf,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -29,9 +32,13 @@ impl ToolchainCfg {
 }
 
 impl ToolchainOverride {
-    pub(crate) fn parse(toml: &str) -> Result<Self> {
-        let _override: ToolchainOverride = de::from_str(toml)?;
-        Ok(_override)
+    pub(crate) fn parse(toml: &str, path: PathBuf) -> Result<Self> {
+        let document = toml.parse::<Document>().expect("invalid toml doc");
+        let config: ToolchainCfg = de::from_item(document["toolchain"].clone())?;
+        Ok(ToolchainOverride {
+            toolchain: config,
+            path,
+        })
     }
 
     pub(crate) fn to_toml(&self) -> std::result::Result<Document, ser::Error> {
@@ -45,7 +52,7 @@ impl ToolchainOverride {
     pub fn from_file() -> Option<ToolchainOverride> {
         if let Some(fuel_toolchain_toml_file) = get_fuel_toolchain_toml() {
             match file::read_file(FUEL_TOOLCHAIN_TOML_FILE, &fuel_toolchain_toml_file) {
-                Ok(f) => ToolchainOverride::parse(&f)
+                Ok(f) => ToolchainOverride::parse(&f, fuel_toolchain_toml_file.to_path_buf())
                     .map(Option::Some)
                     .unwrap_or_else(|_| {
                         warn!(

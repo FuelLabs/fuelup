@@ -56,7 +56,6 @@ pub fn show() -> Result<()> {
     let mut active_toolchain = Toolchain::from_settings()?;
 
     let toolchain_override = ToolchainOverride::from_file();
-    let mut active_toolchain_description = String::new();
 
     let override_name = if let Some(toolchain_override) = toolchain_override.as_ref() {
         match DistToolchainDescription::from_str(&toolchain_override.toolchain.channel) {
@@ -79,19 +78,24 @@ pub fn show() -> Result<()> {
         info!("{}", message)
     }
 
-    if let Some(name) = override_name {
-        if name == active_toolchain.name {
-            active_toolchain_description.push_str("(default) ");
+    let mut active_toolchain_message = String::new();
+    if let Some(toolchain_override) = toolchain_override {
+        // We know that the override exists, but we want to show the target triple as well.
+        active_toolchain = Toolchain::from_path(override_name.as_ref().unwrap())?;
+        active_toolchain_message.push_str(&active_toolchain.name);
+        if active_toolchain.name == override_name.unwrap() {
+            active_toolchain_message.push_str(" (default)");
         }
-        active_toolchain = Toolchain::from_path(&name)?;
-        active_toolchain_description.push_str("(override)");
+        active_toolchain_message.push_str(&format!(
+            " (override), path: {}",
+            toolchain_override.path.display()
+        ));
     } else {
-        active_toolchain_description.push_str("(default)");
+        active_toolchain_message.push_str(&format!("{} (default)", active_toolchain.name));
     };
 
     print_header("\nactive toolchain");
-
-    info!("{} {}", active_toolchain.name, active_toolchain_description);
+    info!("{}", active_toolchain_message);
 
     for component in Components::collect_exclude_plugins()? {
         bold(|s| write!(s, "  {}", &component.name));

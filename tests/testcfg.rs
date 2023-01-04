@@ -159,10 +159,10 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     let tmp_fuelup_bin_dir_path = tmp_home.join(".fuelup").join("bin");
     fs::create_dir(&tmp_fuelup_root_path).unwrap();
     fs::create_dir(&tmp_fuelup_bin_dir_path).unwrap();
-    fs::create_dir(&tmp_fuelup_root_path.join("toolchains")).unwrap();
+    fs::create_dir(tmp_fuelup_root_path.join("toolchains")).unwrap();
     fs::hard_link(
         root.parent().unwrap().join("fuelup"),
-        &tmp_fuelup_bin_dir_path.join("fuelup"),
+        tmp_fuelup_bin_dir_path.join("fuelup"),
     )?;
 
     let target = TargetTriple::from_host().unwrap();
@@ -189,13 +189,13 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
 
-            fs::create_dir_all(&tmp_home.join(".local/bin"))?;
+            fs::create_dir_all(tmp_home.join(".local/bin"))?;
             create_fuel_executable(&tmp_home.join(".local/bin/forc"))?;
 
             create_fuel_executable(&tmp_home.join(".local/bin/forc-wallet"))?;
             create_fuel_executable(&tmp_home.join(".fuelup/bin/forc-wallet"))?;
 
-            fs::create_dir_all(&tmp_home.join(".cargo/bin"))?;
+            fs::create_dir_all(tmp_home.join(".cargo/bin"))?;
 
             create_fuel_executable(&tmp_home.join(".cargo/bin/forc-explore"))?;
             create_fuel_executable(&tmp_home.join(".fuelup/bin/forc-explore"))?;

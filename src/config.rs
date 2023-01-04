@@ -33,7 +33,7 @@ impl Config {
     ) -> Result<bool> {
         let hash_path = self.hashes_dir.join(description.to_string());
 
-        match fs::read_to_string(&hash_path) {
+        match fs::read_to_string(hash_path) {
             Ok(h) => Ok(h == hash),
             Err(e) => match e.kind() {
                 ErrorKind::NotFound => Ok(false),

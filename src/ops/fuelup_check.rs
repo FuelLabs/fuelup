@@ -113,10 +113,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
     for component in Components::collect_exclude_plugins()? {
         if let Some(latest_version) = latest_package_versions.get(&component.name) {
             let component_executable = toolchain.bin_path.join(&component.name);
-            match Command::new(&component_executable)
-                .arg("--version")
-                .output()
-            {
+            match Command::new(component_executable).arg("--version").output() {
                 Ok(o) => {
                     let output = String::from_utf8_lossy(&o.stdout).into_owned();
 

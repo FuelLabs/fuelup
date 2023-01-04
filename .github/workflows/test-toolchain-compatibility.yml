@@ -175,7 +175,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ env.LATEST_CHANNEL_DIR }}
           keep_files: true
-          destination_dir: ./channels
+          destination_dir: ./
 
       - name: Deploy latest channel (archive)
         if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}

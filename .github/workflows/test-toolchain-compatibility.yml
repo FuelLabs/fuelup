@@ -151,6 +151,9 @@ jobs:
         run: cargo install --debug --path ./ci/build-channel
 
       # Generate the channel TOML file here and run build-channel script which appends download links and hashes for forc and fuel-core to the channel TOML.
+      #
+      # Here we want 2 copies of the same latest TOMLs: 1 with the date and 1 without.
+      # The TOML with the date is used to pin versions within fuel-toolchain.toml.
       - name: Prepare channel with compatible versions
         if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
         run: |
@@ -159,7 +162,11 @@ jobs:
 
             build-channel latest $CHANNEL_TOML $GITHUB_RUN_ID forc=${{ env.LATEST_COMPATIBLE_FORC }} fuel-core=${{ env.LATEST_COMPATIBLE_FUEL_CORE }}
 
+            PUBLISHED_DATE=$(date +'%Y-%m-%d')
+        
             cp $CHANNEL_TOML ${{ env.LATEST_CHANNEL_DIR }}
+            mkdir latest-archive
+            cp $CHANNEL_TOML archive/channel-fuel-latest-${PUBLISHED_DATE}.toml
 
       - name: Deploy latest channel
         if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
@@ -168,7 +175,17 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ env.LATEST_CHANNEL_DIR }}
           keep_files: true
-          destination_dir: ./
+          destination_dir: ./channels
+
+      - name: Deploy latest channel (archive)
+        if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./latest-archive
+          keep_files: true
+          destination_dir: ./channels/latest
+
 
       - name: Deploy incompatible versions
         uses: peaceiris/actions-gh-pages@v3

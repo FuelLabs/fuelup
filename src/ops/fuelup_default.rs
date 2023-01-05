@@ -16,10 +16,10 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
         Some(toolchain) => toolchain,
         None => {
             let mut current_default = format!("{} (default)", current_toolchain.name);
-            if let Some(to) = ToolchainOverride::from_file() {
-                let name = match DistToolchainDescription::from_str(&to.toolchain.channel) {
+            if let Some(to) = ToolchainOverride::from_project_root() {
+                let name = match DistToolchainDescription::from_str(&to.cfg.toolchain.channel) {
                     Ok(desc) => desc.to_string(),
-                    Err(_) => to.toolchain.channel,
+                    Err(_) => to.cfg.toolchain.channel,
                 };
                 current_default.push_str(&format!(", {} (override)", name))
             }

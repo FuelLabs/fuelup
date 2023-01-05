@@ -2,7 +2,7 @@ use anyhow::Result;
 use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;
 use fuelup::settings::SettingsFile;
 use fuelup::target_triple::TargetTriple;
-use fuelup::toolchain_override::{ToolchainCfg, ToolchainOverride};
+use fuelup::toolchain_override::{OverrideCfg, ToolchainCfg, ToolchainOverride};
 use std::os::unix::fs::OpenOptionsExt;
 use std::{
     env, fs,
@@ -262,7 +262,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
             setup_override_file(ToolchainOverride {
-                toolchain: ToolchainCfg::new(beta_1, None),
+                cfg: OverrideCfg::new(ToolchainCfg { channel: beta_1 }, None),
                 path: tmp_home.join(FUEL_TOOLCHAIN_TOML_FILE),
             })?;
         }
@@ -271,7 +271,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, "my-toolchain")?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
             setup_override_file(ToolchainOverride {
-                toolchain: ToolchainCfg::new("my-toolchain".to_string(), None),
+                cfg: OverrideCfg::new(ToolchainCfg { channel: beta_1 }, None),
                 path: tmp_home.join(FUEL_TOOLCHAIN_TOML_FILE),
             })?;
         }

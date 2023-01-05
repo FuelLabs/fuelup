@@ -55,12 +55,12 @@ pub fn show() -> Result<()> {
     let cfg = Config::from_env()?;
     let mut active_toolchain = Toolchain::from_settings()?;
 
-    let toolchain_override = ToolchainOverride::from_file();
+    let toolchain_override = ToolchainOverride::from_project_root();
 
     let override_name = if let Some(toolchain_override) = toolchain_override.as_ref() {
-        match DistToolchainDescription::from_str(&toolchain_override.toolchain.channel) {
+        match DistToolchainDescription::from_str(&toolchain_override.cfg.toolchain.channel) {
             Ok(desc) => Some(desc.to_string()),
-            Err(_) => Some(toolchain_override.toolchain.channel.clone()),
+            Err(_) => Some(toolchain_override.cfg.toolchain.channel.clone()),
         }
     } else {
         None

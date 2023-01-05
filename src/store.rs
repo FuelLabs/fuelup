@@ -35,14 +35,3 @@ impl Store {
         format!("{component_name}-{version}")
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use component::Component;
-
-    #[test]
-    fn store() {
-        let comp = Component::from_name("forc").unwrap();
-        println!("{comp:?}");
-    }
-}

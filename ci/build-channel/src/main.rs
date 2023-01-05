@@ -1,6 +1,7 @@
 use anyhow::{bail, Result};
 use clap::Parser;
 use component::{Component, Components};
+use once_cell::sync::Lazy;
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
@@ -10,6 +11,10 @@ use std::error::Error;
 use std::fs;
 use std::io::Read;
 use toml_edit::value;
+
+static TODAY: Lazy<String> = Lazy::new(|| chrono::Utc::now().format("%Y%m%d").to_string());
+static TODAY_ISO: Lazy<String> =
+    Lazy::new(|| format!("{}T00:00:00Z", chrono::Utc::now().format("%Y-%m-%d")));
 
 /// Parse a single key-value pair
 fn parse_key_val<T, U>(s: &str) -> Result<(T, U), Box<dyn Error + Send + Sync + 'static>>
@@ -85,9 +90,6 @@ fn get_version(channel: &str, component: &Component) -> Result<Version> {
     let handle = ureq::builder().user_agent("fuelup").build();
     let mut data = Vec::new();
 
-    let today = chrono::Utc::now().format("%Y%m%d");
-    let today_iso = format!("{}T00:00:00Z", chrono::Utc::now().format("%Y-%m-%d"));
-
     let url = format!(
         "https://api.github.com/repos/FuelLabs/{}/releases/latest",
         component.repository_name
@@ -106,7 +108,7 @@ fn get_version(channel: &str, component: &Component) -> Result<Version> {
             "https://api.github.com/repos/FuelLabs/{}/commits",
             component.repository_name
         );
-        let resp = handle.get(&commit_api).query("until", &today_iso).call()?;
+        let resp = handle.get(&commit_api).query("until", &TODAY_ISO).call()?;
 
         let mut data2 = Vec::new();
         resp.into_reader().read_to_end(&mut data2)?;
@@ -114,7 +116,7 @@ fn get_version(channel: &str, component: &Component) -> Result<Version> {
 
         let short_sha = commits[0].sha.chars().take(10).collect::<String>();
 
-        let build_metadata = format!("{}.{}.{}", "nightly", today, short_sha);
+        let build_metadata = format!("{}.{}.{}", "nightly", TODAY.to_string(), short_sha);
         version_str = format!("{}+{}", version_str, build_metadata);
     };
 
@@ -163,7 +165,7 @@ fn main() -> Result<()> {
     document["pkg"] = implicit_table();
 
     for component in components {
-        println!("Writing package info for component '{}'", &component.name);
+        println!("\nWriting package info for component '{}'", &component.name);
         let tag_prefix = if component.name == "forc" {
             "forc-binaries"
         } else {
@@ -189,11 +191,7 @@ fn main() -> Result<()> {
         } else {
             (
                 "sway-nightly-binaries".to_string(),
-                format!(
-                    "{}-{}",
-                    tag_prefix.to_owned(),
-                    &version.to_string().replace("+", "%2B")
-                ),
+                format!("nightly-{}", TODAY.to_string()),
                 format!("{}-{}", tag_prefix, version),
             )
         };
@@ -210,19 +208,26 @@ fn main() -> Result<()> {
                 "https://github.com/FuelLabs/{}/releases/download/{}/{}-{}.tar.gz",
                 repo, tag, tarball_prefix, target
             );
-            println!("url: {}", &url);
 
-            let res = ureq::get(&url).call()?;
-            res.into_reader().read_to_end(&mut data)?;
-            let mut hasher = Sha256::new();
-            hasher.update(data);
-            let actual_hash = format!("{:x}", hasher.finalize());
-            println!("hash: {}", &actual_hash);
+            match ureq::get(&url).call() {
+                Ok(res) => {
+                    res.into_reader().read_to_end(&mut data)?;
+                    let mut hasher = Sha256::new();
+                    hasher.update(data);
+                    let actual_hash = format!("{:x}", hasher.finalize());
+                    println!("url: {}\nhash: {}", &url, &actual_hash);
 
-            document["pkg"][&component.name]["target"][target.to_string()] = implicit_table();
-            document["pkg"][&component.name]["target"][target.to_string()]["url"] = value(url);
-            document["pkg"][&component.name]["target"][target.to_string()]["hash"] =
-                value(actual_hash);
+                    document["pkg"][&component.name]["target"][target.to_string()] =
+                        implicit_table();
+                    document["pkg"][&component.name]["target"][target.to_string()]["url"] =
+                        value(url);
+                    document["pkg"][&component.name]["target"][target.to_string()]["hash"] =
+                        value(actual_hash);
+                }
+                Err(e) => {
+                    eprintln!("Error adding url and hash for target '{}':\n{}", target, e);
+                }
+            };
         }
     }
 

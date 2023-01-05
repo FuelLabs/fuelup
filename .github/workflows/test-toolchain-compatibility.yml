@@ -190,7 +190,6 @@ jobs:
           keep_files: true
           destination_dir: ./channels/latest
 
-
       - name: Deploy incompatible versions
         uses: peaceiris/actions-gh-pages@v3
         with:

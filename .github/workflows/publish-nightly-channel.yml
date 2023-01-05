@@ -28,16 +28,20 @@ jobs:
       - name: Publish nightly channel
         id: setup
         run: |
-            archive_dir=$(date +'%Y/%m/%d')
+            PUBLISHED_DATE=$(date + '%Y%m%d')
+            FORMATTED_PUBLISHED_DATE=$(date +'%Y/%m/%d')
             mkdir -p ${{ env.NIGHTLY_CHANNEL_DIR }}
 
             CHANNEL_TOML="channel-fuel-nightly.toml"
 
             build-channel nightly $CHANNEL_TOML
 
+            sed -i "1 i\published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" $CHANNEL_TOML
+            sed -i "1 i\date = \"${PUBLISHED_DATE}\"" $CHANNEL_TOML
+
             cp $CHANNEL_TOML ${{ env.NIGHTLY_CHANNEL_DIR }}
 
-            echo "::set-output name=archive_dir::channels/nightly/$archive_dir"
+            echo "::set-output name=archive_dir::channels/nightly/${FORMATTED_PUBLISHED_DATE}"
 
       - name: Deploy nightly channel (latest version)
         uses: peaceiris/actions-gh-pages@v3

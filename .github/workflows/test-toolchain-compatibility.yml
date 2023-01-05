@@ -168,6 +168,7 @@ jobs:
             sed -i "1 i\date = \"${PUBLISHED_DATE}\"" $CHANNEL_TOML
         
             cp $CHANNEL_TOML ${{ env.LATEST_CHANNEL_DIR }}
+
             mkdir latest-archive
             cp $CHANNEL_TOML archive/channel-fuel-latest-${PUBLISHED_DATE}.toml
 

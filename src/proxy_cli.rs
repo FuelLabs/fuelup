@@ -8,9 +8,10 @@ use std::{env, io};
 use tracing::warn;
 
 use crate::constants::FUEL_TOOLCHAIN_TOML_FILE;
+use crate::store::Store;
 use crate::toolchain::{DistToolchainDescription, Toolchain};
 use crate::toolchain_override::ToolchainOverride;
-use component::Components;
+use component::{Component, Components};
 
 /// Runs forc or fuel-core in proxy mode
 pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
@@ -29,14 +30,19 @@ pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
 }
 
 fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io::Result<ExitCode> {
-    let toolchain_override: Option<ToolchainOverride> = ToolchainOverride::from_file();
+    let toolchain_override: Option<ToolchainOverride> = ToolchainOverride::from_project_root();
 
     let (bin_path, toolchain_name) = match toolchain_override {
         Some(to) => {
-            let name = match DistToolchainDescription::from_str(&to.toolchain.channel) {
+            let name = match DistToolchainDescription::from_str(&to.cfg.toolchain.channel) {
                 Ok(n) => n.to_string(),
-                Err(_) => to.toolchain.channel.clone(),
+                Err(_) => to.cfg.toolchain.channel.clone(),
             };
+
+            let store = Store::from_env();
+
+            Component::from_name(&name).unwrap();
+            store.has_component(&name).unwrap();
 
             let toolchain = Toolchain::from_path(&name)
                 .unwrap_or_else(|_| panic!("Failed to create toolchain '{}' from path", &name));

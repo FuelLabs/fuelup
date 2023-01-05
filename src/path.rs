@@ -37,6 +37,10 @@ pub fn toolchains_dir() -> PathBuf {
     fuelup_dir().join("toolchains")
 }
 
+pub fn store_dir() -> PathBuf {
+    fuelup_dir().join("store")
+}
+
 pub fn fuelup_tmp_dir() -> PathBuf {
     fuelup_dir().join("tmp")
 }

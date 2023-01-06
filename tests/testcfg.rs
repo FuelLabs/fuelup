@@ -23,7 +23,6 @@ pub enum FuelupState {
     NightlyAndNightlyDateInstalled,
     Beta1Installed,
     LatestAndNightlyWithBetaOverride,
-    LatestAndCustomWithCustomOverride,
 }
 
 #[derive(Debug)]
@@ -263,15 +262,6 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
 
-            setup_override_file(ToolchainOverride {
-                cfg: OverrideCfg::new(ToolchainCfg { channel: beta_1 }, None),
-                path: tmp_home.join(FUEL_TOOLCHAIN_TOML_FILE),
-            })?;
-        }
-        FuelupState::LatestAndCustomWithCustomOverride => {
-            setup_toolchain(&tmp_fuelup_root_path, &latest)?;
-            setup_toolchain(&tmp_fuelup_root_path, "my-toolchain")?;
-            setup_settings_file(&tmp_fuelup_root_path, &latest)?;
             setup_override_file(ToolchainOverride {
                 cfg: OverrideCfg::new(ToolchainCfg { channel: beta_1 }, None),
                 path: tmp_home.join(FUEL_TOOLCHAIN_TOML_FILE),

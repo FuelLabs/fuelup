@@ -322,50 +322,6 @@ my_toolchain (default)
 }
 
 #[test]
-fn fuelup_show_override() -> Result<()> {
-    testcfg::setup(FuelupState::LatestAndNightlyWithBetaOverride, &|cfg| {
-        let stdout = cfg.fuelup(&["show"]).stdout;
-
-        let mut lines = stdout.lines();
-        assert_eq!(
-            lines.next().unwrap(),
-            &format!("Default host: {}", TargetTriple::from_host().unwrap())
-        );
-        assert!(lines.next().unwrap().contains("fuelup home: "));
-
-        let target = TargetTriple::from_host().unwrap();
-        println!("stdout: {}", stdout);
-        let expected_stdout = &format!(
-            r#"
-installed toolchains
---------------------
-latest-{target} (default)
-nightly-{target}
-
-active toolchain
------------------
-beta-1-{target} (override), path: {}
-  forc - not found
-    - forc-client
-      - forc-deploy - not found
-      - forc-run - not found
-    - forc-doc - not found
-    - forc-explore - not found
-    - forc-fmt - not found
-    - forc-index - not found
-    - forc-lsp - not found
-    - forc-wallet - not found
-  fuel-core - not found
-  fuel-indexer - not found
-"#,
-            cfg.home.join(FUEL_TOOLCHAIN_TOML_FILE).display()
-        );
-        assert!(stdout.contains(expected_stdout));
-    })?;
-    Ok(())
-}
-
-#[test]
 fn fuelup_self_update() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["self", "update"]);

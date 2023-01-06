@@ -1,14 +1,18 @@
-use std::{collections::HashMap, path::PathBuf};
-
-use anyhow::Result;
+use anyhow::{bail, Result};
 use semver::Version;
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
+use std::{collections::HashMap, path::PathBuf};
 use toml_edit::{de, ser, value, Document};
 use tracing::{info, warn};
 
 use crate::{
-    constants::FUEL_TOOLCHAIN_TOML_FILE, download::DownloadCfg, file,
-    path::get_fuel_toolchain_toml, target_triple::TargetTriple, toolchain::Toolchain,
+    constants::FUEL_TOOLCHAIN_TOML_FILE,
+    download::DownloadCfg,
+    file,
+    path::get_fuel_toolchain_toml,
+    target_triple::TargetTriple,
+    toolchain::{DistToolchainName, Toolchain},
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -56,8 +60,12 @@ impl OverrideCfg {
 
 impl OverrideCfg {
     pub(crate) fn from_toml(toml: &str) -> Result<Self> {
-        let channel: OverrideCfg = de::from_str(toml)?;
-        Ok(channel)
+        let cfg: OverrideCfg = de::from_str(toml)?;
+        if DistToolchainName::from_str(&cfg.toolchain.channel).is_ok() {
+            Ok(cfg)
+        } else {
+            bail!("Invalid channel '{}'", &cfg.toolchain.channel)
+        }
     }
 }
 
@@ -84,7 +92,10 @@ impl ToolchainOverride {
         if let Some(fuel_toolchain_toml_file) = get_fuel_toolchain_toml() {
             match ToolchainOverride::from_path(fuel_toolchain_toml_file) {
                 Ok(to) => Some(to),
-                Err(_) => None,
+                Err(e) => {
+                    warn!("warning: Invalid 'fuel-toolchain.toml' exists in project root: {e}");
+                    None
+                }
             }
         } else {
             None
@@ -162,8 +173,12 @@ fuel-core = "0.15.1"
         const EMPTY_TOOLCHAIN: &str = r#"
 [toolchain]
 "#;
+        const INVALID_CHANNEL: &str = r#"
+[toolchain]
+channel = "invalid-channel"
+"#;
 
-        for toml in [EMPTY_STR, EMPTY_TOOLCHAIN] {
+        for toml in [EMPTY_STR, EMPTY_TOOLCHAIN, INVALID_CHANNEL] {
             assert!(OverrideCfg::from_toml(toml).is_err());
         }
     }

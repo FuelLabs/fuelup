@@ -15,16 +15,17 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
     let toolchain = match toolchain {
         Some(toolchain) => toolchain,
         None => {
-            let mut current_default = format!("{} (default)", current_toolchain.name);
+            let mut result = String::new();
             if let Some(to) = ToolchainOverride::from_project_root() {
                 let name = match DistToolchainDescription::from_str(&to.cfg.toolchain.channel) {
                     Ok(desc) => desc.to_string(),
                     Err(_) => to.cfg.toolchain.channel,
                 };
-                current_default.push_str(&format!(", {} (override)", name))
+                result.push_str(&format!("{} (override), ", name))
             }
+            result.push_str(&format!("{} (default)", current_toolchain.name));
 
-            info!("{}", current_default);
+            info!("{}", result);
             return Ok(());
         }
     };

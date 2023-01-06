@@ -3,7 +3,7 @@ use std::{collections::HashMap, path::PathBuf};
 use anyhow::Result;
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use toml_edit::{de, ser, Document};
+use toml_edit::{de, ser, value, Document};
 use tracing::{info, warn};
 
 use crate::{
@@ -35,6 +35,23 @@ impl OverrideCfg {
             components,
         }
     }
+
+    pub fn to_string(&self) -> String {
+        ser::to_string(&self).unwrap()
+    }
+
+    pub fn to_document(self) -> Document {
+        let mut document = toml_edit::Document::new();
+
+        document["toolchain"]["channel"] = value(self.toolchain.channel);
+        if let Some(components) = self.components {
+            for (k, v) in components.iter() {
+                document["components"][k] = value(v.to_string());
+            }
+        }
+
+        return document;
+    }
 }
 
 impl OverrideCfg {
@@ -45,32 +62,28 @@ impl OverrideCfg {
 }
 
 impl ToolchainOverride {
-    pub(crate) fn parse(toml: &str, path: PathBuf) -> Result<Self> {
-        let cfg: OverrideCfg = OverrideCfg::from_toml(toml)?;
-
-        Ok(ToolchainOverride { cfg, path })
+    pub(crate) fn from_path(path: PathBuf) -> Result<Self> {
+        let f = file::read_file(FUEL_TOOLCHAIN_TOML_FILE, path.as_path())?;
+        let cfg: OverrideCfg = OverrideCfg::from_toml(&f)?;
+        Ok(Self { cfg, path })
     }
 
-    pub(crate) fn to_toml(&self) -> std::result::Result<Document, ser::Error> {
-        ser::to_document(&self)
-    }
+    pub fn to_toml(&self) -> Document {
+        let mut document = toml_edit::Document::new();
 
-    pub fn to_string(&self) -> Result<String> {
-        Ok(self.to_toml()?.to_string())
+        document["toolchain"]["channel"] = value(self.cfg.toolchain.channel.to_string());
+        if let Some(components) = &self.cfg.components {
+            for (k, v) in components.iter() {
+                document["components"][k] = value(v.to_string());
+            }
+        }
+        document
     }
 
     pub fn from_project_root() -> Option<ToolchainOverride> {
         if let Some(fuel_toolchain_toml_file) = get_fuel_toolchain_toml() {
-            match file::read_file(FUEL_TOOLCHAIN_TOML_FILE, &fuel_toolchain_toml_file) {
-                Ok(f) => ToolchainOverride::parse(&f, fuel_toolchain_toml_file.to_path_buf())
-                    .map(Option::Some)
-                    .unwrap_or_else(|_| {
-                        warn!(
-                            "Failed parsing {} at project root, using default toolchain instead",
-                            FUEL_TOOLCHAIN_TOML_FILE
-                        );
-                        None
-                    }),
+            match ToolchainOverride::from_path(fuel_toolchain_toml_file) {
+                Ok(to) => Some(to),
                 Err(_) => None,
             }
         } else {
@@ -106,6 +119,8 @@ impl ToolchainOverride {
 
 #[cfg(test)]
 mod tests {
+    use tempfile::tempdir;
+
     use super::*;
 
     #[test]
@@ -115,10 +130,10 @@ mod tests {
 channel = "latest"
 "#;
 
-        let toolchain_override = ToolchainOverride::parse(TOML, PathBuf::new()).unwrap();
+        let cfg = OverrideCfg::from_toml(TOML).unwrap();
 
-        assert_eq!(toolchain_override.cfg.toolchain.channel, "latest");
-        assert!(toolchain_override.cfg.components.is_none());
+        assert_eq!(cfg.toolchain.channel, "latest");
+        assert!(cfg.components.is_none());
     }
 
     #[test]
@@ -131,26 +146,12 @@ channel = "latest"
 fuel-core = "0.15.1"
 "#;
 
-        let toolchain_override = ToolchainOverride::parse(TOML, PathBuf::new()).unwrap();
+        let cfg = OverrideCfg::from_toml(TOML).unwrap();
 
-        assert_eq!(toolchain_override.cfg.toolchain.channel, "latest");
+        assert_eq!(cfg.toolchain.channel, "latest");
+        assert_eq!(cfg.components.as_ref().unwrap().keys().len(), 1);
         assert_eq!(
-            toolchain_override
-                .cfg
-                .components
-                .as_ref()
-                .unwrap()
-                .keys()
-                .len(),
-            1
-        );
-        assert_eq!(
-            toolchain_override
-                .cfg
-                .components
-                .unwrap()
-                .get("fuel-core")
-                .unwrap(),
+            cfg.components.unwrap().get("fuel-core").unwrap(),
             &Version::new(0, 15, 1)
         );
     }
@@ -163,7 +164,23 @@ fuel-core = "0.15.1"
 "#;
 
         for toml in [EMPTY_STR, EMPTY_TOOLCHAIN] {
-            assert!(ToolchainOverride::parse(toml, PathBuf::new()).is_err());
+            assert!(OverrideCfg::from_toml(toml).is_err());
         }
+    }
+    #[test]
+    fn parse_toolchain_override_to_string() {
+        let path = tempdir().unwrap().path().join(FUEL_TOOLCHAIN_TOML_FILE);
+        let toolchain_cfg = ToolchainCfg {
+            channel: "latest".to_string(),
+        };
+
+        let override_cfg = OverrideCfg::new(toolchain_cfg, None);
+
+        let toolchain_override = ToolchainOverride {
+            cfg: override_cfg,
+            path: path.clone(),
+        };
+        let document = toolchain_override.to_toml();
+        println!("How: {:?}", document);
     }
 }

@@ -153,10 +153,11 @@ fn setup_settings_file(settings_dir: &Path, default_toolchain: &str) -> Result<(
 }
 
 fn setup_override_file(toolchain_override: ToolchainOverride) -> Result<()> {
-    let document = toolchain_override.to_string()?;
+    let document = toolchain_override.to_toml();
 
-    fs::write(toolchain_override.path, document)
+    fs::write(toolchain_override.path, document.to_string())
         .unwrap_or_else(|_| panic!("Failed to write {}", FUEL_TOOLCHAIN_TOML_FILE));
+
     Ok(())
 }
 
@@ -261,6 +262,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
+
             setup_override_file(ToolchainOverride {
                 cfg: OverrideCfg::new(ToolchainCfg { channel: beta_1 }, None),
                 path: tmp_home.join(FUEL_TOOLCHAIN_TOML_FILE),

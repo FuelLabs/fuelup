@@ -3,7 +3,8 @@ use fuelup::{
     channel, constants::FUEL_TOOLCHAIN_TOML_FILE, fmt::format_toolchain_with_target,
     target_triple::TargetTriple,
 };
-use std::{env, path::Path};
+use serde::de;
+use std::{env, fs, path::Path};
 
 mod testcfg;
 
@@ -512,7 +513,8 @@ fn fuelup_default_override() -> Result<()> {
     testcfg::setup(FuelupState::LatestAndNightlyWithBetaOverride, &|cfg| {
         let output = cfg.fuelup(&["default"]);
         let triple = TargetTriple::from_host().unwrap();
-        let expected_stdout = format!("latest-{triple} (default), beta-1-{triple} (override)\n");
+
+        let expected_stdout = format!("beta-1-{triple} (override), latest-{triple} (default)\n");
 
         assert_eq!(output.stdout, expected_stdout);
     })?;

@@ -1,7 +1,6 @@
 use anyhow::Result;
 use component::{self, Components};
 use semver::Version;
-use std::str::FromStr;
 use std::{io::Write, path::Path};
 use tracing::{error, info};
 
@@ -10,8 +9,7 @@ use crate::{
     fmt::{bold, print_header},
     path::fuelup_dir,
     target_triple::TargetTriple,
-    toolchain::{DistToolchainDescription, Toolchain},
-    toolchain_override::ToolchainOverride,
+    toolchain::Toolchain,
 };
 
 fn exec_show_version(component_executable: &Path) -> Result<()> {
@@ -53,51 +51,19 @@ pub fn show() -> Result<()> {
 
     print_header("installed toolchains");
     let cfg = Config::from_env()?;
-    let mut active_toolchain = Toolchain::from_settings()?;
-
-    let toolchain_override = ToolchainOverride::from_project_root();
-
-    let override_name = if let Some(toolchain_override) = toolchain_override.as_ref() {
-        match DistToolchainDescription::from_str(&toolchain_override.cfg.toolchain.channel) {
-            Ok(desc) => Some(desc.to_string()),
-            Err(_) => Some(toolchain_override.cfg.toolchain.channel.clone()),
-        }
-    } else {
-        None
-    };
+    let active_toolchain = Toolchain::from_settings()?;
 
     for toolchain in cfg.list_toolchains()? {
-        let mut message = toolchain.clone();
         if toolchain == active_toolchain.name {
-            message.push_str(" (default)")
+            info!("{} (default)", toolchain);
+        } else {
+            info!("{}", toolchain);
         }
-
-        if Some(toolchain) == override_name {
-            message.push_str(" (override)");
-        }
-        info!("{}", message)
     }
 
-    let mut active_toolchain_message = String::new();
-    if let Some(toolchain_override) = toolchain_override {
-        // We know that the override exists, but we want to show the target triple as well.
-        let override_name = override_name.as_ref().unwrap();
-        if &active_toolchain.name == override_name {
-            active_toolchain_message.push_str(" (default)");
-        }
-
-        active_toolchain = Toolchain::from_path(override_name)?;
-        active_toolchain_message.push_str(&active_toolchain.name);
-        active_toolchain_message.push_str(&format!(
-            " (override), path: {}",
-            toolchain_override.path.display()
-        ));
-    } else {
-        active_toolchain_message.push_str(&format!("{} (default)", active_toolchain.name));
-    };
-
     print_header("\nactive toolchain");
-    info!("{}", active_toolchain_message);
+
+    info!("{} (default)", active_toolchain.name);
 
     for component in Components::collect_exclude_plugins()? {
         bold(|s| write!(s, "  {}", &component.name));

@@ -47,8 +47,10 @@ impl OverrideCfg {
     pub fn to_document(self) -> Document {
         let mut document = toml_edit::Document::new();
 
+        document["toolchain"] = toml_edit::Item::Table(toml_edit::Table::new());
         document["toolchain"]["channel"] = value(self.toolchain.channel);
         if let Some(components) = self.components {
+            document["components"] = toml_edit::Item::Table(toml_edit::Table::new());
             for (k, v) in components.iter() {
                 document["components"][k] = value(v.to_string());
             }
@@ -130,8 +132,6 @@ impl ToolchainOverride {
 
 #[cfg(test)]
 mod tests {
-    use tempfile::tempdir;
-
     use super::*;
 
     #[test]
@@ -145,6 +145,7 @@ channel = "latest"
 
         assert_eq!(cfg.toolchain.channel, "latest");
         assert!(cfg.components.is_none());
+        assert_eq!(TOML, cfg.to_document().to_string());
     }
 
     #[test]
@@ -162,9 +163,10 @@ fuel-core = "0.15.1"
         assert_eq!(cfg.toolchain.channel, "latest");
         assert_eq!(cfg.components.as_ref().unwrap().keys().len(), 1);
         assert_eq!(
-            cfg.components.unwrap().get("fuel-core").unwrap(),
+            cfg.components.as_ref().unwrap().get("fuel-core").unwrap(),
             &Version::new(0, 15, 1)
         );
+        assert_eq!(TOML, cfg.to_document().to_string());
     }
 
     #[test]
@@ -181,21 +183,5 @@ channel = "invalid-channel"
         for toml in [EMPTY_STR, EMPTY_TOOLCHAIN, INVALID_CHANNEL] {
             assert!(OverrideCfg::from_toml(toml).is_err());
         }
-    }
-    #[test]
-    fn parse_toolchain_override_to_string() {
-        let path = tempdir().unwrap().path().join(FUEL_TOOLCHAIN_TOML_FILE);
-        let toolchain_cfg = ToolchainCfg {
-            channel: "latest".to_string(),
-        };
-
-        let override_cfg = OverrideCfg::new(toolchain_cfg, None);
-
-        let toolchain_override = ToolchainOverride {
-            cfg: override_cfg,
-            path: path.clone(),
-        };
-        let document = toolchain_override.to_toml();
-        println!("How: {:?}", document);
     }
 }

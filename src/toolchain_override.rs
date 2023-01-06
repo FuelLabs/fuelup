@@ -3,7 +3,7 @@ use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use std::{collections::HashMap, path::PathBuf};
-use toml_edit::{de, ser, value, Document};
+use toml_edit::{de, value, Document};
 use tracing::{info, warn};
 
 use crate::{
@@ -40,10 +40,6 @@ impl OverrideCfg {
         }
     }
 
-    pub fn to_string(&self) -> String {
-        ser::to_string(&self).unwrap()
-    }
-
     pub fn to_document(self) -> Document {
         let mut document = toml_edit::Document::new();
 
@@ -56,7 +52,7 @@ impl OverrideCfg {
             }
         }
 
-        return document;
+        document
     }
 }
 

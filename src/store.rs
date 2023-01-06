@@ -18,20 +18,18 @@ impl Store {
         &self.path
     }
 
-    pub(crate) fn into_path(&self) -> PathBuf {
-        self.path.to_path_buf()
+    pub(crate) fn into_path(self) -> PathBuf {
+        self.path
     }
 
     pub(crate) fn has_component(self, component_name: &str) -> Result<bool> {
         ensure_dir_exists(self.path())?;
 
-        return Ok(self
-            .into_path()
-            .join(self.component_dirname(component_name, &Version::new(0, 0, 0)))
-            .exists());
+        let dirname = self.component_dirname(component_name, &Version::new(0, 0, 0));
+        Ok(self.into_path().join(dirname).exists())
     }
 
-    pub(crate) fn component_dirname(self, component_name: &str, version: &Version) -> String {
+    pub(crate) fn component_dirname(&self, component_name: &str, version: &Version) -> String {
         format!("{component_name}-{version}")
     }
 }

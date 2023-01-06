@@ -261,9 +261,13 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
-
             setup_override_file(ToolchainOverride {
-                cfg: OverrideCfg::new(ToolchainCfg { channel: beta_1 }, None),
+                cfg: OverrideCfg::new(
+                    ToolchainCfg {
+                        channel: "beta-1".to_string(),
+                    },
+                    None,
+                ),
                 path: tmp_home.join(FUEL_TOOLCHAIN_TOML_FILE),
             })?;
         }

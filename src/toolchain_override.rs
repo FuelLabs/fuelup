@@ -15,65 +15,32 @@ use crate::{
     toolchain::{DistToolchainName, Toolchain},
 };
 
+// For composability with other functionality of fuelup, we want to add
+// additional info to OverrideCfg (representation of 'fuel-toolchain.toml').
+// In this case, we want the path to the toml file. More info might be
+// needed in future.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ToolchainOverride {
     pub cfg: OverrideCfg,
     pub path: PathBuf,
 }
 
+// Representation of the entire 'fuel-toolchain.toml'.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct OverrideCfg {
     pub toolchain: ToolchainCfg,
     pub components: Option<HashMap<String, Version>>,
 }
 
+// Represents the [toolchain] table in 'fuel-toolchain.toml'.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ToolchainCfg {
     pub channel: String,
 }
 
-impl OverrideCfg {
-    pub fn new(toolchain: ToolchainCfg, components: Option<HashMap<String, Version>>) -> Self {
-        Self {
-            toolchain,
-            components,
-        }
-    }
-
-    pub fn to_document(self) -> Document {
-        let mut document = toml_edit::Document::new();
-
-        document["toolchain"] = toml_edit::Item::Table(toml_edit::Table::new());
-        document["toolchain"]["channel"] = value(self.toolchain.channel);
-        if let Some(components) = self.components {
-            document["components"] = toml_edit::Item::Table(toml_edit::Table::new());
-            for (k, v) in components.iter() {
-                document["components"][k] = value(v.to_string());
-            }
-        }
-
-        document
-    }
-}
-
-impl OverrideCfg {
-    pub(crate) fn from_toml(toml: &str) -> Result<Self> {
-        let cfg: OverrideCfg = de::from_str(toml)?;
-        if DistToolchainName::from_str(&cfg.toolchain.channel).is_err() {
-            bail!("Invalid channel '{}'", &cfg.toolchain.channel)
-        }
-
-        if let Some(components) = cfg.components.as_ref() {
-            if components.is_empty() {
-                bail!("'[components]' table is declared with no components")
-            }
-        }
-
-        Ok(cfg)
-    }
-}
-
 impl ToolchainOverride {
+    // Creates a representation of a 'fuel-toolchain.toml' from a file path.
+    // This representation is an OverrideCfg and the file path.
     pub(crate) fn from_path(path: PathBuf) -> Result<Self> {
         let f = file::read_file(FUEL_TOOLCHAIN_TOML_FILE, path.as_path())?;
         let cfg: OverrideCfg = OverrideCfg::from_toml(&f)?;
@@ -137,6 +104,48 @@ impl ToolchainOverride {
             }
         };
         Ok(())
+    }
+}
+
+impl OverrideCfg {
+    pub fn new(toolchain: ToolchainCfg, components: Option<HashMap<String, Version>>) -> Self {
+        Self {
+            toolchain,
+            components,
+        }
+    }
+
+    // Creates a representation of a 'fuel-toolchain.toml' from a toml string.
+    // This is used in the implementation of ToolchainOverride, which is just
+    // an OverrideCfg with its file path.
+    pub(crate) fn from_toml(toml: &str) -> Result<Self> {
+        let cfg: OverrideCfg = de::from_str(toml)?;
+        if DistToolchainName::from_str(&cfg.toolchain.channel).is_err() {
+            bail!("Invalid channel '{}'", &cfg.toolchain.channel)
+        }
+
+        if let Some(components) = cfg.components.as_ref() {
+            if components.is_empty() {
+                bail!("'[components]' table is declared with no components")
+            }
+        }
+
+        Ok(cfg)
+    }
+
+    pub fn to_document(self) -> Document {
+        let mut document = toml_edit::Document::new();
+
+        document["toolchain"] = toml_edit::Item::Table(toml_edit::Table::new());
+        document["toolchain"]["channel"] = value(self.toolchain.channel);
+        if let Some(components) = self.components {
+            document["components"] = toml_edit::Item::Table(toml_edit::Table::new());
+            for (k, v) in components.iter() {
+                document["components"][k] = value(v.to_string());
+            }
+        }
+
+        document
     }
 }
 

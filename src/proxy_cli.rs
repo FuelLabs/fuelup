@@ -42,10 +42,12 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
                 panic!("Failed to create toolchain '{}' from path", &description)
             });
 
+            // Install the entire toolchain declared in [toolchain] if it does not exist.
             toolchain
                 .install_if_nonexistent(&description)
                 .unwrap_or_else(|_| panic!("could not install toolchain: '{}'", &description));
 
+            // Install components within [components] that are declared but missing from the store.
             if let Some(version) = to.get_component_version(proc_name) {
                 let store = Store::from_env().unwrap();
                 if store.has_component(proc_name, version)

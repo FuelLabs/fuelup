@@ -7,7 +7,7 @@ Currently, the only way of overriding toolchains is through the `fuel-toolchain.
 
 ## The toolchain file
 
-Using the `fuel-toolchain.toml` file is a way to have projects 'pinned' to specific versions of components 
+Using the `fuel-toolchain.toml` file is a way to have projects 'pinned' to specific versions of components
 in the Fuel toolchain and have this information reflected in their source repository.
 
 When this file is present, `fuelup` knows to override the default toolchain with the specified toolchain when executing binaries
@@ -31,14 +31,14 @@ $ tree -L 1 # 'tree -L 1' shows the project structure up to the depth of 1
 
 ### Examples
 
-1. an application using the [`beta-2`] toolchain:
+An application using the [`beta-2`] toolchain:
 
 ```toml
 [toolchain]
 channel = "beta-2"
 ```
 
-2. An application using the [`beta-2`] toolchain, but using another version of forc:
+An application using the [`beta-2`] toolchain, but using another version of forc:
 
 ```toml
 [toolchain]

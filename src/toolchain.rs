@@ -8,7 +8,8 @@ use std::str::FromStr;
 use time::Date;
 use tracing::{error, info};
 
-use crate::channel::{self, is_beta_toolchain};
+use crate::channel::{self, is_beta_toolchain, Channel};
+use crate::config::Config;
 use crate::constants::DATE_FORMAT;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
@@ -276,6 +277,21 @@ impl Toolchain {
         Ok(download_cfg)
     }
 
+    pub fn install_if_nonexistent(&self, description: &DistToolchainDescription) -> Result<()> {
+        if !self.exists() {
+            if let Ok((channel, hash)) = Channel::from_dist_channel(description) {
+                let config = Config::from_env().unwrap();
+                if let Ok(true) = config.hash_matches(description, &hash) {
+                    info!("'{}' is already installed and up to date", self.name);
+                };
+                for cfg in channel.build_download_configs() {
+                    let _ = self.add_component(cfg);
+                }
+            }
+        };
+
+        Ok(())
+    }
     fn remove_executables(&self, component: &str) -> Result<()> {
         let executables = &Components::collect().unwrap().component[component].executables;
         for executable in executables {

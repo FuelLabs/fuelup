@@ -23,17 +23,10 @@ impl Store {
         &self.path
     }
 
-    pub(crate) fn has_component(
-        &self,
-        component_name: &str,
-        version: Option<&Version>,
-    ) -> Result<bool> {
-        if version.is_none() {
-            return Ok(false);
-        }
+    pub(crate) fn has_component(&self, component_name: &str, version: &Version) -> Result<bool> {
         ensure_dir_exists(self.path())?;
 
-        let dirname = self.component_dirname(component_name, version.unwrap());
+        let dirname = self.component_dirname(component_name, version);
         Ok(self.path().join(dirname).exists())
     }
 

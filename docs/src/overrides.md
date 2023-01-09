@@ -3,7 +3,7 @@
 `fuelup` automatically determines which [toolchain] to use when one of the installed commands like
 `forc` is executed.
 
-Currently, the only way of overriding toolchains is through the `fuel-toolchain.toml` file.
+You can override the installed default toolchain using a `fuel-toolchain.toml` file.
 
 ## The toolchain file
 

@@ -59,11 +59,17 @@ impl OverrideCfg {
 impl OverrideCfg {
     pub(crate) fn from_toml(toml: &str) -> Result<Self> {
         let cfg: OverrideCfg = de::from_str(toml)?;
-        if DistToolchainName::from_str(&cfg.toolchain.channel).is_ok() {
-            Ok(cfg)
-        } else {
+        if DistToolchainName::from_str(&cfg.toolchain.channel).is_err() {
             bail!("Invalid channel '{}'", &cfg.toolchain.channel)
         }
+
+        if let Some(components) = cfg.components.as_ref() {
+            if components.is_empty() {
+                bail!("'[components]' table is declared with no components")
+            }
+        }
+
+        Ok(cfg)
     }
 }
 
@@ -95,6 +101,14 @@ impl ToolchainOverride {
                     None
                 }
             }
+        } else {
+            None
+        }
+    }
+
+    pub fn get_component_version(&self, component: &str) -> Option<&Version> {
+        if let Some(components) = &self.cfg.components {
+            components.get(component)
         } else {
             None
         }
@@ -176,7 +190,19 @@ fuel-core = "0.15.1"
 channel = "invalid-channel"
 "#;
 
-        for toml in [EMPTY_STR, EMPTY_TOOLCHAIN, INVALID_CHANNEL] {
+        const EMPTY_COMPONENTS: &str = r#"
+[toolchain]
+channel = "beta-2"
+
+[components]
+"#;
+
+        for toml in [
+            EMPTY_STR,
+            EMPTY_TOOLCHAIN,
+            INVALID_CHANNEL,
+            EMPTY_COMPONENTS,
+        ] {
             assert!(OverrideCfg::from_toml(toml).is_err());
         }
     }

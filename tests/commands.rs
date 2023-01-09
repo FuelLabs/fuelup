@@ -1,8 +1,5 @@
 use anyhow::Result;
-use fuelup::{
-    channel, constants::FUEL_TOOLCHAIN_TOML_FILE, fmt::format_toolchain_with_target,
-    target_triple::TargetTriple,
-};
+use fuelup::{channel, fmt::format_toolchain_with_target, target_triple::TargetTriple};
 use std::{env, path::Path};
 
 mod testcfg;

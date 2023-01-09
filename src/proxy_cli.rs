@@ -5,13 +5,11 @@ use std::os::unix::prelude::CommandExt;
 use std::process::{Command, ExitCode, Stdio};
 use std::str::FromStr;
 use std::{env, io};
-use tracing::warn;
 
-use crate::constants::FUEL_TOOLCHAIN_TOML_FILE;
 use crate::store::Store;
 use crate::toolchain::{DistToolchainDescription, Toolchain};
 use crate::toolchain_override::ToolchainOverride;
-use component::{Component, Components};
+use component::Components;
 
 /// Runs forc or fuel-core in proxy mode
 pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
@@ -34,26 +32,29 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
 
     let (bin_path, toolchain_name) = match toolchain_override {
         Some(to) => {
-            let name = match DistToolchainDescription::from_str(&to.cfg.toolchain.channel) {
-                Ok(n) => n.to_string(),
-                Err(_) => to.cfg.toolchain.channel.clone(),
-            };
+            // unwrap() is safe here since we try DistToolchainDescription::from_str()
+            // when deserializing from the toml.
+            let name = DistToolchainDescription::from_str(&to.cfg.toolchain.channel)
+                .unwrap()
+                .to_string();
 
-            let store = Store::from_env();
+            if let Some(version) = to.get_component_version(&proc_name) {
+                let store = Store::from_env();
+                if let Ok(false) = store.has_component(&proc_name, Some(version)) {
+                    store.install_component(&proc_name, &to).unwrap();
+                };
 
-            Component::from_name(&name).unwrap();
-            store.has_component(&name).unwrap();
-
-            let toolchain = Toolchain::from_path(&name)
-                .unwrap_or_else(|_| panic!("Failed to create toolchain '{}' from path", &name));
-
-            if let Err(e) = to.install_missing_components(&toolchain, proc_name) {
-                warn!(
-                    "warning: could not install toolchain from {}: {}",
-                    FUEL_TOOLCHAIN_TOML_FILE, e
+                (
+                    store
+                        .component_dir_path(&proc_name, version)
+                        .join(proc_name),
+                    name,
                 )
+            } else {
+                let toolchain = Toolchain::from_path(&name)
+                    .unwrap_or_else(|_| panic!("Failed to create toolchain '{}' from path", &name));
+                (toolchain.bin_path.join(proc_name), name)
             }
-            (toolchain.bin_path.join(proc_name), name)
         }
         None => (
             toolchain.bin_path.join(proc_name),

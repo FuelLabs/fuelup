@@ -38,14 +38,13 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
                 DistToolchainDescription::from_str(&to.cfg.toolchain.channel).unwrap();
 
             // Since we have a valid
-            let toolchain = Toolchain::from_path(&description.to_string()).expect(&format!(
-                "Failed to create toolchain '{}' from path",
-                &description
-            ));
+            let toolchain = Toolchain::from_path(&description.to_string()).unwrap_or_else(|_| {
+                panic!("Failed to create toolchain '{}' from path", &description)
+            });
 
             toolchain
                 .install_if_nonexistent(&description)
-                .expect(&format!("could not install toolchain: '{}'", &description));
+                .unwrap_or_else(|_| panic!("could not install toolchain: '{}'", &description));
 
             if let Some(version) = to.get_component_version(proc_name) {
                 let store = Store::from_env().unwrap();

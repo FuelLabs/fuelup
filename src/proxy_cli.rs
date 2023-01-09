@@ -34,28 +34,33 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
         Some(to) => {
             // unwrap() is safe here since we try DistToolchainDescription::from_str()
             // when deserializing from the toml.
-            let name = DistToolchainDescription::from_str(&to.cfg.toolchain.channel)
-                .unwrap()
-                .to_string();
+            let description =
+                DistToolchainDescription::from_str(&to.cfg.toolchain.channel).unwrap();
 
-            let component_path = if let Some(version) = to.get_component_version(proc_name) {
-                let store = Store::from_env();
-                if let Ok(false) = store.has_component(proc_name, version) {
-                    if store.install_component(proc_name, &to).is_ok() {
-                        store.component_dir_path(proc_name, version).join(proc_name)
-                    } else {
-                        toolchain.bin_path.join(proc_name)
-                    }
+            // Since we have a valid DistToolchainDescription above, Toolchain::from_path shouldn't fail.
+            let toolchain = Toolchain::from_path(&description.to_string()).unwrap_or_else(|_| {
+                panic!("Failed to create toolchain '{}' from path", &description)
+            });
+
+            toolchain
+                .install_if_nonexistent(&description)
+                .unwrap_or_else(|_| panic!("could not install toolchain: '{}'", &description));
+
+            if let Some(version) = to.get_component_version(proc_name) {
+                let store = Store::from_env().unwrap();
+                if store.has_component(proc_name, version)
+                    && store.install_component(proc_name, &to).is_ok()
+                {
+                    (
+                        store.component_dir_path(proc_name, version).join(proc_name),
+                        description.to_string(),
+                    )
                 } else {
-                    toolchain.bin_path.join(proc_name)
-                }
-            } else {
-                let toolchain = Toolchain::from_path(&name)
-                    .unwrap_or_else(|_| panic!("Failed to create toolchain '{}' from path", &name));
-                toolchain.bin_path.join(proc_name)
-            };
+                    (toolchain.bin_path.join(proc_name), description.to_string())
+                };
+            }
 
-            (component_path, name)
+            (toolchain.bin_path.join(proc_name), description.to_string())
         }
         None => (
             toolchain.bin_path.join(proc_name),

@@ -160,12 +160,8 @@ jobs:
             mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
             CHANNEL_TOML="channel-fuel-latest.toml"
 
-            build-channel latest $CHANNEL_TOML forc=${{ env.LATEST_COMPATIBLE_FORC }} fuel-core=${{ env.LATEST_COMPATIBLE_FUEL_CORE }}
-
             PUBLISHED_DATE=$(date +'%Y-%m-%d')
-
-            sed -i "1 i\published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" $CHANNEL_TOML
-            sed -i "1 i\date = \"${PUBLISHED_DATE}\"" $CHANNEL_TOML
+            build-channel latest $CHANNEL_TOML $GITHUB_RUN_ID $PUBLISHED_DATE forc=${{ env.LATEST_COMPATIBLE_FORC }} fuel-core=${{ env.LATEST_COMPATIBLE_FUEL_CORE }}
         
             cp $CHANNEL_TOML ${{ env.LATEST_CHANNEL_DIR }}
 

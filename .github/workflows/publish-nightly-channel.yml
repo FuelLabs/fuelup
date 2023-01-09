@@ -28,16 +28,13 @@ jobs:
       - name: Publish nightly channel
         id: setup
         run: |
-            PUBLISHED_DATE=$(date + '%Y%m%d')
+            PUBLISHED_DATE=$(date + '%Y-%m-%d')
             FORMATTED_PUBLISHED_DATE=$(date +'%Y/%m/%d')
             mkdir -p ${{ env.NIGHTLY_CHANNEL_DIR }}
 
             CHANNEL_TOML="channel-fuel-nightly.toml"
 
-            build-channel nightly $CHANNEL_TOML
-
-            sed -i "1 i\published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/${GITHUB_RUN_ID}\"\n" $CHANNEL_TOML
-            sed -i "1 i\date = \"${PUBLISHED_DATE}\"" $CHANNEL_TOML
+            build-channel nightly $CHANNEL_TOML $GITHUB_RUN_ID $PUBLISHED_DATE
 
             cp $CHANNEL_TOML ${{ env.NIGHTLY_CHANNEL_DIR }}
 

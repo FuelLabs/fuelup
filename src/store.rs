@@ -47,18 +47,20 @@ impl Store {
         toolchain_override: &ToolchainOverride,
     ) -> Result<()> {
         if let Some(components) = toolchain_override.cfg.components.as_ref() {
-            let version = components.get(component_name).cloned();
+            if let Some(version) = components.get(component_name) {
+                let download_cfg = DownloadCfg::new(
+                    component_name,
+                    TargetTriple::from_component(component_name)?,
+                    Some(version.clone()),
+                )?;
 
-            let download_cfg = DownloadCfg::new(
-                component_name,
-                TargetTriple::from_component(component_name).unwrap(),
-                version.clone(),
-            )?;
+                let component_dir = self.component_dir_path(component_name, &version);
 
-            let component_dir = self.component_dir_path(component_name, &version.unwrap());
-            ensure_dir_exists(&component_dir)?;
-            download_file_and_unpack(&download_cfg, &component_dir)?;
-            unpack_bins(&component_dir, component_dir.parent().unwrap())?;
+                ensure_dir_exists(&component_dir)?;
+                download_file_and_unpack(&download_cfg, &component_dir)?;
+                // We ensure that component_dir exists above, so its parent must exist here.
+                unpack_bins(&component_dir, component_dir.parent().unwrap())?;
+            }
         }
 
         Ok(())

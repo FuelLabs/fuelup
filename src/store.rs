@@ -54,7 +54,7 @@ impl Store {
                     Some(version.clone()),
                 )?;
 
-                let component_dir = self.component_dir_path(component_name, &version);
+                let component_dir = self.component_dir_path(component_name, version);
 
                 ensure_dir_exists(&component_dir)?;
                 download_file_and_unpack(&download_cfg, &component_dir)?;

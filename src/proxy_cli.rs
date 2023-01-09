@@ -38,16 +38,14 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
                 .unwrap()
                 .to_string();
 
-            if let Some(version) = to.get_component_version(&proc_name) {
+            if let Some(version) = to.get_component_version(proc_name) {
                 let store = Store::from_env();
-                if let Ok(false) = store.has_component(&proc_name, Some(version)) {
-                    store.install_component(&proc_name, &to).unwrap();
+                if let Ok(false) = store.has_component(proc_name, Some(version)) {
+                    store.install_component(proc_name, &to).unwrap();
                 };
 
                 (
-                    store
-                        .component_dir_path(&proc_name, version)
-                        .join(proc_name),
+                    store.component_dir_path(proc_name, version).join(proc_name),
                     name,
                 )
             } else {

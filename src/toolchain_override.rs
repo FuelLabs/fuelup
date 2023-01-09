@@ -97,7 +97,7 @@ impl ToolchainOverride {
             match ToolchainOverride::from_path(fuel_toolchain_toml_file) {
                 Ok(to) => Some(to),
                 Err(e) => {
-                    warn!("warning: Invalid 'fuel-toolchain.toml' exists in project root: {e}");
+                    warn!("warning: invalid 'fuel-toolchain.toml' in project root: {e}");
                     None
                 }
             }

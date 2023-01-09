@@ -37,7 +37,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
             let description =
                 DistToolchainDescription::from_str(&to.cfg.toolchain.channel).unwrap();
 
-            // Since we have a valid
+            // Since we have a valid DistToolchainDescription above, Toolchain::from_path shouldn't fail.
             let toolchain = Toolchain::from_path(&description.to_string()).unwrap_or_else(|_| {
                 panic!("Failed to create toolchain '{}' from path", &description)
             });

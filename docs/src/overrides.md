@@ -10,7 +10,7 @@ You can override the installed default toolchain using a `fuel-toolchain.toml` f
 Using the `fuel-toolchain.toml` file is a way to have projects 'pinned' to specific versions of components
 in the Fuel toolchain and have this information reflected in their source repository.
 
-When this file is present, `fuelup` knows to override the default toolchain with the specified toolchain when executing binaries
+When this file is present, `fuelup` will override the default toolchain with the specified toolchain when executing binaries
 in the toolchain.
 
 In these cases, the toolchain can be specified in a file called `fuel-toolchain.toml`. These toolchains can only be

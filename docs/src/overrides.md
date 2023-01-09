@@ -38,14 +38,15 @@ An application using the [`beta-2`] toolchain:
 channel = "beta-2"
 ```
 
-An application using the [`beta-2`] toolchain, but using another version of forc:
+Let's say we have a project on the `beta-2` testnet, and we want to try using the 
+latest (at time of writing) forc to develop on it:
 
 ```toml
 [toolchain]
 channel = "beta-2"
 
 [components]
-forc = "0.32.2" # in beta-2, forc is pinned to v0.31.1
+forc = "0.33.0" # in beta-2, forc is pinned to v0.31.1
 ```
 
 [toolchain]: concepts/toolchains.md

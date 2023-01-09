@@ -38,7 +38,7 @@ An application using the [`beta-2`] toolchain:
 channel = "beta-2"
 ```
 
-Let's say we have a project on the `beta-2` testnet, and we want to try using the 
+Let's say we have a project on the `beta-2` testnet, and we want to try using the
 latest (at time of writing) forc to develop on it:
 
 ```toml

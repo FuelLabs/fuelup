@@ -15,19 +15,19 @@ pub struct Store {
 }
 
 impl Store {
-    pub(crate) fn from_env() -> Self {
-        Self { path: store_dir() }
+    pub(crate) fn from_env() -> Result<Self> {
+        let path = store_dir();
+        ensure_dir_exists(&path)?;
+        Ok(Self { path })
     }
 
     pub(crate) fn path(&self) -> &Path {
         &self.path
     }
 
-    pub(crate) fn has_component(&self, component_name: &str, version: &Version) -> Result<bool> {
-        ensure_dir_exists(self.path())?;
-
+    pub(crate) fn has_component(&self, component_name: &str, version: &Version) -> bool {
         let dirname = self.component_dirname(component_name, version);
-        Ok(self.path().join(dirname).exists())
+        self.path().join(dirname).exists()
     }
 
     pub(crate) fn component_dirname(&self, component_name: &str, version: &Version) -> String {

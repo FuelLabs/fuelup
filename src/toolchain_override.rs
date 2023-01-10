@@ -144,8 +144,7 @@ mod tests {
 
     #[test]
     fn parse_toolchain_override_channel_only() {
-        const TOML: &str = r#"
-[toolchain]
+        const TOML: &str = r#"[toolchain]
 channel = "latest"
 "#;
 
@@ -158,8 +157,7 @@ channel = "latest"
 
     #[test]
     fn parse_toolchain_override_components() {
-        const TOML: &str = r#"
-[toolchain]
+        const TOML: &str = r#"[toolchain]
 channel = "latest"
 
 [components]
@@ -180,16 +178,13 @@ fuel-core = "0.15.1"
     #[test]
     fn parse_toolchain_override_invalid_tomls() {
         const EMPTY_STR: &str = "";
-        const EMPTY_TOOLCHAIN: &str = r#"
-[toolchain]
+        const EMPTY_TOOLCHAIN: &str = r#"[toolchain]
 "#;
-        const INVALID_CHANNEL: &str = r#"
-[toolchain]
+        const INVALID_CHANNEL: &str = r#"[toolchain]
 channel = "invalid-channel"
 "#;
 
-        const EMPTY_COMPONENTS: &str = r#"
-[toolchain]
+        const EMPTY_COMPONENTS: &str = r#"[toolchain]
 channel = "beta-2"
 
 [components]

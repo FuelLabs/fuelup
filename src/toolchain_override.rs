@@ -3,7 +3,7 @@ use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use std::{collections::HashMap, path::PathBuf};
-use toml_edit::{de, value, Document};
+use toml_edit::{de, ser, value, Document};
 use tracing::{info, warn};
 
 use crate::{
@@ -133,19 +133,8 @@ impl OverrideCfg {
         Ok(cfg)
     }
 
-    pub fn to_document(self) -> Document {
-        let mut document = toml_edit::Document::new();
-
-        document["toolchain"] = toml_edit::Item::Table(toml_edit::Table::new());
-        document["toolchain"]["channel"] = value(self.toolchain.channel);
-        if let Some(components) = self.components {
-            document["components"] = toml_edit::Item::Table(toml_edit::Table::new());
-            for (k, v) in components.iter() {
-                document["components"][k] = value(v.to_string());
-            }
-        }
-
-        document
+    pub fn to_string_pretty(self) -> Result<String, ser::Error> {
+        ser::to_string_pretty(&self)
     }
 }
 
@@ -164,7 +153,7 @@ channel = "latest"
 
         assert_eq!(cfg.toolchain.channel, "latest");
         assert!(cfg.components.is_none());
-        assert_eq!(TOML, cfg.to_document().to_string());
+        assert_eq!(TOML, cfg.to_string_pretty().unwrap());
     }
 
     #[test]
@@ -185,7 +174,7 @@ fuel-core = "0.15.1"
             cfg.components.as_ref().unwrap().get("fuel-core").unwrap(),
             &Version::new(0, 15, 1)
         );
-        assert_eq!(TOML, cfg.to_document().to_string());
+        assert_eq!(TOML, cfg.to_string_pretty().unwrap());
     }
 
     #[test]

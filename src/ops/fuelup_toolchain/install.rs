@@ -28,7 +28,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
     let config = Config::from_env()?;
     warn_existing_fuel_executables()?;
 
-    let toolchain = Toolchain::from_path(&description.to_string())?;
+    let toolchain = Toolchain::from_path(&description.to_string());
     let (cfgs, hash) = if let Ok((channel, hash)) = Channel::from_dist_channel(&description) {
         if let Ok(true) = config.hash_matches(&description, &hash) {
             info!("'{}' is already installed and up to date", toolchain.name);

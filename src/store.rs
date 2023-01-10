@@ -10,6 +10,10 @@ use crate::{
     toolchain_override::ToolchainOverride,
 };
 
+fn component_dirname(component_name: &str, version: &Version) -> String {
+    format!("{component_name}-{version}")
+}
+
 pub struct Store {
     path: PathBuf,
 }
@@ -26,17 +30,12 @@ impl Store {
     }
 
     pub(crate) fn has_component(&self, component_name: &str, version: &Version) -> bool {
-        let dirname = self.component_dirname(component_name, version);
+        let dirname = component_dirname(component_name, version);
         self.path().join(dirname).exists()
     }
 
-    pub(crate) fn component_dirname(&self, component_name: &str, version: &Version) -> String {
-        format!("{component_name}-{version}")
-    }
-
     pub(crate) fn component_dir_path(&self, component_name: &str, version: &Version) -> PathBuf {
-        self.path
-            .join(self.component_dirname(component_name, version))
+        self.path.join(component_dirname(component_name, version))
     }
 
     // This function installs a component into a directory within '/.fuelup/store'.

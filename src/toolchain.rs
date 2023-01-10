@@ -159,12 +159,12 @@ impl Toolchain {
         })
     }
 
-    pub fn from_path(toolchain: &str) -> Result<Self> {
-        Ok(Self {
+    pub fn from_path(toolchain: &str) -> Self {
+        Self {
             name: toolchain.to_string(),
             path: toolchain_dir(toolchain),
             bin_path: toolchain_bin_dir(toolchain),
-        })
+        }
     }
 
     pub fn from_settings() -> Result<Self> {
@@ -280,12 +280,12 @@ impl Toolchain {
     pub fn install_if_nonexistent(&self, description: &DistToolchainDescription) -> Result<()> {
         if !self.exists() {
             if let Ok((channel, hash)) = Channel::from_dist_channel(description) {
-                let config = Config::from_env().unwrap();
+                let config = Config::from_env()?;
                 if let Ok(true) = config.hash_matches(description, &hash) {
                     info!("'{}' is already installed and up to date", self.name);
                 };
                 for cfg in channel.build_download_configs() {
-                    let _ = self.add_component(cfg);
+                    self.add_component(cfg)?;
                 }
             }
         };

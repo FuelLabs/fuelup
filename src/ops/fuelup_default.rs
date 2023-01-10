@@ -31,8 +31,8 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
     };
 
     let new_default = match DistToolchainDescription::from_str(&toolchain) {
-        Ok(desc) => Toolchain::from_path(&desc.to_string())?,
-        Err(_) => Toolchain::from_path(&toolchain)?,
+        Ok(desc) => Toolchain::from_path(&desc.to_string()),
+        Err(_) => Toolchain::from_path(&toolchain),
     };
 
     if !new_default.exists() {

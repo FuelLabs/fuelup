@@ -98,7 +98,7 @@ impl fmt::Display for Channel {
 impl FromStr for Channel {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
-        if DistToolchainName::from_str(&s).is_ok() {
+        if DistToolchainName::from_str(s).is_ok() {
             return Ok(Self {
                 name: s.to_string(),
                 date: None,

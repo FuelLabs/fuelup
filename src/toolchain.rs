@@ -159,12 +159,12 @@ impl Toolchain {
         })
     }
 
-    pub fn from_path(toolchain: &str) -> Result<Self> {
-        Ok(Self {
+    pub fn from_path(toolchain: &str) -> Self {
+        Self {
             name: toolchain.to_string(),
             path: toolchain_dir(toolchain),
             bin_path: toolchain_bin_dir(toolchain),
-        })
+        }
     }
 
     pub fn from_settings() -> Result<Self> {

@@ -27,7 +27,7 @@ pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
     Ok(ExitCode::SUCCESS)
 }
 
-fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io::Result<ExitCode> {
+fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Result<ExitCode> {
     let toolchain_override: Option<ToolchainOverride> = ToolchainOverride::from_project_root();
 
     let (bin_path, toolchain_name) = match toolchain_override {
@@ -36,16 +36,10 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
             // when deserializing from the toml.
             let description =
                 DistToolchainDescription::from_str(&to.cfg.toolchain.channel).unwrap();
-
-            // Since we have a valid DistToolchainDescription above, Toolchain::from_path shouldn't fail.
-            let toolchain = Toolchain::from_path(&description.to_string()).unwrap_or_else(|_| {
-                panic!("Failed to create toolchain '{}' from path", &description)
-            });
+            let toolchain = Toolchain::from_path(&description.to_string())?;
 
             // Install the entire toolchain declared in [toolchain] if it does not exist.
-            toolchain
-                .install_if_nonexistent(&description)
-                .unwrap_or_else(|_| panic!("could not install toolchain: '{}'", &description));
+            toolchain.install_if_nonexistent(&description)?;
 
             // Install components within [components] that are declared but missing from the store.
             if let Some(version) = to.get_component_version(proc_name) {
@@ -75,7 +69,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> io
     cmd.args(args);
     cmd.stdin(Stdio::inherit());
 
-    return exec(&mut cmd, proc_name, &toolchain_name);
+    return exec(&mut cmd, proc_name, &toolchain_name).map_err(|e| anyhow::Error::from(e));
 
     fn exec(cmd: &mut Command, proc_name: &str, toolchain_name: &str) -> io::Result<ExitCode> {
         let error = cmd.exec();

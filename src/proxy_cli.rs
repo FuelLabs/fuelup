@@ -36,7 +36,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
             // when deserializing from the toml.
             let description =
                 DistToolchainDescription::from_str(&to.cfg.toolchain.channel).unwrap();
-            let toolchain = Toolchain::from_path(&description.to_string())?;
+            let toolchain = Toolchain::from_path(&description.to_string());
 
             // Install the entire toolchain declared in [toolchain] if it does not exist.
             toolchain.install_if_nonexistent(&description)?;

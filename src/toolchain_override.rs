@@ -85,6 +85,7 @@ where
         &"a valid channel str",
     ))
 }
+
 impl fmt::Display for Channel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.date {

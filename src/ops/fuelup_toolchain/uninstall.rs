@@ -22,9 +22,9 @@ pub fn uninstall(command: UninstallCommand) -> Result<()> {
                 fs::remove_file(hash_file)?;
             };
 
-            Toolchain::from_path(&desc.to_string())?
+            Toolchain::from_path(&desc.to_string())
         }
-        Err(_) => Toolchain::from_path(&name)?,
+        Err(_) => Toolchain::from_path(&name),
     };
 
     if !toolchain.exists() {

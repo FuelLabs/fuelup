@@ -69,7 +69,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
     cmd.args(args);
     cmd.stdin(Stdio::inherit());
 
-    return exec(&mut cmd, proc_name, &toolchain_name).map_err(|e| anyhow::Error::from(e));
+    return exec(&mut cmd, proc_name, &toolchain_name).map_err(anyhow::Error::from);
 
     fn exec(cmd: &mut Command, proc_name: &str, toolchain_name: &str) -> io::Result<ExitCode> {
         let error = cmd.exec();

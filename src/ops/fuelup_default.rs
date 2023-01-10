@@ -17,9 +17,10 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
         None => {
             let mut result = String::new();
             if let Some(to) = ToolchainOverride::from_project_root() {
-                let name = match DistToolchainDescription::from_str(&to.cfg.toolchain.channel) {
+                let name = match DistToolchainDescription::from_str(&to.cfg.toolchain.channel.name)
+                {
                     Ok(desc) => desc.to_string(),
-                    Err(_) => to.cfg.toolchain.channel,
+                    Err(_) => to.cfg.toolchain.channel.name,
                 };
                 result.push_str(&format!("{} (override), ", name))
             }

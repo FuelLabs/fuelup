@@ -97,17 +97,21 @@ impl fmt::Display for Channel {
 impl FromStr for Channel {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
-        if let Some((name, d)) = s.split_once('-') {
-            Ok(Self {
-                name: name.to_string(),
-                date: Date::parse(d, DATE_FORMAT).ok(),
-            })
-        } else {
-            Ok(Self {
+        if DistToolchainName::from_str(&s).is_ok() {
+            return Ok(Self {
                 name: s.to_string(),
                 date: None,
-            })
-        }
+            });
+        };
+
+        if let Some((name, d)) = s.split_once('-') {
+            return Ok(Self {
+                name: name.to_string(),
+                date: Date::parse(d, DATE_FORMAT).ok(),
+            });
+        } else {
+            bail!("Invalid str for channel: '{}'", s);
+        };
     }
 }
 

@@ -115,16 +115,16 @@ impl FromStr for Channel {
         };
 
         if let Some((name, d)) = s.split_once('-') {
-            return Ok(Self {
+            Ok(Self {
                 name: name.to_string(),
                 date: Date::parse(d, DATE_FORMAT).ok(),
-            });
+            })
         } else {
             if s == LATEST || s == NIGHTLY {
                 bail!("'{s}' without date specifier is forbidden");
             }
             bail!("Invalid str for channel: '{}'", s);
-        };
+        }
     }
 }
 

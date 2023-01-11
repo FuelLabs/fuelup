@@ -14,10 +14,6 @@ use toml_edit::value;
 use toml_edit::Document;
 
 static TODAY: Lazy<String> = Lazy::new(|| chrono::Utc::now().format("%Y%m%d").to_string());
-static TODAY_HYPHENATED: Lazy<String> =
-    Lazy::new(|| chrono::Utc::now().format("%Y-%m-%d").to_string());
-static TODAY_ISO: Lazy<String> =
-    Lazy::new(|| format!("{}T00:00:00Z", chrono::Utc::now().format("%Y-%m-%d")));
 
 /// Parse a single key-value pair
 fn parse_key_val<T, U>(s: &str) -> Result<(T, U), Box<dyn Error + Send + Sync + 'static>>
@@ -92,7 +88,7 @@ struct Commit {
     sha: String,
 }
 
-fn get_version(channel: &str, component: &Component) -> Result<Version> {
+fn get_version(component: &Component) -> Result<Version> {
     let handle = ureq::builder().user_agent("fuelup").build();
     let mut data = Vec::new();
 
@@ -106,24 +102,7 @@ fn get_version(channel: &str, component: &Component) -> Result<Version> {
     resp.into_reader().read_to_end(&mut data)?;
     let response: LatestReleaseApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
 
-    let mut version_str = response.tag_name["v".len()..].to_string();
-
-    if channel == "nightly" {
-        let commit_api = format!(
-            "https://api.github.com/repos/FuelLabs/{}/commits",
-            component.repository_name
-        );
-        let resp = handle.get(&commit_api).query("until", &TODAY_ISO).call()?;
-
-        let mut data2 = Vec::new();
-        resp.into_reader().read_to_end(&mut data2)?;
-        let commits: Vec<Commit> = serde_json::from_str(&String::from_utf8_lossy(&data2))?;
-
-        let short_sha = commits[0].sha.chars().take(10).collect::<String>();
-
-        let build_metadata = format!("{}.{}.{}", "nightly", TODAY.to_string(), short_sha);
-        version_str = format!("{}+{}", version_str, build_metadata);
-    };
+    let version_str = response.tag_name["v".len()..].to_string();
 
     let version = Version::parse(&version_str)?;
 
@@ -197,29 +176,11 @@ fn publish_nightly(document: &mut Document, components: Vec<Component>) -> Resul
     Ok(())
 }
 
-fn main() -> Result<()> {
-    let args = Args::parse();
-
-    let mut component_versions: HashMap<String, Version> = HashMap::new();
-
-    for package in args.packages {
-        component_versions.insert(package.0, package.1);
-    }
-
-    validate_components(&args.channel, &component_versions)?;
-
-    let components = Components::collect_publishables()?;
-
-    let mut document = Document::new();
-    document["pkg"] = implicit_table();
-
-    match args.channel.as_str() {
-        "nightly" => publish_nightly(&mut document, components.clone())?,
-        _ => {
-            bail!("");
-        }
-    }
-
+fn publish_latest(
+    document: &mut Document,
+    components: Vec<Component>,
+    component_versions: HashMap<String, Version>,
+) -> Result<()> {
     for component in components {
         println!("\nWriting package info for component '{}'", &component.name);
         let tag_prefix = if component.name == "forc" {
@@ -230,7 +191,7 @@ fn main() -> Result<()> {
 
         let version = match component_versions.contains_key(&component.name) {
             true => component_versions[&component.name].clone(),
-            false => get_version(&args.channel, &component)?,
+            false => get_version(&component)?,
         };
 
         let (repo, tag, tarball_prefix) = {
@@ -279,6 +240,28 @@ fn main() -> Result<()> {
                 }
             };
         }
+    }
+    Ok(())
+}
+
+fn main() -> Result<()> {
+    let args = Args::parse();
+
+    let mut component_versions: HashMap<String, Version> = HashMap::new();
+    for package in args.packages {
+        component_versions.insert(package.0, package.1);
+    }
+    validate_components(&args.channel, &component_versions)?;
+
+    let components = Components::collect_publishables()?;
+
+    let mut document = Document::new();
+    document["pkg"] = implicit_table();
+
+    match args.channel.as_str() {
+        "nightly" => publish_nightly(&mut document, components.clone())?,
+        "latest" => publish_latest(&mut document, components.clone(), component_versions)?,
+        _ => bail!("Unrecognized channel '{}'", args.channel.as_str()),
     }
 
     println!("writing channel: '{}'", &args.out_file);

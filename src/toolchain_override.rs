@@ -10,12 +10,15 @@ use time::Date;
 use toml_edit::{de, ser, value, Document};
 use tracing::{info, warn};
 
+use crate::channel::{is_beta_toolchain, LATEST, NIGHTLY};
 use crate::constants::DATE_FORMAT;
-use crate::toolchain::{DistToolchainDescription, DistToolchainName};
+use crate::toolchain::DistToolchainDescription;
 use crate::{
     constants::FUEL_TOOLCHAIN_TOML_FILE, download::DownloadCfg, file,
     path::get_fuel_toolchain_toml, target_triple::TargetTriple, toolchain::Toolchain,
 };
+
+const CHANNEL_WITHOUT_DATE_ERROR: &str = "channel with date";
 
 // For composability with other functionality of fuelup, we want to add
 // additional info to OverrideCfg (representation of 'fuel-toolchain.toml').
@@ -65,12 +68,13 @@ where
 {
     let channel_str = String::deserialize(deserializer)?;
 
-    if DistToolchainName::from_str(&channel_str).is_ok() {
+    if is_beta_toolchain(&channel_str) {
         return Ok(Channel {
             name: channel_str,
             date: None,
         });
     }
+
     if let Some((name, date)) = channel_str.split_once('-') {
         return Ok(Channel {
             name: name.to_string(),
@@ -78,6 +82,13 @@ where
                 .map_err(de::Error::custom)
                 .ok(),
         });
+    }
+
+    if channel_str == LATEST || channel_str == NIGHTLY {
+        return Err(Error::invalid_value(
+            serde::de::Unexpected::Str(&channel_str),
+            &CHANNEL_WITHOUT_DATE_ERROR,
+        ));
     }
 
     Err(Error::invalid_value(
@@ -98,7 +109,7 @@ impl fmt::Display for Channel {
 impl FromStr for Channel {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
-        if DistToolchainName::from_str(s).is_ok() {
+        if is_beta_toolchain(s) {
             return Ok(Self {
                 name: s.to_string(),
                 date: None,
@@ -111,6 +122,9 @@ impl FromStr for Channel {
                 date: Date::parse(d, DATE_FORMAT).ok(),
             });
         } else {
+            if s == LATEST || s == NIGHTLY {
+                bail!("'{s}' without date specifier is forbidden");
+            }
             bail!("Invalid str for channel: '{}'", s);
         };
     }
@@ -218,19 +232,9 @@ impl OverrideCfg {
 
 #[cfg(test)]
 mod tests {
+    use crate::channel::{BETA_1, BETA_2, NIGHTLY};
+
     use super::*;
-
-    #[test]
-    fn parse_toolchain_override_channel_only() {
-        const TOML: &str = r#"[toolchain]
-channel = "latest"
-"#;
-        let cfg = OverrideCfg::from_toml(TOML).unwrap();
-
-        assert_eq!(cfg.toolchain.channel.to_string(), "latest");
-        assert!(cfg.components.is_none());
-        assert_eq!(TOML, cfg.to_string_pretty().unwrap());
-    }
 
     #[test]
     fn parse_toolchain_override_latest_with_date() {
@@ -283,6 +287,30 @@ fuel-core = "0.15.1"
     }
 
     #[test]
+    fn parse_toolchain_override_channel_without_date_error() {
+        const LATEST: &str = r#"[toolchain]
+channel = "latest"
+"#;
+        const NIGHTLY: &str = r#"[toolchain]
+channel = "nightly"
+"#;
+
+        let result = OverrideCfg::from_toml(LATEST);
+        assert!(result.is_err());
+        let e = result.unwrap_err();
+        assert!(e.to_string().contains(&format!(
+            "invalid value: string \"latest\", expected channel with date",
+        )));
+
+        let result = OverrideCfg::from_toml(NIGHTLY);
+        assert!(result.is_err());
+        let e = result.unwrap_err();
+        assert!(e.to_string().contains(&format!(
+            "invalid value: string \"nightly\", expected channel with date",
+        )));
+    }
+
+    #[test]
     fn parse_toolchain_override_invalid_tomls() {
         const EMPTY_STR: &str = "";
         const EMPTY_TOOLCHAIN: &str = r#"[toolchain]
@@ -290,7 +318,6 @@ fuel-core = "0.15.1"
         const INVALID_CHANNEL: &str = r#"[toolchain]
 channel = "invalid-channel"
 "#;
-
         const EMPTY_COMPONENTS: &str = r#"[toolchain]
 channel = "beta-2"
 
@@ -305,5 +332,13 @@ channel = "beta-2"
         ] {
             assert!(OverrideCfg::from_toml(toml).is_err());
         }
+    }
+
+    #[test]
+    fn channel_from_str() {
+        assert!(Channel::from_str(BETA_1).is_ok());
+        assert!(Channel::from_str(BETA_2).is_ok());
+        assert!(Channel::from_str(NIGHTLY).is_err());
+        assert!(Channel::from_str(LATEST).is_err());
     }
 }

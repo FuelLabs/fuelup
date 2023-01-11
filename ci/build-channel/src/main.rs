@@ -6,7 +6,7 @@ use semver::Version;
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
 use sha2::Sha256;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
 use std::io::Read;
@@ -116,7 +116,7 @@ fn validate_components(channel: &str, components: &HashMap<String, Version>) -> 
     Ok(())
 }
 
-fn publish_nightly(document: &mut Document, components: Vec<Component>) -> Result<()> {
+fn write_nightly_document(document: &mut Document, components: Vec<Component>) -> Result<()> {
     let mut data = Vec::new();
     let nightly_release_url = format!(
         "https://api.github.com/repos/FuelLabs/sway-nightly-binaries/releases/tags/nightly-{}",
@@ -173,7 +173,7 @@ fn publish_nightly(document: &mut Document, components: Vec<Component>) -> Resul
     Ok(())
 }
 
-fn publish_latest(
+fn write_latest_document(
     document: &mut Document,
     components: Vec<Component>,
     component_versions: HashMap<String, Version>,
@@ -256,8 +256,8 @@ fn main() -> Result<()> {
     document["pkg"] = implicit_table();
 
     match args.channel.as_str() {
-        "nightly" => publish_nightly(&mut document, components)?,
-        "latest" => publish_latest(&mut document, components, component_versions)?,
+        "nightly" => write_nightly_document(&mut document, components)?,
+        "latest" => write_latest_document(&mut document, components, component_versions)?,
         _ => bail!("Unrecognized channel '{}'", args.channel.as_str()),
     }
 

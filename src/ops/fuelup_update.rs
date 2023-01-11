@@ -47,7 +47,7 @@ pub fn update() -> Result<()> {
                 .collect::<String>()
         );
         for cfg in cfgs {
-            let toolchain = Toolchain::from_path(&description.to_string())?;
+            let toolchain = Toolchain::from_path(&description.to_string());
             match toolchain.add_component(cfg) {
                 Ok(cfg) => installed_bins.push_str(&format!("  - {} {}\n", cfg.name, cfg.version)),
                 Err(e) => errored_bins.push_str(&format!("  - {}\n", e)),

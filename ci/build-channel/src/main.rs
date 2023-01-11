@@ -129,13 +129,21 @@ fn publish_nightly(document: &mut Document, components: Vec<Component>) -> Resul
 
     for asset in release.assets {
         for component in &components {
+            // Asset name example: fuel-core-0.15.1+nightly.20230111.a5514420e5-x86_64-unknown-linux-gnu.tar.gz
+            // If an asset's name matches a component's declared tarball_prefix in components.toml,
+            // we want to store the download information in a channel.
             if let Some(stripped) = asset.name.strip_prefix(&component.tarball_prefix) {
+                println!("\nWriting package info for component '{}'", &component.name);
                 document["pkg"][&component.name] = implicit_table();
                 document["pkg"][&component.name]["target"] = implicit_table();
+
+                // Example output: Some((0.15.1+nightly.20230111.a5514420e5, x86_64-unknown-linux-gnu.tar.gz))
+                // We want to record the version and target in the channel toml.
                 let split = stripped[1..].split_once('-');
                 if let Some((version, tarball_name)) = split {
                     document["pkg"][&component.name]["version"] = value(version.to_string());
 
+                    // Example output: Some((x86_64-unknown-linux-gnu, tar.gz))
                     if let Some((target, _)) = tarball_name.split_once('.') {
                         let mut data = Vec::new();
 
@@ -254,7 +262,6 @@ fn main() -> Result<()> {
     }
 
     println!("writing channel: '{}'", &args.out_file);
-
     let mut channel_str = String::new();
     channel_str.push_str(&format!(
         "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/{}\"\n",

@@ -54,17 +54,6 @@ pub struct HashedBinary {
     pub hash: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Channel {
-    pub pkg: BTreeMap<String, Package>,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Package {
-    pub target: BTreeMap<String, HashedBinary>,
-    pub version: Version,
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
     url: String,
@@ -81,11 +70,6 @@ struct Release {
 struct Asset {
     browser_download_url: String,
     name: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Commit {
-    sha: String,
 }
 
 fn get_version(component: &Component) -> Result<Version> {

@@ -279,11 +279,13 @@ impl Toolchain {
 
     pub fn install_if_nonexistent(&self, description: &DistToolchainDescription) -> Result<()> {
         if !self.exists() {
+            info!("toolchain '{}' does not exist; installing", description);
             if let Ok((channel, hash)) = Channel::from_dist_channel(description) {
                 let config = Config::from_env()?;
                 if let Ok(true) = config.hash_matches(description, &hash) {
                     info!("'{}' is already installed and up to date", self.name);
                 };
+
                 for cfg in channel.build_download_configs() {
                     self.add_component(cfg)?;
                 }

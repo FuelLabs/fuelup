@@ -1,6 +1,8 @@
 use anyhow::Result;
+use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;
 use fuelup::settings::SettingsFile;
 use fuelup::target_triple::TargetTriple;
+use fuelup::toolchain_override::{OverrideCfg, ToolchainCfg, ToolchainOverride};
 use std::os::unix::fs::OpenOptionsExt;
 use std::{
     env, fs,
@@ -20,8 +22,10 @@ pub enum FuelupState {
     LatestAndNightlyInstalled,
     NightlyAndNightlyDateInstalled,
     Beta1Installed,
+    LatestAndNightlyWithBetaOverride,
 }
 
+#[derive(Debug)]
 pub struct TestCfg {
     pub fuelup_path: PathBuf,
     pub root: PathBuf,
@@ -82,6 +86,7 @@ impl TestCfg {
     pub fn fuelup(&mut self, args: &[&str]) -> TestOutput {
         let output = Command::new(&self.fuelup_path)
             .args(args)
+            .current_dir(&self.home)
             .env("HOME", &self.home)
             .env("CARGO_HOME", self.home.join(".cargo").to_str().unwrap())
             .env(
@@ -142,6 +147,15 @@ fn setup_settings_file(settings_dir: &Path, default_toolchain: &str) -> Result<(
         format!("default_toolchain = \"{}\"", default_toolchain),
     )
     .expect("Failed to copy settings");
+    Ok(())
+}
+
+fn setup_override_file(toolchain_override: ToolchainOverride) -> Result<()> {
+    let document = toolchain_override.to_toml();
+
+    fs::write(toolchain_override.path, document.to_string())
+        .unwrap_or_else(|_| panic!("Failed to write {}", FUEL_TOOLCHAIN_TOML_FILE));
+
     Ok(())
 }
 
@@ -241,6 +255,20 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
                 &format!("beta-1-{}-{}", DATE, target),
             )?;
             setup_settings_file(&tmp_fuelup_root_path, &beta_1)?;
+        }
+        FuelupState::LatestAndNightlyWithBetaOverride => {
+            setup_toolchain(&tmp_fuelup_root_path, &latest)?;
+            setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
+            setup_settings_file(&tmp_fuelup_root_path, &latest)?;
+            setup_override_file(ToolchainOverride {
+                cfg: OverrideCfg::new(
+                    ToolchainCfg {
+                        channel: "beta-1".to_string(),
+                    },
+                    None,
+                ),
+                path: tmp_home.join(FUEL_TOOLCHAIN_TOML_FILE),
+            })?;
         }
     }
 

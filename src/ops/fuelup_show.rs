@@ -86,7 +86,7 @@ pub fn show() -> Result<()> {
             active_toolchain_message.push_str(" (default)");
         }
 
-        active_toolchain = Toolchain::from_path(override_name)?;
+        active_toolchain = Toolchain::from_path(override_name);
         active_toolchain_message.push_str(&active_toolchain.name);
         active_toolchain_message.push_str(&format!(
             " (override), path: {}",

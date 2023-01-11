@@ -57,7 +57,6 @@ impl Channel {
 
         match desc.name {
             DistToolchainName::Latest => {
-                println!("date: {}", desc);
                 if let Some(date) = desc.date {
                     channel_url.push_str(&format!("channel-fuel-latest-{}.toml", date))
                 } else {
@@ -67,7 +66,6 @@ impl Channel {
 
             DistToolchainName::Nightly => {
                 if let Some(date) = desc.date {
-                    println!("date: {}", date);
                     channel_url.push_str(&format_nightly_url(&date)?);
                     channel_url.push('/');
                 }
@@ -76,8 +74,6 @@ impl Channel {
             DistToolchainName::Beta1 => channel_url.push_str(CHANNEL_BETA_1_FILE_NAME),
             DistToolchainName::Beta2 => channel_url.push_str(CHANNEL_BETA_2_FILE_NAME),
         };
-
-        println!("desc: {}", channel_url);
 
         let mut hasher = Sha256::new();
         let toml = match download(&channel_url, &mut hasher) {

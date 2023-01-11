@@ -97,7 +97,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><a href="installation/index.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="installation/other.html"><strong aria-hidden="true">1.1.</strong> Other installation methods</a></li></ol></li><li class="chapter-item expanded "><a href="concepts/index.html"><strong aria-hidden="true">2.</strong> Concepts</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="concepts/channels/index.html"><strong aria-hidden="true">2.1.</strong> Channels</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="concepts/channels/latest.html"><strong aria-hidden="true">2.1.1.</strong> latest</a></li><li class="chapter-item expanded "><a href="concepts/channels/nightly.html"><strong aria-hidden="true">2.1.2.</strong> nightly</a></li><li class="chapter-item expanded "><a href="concepts/channels/beta-1.html"><strong aria-hidden="true">2.1.3.</strong> beta-1</a></li><li class="chapter-item expanded "><a href="concepts/channels/beta-2.html"><strong aria-hidden="true">2.1.4.</strong> beta-2</a></li></ol></li><li class="chapter-item expanded "><a href="concepts/toolchains.html"><strong aria-hidden="true">2.2.</strong> Toolchains</a></li><li class="chapter-item expanded "><a href="concepts/components.html"><strong aria-hidden="true">2.3.</strong> Components</a></li><li class="chapter-item expanded "><a href="concepts/proxies.html"><strong aria-hidden="true">2.4.</strong> Proxies</a></li></ol></li><li class="chapter-item expanded "><a href="basics.html"><strong aria-hidden="true">3.</strong> Basic usage</a></li><li class="chapter-item expanded "><a href="configuration.html"><strong aria-hidden="true">4.</strong> Configuration</a></li><li class="chapter-item expanded "><a href="examples.html"><strong aria-hidden="true">5.</strong> Examples</a></li><li class="chapter-item expanded "><a href="contributing_to_fuelup.html"><strong aria-hidden="true">6.</strong> Contributing to fuelup</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><a href="installation/index.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="installation/other.html"><strong aria-hidden="true">1.1.</strong> Other installation methods</a></li></ol></li><li class="chapter-item expanded "><a href="concepts/index.html"><strong aria-hidden="true">2.</strong> Concepts</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="concepts/channels/index.html"><strong aria-hidden="true">2.1.</strong> Channels</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="concepts/channels/latest.html"><strong aria-hidden="true">2.1.1.</strong> latest</a></li><li class="chapter-item expanded "><a href="concepts/channels/nightly.html"><strong aria-hidden="true">2.1.2.</strong> nightly</a></li><li class="chapter-item expanded "><a href="concepts/channels/beta-1.html"><strong aria-hidden="true">2.1.3.</strong> beta-1</a></li><li class="chapter-item expanded "><a href="concepts/channels/beta-2.html"><strong aria-hidden="true">2.1.4.</strong> beta-2</a></li></ol></li><li class="chapter-item expanded "><a href="concepts/toolchains.html"><strong aria-hidden="true">2.2.</strong> Toolchains</a></li><li class="chapter-item expanded "><a href="concepts/components.html"><strong aria-hidden="true">2.3.</strong> Components</a></li><li class="chapter-item expanded "><a href="concepts/proxies.html"><strong aria-hidden="true">2.4.</strong> Proxies</a></li></ol></li><li class="chapter-item expanded "><a href="basics.html"><strong aria-hidden="true">3.</strong> Basic usage</a></li><li class="chapter-item expanded "><a href="overrides.html"><strong aria-hidden="true">4.</strong> Overrides</a></li><li class="chapter-item expanded "><a href="configuration.html"><strong aria-hidden="true">5.</strong> Configuration</a></li><li class="chapter-item expanded "><a href="examples.html"><strong aria-hidden="true">6.</strong> Examples</a></li><li class="chapter-item expanded "><a href="contributing_to_fuelup.html"><strong aria-hidden="true">7.</strong> Contributing to fuelup</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -395,6 +395,41 @@ by running:</p>
 that provides more information about each command. Run <code>fuelup help</code> for an overview. Detailed
 help for each subcommand is also available.</p>
 <p>For example, run <code>fuelup component --help</code> for specifics on installing <a href="concepts/components.html">components</a>.</p>
+<div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="overrides"><a class="header" href="#overrides">Overrides</a></h1>
+<p><code>fuelup</code> automatically determines which <a href="concepts/toolchains.html">toolchain</a> to use when one of the installed commands like
+<code>forc</code> is executed.</p>
+<p>You can override the installed default toolchain using a <code>fuel-toolchain.toml</code> file.</p>
+<h2 id="the-toolchain-file"><a class="header" href="#the-toolchain-file">The toolchain file</a></h2>
+<p>The fuel-toolchain.toml file allows projects to &quot;pin&quot; to a specific set of fuel toolchain component versions.
+This greatly improves the reproducibility of a project, as the fuel-toolchain.toml contains the set of known,
+working versions for each tool used to build it.</p>
+<p>When this file is present, <code>fuelup</code> will override the default toolchain with the specified toolchain when executing binaries
+in the toolchain.</p>
+<p>In these cases, the toolchain can be specified in a file called <code>fuel-toolchain.toml</code>. These toolchains can only be
+the <a href="concepts/toolchains.html#toolchains">distributed toolchains</a> at this point in time.</p>
+<p>Here's what a sample project might look like:</p>
+<pre><code class="language-console">$ tree -L 1 # 'tree -L 1' shows the project structure up to the depth of 1
+.
+├── Cargo.toml
+├── Forc.toml
+├── fuel-toolchain.toml
+├── project
+├── README.md
+└── SPECIFICATION.md
+</code></pre>
+<h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
+<p>An application using the <a href="concepts/channels/beta-2.html"><code>beta-2</code></a> toolchain:</p>
+<pre><code class="language-toml">[toolchain]
+channel = &quot;beta-2&quot;
+</code></pre>
+<p>Let's say we have a project on the <code>beta-2</code> testnet, and we want to try using the
+latest (at time of writing) forc to develop on it:</p>
+<pre><code class="language-toml">[toolchain]
+channel = &quot;beta-2&quot;
+
+[components]
+forc = &quot;0.33.0&quot; # in beta-2, forc is pinned to v0.31.1
+</code></pre>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
 <p><em>fuelup</em> has a <a href="https://github.com/toml-lang/toml">TOML</a> settings file at
 <code>.fuelup/settings.toml</code>. The schema for this file is not part of the public
@@ -462,7 +497,7 @@ directories.</p>
 generated completions.</p>
 <pre><code class="language-sh">use fuelup
 </code></pre>
-<div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody>
 <tr><td><code>fuelup toolchain install latest</code></td><td>Installs the toolchain distributed by the <code>latest</code> channel</td></tr>
 <tr><td><code>fuelup toolchain new my_toolchain</code></td><td>Creates a new custom toolchain named 'my_toolchain' and sets it as the default</td></tr>

@@ -165,7 +165,7 @@ jobs:
         
             cp $CHANNEL_TOML ${{ env.LATEST_CHANNEL_DIR }}
 
-            mkdir latest-archive
+            mkdir archive
             cp $CHANNEL_TOML archive/channel-fuel-latest-${PUBLISHED_DATE}.toml
 
       - name: Deploy latest channel
@@ -182,7 +182,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./latest-archive
+          publish_dir: ./archive
           keep_files: true
           destination_dir: ./channels/latest
 

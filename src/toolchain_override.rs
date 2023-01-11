@@ -18,8 +18,6 @@ use crate::{
     path::get_fuel_toolchain_toml, target_triple::TargetTriple, toolchain::Toolchain,
 };
 
-const CHANNEL_WITHOUT_DATE_ERROR: &str = "channel with date";
-
 // For composability with other functionality of fuelup, we want to add
 // additional info to OverrideCfg (representation of 'fuel-toolchain.toml').
 // In this case, we want the path to the toml file. More info might be
@@ -87,7 +85,7 @@ where
     if channel_str == LATEST || channel_str == NIGHTLY {
         return Err(Error::invalid_value(
             serde::de::Unexpected::Str(&channel_str),
-            &CHANNEL_WITHOUT_DATE_ERROR,
+            &"channel with date",
         ));
     }
 

@@ -58,9 +58,10 @@ pub fn show() -> Result<()> {
     let toolchain_override = ToolchainOverride::from_project_root();
 
     let override_name = if let Some(toolchain_override) = toolchain_override.as_ref() {
-        match DistToolchainDescription::from_str(&toolchain_override.cfg.toolchain.channel) {
+        let override_name = toolchain_override.cfg.toolchain.channel.to_string();
+        match DistToolchainDescription::from_str(&override_name) {
             Ok(desc) => Some(desc.to_string()),
-            Err(_) => Some(toolchain_override.cfg.toolchain.channel.clone()),
+            Err(_) => Some(override_name),
         }
     } else {
         None

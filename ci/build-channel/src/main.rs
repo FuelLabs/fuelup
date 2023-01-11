@@ -154,20 +154,25 @@ fn publish_nightly(document: &mut Document, components: Vec<Component>) -> Resul
 
                     if let Some((target, _)) = tarball_name.split_once('.') {
                         let mut data = Vec::new();
-                        let mut hasher = Sha256::new();
-                        hasher.update(data);
-                        let actual_hash = format!("{:x}", hasher.finalize());
-                        println!(
-                            "url: {}\nhash: {}",
-                            &asset.browser_download_url, &actual_hash
-                        );
+
                         document["pkg"][&component.name]["target"][target.to_string()] =
                             implicit_table();
                         document["pkg"][&component.name]["target"][target.to_string()]["url"] =
                             value(&asset.browser_download_url);
 
-                        document["pkg"][&component.name]["target"][target.to_string()]["hash"] =
-                            value(actual_hash);
+                        if let Ok(res) = ureq::get(&asset.browser_download_url).call() {
+                            res.into_reader().read_to_end(&mut data)?;
+                            let mut hasher = Sha256::new();
+                            hasher.update(data);
+                            let actual_hash = format!("{:x}", hasher.finalize());
+
+                            println!(
+                                "url: {}\nhash: {}",
+                                &asset.browser_download_url, &actual_hash
+                            );
+                            document["pkg"][&component.name]["target"][target.to_string()]
+                                ["hash"] = value(actual_hash);
+                        };
                     };
                 }
             }

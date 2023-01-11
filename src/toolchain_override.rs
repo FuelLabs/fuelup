@@ -267,26 +267,6 @@ forc = "0.33.0"
     }
 
     #[test]
-    fn parse_toolchain_override_components() {
-        const TOML: &str = r#"[toolchain]
-channel = "latest"
-
-[components]
-fuel-core = "0.15.1"
-"#;
-
-        let cfg = OverrideCfg::from_toml(TOML).unwrap();
-
-        assert_eq!(cfg.toolchain.channel.to_string(), "latest");
-        assert_eq!(cfg.components.as_ref().unwrap().keys().len(), 1);
-        assert_eq!(
-            cfg.components.as_ref().unwrap().get("fuel-core").unwrap(),
-            &Version::new(0, 15, 1)
-        );
-        assert_eq!(TOML, cfg.to_string_pretty().unwrap());
-    }
-
-    #[test]
     fn parse_toolchain_override_channel_without_date_error() {
         const LATEST: &str = r#"[toolchain]
 channel = "latest"

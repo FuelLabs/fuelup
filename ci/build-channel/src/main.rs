@@ -11,8 +11,11 @@ use std::error::Error;
 use std::fs;
 use std::io::Read;
 use toml_edit::value;
+use toml_edit::Document;
 
 static TODAY: Lazy<String> = Lazy::new(|| chrono::Utc::now().format("%Y%m%d").to_string());
+static TODAY_HYPHENATED: Lazy<String> =
+    Lazy::new(|| chrono::Utc::now().format("%Y-%m-%d").to_string());
 static TODAY_ISO: Lazy<String> =
     Lazy::new(|| format!("{}T00:00:00Z", chrono::Utc::now().format("%Y-%m-%d")));
 
@@ -81,6 +84,7 @@ struct Release {
 #[derive(Debug, Serialize, Deserialize)]
 struct Asset {
     browser_download_url: String,
+    name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -100,7 +104,6 @@ fn get_version(channel: &str, component: &Component) -> Result<Version> {
     let resp = handle.get(&url).call()?;
 
     resp.into_reader().read_to_end(&mut data)?;
-
     let response: LatestReleaseApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
 
     let mut version_str = response.tag_name["v".len()..].to_string();
@@ -150,6 +153,50 @@ fn validate_components(channel: &str, components: &HashMap<String, Version>) -> 
     Ok(())
 }
 
+fn publish_nightly(document: &mut Document, components: Vec<Component>) -> Result<()> {
+    let mut data = Vec::new();
+    let nightly_release_url = format!(
+        "https://api.github.com/repos/FuelLabs/sway-nightly-binaries/releases/tags/nightly-{}",
+        TODAY.to_string()
+    );
+
+    let resp = ureq::get(&nightly_release_url).call()?;
+    resp.into_reader().read_to_end(&mut data)?;
+    let release: Release = serde_json::from_str(&String::from_utf8_lossy(&data))?;
+
+    for asset in release.assets {
+        for component in &components {
+            if let Some(stripped) = asset.name.strip_prefix(&component.tarball_prefix) {
+                document["pkg"][&component.name] = implicit_table();
+                document["pkg"][&component.name]["target"] = implicit_table();
+                let split = stripped[1..].split_once('-');
+                if let Some((version, tarball_name)) = split {
+                    document["pkg"][&component.name]["version"] = value(version.to_string());
+
+                    if let Some((target, _)) = tarball_name.split_once('.') {
+                        let mut data = Vec::new();
+                        let mut hasher = Sha256::new();
+                        hasher.update(data);
+                        let actual_hash = format!("{:x}", hasher.finalize());
+                        println!(
+                            "url: {}\nhash: {}",
+                            &asset.browser_download_url, &actual_hash
+                        );
+                        document["pkg"][&component.name]["target"][target.to_string()] =
+                            implicit_table();
+                        document["pkg"][&component.name]["target"][target.to_string()]["url"] =
+                            value(&asset.browser_download_url);
+
+                        document["pkg"][&component.name]["target"][target.to_string()]["hash"] =
+                            value(actual_hash);
+                    };
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
 fn main() -> Result<()> {
     let args = Args::parse();
 
@@ -163,8 +210,15 @@ fn main() -> Result<()> {
 
     let components = Components::collect_publishables()?;
 
-    let mut document = toml_edit::Document::new();
+    let mut document = Document::new();
     document["pkg"] = implicit_table();
+
+    match args.channel.as_str() {
+        "nightly" => publish_nightly(&mut document, components.clone())?,
+        _ => {
+            bail!("");
+        }
+    }
 
     for component in components {
         println!("\nWriting package info for component '{}'", &component.name);
@@ -179,7 +233,7 @@ fn main() -> Result<()> {
             false => get_version(&args.channel, &component)?,
         };
 
-        let (repo, tag, tarball_prefix) = if args.channel.as_str() == "latest" {
+        let (repo, tag, tarball_prefix) = {
             let tarball_prefix = if tag_prefix == "forc-binaries" {
                 tag_prefix.to_string()
             } else {
@@ -189,12 +243,6 @@ fn main() -> Result<()> {
                 component.repository_name,
                 "v".to_owned() + &version.to_string(),
                 tarball_prefix,
-            )
-        } else {
-            (
-                "sway-nightly-binaries".to_string(),
-                format!("nightly-{}", TODAY.to_string()),
-                format!("{}-{}", tag_prefix, version),
             )
         };
 

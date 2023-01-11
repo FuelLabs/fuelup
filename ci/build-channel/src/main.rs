@@ -136,7 +136,7 @@ fn publish_nightly(document: &mut Document, components: Vec<Component>) -> Resul
     let mut data = Vec::new();
     let nightly_release_url = format!(
         "https://api.github.com/repos/FuelLabs/sway-nightly-binaries/releases/tags/nightly-{}",
-        TODAY.to_string()
+        *TODAY
     );
 
     let resp = ureq::get(&nightly_release_url).call()?;
@@ -264,8 +264,8 @@ fn main() -> Result<()> {
     document["pkg"] = implicit_table();
 
     match args.channel.as_str() {
-        "nightly" => publish_nightly(&mut document, components.clone())?,
-        "latest" => publish_latest(&mut document, components.clone(), component_versions)?,
+        "nightly" => publish_nightly(&mut document, components)?,
+        "latest" => publish_latest(&mut document, components, component_versions)?,
         _ => bail!("Unrecognized channel '{}'", args.channel.as_str()),
     }
 
@@ -277,7 +277,7 @@ fn main() -> Result<()> {
         args.github_run_id
     ));
     channel_str.push_str(&document.to_string());
-    fs::write(&args.out_file, channel_str.to_string())?;
+    fs::write(&args.out_file, &channel_str)?;
 
     Ok(())
 }

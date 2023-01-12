@@ -20,7 +20,7 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
                 let name = match DistToolchainDescription::from_str(&to.cfg.toolchain.channel.name)
                 {
                     Ok(desc) => desc.to_string(),
-                    Err(_) => to.cfg.toolchain.channel.name,
+                    Err(_) => to.cfg.toolchain.channel.to_string(),
                 };
                 result.push_str(&format!("{} (override), ", name))
             }

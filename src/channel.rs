@@ -50,33 +50,38 @@ fn format_nightly_url(date: &Date) -> Result<String> {
     ))
 }
 
+fn construct_channel_url(desc: &DistToolchainDescription) -> Result<String> {
+    let mut url = FUELUP_GH_PAGES.to_owned();
+    match desc.name {
+        DistToolchainName::Latest => {
+            if let Some(date) = desc.date {
+                url.push_str(&format!(
+                    "channels/latest/channel-fuel-latest-{}.toml",
+                    date
+                ))
+            } else {
+                url.push_str(CHANNEL_LATEST_FILE_NAME)
+            }
+        }
+
+        DistToolchainName::Nightly => {
+            if let Some(date) = desc.date {
+                url.push_str(&format_nightly_url(&date)?);
+                url.push('/');
+            }
+            url.push_str(CHANNEL_NIGHTLY_FILE_NAME)
+        }
+        DistToolchainName::Beta1 => url.push_str(CHANNEL_BETA_1_FILE_NAME),
+        DistToolchainName::Beta2 => url.push_str(CHANNEL_BETA_2_FILE_NAME),
+    };
+
+    Ok(url)
+}
+
 impl Channel {
     /// The returned `String` is a sha256 hash of the downloaded toolchain TOML bytes.
     pub fn from_dist_channel(desc: &DistToolchainDescription) -> Result<(Self, String)> {
-        let mut channel_url = FUELUP_GH_PAGES.to_owned();
-
-        match desc.name {
-            DistToolchainName::Latest => {
-                if let Some(date) = desc.date {
-                    channel_url.push_str(&format!(
-                        "channels/latest/channel-fuel-latest-{}.toml",
-                        date
-                    ))
-                } else {
-                    channel_url.push_str(CHANNEL_LATEST_FILE_NAME)
-                }
-            }
-
-            DistToolchainName::Nightly => {
-                if let Some(date) = desc.date {
-                    channel_url.push_str(&format_nightly_url(&date)?);
-                    channel_url.push('/');
-                }
-                channel_url.push_str(CHANNEL_NIGHTLY_FILE_NAME)
-            }
-            DistToolchainName::Beta1 => channel_url.push_str(CHANNEL_BETA_1_FILE_NAME),
-            DistToolchainName::Beta2 => channel_url.push_str(CHANNEL_BETA_2_FILE_NAME),
-        };
+        let channel_url = construct_channel_url(desc)?;
 
         let mut hasher = Sha256::new();
         let toml = match download(&channel_url, &mut hasher) {

@@ -1,0 +1,84 @@
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/0"
+date = "2023-01-06"
+
+[pkg.forc]
+version = "0.33.0"
+
+[pkg.forc.target.linux_amd64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.33.0/forc-binaries-linux_amd64.tar.gz"
+hash = "3a5f18a7cdb391e9bd2b38d42f69b8ff39f2891a7e0569343a4fa93037305b2c"
+
+[pkg.forc.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.33.0/forc-binaries-linux_arm64.tar.gz"
+hash = "fb8b2a5f33861dc136b444ff183bfcc3b7c36abefd4431be03950041a708a369"
+
+[pkg.forc.target.darwin_amd64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.33.0/forc-binaries-darwin_amd64.tar.gz"
+hash = "5223eda124dc9d898b261c558d5cd3cb11798bef00b236f393837e0400eff684"
+
+[pkg.forc.target.darwin_arm64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.33.0/forc-binaries-darwin_arm64.tar.gz"
+hash = "cb2defadb2a4335389b00fc3e37dd3822a64014b5f485359e8870936dcd6482f"
+
+[pkg.forc-explore]
+version = "0.28.1"
+
+[pkg.forc-explore.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-aarch64-unknown-linux-gnu.tar.gz"
+hash = "8f7ade34ff611eb8ffaea2ec0bd33f5bbf6de6b05aad2bcd39a3a62309ef3a41"
+
+[pkg.forc-explore.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-x86_64-unknown-linux-gnu.tar.gz"
+hash = "b0bfe8ddb4b0a962bc2ce956385392c7dae3f19f3ca97a90aba88f8d5b5f183c"
+
+[pkg.forc-explore.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-aarch64-apple-darwin.tar.gz"
+hash = "4c437e84b4f95e55c97d32595a4d529b3dcb78ebec06f07babccde74e1827566"
+
+[pkg.forc-explore.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-x86_64-apple-darwin.tar.gz"
+hash = "9ef1d8af2c5a611d33f8966881197bd4958da05e4b325eb0dc847b84ea1eac96"
+
+[pkg.forc-index]
+version = "0.1.13"
+
+[pkg.forc-wallet]
+version = "0.1.2"
+
+[pkg.forc-wallet.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.1.2/forc-wallet-0.1.2-aarch64-unknown-linux-gnu.tar.gz"
+hash = "b85bd65a19d8810ac05b766ccfe8f98630d21cd414031fb58c8e690a4255f2c2"
+
+[pkg.forc-wallet.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.1.2/forc-wallet-0.1.2-x86_64-unknown-linux-gnu.tar.gz"
+hash = "10d233d7c8fa5c04af328dad648b688b4677144476f0d402654131f9ed66283d"
+
+[pkg.forc-wallet.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.1.2/forc-wallet-0.1.2-aarch64-apple-darwin.tar.gz"
+hash = "d662150018b6fc6c1cbff727aaa739f93c7d7af6871b7e490d7b275d46999f59"
+
+[pkg.forc-wallet.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.1.2/forc-wallet-0.1.2-x86_64-apple-darwin.tar.gz"
+hash = "0705414a4ca68c4febc709f2a8c444f7e1748ba5223270d39f9b7431a57241fa"
+
+[pkg.fuel-core]
+version = "0.15.1"
+
+[pkg.fuel-core.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.15.1/fuel-core-0.15.1-aarch64-unknown-linux-gnu.tar.gz"
+hash = "4cc83ec6ec8e1261010f13c91b5918e941fb3539020ab4ffedd61a5d072a48ba"
+
+[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.15.1/fuel-core-0.15.1-x86_64-unknown-linux-gnu.tar.gz"
+hash = "620b3064badd6799174ed56235f86577e37cf2aeb28e3f247ce57aca12bb1511"
+
+[pkg.fuel-core.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.15.1/fuel-core-0.15.1-aarch64-apple-darwin.tar.gz"
+hash = "19c75f9bf94a85717f046892bd625baa06082fbf49c1be650096b8e8c5b1b32c"
+
+[pkg.fuel-core.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.15.1/fuel-core-0.15.1-x86_64-apple-darwin.tar.gz"
+hash = "fe082d451ecaf6f5f18e4e6dfce7ca89a4f7626112e32d119e2e567c6a08f014"
+
+[pkg.fuel-indexer]
+version = "0.1.13"

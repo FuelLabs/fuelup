@@ -285,7 +285,6 @@ impl Toolchain {
                 if let Ok(true) = config.hash_matches(description, &hash) {
                     info!("'{}' is already installed and up to date", self.name);
                 };
-
                 for cfg in channel.build_download_configs() {
                     self.add_component(cfg)?;
                 }

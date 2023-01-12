@@ -9,6 +9,8 @@ use tracing::warn;
 
 use dirs;
 
+use crate::constants::FUEL_TOOLCHAIN_TOML_FILE;
+
 pub const FUELUP_DIR: &str = ".fuelup";
 
 pub fn fuelup_dir() -> PathBuf {
@@ -33,6 +35,10 @@ pub fn hashes_dir() -> PathBuf {
 
 pub fn toolchains_dir() -> PathBuf {
     fuelup_dir().join("toolchains")
+}
+
+pub fn store_dir() -> PathBuf {
+    fuelup_dir().join("store")
 }
 
 pub fn fuelup_tmp_dir() -> PathBuf {
@@ -118,6 +124,28 @@ pub fn warn_existing_fuel_executables() -> Result<()> {
     warn!("{}", summary);
 
     Ok(())
+}
+
+fn find_parent_dir_with_file(starter_path: &Path, file_name: &str) -> Option<PathBuf> {
+    let mut path = std::fs::canonicalize(starter_path).ok()?;
+    let empty_path = PathBuf::from("/");
+    while path != empty_path {
+        path.push(file_name);
+        if path.exists() {
+            path.pop();
+            return Some(path);
+        } else {
+            path.pop();
+            path.pop();
+        }
+    }
+    None
+}
+
+pub fn get_fuel_toolchain_toml() -> Option<PathBuf> {
+    let parent_dir =
+        find_parent_dir_with_file(&std::env::current_dir().unwrap(), FUEL_TOOLCHAIN_TOML_FILE);
+    parent_dir.map(|p| p.join(FUEL_TOOLCHAIN_TOML_FILE))
 }
 
 #[cfg(unix)]

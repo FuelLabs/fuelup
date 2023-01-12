@@ -1,6 +1,7 @@
 use time::{format_description::FormatItem, macros::format_description};
 
 pub const FUELUP_GH_PAGES: &str = "https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/";
+pub const FUEL_TOOLCHAIN_TOML_FILE: &str = "fuel-toolchain.toml";
 
 pub const CHANNEL_LATEST_URL: &str =
     "https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/channel-fuel-latest.toml";

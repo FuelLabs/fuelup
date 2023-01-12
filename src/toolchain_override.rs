@@ -242,6 +242,7 @@ channel = "latest-2023-01-09"
         let cfg = OverrideCfg::from_toml(TOML).unwrap();
 
         assert_eq!(cfg.toolchain.channel.to_string(), "latest-2023-01-09");
+
         assert!(cfg.components.is_none());
         assert_eq!(TOML, cfg.to_string_pretty().unwrap());
     }

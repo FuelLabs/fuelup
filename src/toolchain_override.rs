@@ -277,16 +277,16 @@ channel = "nightly"
         let result = OverrideCfg::from_toml(LATEST);
         assert!(result.is_err());
         let e = result.unwrap_err();
-        assert!(e.to_string().contains(&format!(
-            "invalid value: string \"latest\", expected channel with date",
-        )));
+        assert!(e
+            .to_string()
+            .contains("invalid value: string \"latest\", expected channel with date"));
 
         let result = OverrideCfg::from_toml(NIGHTLY);
         assert!(result.is_err());
         let e = result.unwrap_err();
-        assert!(e.to_string().contains(&format!(
-            "invalid value: string \"nightly\", expected channel with date",
-        )));
+        assert!(e
+            .to_string()
+            .contains("invalid value: string \"nightly\", expected channel with date"));
     }
 
     #[test]

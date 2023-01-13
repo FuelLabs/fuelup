@@ -28,7 +28,7 @@ jobs:
       - name: Publish nightly channel
         id: setup
         run: |
-            PUBLISHED_DATE=$(date + '%Y-%m-%d')
+            PUBLISHED_DATE=$(date +'%Y-%m-%d')
             FORMATTED_PUBLISHED_DATE=$(date +'%Y/%m/%d')
             mkdir -p ${{ env.NIGHTLY_CHANNEL_DIR }}
 

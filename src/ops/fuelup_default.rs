@@ -14,8 +14,8 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
         Some(toolchain) => toolchain,
         None => {
             let mut result = String::new();
-
             let current_toolchain = Toolchain::from_settings()?;
+
             if let Some(to) = ToolchainOverride::from_project_root() {
                 let name =
                     match DistToolchainDescription::from_str(&to.cfg.toolchain.channel.to_string())

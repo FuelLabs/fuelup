@@ -10,19 +10,26 @@ use crate::{
 };
 
 pub fn default(toolchain: Option<String>) -> Result<()> {
-    let current_toolchain = Toolchain::from_settings()?;
-
     let toolchain = match toolchain {
         Some(toolchain) => toolchain,
         None => {
             let mut result = String::new();
+            let current_toolchain = Toolchain::from_settings()?;
+
             if let Some(to) = ToolchainOverride::from_project_root() {
-                let name = match DistToolchainDescription::from_str(&to.cfg.toolchain.channel) {
-                    Ok(desc) => desc.to_string(),
-                    Err(_) => to.cfg.toolchain.channel,
-                };
-                result.push_str(&format!("{} (override), ", name))
+                let name =
+                    match DistToolchainDescription::from_str(&to.cfg.toolchain.channel.to_string())
+                    {
+                        Ok(desc) => desc.to_string(),
+                        Err(_) => to.cfg.toolchain.channel,
+                    };
+                result.push_str(&format!("{} (override)", name));
+
+                if current_toolchain.exists() {
+                    result.push_str(", ")
+                }
             }
+
             result.push_str(&format!("{} (default)", current_toolchain.name));
 
             info!("{}", result);

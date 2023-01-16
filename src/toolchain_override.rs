@@ -12,10 +12,9 @@ use tracing::{info, warn};
 
 use crate::channel::{is_beta_toolchain, LATEST, NIGHTLY};
 use crate::constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE};
-use crate::toolchain::DistToolchainDescription;
+use crate::toolchain::{DistToolchainDescription, Toolchain};
 use crate::{
     download::DownloadCfg, file, path::get_fuel_toolchain_toml, target_triple::TargetTriple,
-    toolchain::Toolchain,
 };
 
 // For composability with other functionality of fuelup, we want to add

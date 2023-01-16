@@ -8,7 +8,8 @@ use std::str::FromStr;
 use time::Date;
 use tracing::{error, info};
 
-use crate::channel::{self, is_beta_toolchain};
+use crate::channel::{self, is_beta_toolchain, Channel};
+use crate::config::Config;
 use crate::constants::DATE_FORMAT;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
 use crate::ops::fuelup_self::self_update;
@@ -168,18 +169,18 @@ impl Toolchain {
 
     pub fn from_settings() -> Result<Self> {
         let settings = SettingsFile::new(settings_file());
-        let toolchain_name = match settings.with(|s| Ok(s.default_toolchain.clone()))? {
-            Some(t) => t,
-            None => {
-                bail!("No default toolchain detected. Please install or create a toolchain first.")
+
+        if settings_file().exists() {
+            if let Some(t) = settings.with(|s| Ok(s.default_toolchain.clone()))? {
+                return Ok(Self {
+                    name: t.clone(),
+                    path: toolchain_dir(&t),
+                    bin_path: toolchain_bin_dir(&t),
+                });
             }
         };
 
-        Ok(Self {
-            name: toolchain_name.clone(),
-            path: toolchain_dir(&toolchain_name),
-            bin_path: toolchain_bin_dir(&toolchain_name),
-        })
+        bail!("No default toolchain detected. Please install or create a toolchain first.")
     }
 
     pub fn is_distributed(&self) -> bool {
@@ -276,6 +277,21 @@ impl Toolchain {
         Ok(download_cfg)
     }
 
+    pub fn install_if_nonexistent(&self, description: &DistToolchainDescription) -> Result<()> {
+        if !self.exists() {
+            if let Ok((channel, hash)) = Channel::from_dist_channel(description) {
+                let config = Config::from_env()?;
+                if let Ok(true) = config.hash_matches(description, &hash) {
+                    info!("'{}' is already installed and up to date", self.name);
+                };
+                for cfg in channel.build_download_configs() {
+                    self.add_component(cfg)?;
+                }
+            }
+        };
+
+        Ok(())
+    }
     fn remove_executables(&self, component: &str) -> Result<()> {
         let executables = &Components::collect().unwrap().component[component].executables;
         for executable in executables {

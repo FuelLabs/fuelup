@@ -28,16 +28,17 @@ jobs:
       - name: Publish nightly channel
         id: setup
         run: |
-            archive_dir=$(date +'%Y/%m/%d')
+            PUBLISHED_DATE=$(date +'%Y-%m-%d')
+            FORMATTED_PUBLISHED_DATE=$(date +'%Y/%m/%d')
             mkdir -p ${{ env.NIGHTLY_CHANNEL_DIR }}
 
             CHANNEL_TOML="channel-fuel-nightly.toml"
 
-            build-channel nightly $CHANNEL_TOML $GITHUB_RUN_ID
+            build-channel nightly $CHANNEL_TOML $GITHUB_RUN_ID $PUBLISHED_DATE
 
             cp $CHANNEL_TOML ${{ env.NIGHTLY_CHANNEL_DIR }}
 
-            echo "::set-output name=archive_dir::channels/nightly/$archive_dir"
+            echo "::set-output name=archive_dir::channels/nightly/${FORMATTED_PUBLISHED_DATE}"
 
       - name: Deploy nightly channel (latest version)
         uses: peaceiris/actions-gh-pages@v3

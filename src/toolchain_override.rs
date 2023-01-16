@@ -11,11 +11,11 @@ use toml_edit::{de, ser, value, Document};
 use tracing::{info, warn};
 
 use crate::channel::{is_beta_toolchain, LATEST, NIGHTLY};
-use crate::constants::DATE_FORMAT;
+use crate::constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE};
 use crate::toolchain::DistToolchainDescription;
 use crate::{
-    constants::FUEL_TOOLCHAIN_TOML_FILE, download::DownloadCfg, file,
-    path::get_fuel_toolchain_toml, target_triple::TargetTriple, toolchain::Toolchain,
+    download::DownloadCfg, file, path::get_fuel_toolchain_toml, target_triple::TargetTriple,
+    toolchain::Toolchain,
 };
 
 // For composability with other functionality of fuelup, we want to add
@@ -66,33 +66,15 @@ where
 {
     let channel_str = String::deserialize(deserializer)?;
 
-    if is_beta_toolchain(&channel_str) {
-        return Ok(Channel {
-            name: channel_str,
-            date: None,
-        });
-    }
-
-    if let Some((name, date)) = channel_str.split_once('-') {
-        return Ok(Channel {
-            name: name.to_string(),
-            date: Date::parse(date, DATE_FORMAT)
-                .map_err(de::Error::custom)
-                .ok(),
-        });
-    }
-
-    if channel_str == LATEST || channel_str == NIGHTLY {
-        return Err(Error::invalid_value(
-            serde::de::Unexpected::Str(&channel_str),
-            &"channel with date",
-        ));
-    }
-
-    Err(Error::invalid_value(
-        serde::de::Unexpected::Str(&channel_str),
-        &"a valid channel str",
-    ))
+    channel_str.parse().map_or_else(
+        |_| {
+            Err(Error::invalid_value(
+                serde::de::Unexpected::Str(&channel_str),
+                &"a channel with date <latest|nightly>-YYYY-MM-DD",
+            ))
+        },
+        |c| Ok(c),
+    )
 }
 
 impl fmt::Display for Channel {

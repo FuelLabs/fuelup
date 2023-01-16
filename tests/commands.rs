@@ -384,6 +384,7 @@ fn fuelup_default_empty() -> Result<()> {
             "No default toolchain detected. Please install or create a toolchain first.\n";
 
         assert_eq!(output.stdout, expected_stdout);
+        assert!(!cfg.home.join("settings.toml").exists());
     })?;
 
     Ok(())

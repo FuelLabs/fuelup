@@ -21,6 +21,11 @@ impl SettingsFile {
 
     fn write_settings(&self) -> Result<()> {
         let s = self.cache.borrow().as_ref().unwrap().clone();
+
+        let parent_exists = self.path.parent().map(|dir| dir.exists()).unwrap_or(true);
+        if !parent_exists {
+            std::fs::create_dir_all(self.path.parent().unwrap())?;
+        }
         file::write_file(&self.path, &s.to_string()?)?;
         Ok(())
     }

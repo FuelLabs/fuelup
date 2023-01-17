@@ -21,7 +21,7 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
                     match DistToolchainDescription::from_str(&to.cfg.toolchain.channel.to_string())
                     {
                         Ok(desc) => desc.to_string(),
-                        Err(_) => to.cfg.toolchain.channel,
+                        Err(_) => to.cfg.toolchain.channel.to_string(),
                     };
                 result.push_str(&format!("{} (override)", name));
 

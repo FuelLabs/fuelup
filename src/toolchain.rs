@@ -169,18 +169,18 @@ impl Toolchain {
 
     pub fn from_settings() -> Result<Self> {
         let settings = SettingsFile::new(settings_file());
-        let toolchain_name = match settings.with(|s| Ok(s.default_toolchain.clone()))? {
-            Some(t) => t,
-            None => {
-                bail!("No default toolchain detected. Please install or create a toolchain first.")
+
+        if settings_file().exists() {
+            if let Some(t) = settings.with(|s| Ok(s.default_toolchain.clone()))? {
+                return Ok(Self {
+                    name: t.clone(),
+                    path: toolchain_dir(&t),
+                    bin_path: toolchain_bin_dir(&t),
+                });
             }
         };
 
-        Ok(Self {
-            name: toolchain_name.clone(),
-            path: toolchain_dir(&toolchain_name),
-            bin_path: toolchain_bin_dir(&toolchain_name),
-        })
+        bail!("No default toolchain detected. Please install or create a toolchain first.")
     }
 
     pub fn is_distributed(&self) -> bool {

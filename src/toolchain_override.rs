@@ -72,7 +72,7 @@ where
                 &"a channel with date <latest|nightly>-YYYY-MM-DD",
             ))
         },
-        |c| Ok(c),
+        Result::Ok,
     )
 }
 

@@ -2,8 +2,9 @@ use anyhow::Result;
 use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;
 use fuelup::settings::SettingsFile;
 use fuelup::target_triple::TargetTriple;
-use fuelup::toolchain_override::{OverrideCfg, ToolchainCfg, ToolchainOverride};
+use fuelup::toolchain_override::{self, OverrideCfg, ToolchainCfg, ToolchainOverride};
 use std::os::unix::fs::OpenOptionsExt;
+use std::str::FromStr;
 use std::{
     env, fs,
     path::{Path, PathBuf},
@@ -263,7 +264,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_override_file(ToolchainOverride {
                 cfg: OverrideCfg::new(
                     ToolchainCfg {
-                        channel: "beta-1".to_string(),
+                        channel: toolchain_override::Channel::from_str("beta-1").unwrap(),
                     },
                     None,
                 ),

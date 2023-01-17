@@ -12,6 +12,7 @@ use semver::Version;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{collections::BTreeMap, fmt::Debug};
+use time::Date;
 use toml_edit::de;
 use tracing::warn;
 
@@ -42,24 +43,46 @@ pub fn is_beta_toolchain(name: &str) -> bool {
     name == BETA_1 || name == BETA_2
 }
 
+fn format_nightly_url(date: &Date) -> Result<String> {
+    Ok(format!(
+        "channels/nightly/{}",
+        &date.format(DATE_FORMAT_URL_FRIENDLY)?,
+    ))
+}
+
+fn construct_channel_url(desc: &DistToolchainDescription) -> Result<String> {
+    let mut url = FUELUP_GH_PAGES.to_owned();
+    match desc.name {
+        DistToolchainName::Latest => {
+            if let Some(date) = desc.date {
+                url.push_str(&format!(
+                    "channels/latest/channel-fuel-latest-{}.toml",
+                    date
+                ))
+            } else {
+                url.push_str(CHANNEL_LATEST_FILE_NAME)
+            }
+        }
+
+        DistToolchainName::Nightly => {
+            if let Some(date) = desc.date {
+                url.push_str(&format_nightly_url(&date)?);
+                url.push('/');
+            }
+            url.push_str(CHANNEL_NIGHTLY_FILE_NAME)
+        }
+        DistToolchainName::Beta1 => url.push_str(CHANNEL_BETA_1_FILE_NAME),
+        DistToolchainName::Beta2 => url.push_str(CHANNEL_BETA_2_FILE_NAME),
+    };
+
+    Ok(url)
+}
+
 impl Channel {
     /// The returned `String` is a sha256 hash of the downloaded toolchain TOML bytes.
     pub fn from_dist_channel(desc: &DistToolchainDescription) -> Result<(Self, String)> {
-        let channel_file_name = match desc.name {
-            DistToolchainName::Latest => CHANNEL_LATEST_FILE_NAME,
-            DistToolchainName::Nightly => CHANNEL_NIGHTLY_FILE_NAME,
-            DistToolchainName::Beta1 => CHANNEL_BETA_1_FILE_NAME,
-            DistToolchainName::Beta2 => CHANNEL_BETA_2_FILE_NAME,
-        };
+        let channel_url = construct_channel_url(desc)?;
 
-        let mut channel_url = FUELUP_GH_PAGES.to_owned();
-        if desc.name == DistToolchainName::Nightly && desc.date.is_some() {
-            channel_url.push_str("channels/nightly/");
-            channel_url.push_str(&desc.date.unwrap().format(DATE_FORMAT_URL_FRIENDLY)?);
-            channel_url.push('/');
-        }
-
-        channel_url.push_str(channel_file_name);
         let mut hasher = Sha256::new();
         let toml = match download(&channel_url, &mut hasher) {
             Ok(t) => String::from_utf8(t)?,

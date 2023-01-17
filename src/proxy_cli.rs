@@ -35,7 +35,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
             // unwrap() is safe here since we try DistToolchainDescription::from_str()
             // when deserializing from the toml.
             let description =
-                DistToolchainDescription::from_str(&to.cfg.toolchain.channel).unwrap();
+                DistToolchainDescription::from_str(&to.cfg.toolchain.channel.to_string()).unwrap();
             let toolchain = Toolchain::from_path(&description.to_string());
 
             // Install the entire toolchain declared in [toolchain] if it does not exist.

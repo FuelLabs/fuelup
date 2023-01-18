@@ -38,6 +38,25 @@ hash = "4c437e84b4f95e55c97d32595a4d529b3dcb78ebec06f07babccde74e1827566"
 url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-x86_64-apple-darwin.tar.gz"
 hash = "9ef1d8af2c5a611d33f8966881197bd4958da05e4b325eb0dc847b84ea1eac96"
 
+[pkg.forc-index]
+version = "0.1.13"
+
+[pkg.forc-index.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.1.13/forc-index-0.1.13-aarch64-unknown-linux-gnu.tar.gz"
+hash = "df24f95c355e342d30130198980fe1cce0765f9348e29da433023bd21db2dd1b"
+
+[pkg.forc-index.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.1.13/forc-index-0.1.13-x86_64-unknown-linux-gnu.tar.gz"
+hash = "9098d04a2aa173cfe8daf13e20fbde47ec847e0706ff8892b50ef63ff2aa1c7f"
+
+[pkg.forc-index.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.1.13/forc-index-0.1.13-aarch64-apple-darwin.tar.gz"
+hash = "040a6da71bd220fb4b6df12a09d786fb9d870446e52baee38ef29a3fb7ee0d27"
+
+[pkg.forc-index.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.1.13/forc-index-0.1.13-x86_64-apple-darwin.tar.gz"
+hash = "e8de2710e40fe2444f989df983e1e60f50dd818b0867387d4fce105b1444cecc"
+
 [pkg.forc-wallet]
 version = "0.1.2"
 
@@ -75,3 +94,22 @@ hash = "514b24f7a6c1b02e6b4f7925bf456806d06256e77f89a6b72931edd4be35fa07"
 [pkg.fuel-core.target.x86_64-apple-darwin]
 url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.15.3/fuel-core-0.15.3-x86_64-apple-darwin.tar.gz"
 hash = "c177aa4a09ad6e17cc654905a401f0e7a5962876c81be56be37ddaa40d761a1d"
+
+[pkg.fuel-indexer]
+version = "0.1.13"
+
+[pkg.fuel-indexer.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.1.13/fuel-indexer-0.1.13-aarch64-unknown-linux-gnu.tar.gz"
+hash = "d393e17741993bf4beba2a08477aaf88c270d319a27555cd7768fd10ac553846"
+
+[pkg.fuel-indexer.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.1.13/fuel-indexer-0.1.13-x86_64-unknown-linux-gnu.tar.gz"
+hash = "3b007d73214d80cf193f1aac5588aa16e0906a0dfa9ba12c9492f716903fe226"
+
+[pkg.fuel-indexer.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.1.13/fuel-indexer-0.1.13-aarch64-apple-darwin.tar.gz"
+hash = "8653d4484aa2b9c888f30b8e609a61f3f3b07a1a46f259a472a47c5ecbde7fa0"
+
+[pkg.fuel-indexer.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.1.13/fuel-indexer-0.1.13-x86_64-apple-darwin.tar.gz"
+hash = "f5f527074c806368551fff176fe2085119eaec67b1c551e1627d859313bd2a34"

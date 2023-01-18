@@ -6,15 +6,14 @@ use semver::Version;
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
 use sha2::Sha256;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
 use std::io::Read;
 use toml_edit::value;
+use toml_edit::Document;
 
 static TODAY: Lazy<String> = Lazy::new(|| chrono::Utc::now().format("%Y%m%d").to_string());
-static TODAY_ISO: Lazy<String> =
-    Lazy::new(|| format!("{}T00:00:00Z", chrono::Utc::now().format("%Y-%m-%d")));
 
 /// Parse a single key-value pair
 fn parse_key_val<T, U>(s: &str) -> Result<(T, U), Box<dyn Error + Send + Sync + 'static>>
@@ -57,17 +56,6 @@ pub struct HashedBinary {
     pub hash: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Channel {
-    pub pkg: BTreeMap<String, Package>,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Package {
-    pub target: BTreeMap<String, HashedBinary>,
-    pub version: Version,
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
     url: String,
@@ -83,14 +71,10 @@ struct Release {
 #[derive(Debug, Serialize, Deserialize)]
 struct Asset {
     browser_download_url: String,
+    name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-struct Commit {
-    sha: String,
-}
-
-fn get_version(channel: &str, component: &Component) -> Result<Version> {
+fn get_version(component: &Component) -> Result<Version> {
     let handle = ureq::builder().user_agent("fuelup").build();
     let mut data = Vec::new();
 
@@ -102,27 +86,9 @@ fn get_version(channel: &str, component: &Component) -> Result<Version> {
     let resp = handle.get(&url).call()?;
 
     resp.into_reader().read_to_end(&mut data)?;
-
     let response: LatestReleaseApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
 
-    let mut version_str = response.tag_name["v".len()..].to_string();
-
-    if channel == "nightly" {
-        let commit_api = format!(
-            "https://api.github.com/repos/FuelLabs/{}/commits",
-            component.repository_name
-        );
-        let resp = handle.get(&commit_api).query("until", &TODAY_ISO).call()?;
-
-        let mut data2 = Vec::new();
-        resp.into_reader().read_to_end(&mut data2)?;
-        let commits: Vec<Commit> = serde_json::from_str(&String::from_utf8_lossy(&data2))?;
-
-        let short_sha = commits[0].sha.chars().take(10).collect::<String>();
-
-        let build_metadata = format!("{}.{}.{}", "nightly", TODAY.to_string(), short_sha);
-        version_str = format!("{}+{}", version_str, build_metadata);
-    };
+    let version_str = response.tag_name["v".len()..].to_string();
 
     let version = Version::parse(&version_str)?;
 
@@ -152,22 +118,68 @@ fn validate_components(channel: &str, components: &HashMap<String, Version>) -> 
     Ok(())
 }
 
-fn main() -> Result<()> {
-    let args = Args::parse();
+fn write_nightly_document(document: &mut Document, components: Vec<Component>) -> Result<()> {
+    let mut data = Vec::new();
+    let nightly_release_url = format!(
+        "https://api.github.com/repos/FuelLabs/sway-nightly-binaries/releases/tags/nightly-{}",
+        *TODAY
+    );
 
-    let mut component_versions: HashMap<String, Version> = HashMap::new();
+    let resp = ureq::get(&nightly_release_url).call()?;
+    resp.into_reader().read_to_end(&mut data)?;
+    let release: Release = serde_json::from_str(&String::from_utf8_lossy(&data))?;
 
-    for package in args.packages {
-        component_versions.insert(package.0, package.1);
+    for asset in release.assets {
+        for component in &components {
+            // Asset name example: fuel-core-0.15.1+nightly.20230111.a5514420e5-x86_64-unknown-linux-gnu.tar.gz
+            // If an asset's name matches a component's declared tarball_prefix in components.toml,
+            // we want to store the download information in a channel.
+            if let Some(stripped) = asset.name.strip_prefix(&component.tarball_prefix) {
+                println!("\nWriting package info for component '{}'", &component.name);
+                document["pkg"][&component.name] = implicit_table();
+                document["pkg"][&component.name]["target"] = implicit_table();
+
+                // Example output: Some((0.15.1+nightly.20230111.a5514420e5, x86_64-unknown-linux-gnu.tar.gz))
+                // We want to record the version and target in the channel toml.
+                let split = stripped[1..].split_once('-');
+                if let Some((version, tarball_name)) = split {
+                    document["pkg"][&component.name]["version"] = value(version.to_string());
+
+                    // Example output: Some((x86_64-unknown-linux-gnu, tar.gz))
+                    if let Some((target, _)) = tarball_name.split_once('.') {
+                        let mut data = Vec::new();
+
+                        document["pkg"][&component.name]["target"][target.to_string()] =
+                            implicit_table();
+                        document["pkg"][&component.name]["target"][target.to_string()]["url"] =
+                            value(&asset.browser_download_url);
+
+                        if let Ok(res) = ureq::get(&asset.browser_download_url).call() {
+                            res.into_reader().read_to_end(&mut data)?;
+                            let mut hasher = Sha256::new();
+                            hasher.update(data);
+                            let actual_hash = format!("{:x}", hasher.finalize());
+
+                            println!(
+                                "url: {}\nhash: {}",
+                                &asset.browser_download_url, &actual_hash
+                            );
+                            document["pkg"][&component.name]["target"][target.to_string()]
+                                ["hash"] = value(actual_hash);
+                        };
+                    };
+                }
+            }
+        }
     }
+    Ok(())
+}
 
-    validate_components(&args.channel, &component_versions)?;
-
-    let components = Components::collect_publishables()?;
-
-    let mut document = toml_edit::Document::new();
-    document["pkg"] = implicit_table();
-
+fn write_latest_document(
+    document: &mut Document,
+    components: Vec<Component>,
+    component_versions: HashMap<String, Version>,
+) -> Result<()> {
     for component in components {
         println!("\nWriting package info for component '{}'", &component.name);
         let tag_prefix = if component.name == "forc" {
@@ -178,10 +190,10 @@ fn main() -> Result<()> {
 
         let version = match component_versions.contains_key(&component.name) {
             true => component_versions[&component.name].clone(),
-            false => get_version(&args.channel, &component)?,
+            false => get_version(&component)?,
         };
 
-        let (repo, tag, tarball_prefix) = if args.channel.as_str() == "latest" {
+        let (repo, tag, tarball_prefix) = {
             let tarball_prefix = if tag_prefix == "forc-binaries" {
                 tag_prefix.to_string()
             } else {
@@ -191,12 +203,6 @@ fn main() -> Result<()> {
                 component.repository_name,
                 "v".to_owned() + &version.to_string(),
                 tarball_prefix,
-            )
-        } else {
-            (
-                "sway-nightly-binaries".to_string(),
-                format!("nightly-{}", TODAY.to_string()),
-                format!("{}-{}", tag_prefix, version),
             )
         };
 
@@ -234,9 +240,30 @@ fn main() -> Result<()> {
             };
         }
     }
+    Ok(())
+}
+
+fn main() -> Result<()> {
+    let args = Args::parse();
+
+    let mut component_versions: HashMap<String, Version> = HashMap::new();
+    for package in args.packages {
+        component_versions.insert(package.0, package.1);
+    }
+    validate_components(&args.channel, &component_versions)?;
+
+    let components = Components::collect_publishables()?;
+
+    let mut document = Document::new();
+    document["pkg"] = implicit_table();
+
+    match args.channel.as_str() {
+        "nightly" => write_nightly_document(&mut document, components)?,
+        "latest" => write_latest_document(&mut document, components, component_versions)?,
+        _ => bail!("Unrecognized channel '{}'", args.channel.as_str()),
+    }
 
     println!("writing channel: '{}'", &args.out_file);
-
     let mut channel_str = String::new();
     channel_str.push_str(&format!(
         "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/{}\"\n",
@@ -244,7 +271,7 @@ fn main() -> Result<()> {
     ));
     channel_str.push_str(&format!("date = \"{}\"\n", args.publish_date));
     channel_str.push_str(&document.to_string());
-    fs::write(&args.out_file, channel_str.to_string())?;
+    fs::write(&args.out_file, &channel_str)?;
 
     Ok(())
 }

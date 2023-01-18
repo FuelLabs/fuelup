@@ -1,6 +1,6 @@
 [package]
 name = "fuelup"
-version = "0.15.1"
+version = "0.16.1"
 authors = ["Fuel Labs <contact@fuel.sh>"]
 edition = "2021"
 homepage = "https://fuel.network/"
@@ -31,7 +31,7 @@ sha2 = "0.10"
 tar = "0.4"
 tempfile = "3"
 termcolor = "1"
-time = { version = "0.3", features = ["macros", "parsing", "formatting"] }
+time = { version = "0.3", features = ["macros", "parsing", "formatting", "serde-well-known"] }
 toml_edit = { version = "0.13", features = ["serde", "easy"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["ansi", "env-filter", "json"] }

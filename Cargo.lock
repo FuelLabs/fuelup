@@ -371,7 +371,7 @@ dependencies = [
 
 [[package]]
 name = "fuelup"
-version = "0.15.1"
+version = "0.16.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -971,6 +971,7 @@ dependencies = [
  "itoa",
  "libc",
  "num_threads",
+ "serde",
  "time-macros",
 ]
 

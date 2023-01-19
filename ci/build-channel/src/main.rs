@@ -136,8 +136,13 @@ fn write_nightly_document(document: &mut Document, components: Vec<Component>) -
             // we want to store the download information in a channel.
             if let Some(stripped) = asset.name.strip_prefix(&component.tarball_prefix) {
                 println!("\nWriting package info for component '{}'", &component.name);
-                document["pkg"][&component.name] = implicit_table();
-                document["pkg"][&component.name]["target"] = implicit_table();
+
+                if let Some(pkg) = document.get("pkg") {
+                    if pkg.get(&component.name).is_none() {
+                        document["pkg"][&component.name] = implicit_table();
+                        document["pkg"][&component.name]["target"] = implicit_table();
+                    }
+                }
 
                 // Example output: Some((0.15.1+nightly.20230111.a5514420e5, x86_64-unknown-linux-gnu.tar.gz))
                 // We want to record the version and target in the channel toml.

@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-mod testcfg;
+pub mod testcfg;
 use testcfg::FuelupState;
 
 #[test]

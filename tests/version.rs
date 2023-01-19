@@ -1,7 +1,7 @@
 use anyhow::Result;
 use std::env;
 
-mod testcfg;
+pub mod testcfg;
 use testcfg::FuelupState;
 
 #[test]

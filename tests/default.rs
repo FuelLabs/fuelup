@@ -1,7 +1,7 @@
 use anyhow::Result;
 use fuelup::{fmt::format_toolchain_with_target, target_triple::TargetTriple};
 
-mod testcfg;
+pub mod testcfg;
 use testcfg::{FuelupState, DATE};
 
 #[test]

@@ -1,7 +1,7 @@
 use anyhow::Result;
 use fuelup::target_triple::TargetTriple;
 
-mod testcfg;
+pub mod testcfg;
 
 use testcfg::FuelupState;
 

@@ -1,7 +1,7 @@
 use anyhow::Result;
 use fuelup::{constants::FUEL_TOOLCHAIN_TOML_FILE, target_triple::TargetTriple};
 
-mod testcfg;
+pub mod testcfg;
 use testcfg::FuelupState;
 
 #[test]

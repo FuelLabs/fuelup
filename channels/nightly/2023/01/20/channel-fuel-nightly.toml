@@ -1,0 +1,30 @@
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/3963895976"
+date = "2023-01-20"
+
+[pkg.forc]
+version = "0.33.1+nightly.20230120.d73a033e52"
+
+[pkg.forc.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20230120/forc-binaries-0.33.1%2Bnightly.20230120.d73a033e52-linux_arm64.tar.gz"
+hash = "68091a8274167d6e3f0ba9c7808f82c47aa45e08919f11c4076dabe4d6e84b8e"
+
+[pkg.forc-explore]
+version = "0.28.1+nightly.20230120.4bb7392eed"
+
+[pkg.forc-explore.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20230120/forc-explore-0.28.1%2Bnightly.20230120.4bb7392eed-x86_64-unknown-linux-gnu.tar.gz"
+hash = "404364c29a47564154074c2bc5a2112774cd0aa601114f417d0b1ea237eaa2b8"
+
+[pkg.forc-wallet]
+version = "0.1.2+nightly.20230120.cdc60a658c"
+
+[pkg.forc-wallet.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20230120/forc-wallet-0.1.2%2Bnightly.20230120.cdc60a658c-x86_64-unknown-linux-gnu.tar.gz"
+hash = "fc58d9b7eb232b09eaf190563186f7e288f48ca5bcd60fd3508e39b6884b68f3"
+
+[pkg.fuel-core]
+version = "0.15.1+nightly.20230120.2301e1529a"
+
+[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20230120/fuel-core-0.15.1%2Bnightly.20230120.2301e1529a-x86_64-unknown-linux-gnu.tar.gz"
+hash = "3730713d32a00abe85a797a5ed5cce227e046159bc5cb94efaad2fadd3013924"

@@ -43,25 +43,37 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
             // Install the entire toolchain declared in [toolchain] if it does not exist.
             toolchain.install_if_nonexistent(&description)?;
 
+            // Plugins distributed by forc have to be handled a little differently,
+            // if one of them is called we want to check for 'forc' instead.
+            let component_name = if Components::is_distributed_by_forc(proc_name) {
+                component::FORC
+            } else {
+                proc_name
+            };
             // Install components within [components] that are declared but missing from the store.
-            if let Some(version) = to.get_component_version(proc_name) {
+            if let Some(version) = to.get_component_version(component_name) {
                 let store = Store::from_env()?;
 
-                if !store.has_component(proc_name, version) {
+                if !store.has_component(component_name, version) {
                     let download_cfg = DownloadCfg::new(
-                        proc_name,
-                        TargetTriple::from_component(proc_name)?,
+                        component_name,
+                        TargetTriple::from_component(component_name)?,
                         Some(version.clone()),
                     )?;
                     store.install_component(&download_cfg)?;
                 };
 
                 (
-                    store.component_dir_path(proc_name, version).join(proc_name),
+                    store
+                        .component_dir_path(component_name, version)
+                        .join(proc_name),
                     description.to_string(),
                 )
             } else {
-                (toolchain.bin_path.join(proc_name), description.to_string())
+                (
+                    toolchain.bin_path.join(component_name),
+                    description.to_string(),
+                )
             }
         }
         None => (

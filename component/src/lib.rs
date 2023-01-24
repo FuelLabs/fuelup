@@ -165,6 +165,15 @@ impl Components {
 
         Ok(executables)
     }
+
+    pub fn is_distributed_by_forc(plugin_name: &str) -> bool {
+        let components = Self::from_toml(COMPONENTS_TOML).expect("Failed to parse components toml");
+        if let Some(forc) = components.component.get(FORC) {
+            return forc.executables.contains(&plugin_name.to_string());
+        };
+
+        false
+    }
 }
 
 #[cfg(test)]

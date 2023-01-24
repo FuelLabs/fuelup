@@ -1,12 +1,13 @@
 use anyhow::{bail, Result};
-use component;
+use component::{self, Components};
 use std::{fs, path::Path};
 use tempfile;
 use tracing::{error, info};
 
 use crate::{
     download::{download_file_and_unpack, unpack_bins, DownloadCfg},
-    path::fuelup_bin,
+    file::hard_or_symlink_file,
+    path::{fuelup_bin, fuelup_bin_dir},
     target_triple::TargetTriple,
 };
 
@@ -83,7 +84,13 @@ You should re-install fuelup using fuelup-init:
             "Old fuelup restored because something went wrong replacing old fuelup with new fuelup.",
         );
     } else {
+        let fuelup_bin_dir = fuelup_bin_dir();
         let _ = fs::remove_file(&fuelup_new);
+        for component in Components::collect_publishables()? {
+            if fuelup_bin_dir.join(&component.name).exists() {
+                hard_or_symlink_file(&fuelup_bin, &fuelup_bin_dir.join(component.name))?;
+            }
+        }
     };
 
     // Remove backup at the end.

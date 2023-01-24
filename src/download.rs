@@ -282,11 +282,9 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path)
     Ok(())
 }
 
-pub fn link_to_toolchain(toolchain_dir: PathBuf, bins: Vec<PathBuf>) -> Result<()> {
-    for path in bins {
-        if let Some(file_name) = path.file_name() {
-            hard_or_symlink_file(&path, &toolchain_dir.join(file_name))?;
-        }
+pub fn link_to_toolchain(toolchain_dir: &Path, bin_path: &Path) -> Result<()> {
+    if let Some(file_name) = bin_path.file_name() {
+        hard_or_symlink_file(bin_path, &toolchain_dir.join(file_name))?;
     }
     Ok(())
 }

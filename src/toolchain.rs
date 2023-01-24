@@ -11,7 +11,9 @@ use tracing::{error, info};
 use crate::channel::{self, is_beta_toolchain, Channel};
 use crate::config::Config;
 use crate::constants::DATE_FORMAT;
-use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
+use crate::download::{
+    download_file_and_unpack, link_to_fuelup, link_to_toolchain, unpack_bins, DownloadCfg,
+};
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
     ensure_dir_exists, fuelup_bin, fuelup_bin_dir, fuelup_tmp_dir, settings_file,
@@ -288,7 +290,10 @@ impl Toolchain {
                     info!("'{}' is already installed and up to date", self.name);
                 };
                 for cfg in channel.build_download_configs() {
-                    store.install_toolchain_component(self.bin_path.clone(), &cfg)?;
+                    let downloaded = store.install_component(&cfg)?;
+                    for bin in downloaded {
+                        link_to_toolchain(&self.path, &bin)?;
+                    }
                 }
             }
         };

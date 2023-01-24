@@ -29,8 +29,6 @@ impl Store {
 
     pub(crate) fn has_component(&self, component_name: &str, version: &Version) -> bool {
         let dirname = component_dirname(component_name, version);
-        println!("dirname: {}", self.path().join(dirname.clone()).display());
-        println!("exists:{}", self.path().join(&dirname).exists());
         self.path().join(dirname).exists()
     }
 

@@ -18,6 +18,7 @@ use crate::path::{
     toolchain_bin_dir, toolchain_dir,
 };
 use crate::settings::SettingsFile;
+use crate::store::Store;
 use crate::target_triple::TargetTriple;
 
 pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
@@ -281,12 +282,13 @@ impl Toolchain {
         if !self.exists() {
             info!("toolchain '{}' does not exist; installing", description);
             if let Ok((channel, hash)) = Channel::from_dist_channel(description) {
+                let store = Store::from_env()?;
                 let config = Config::from_env()?;
                 if let Ok(true) = config.hash_matches(description, &hash) {
                     info!("'{}' is already installed and up to date", self.name);
                 };
                 for cfg in channel.build_download_configs() {
-                    self.add_component(cfg)?;
+                    store.install_toolchain_component(self.bin_path.clone(), &cfg)?;
                 }
             }
         };

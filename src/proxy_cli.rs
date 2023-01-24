@@ -6,7 +6,9 @@ use std::process::{Command, ExitCode, Stdio};
 use std::str::FromStr;
 use std::{env, io};
 
+use crate::download::DownloadCfg;
 use crate::store::Store;
+use crate::target_triple::TargetTriple;
 use crate::toolchain::{DistToolchainDescription, Toolchain};
 use crate::toolchain_override::ToolchainOverride;
 use component::Components;
@@ -43,20 +45,24 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
 
             // Install components within [components] that are declared but missing from the store.
             if let Some(version) = to.get_component_version(proc_name) {
-                let store = Store::from_env().unwrap();
-                if store.has_component(proc_name, version)
-                    && store.install_component(proc_name, &to).is_ok()
-                {
-                    (
-                        store.component_dir_path(proc_name, version).join(proc_name),
-                        description.to_string(),
-                    )
-                } else {
-                    (toolchain.bin_path.join(proc_name), description.to_string())
-                };
-            }
+                let store = Store::from_env()?;
 
-            (toolchain.bin_path.join(proc_name), description.to_string())
+                if !store.has_component(proc_name, version) {
+                    let download_cfg = DownloadCfg::new(
+                        proc_name,
+                        TargetTriple::from_component(proc_name)?,
+                        Some(version.clone()),
+                    )?;
+                    store.install_component(&download_cfg)?;
+                };
+
+                (
+                    store.component_dir_path(proc_name, version).join(proc_name),
+                    description.to_string(),
+                )
+            } else {
+                (toolchain.bin_path.join(proc_name), description.to_string())
+            }
         }
         None => (
             toolchain.bin_path.join(proc_name),

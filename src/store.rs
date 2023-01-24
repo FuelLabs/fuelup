@@ -61,7 +61,6 @@ impl Store {
         // We ensure that component_dir exists above, so its parent must exist here.
         if let Ok(downloaded) = unpack_bins(&component_dir, &component_dir) {
             ensure_dir_exists(&toolchain_dir)?;
-            ensure_dir_exists(&toolchain_dir.join("bin"))?;
             link_to_toolchain(toolchain_dir, downloaded)?;
         }
 

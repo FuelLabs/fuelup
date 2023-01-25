@@ -84,16 +84,17 @@ pub fn show() -> Result<()> {
     if let Some(toolchain_override) = toolchain_override {
         // We know that the override exists, but we want to show the target triple as well.
         let override_name = override_name.as_ref().unwrap();
-        if &active_toolchain.name == override_name {
+
+        let should_append_default = &active_toolchain.name == override_name;
+
+        active_toolchain = Toolchain::from_path(override_name);
+        active_toolchain_message.push_str(&format!("{} (override)", active_toolchain.name));
+        if should_append_default {
             active_toolchain_message.push_str(" (default)");
         }
 
-        active_toolchain = Toolchain::from_path(override_name);
-        active_toolchain_message.push_str(&active_toolchain.name);
-        active_toolchain_message.push_str(&format!(
-            " (override), path: {}",
-            toolchain_override.path.display()
-        ));
+        active_toolchain_message
+            .push_str(&format!(", path: {}", toolchain_override.path.display()));
     } else {
         active_toolchain_message.push_str(&format!("{} (default)", active_toolchain.name));
     };

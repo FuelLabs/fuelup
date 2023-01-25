@@ -12,12 +12,14 @@ use crate::channel::{self, is_beta_toolchain, Channel};
 use crate::config::Config;
 use crate::constants::DATE_FORMAT;
 use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
+use crate::file::hard_or_symlink_file;
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
     ensure_dir_exists, fuelup_bin, fuelup_bin_dir, fuelup_tmp_dir, settings_file,
     toolchain_bin_dir, toolchain_dir,
 };
 use crate::settings::SettingsFile;
+use crate::store::Store;
 use crate::target_triple::TargetTriple;
 
 pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
@@ -281,12 +283,26 @@ impl Toolchain {
         if !self.exists() {
             info!("toolchain '{}' does not exist; installing", description);
             if let Ok((channel, hash)) = Channel::from_dist_channel(description) {
+                ensure_dir_exists(&self.bin_path)?;
+                let store = Store::from_env()?;
                 let config = Config::from_env()?;
                 if let Ok(true) = config.hash_matches(description, &hash) {
                     info!("'{}' is already installed and up to date", self.name);
                 };
                 for cfg in channel.build_download_configs() {
-                    self.add_component(cfg)?;
+                    if store.has_component(&cfg.name, &cfg.version) {
+                        hard_or_symlink_file(
+                            &store
+                                .component_dir_path(&cfg.name, &cfg.version)
+                                .join(&cfg.name),
+                            &self.bin_path.join(&cfg.name),
+                        )?;
+                    } else {
+                        let downloaded = store.install_component(&cfg)?;
+                        for bin in downloaded {
+                            hard_or_symlink_file(&bin, &self.bin_path.join(&cfg.name))?;
+                        }
+                    }
                 }
             }
         };

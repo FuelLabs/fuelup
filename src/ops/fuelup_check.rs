@@ -147,7 +147,12 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                             plugin_name = &plugin.executables[index];
                         }
 
-                        if let Some(latest_version) = latest_package_versions.get(&plugin.name) {
+                        let maybe_latest_version = plugin.publish.map_or_else(
+                            || latest_package_versions.get(component::FORC),
+                            |_| latest_package_versions.get(plugin_name),
+                        );
+
+                        if let Some(latest_version) = maybe_latest_version {
                             check_plugin(&plugin_executable, plugin_name, latest_version)?;
                         }
                     }

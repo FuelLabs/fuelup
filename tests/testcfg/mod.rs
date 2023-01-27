@@ -190,10 +190,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
         FuelupState::AllInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
-            setup_toolchain(
-                &tmp_fuelup_root_path,
-                &format!("nightly-{DATE}-{target}"),
-            )?;
+            setup_toolchain(&tmp_fuelup_root_path, &format!("nightly-{DATE}-{target}"))?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
         }
         FuelupState::LatestToolchainInstalled => {
@@ -222,14 +219,8 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_settings_file(&tmp_fuelup_root_path, &nightly)?;
         }
         FuelupState::NightlyDateInstalled => {
-            setup_toolchain(
-                &tmp_fuelup_root_path,
-                &format!("nightly-{DATE}-{target}"),
-            )?;
-            setup_settings_file(
-                &tmp_fuelup_root_path,
-                &format!("nightly-{DATE}-{target}"),
-            )?;
+            setup_toolchain(&tmp_fuelup_root_path, &format!("nightly-{DATE}-{target}"))?;
+            setup_settings_file(&tmp_fuelup_root_path, &format!("nightly-{DATE}-{target}"))?;
         }
         FuelupState::LatestAndCustomInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
@@ -243,18 +234,12 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
         }
         FuelupState::NightlyAndNightlyDateInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
-            setup_toolchain(
-                &tmp_fuelup_root_path,
-                &format!("nightly-{DATE}-{target}"),
-            )?;
+            setup_toolchain(&tmp_fuelup_root_path, &format!("nightly-{DATE}-{target}"))?;
             setup_settings_file(&tmp_fuelup_root_path, &nightly)?;
         }
         FuelupState::Beta1Installed => {
             setup_toolchain(&tmp_fuelup_root_path, &beta_1)?;
-            setup_toolchain(
-                &tmp_fuelup_root_path,
-                &format!("beta-1-{DATE}-{target}"),
-            )?;
+            setup_toolchain(&tmp_fuelup_root_path, &format!("beta-1-{DATE}-{target}"))?;
             setup_settings_file(&tmp_fuelup_root_path, &beta_1)?;
         }
         FuelupState::LatestAndNightlyWithBetaOverride => {

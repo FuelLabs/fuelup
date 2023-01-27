@@ -25,9 +25,7 @@ use crate::target_triple::TargetTriple;
 use crate::toolchain::DistToolchainDescription;
 
 fn github_releases_download_url(repo: &str, tag: &Version, tarball: &str) -> String {
-    format!(
-        "https://github.com/FuelLabs/{repo}/releases/download/v{tag}/{tarball}"
-    )
+    format!("https://github.com/FuelLabs/{repo}/releases/download/v{tag}/{tarball}")
 }
 
 #[derive(Debug, Serialize, Deserialize)]

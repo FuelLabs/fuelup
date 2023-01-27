@@ -42,7 +42,7 @@ fn symlink_file(_original: &Path, _link: &Path) -> Result<()> {
 }
 
 pub fn read_file(name: &'static str, path: &Path) -> Result<String> {
-    fs::read_to_string(path).with_context(|| format!("Failed to read {}", name))
+    fs::read_to_string(path).with_context(|| format!("Failed to read {name}"))
 }
 
 pub fn write_file(path: &Path, contents: &str) -> io::Result<()> {

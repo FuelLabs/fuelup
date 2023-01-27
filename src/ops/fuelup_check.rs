@@ -34,16 +34,16 @@ fn compare_and_print_versions(current_version: &Version, latest_version: &Versio
     match current_version.cmp(latest_version) {
         Less => {
             colored_bold(Color::Yellow, |s| write!(s, "Update available"));
-            println!(" : {} -> {}", current_version, latest_version);
+            println!(" : {current_version} -> {latest_version}");
         }
         Equal => {
             colored_bold(Color::Green, |s| write!(s, "Up to date"));
-            println!(" : {}", current_version);
+            println!(" : {current_version}");
         }
         Greater => {
-            print!(" : {}", current_version);
+            print!(" : {current_version}");
             colored_bold(Color::Yellow, |s| write!(s, " (unstable)"));
-            print!(" -> {}", latest_version);
+            print!(" -> {latest_version}");
             colored_bold(Color::Green, |s| writeln!(s, " (recommended)"));
         }
     }
@@ -61,7 +61,7 @@ fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version
                 Some(v) => {
                     let version = Version::parse(v)?;
                     print!("    - ");
-                    bold(|s| write!(s, "{}", plugin));
+                    bold(|s| write!(s, "{plugin}"));
                     print!(" - ");
                     compare_and_print_versions(&version, latest_version)?;
                 }
@@ -72,10 +72,10 @@ fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version
         }
         Err(e) => {
             print!("    - ");
-            bold(|s| write!(s, "{}", plugin));
+            bold(|s| write!(s, "{plugin}"));
             print!(" - ");
             if plugin_executable.exists() {
-                println!("execution error - {}", e);
+                println!("execution error - {e}");
             } else {
                 println!("not found");
             }

@@ -95,8 +95,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
             ErrorKind::NotFound => Err(Error::new(
                 ErrorKind::NotFound,
                 format!(
-                    "component '{}' not found in currently active toolchain '{}'",
-                    proc_name, toolchain_name
+                    "component '{proc_name}' not found in currently active toolchain '{toolchain_name}'"
                 ),
             )),
             _ => Err(error),

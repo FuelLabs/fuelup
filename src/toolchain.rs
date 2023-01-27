@@ -153,7 +153,7 @@ pub struct Toolchain {
 impl Toolchain {
     pub fn new(name: &str) -> Result<Self> {
         let target = TargetTriple::from_host()?;
-        let toolchain = format!("{}-{}", name, target);
+        let toolchain = format!("{name}-{target}");
         Ok(Self {
             name: toolchain.clone(),
             path: toolchain_dir(&toolchain),
@@ -313,7 +313,7 @@ impl Toolchain {
         let executables = &Components::collect().unwrap().component[component].executables;
         for executable in executables {
             remove_file(self.bin_path.join(executable))
-                .with_context(|| format!("failed to remove executable '{}'", executable))?;
+                .with_context(|| format!("failed to remove executable '{executable}'"))?;
         }
         Ok(())
     }

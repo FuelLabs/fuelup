@@ -53,7 +53,7 @@ impl TargetTriple {
             unsupported_os => bail!("Unsupported os: {}", unsupported_os),
         };
 
-        let target_triple = format!("{}-{}-{}", architecture, vendor, os);
+        let target_triple = format!("{architecture}-{vendor}-{os}");
 
         Ok(Self(target_triple))
     }
@@ -72,7 +72,7 @@ impl TargetTriple {
                     unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
                 };
 
-                Ok(Self(format!("{}_{}", os, architecture)))
+                Ok(Self(format!("{os}_{architecture}")))
             }
             _ => {
                 let architecture = match std::env::consts::ARCH {
@@ -91,7 +91,7 @@ impl TargetTriple {
                     unsupported_os => bail!("Unsupported os: {}", unsupported_os),
                 };
 
-                Ok(Self(format!("{}-{}-{}", architecture, vendor, os)))
+                Ok(Self(format!("{architecture}-{vendor}-{os}")))
             }
         }
     }

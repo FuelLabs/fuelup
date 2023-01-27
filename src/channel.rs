@@ -56,8 +56,7 @@ fn construct_channel_url(desc: &DistToolchainDescription) -> Result<String> {
         DistToolchainName::Latest => {
             if let Some(date) = desc.date {
                 url.push_str(&format!(
-                    "channels/latest/channel-fuel-latest-{}.toml",
-                    date
+                    "channels/latest/channel-fuel-latest-{date}.toml"
                 ))
             } else {
                 url.push_str(CHANNEL_LATEST_FILE_NAME)

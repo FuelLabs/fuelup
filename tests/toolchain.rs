@@ -105,22 +105,22 @@ fn fuelup_toolchain_install_date_target_disallowed() -> Result<()> {
 #[test]
 fn fuelup_toolchain_uninstall() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let toolchains = ["latest", "nightly", &format!("nightly-{}", DATE)];
+        let toolchains = ["latest", "nightly", &format!("nightly-{DATE}")];
         for toolchain in toolchains {
             let toolchain_with_target = format_toolchain_with_target(toolchain);
             let output = cfg.fuelup(&["toolchain", "uninstall", toolchain]);
-            let expected_stdout = format!("toolchain '{}' does not exist\n", toolchain_with_target);
+            let expected_stdout = format!("toolchain '{toolchain_with_target}' does not exist\n");
 
             assert_eq!(output.stdout, expected_stdout);
         }
     })?;
 
     testcfg::setup(FuelupState::AllInstalled, &|cfg| {
-        let toolchains = ["latest", "nightly", &format!("nightly-{}", DATE)];
+        let toolchains = ["latest", "nightly", &format!("nightly-{DATE}")];
         for toolchain in toolchains {
             let toolchain_with_target = format_toolchain_with_target(toolchain);
             let output = cfg.fuelup(&["toolchain", "uninstall", toolchain]);
-            let expected_stdout = format!("toolchain '{}' uninstalled\n", toolchain_with_target);
+            let expected_stdout = format!("toolchain '{toolchain_with_target}' uninstalled\n");
 
             assert!(output.stdout.contains(&expected_stdout));
         }

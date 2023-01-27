@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Components - fuelup</title>
+        <title>Adding components - fuelup</title>
         
         
 
@@ -95,7 +95,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../installation/index.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../installation/other.html"><strong aria-hidden="true">1.1.</strong> Other installation methods</a></li></ol></li><li class="chapter-item expanded "><a href="../concepts/index.html"><strong aria-hidden="true">2.</strong> Concepts</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../concepts/channels/index.html"><strong aria-hidden="true">2.1.</strong> Channels</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../concepts/channels/latest.html"><strong aria-hidden="true">2.1.1.</strong> latest</a></li><li class="chapter-item expanded "><a href="../concepts/channels/nightly.html"><strong aria-hidden="true">2.1.2.</strong> nightly</a></li><li class="chapter-item expanded "><a href="../concepts/channels/beta-1.html"><strong aria-hidden="true">2.1.3.</strong> beta-1</a></li><li class="chapter-item expanded "><a href="../concepts/channels/beta-2.html"><strong aria-hidden="true">2.1.4.</strong> beta-2</a></li></ol></li><li class="chapter-item expanded "><a href="../concepts/toolchains.html"><strong aria-hidden="true">2.2.</strong> Toolchains</a></li><li class="chapter-item expanded "><a href="../concepts/components.html" class="active"><strong aria-hidden="true">2.3.</strong> Components</a></li><li class="chapter-item expanded "><a href="../concepts/proxies.html"><strong aria-hidden="true">2.4.</strong> Proxies</a></li></ol></li><li class="chapter-item expanded "><a href="../basics.html"><strong aria-hidden="true">3.</strong> Basic usage</a></li><li class="chapter-item expanded "><a href="../overrides.html"><strong aria-hidden="true">4.</strong> Overrides</a></li><li class="chapter-item expanded "><a href="../configuration.html"><strong aria-hidden="true">5.</strong> Configuration</a></li><li class="chapter-item expanded "><a href="../examples.html"><strong aria-hidden="true">6.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../developer_guide/index.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../developer_guide/contributing_to_fuelup.html"><strong aria-hidden="true">7.1.</strong> Contributing to fuelup</a></li><li class="chapter-item expanded "><a href="../developer_guide/adding_components.html"><strong aria-hidden="true">7.2.</strong> Adding components</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../installation/index.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../installation/other.html"><strong aria-hidden="true">1.1.</strong> Other installation methods</a></li></ol></li><li class="chapter-item expanded "><a href="../concepts/index.html"><strong aria-hidden="true">2.</strong> Concepts</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../concepts/channels/index.html"><strong aria-hidden="true">2.1.</strong> Channels</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../concepts/channels/latest.html"><strong aria-hidden="true">2.1.1.</strong> latest</a></li><li class="chapter-item expanded "><a href="../concepts/channels/nightly.html"><strong aria-hidden="true">2.1.2.</strong> nightly</a></li><li class="chapter-item expanded "><a href="../concepts/channels/beta-1.html"><strong aria-hidden="true">2.1.3.</strong> beta-1</a></li><li class="chapter-item expanded "><a href="../concepts/channels/beta-2.html"><strong aria-hidden="true">2.1.4.</strong> beta-2</a></li></ol></li><li class="chapter-item expanded "><a href="../concepts/toolchains.html"><strong aria-hidden="true">2.2.</strong> Toolchains</a></li><li class="chapter-item expanded "><a href="../concepts/components.html"><strong aria-hidden="true">2.3.</strong> Components</a></li><li class="chapter-item expanded "><a href="../concepts/proxies.html"><strong aria-hidden="true">2.4.</strong> Proxies</a></li></ol></li><li class="chapter-item expanded "><a href="../basics.html"><strong aria-hidden="true">3.</strong> Basic usage</a></li><li class="chapter-item expanded "><a href="../overrides.html"><strong aria-hidden="true">4.</strong> Overrides</a></li><li class="chapter-item expanded "><a href="../configuration.html"><strong aria-hidden="true">5.</strong> Configuration</a></li><li class="chapter-item expanded "><a href="../examples.html"><strong aria-hidden="true">6.</strong> Examples</a></li><li class="chapter-item expanded "><a href="../developer_guide/index.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../developer_guide/contributing_to_fuelup.html"><strong aria-hidden="true">7.1.</strong> Contributing to fuelup</a></li><li class="chapter-item expanded "><a href="../developer_guide/adding_components.html" class="active"><strong aria-hidden="true">7.2.</strong> Adding components</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -169,23 +169,63 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="components"><a class="header" href="#components">Components</a></h1>
-<p>Each <a href="toolchains.html">toolchain</a> has several &quot;components&quot;, which are tools used to develop on Fuel.</p>
-<p>The <code>fuelup component</code> command is used to manage the installed components.</p>
-<p>Components can be added to an already-installed toolchain with the <code>fuelup component</code> command:</p>
-<pre><code class="language-sh">fuelup component add forc
+                        <h1 id="adding-components"><a class="header" href="#adding-components">Adding components</a></h1>
+<p>Adding components in <code>fuelup</code> is often just a small PR to <a href="https://github.com/FuelLabs/fuelup/blob/master/components.toml"><code>components.toml</code></a> in the repo, followed by a
+new release of <code>fuelup</code>.</p>
+<h2 id="contributing-to-componentstoml"><a class="header" href="#contributing-to-componentstoml">Contributing to components.toml</a></h2>
+<p>This section describes how you may add support for a binary within <code>fuelup</code>.</p>
+<h3 id="binary-packaged-natively-in-forc"><a class="header" href="#binary-packaged-natively-in-forc">Binary packaged natively in forc</a></h3>
+<p>This refers to binaries like <code>forc-fmt</code> that are added within the Sway repository.</p>
+<p>In this scenario, <code>fuelup</code> will already automatically download the tar file from the Sway repository and
+unarchive all of them without discrimination. You will be able to use the executables, but certain features
+like <code>fuelup show</code> may not work until you add them to the <a href="https://github.com/FuelLabs/fuelup/blob/master/components.toml"><code>components.toml</code></a> within the source code. <code>fuelup</code>
+reads from this TOML file to know which components are supported directly through itself, so this step is
+important. You may follow <a href="https://github.com/FuelLabs/fuelup/pull/363">the PR adding <code>forc-tx</code></a> as an example of how to add such a component.</p>
+<h3 id="binary-packaged-outside-of-forc"><a class="header" href="#binary-packaged-outside-of-forc">Binary packaged outside of forc</a></h3>
+<p>This refers to standalone binaries like <code>forc-wallet</code> which have their own repositories.</p>
+<p>In this case, <code>fuelup</code> <strong>will NOT</strong> download the tar file automatically since it does not know where to
+download it from. Currently, we do not support downloading and using arbitrary forc plugins and components, so
+information will have to be added to <code>components.toml</code> for <code>fuelup</code> to know how to handle these. You may follow
+<a href="https://github.com/FuelLabs/fuelup/pull/195">the PR adding <code>forc-wallet</code></a> as an example of how to add such a component.</p>
+<p>Example:</p>
+<pre><code class="language-toml">[component.forc-wallet]
+name = &quot;forc-wallet&quot;
+tarball_prefix = &quot;forc-wallet&quot;
+is_plugin = true
+executables = [&quot;forc-wallet&quot;]
+repository_name = &quot;forc-wallet&quot;
+targets = [ &quot;aarch64-unknown-linux-gnu&quot;, &quot;x86_64-unknown-linux-gnu&quot;, &quot;aarch64-apple-darwin&quot;, &quot;x86_64-apple-darwin&quot; ]
+publish = true
 </code></pre>
-<p>In custom toolchains, you also have the choice of adding a specific version of a component:</p>
-<pre><code class="language-sh">fuelup component add forc@0.30.1
-</code></pre>
-<h2 id="components-overview"><a class="header" href="#components-overview">Components overview</a></h2>
-<p>The following is an overview of components installable through <code>fuelup</code>:</p>
+<p>A short description of the keys you find above:</p>
+<p><code>name</code></p>
 <ul>
-<li><a href="https://fuellabs.github.io/sway/master/forc/index.html"><code>forc</code></a> — The Fuel Orchestrator, a suite of tools to work with the Fuel ecosystem. This comes
-with some built-in plugin executables, namely <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_client/index.html"><code>forc-client</code></a>, <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_fmt.html"><code>forc-fmt</code></a> and <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_lsp.html"><code>forc-lsp</code></a>.</li>
-<li><a href="https://github.com/FuelLabs/fuel-core"><code>fuel-core</code></a> — Full node implementation of the Fuel v2 protocol, written in Rust.</li>
-<li><a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_explore.html"><code>forc-explore</code></a> — A Forc plugin for running the Fuel Block Explorer.</li>
-<li><a href="https://github.com/FuelLabs/forc-wallet"><code>forc-wallet</code></a> - A Forc plugin for managing Fuel wallets.</li>
+<li>Name of the component/plugin.</li>
+</ul>
+<p><code>tarball_prefix</code></p>
+<ul>
+<li>Fuel binaries mostly conform to the format <code>&lt;name&gt;-&lt;version&gt;-&lt;target&gt;</code> for our tar files. <code>tarball_prefix</code> refers to the <code>&lt;name&gt;</code> part.</li>
+</ul>
+<p><code>executables</code></p>
+<ul>
+<li>In most cases, the name of the component is the executable itself,
+but certain components like <code>forc</code> itself and <code>forc-client</code> may package multiple executables and therefore have different names.</li>
+</ul>
+<p><code>repository_name</code></p>
+<ul>
+<li>The repo name that contains the releases.</li>
+</ul>
+<p><code>targets</code></p>
+<ul>
+<li>A list of targets the component is released for.</li>
+</ul>
+<p><code>is_plugin</code></p>
+<ul>
+<li><em>Optional</em>. This tells you if this component is a <code>forc</code> plugin.</li>
+</ul>
+<p><code>publish</code></p>
+<ul>
+<li><em>Optional</em>. Declares if the component is published as a standalone, or packaged with <code>forc</code>.</li>
 </ul>
 
                     </main>
@@ -193,15 +233,11 @@ with some built-in plugin executables, namely <a href="https://fuellabs.github.i
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
                         
-                            <a rel="prev" href="../concepts/toolchains.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../developer_guide/contributing_to_fuelup.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
 
-                        
-                            <a rel="next" href="../concepts/proxies.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
                         
 
                         <div style="clear: both"></div>
@@ -211,15 +247,11 @@ with some built-in plugin executables, namely <a href="https://fuellabs.github.i
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
                 
-                    <a rel="prev" href="../concepts/toolchains.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../developer_guide/contributing_to_fuelup.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
 
-                
-                    <a rel="next" href="../concepts/proxies.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
                 
             </nav>
 

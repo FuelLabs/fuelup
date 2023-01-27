@@ -32,7 +32,7 @@ pub fn update() -> Result<()> {
         let (cfgs, hash) = if let Ok((channel, hash)) = Channel::from_dist_channel(&description) {
             if let Ok(true) = config.hash_matches(&description, &hash) {
                 info!("'{}' already installed and up to date", description);
-                summary.push((format!("{} {}", toolchain, UNCHANGED), "".to_string()));
+                summary.push((format!("{toolchain} {UNCHANGED}"), "".to_string()));
                 continue;
             };
             (channel.build_download_configs(), hash)
@@ -50,26 +50,26 @@ pub fn update() -> Result<()> {
             let toolchain = Toolchain::from_path(&description.to_string());
             match toolchain.add_component(cfg) {
                 Ok(cfg) => installed_bins.push_str(&format!("  - {} {}\n", cfg.name, cfg.version)),
-                Err(e) => errored_bins.push_str(&format!("  - {}\n", e)),
+                Err(e) => errored_bins.push_str(&format!("  - {e}\n")),
             };
         }
 
         let mut status = String::new();
         if !installed_bins.is_empty() {
             status = UPDATED.to_string();
-            installed_bins = format!("  updated components:\n{}", installed_bins);
+            installed_bins = format!("  updated components:\n{installed_bins}");
         }
 
         if errored_bins.is_empty() {
             config.save_hash(&toolchain, &hash)?;
         } else {
             status = PARTIALLY_UPDATED.to_string();
-            errored_bins = format!("  failed to update:\n{}", errored_bins);
+            errored_bins = format!("  failed to update:\n{errored_bins}");
         };
 
         summary.push((
-            format!("{} {}\n", toolchain, status),
-            format!("{}{}", installed_bins, errored_bins),
+            format!("{toolchain} {status}\n"),
+            format!("{installed_bins}{errored_bins}"),
         ));
     }
 
@@ -80,9 +80,9 @@ pub fn update() -> Result<()> {
             .collect::<String>()
             .is_empty()
         {
-            colored_bold(Color::Green, |s| write!(s, "{}", toolchain_info));
+            colored_bold(Color::Green, |s| write!(s, "{toolchain_info}"));
         } else {
-            bold(|s| write!(s, "{}", toolchain_info));
+            bold(|s| write!(s, "{toolchain_info}"));
         }
         info!("{}", components_info);
     }

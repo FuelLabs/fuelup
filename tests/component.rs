@@ -41,11 +41,10 @@ fn fuelup_component_add_disallowed() -> Result<()> {
         let output = cfg.fuelup(&["component", "add", "forc@0.19.1"]);
         let expected_stdout = format!(
             r#"Installing specific components is reserved for custom toolchains.
-You are currently using '{}'.
+You are currently using '{latest}'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#,
-            latest
+"#
         );
         assert_eq!(output.stdout, expected_stdout);
 
@@ -57,11 +56,10 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
         let output = cfg.fuelup(&["component", "add", "forc@.19.1"]);
         let expected_stdout = format!(
             r#"Installing specific components is reserved for custom toolchains.
-You are currently using '{}'.
+You are currently using '{nightly}'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#,
-            nightly
+"#
         );
         assert_eq!(output.stdout, expected_stdout);
 
@@ -73,11 +71,10 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
         let output = cfg.fuelup(&["component", "add", "forc@.19.1"]);
         let expected_stdout = format!(
             r#"Installing specific components is reserved for custom toolchains.
-You are currently using '{}'.
+You are currently using '{nightly_date}'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#,
-            nightly_date
+"#
         );
         assert_eq!(output.stdout, expected_stdout);
 
@@ -117,11 +114,10 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
 
         let expected_stdout = format!(
             r#"Removing specific components is reserved for custom toolchains.
-You are currently using '{}'.
+You are currently using '{nightly_date}'.
 
 You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#,
-            nightly_date
+"#
         );
         assert_eq!(output.stdout, expected_stdout);
         expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);

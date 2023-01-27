@@ -145,7 +145,7 @@ fn setup_settings_file(settings_dir: &Path, default_toolchain: &str) -> Result<(
     let settings_path = settings_dir.join("settings.toml");
     fs::write(
         settings_path,
-        format!("default_toolchain = \"{}\"", default_toolchain),
+        format!("default_toolchain = \"{default_toolchain}\""),
     )
     .expect("Failed to copy settings");
     Ok(())
@@ -155,7 +155,7 @@ fn setup_override_file(toolchain_override: ToolchainOverride) -> Result<()> {
     let document = toolchain_override.to_toml();
 
     fs::write(toolchain_override.path, document.to_string())
-        .unwrap_or_else(|_| panic!("Failed to write {}", FUEL_TOOLCHAIN_TOML_FILE));
+        .unwrap_or_else(|_| panic!("Failed to write {FUEL_TOOLCHAIN_TOML_FILE}"));
 
     Ok(())
 }
@@ -181,19 +181,16 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     )?;
 
     let target = TargetTriple::from_host().unwrap();
-    let latest = format!("latest-{}", target);
-    let nightly = format!("nightly-{}", target);
-    let beta_1 = format!("beta-1-{}", target);
+    let latest = format!("latest-{target}");
+    let nightly = format!("nightly-{target}");
+    let beta_1 = format!("beta-1-{target}");
 
     match state {
         FuelupState::Empty => {}
         FuelupState::AllInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
-            setup_toolchain(
-                &tmp_fuelup_root_path,
-                &format!("nightly-{}-{}", DATE, target),
-            )?;
+            setup_toolchain(&tmp_fuelup_root_path, &format!("nightly-{DATE}-{target}"))?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
         }
         FuelupState::LatestToolchainInstalled => {
@@ -222,14 +219,8 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_settings_file(&tmp_fuelup_root_path, &nightly)?;
         }
         FuelupState::NightlyDateInstalled => {
-            setup_toolchain(
-                &tmp_fuelup_root_path,
-                &format!("nightly-{}-{}", DATE, target),
-            )?;
-            setup_settings_file(
-                &tmp_fuelup_root_path,
-                &format!("nightly-{}-{}", DATE, target),
-            )?;
+            setup_toolchain(&tmp_fuelup_root_path, &format!("nightly-{DATE}-{target}"))?;
+            setup_settings_file(&tmp_fuelup_root_path, &format!("nightly-{DATE}-{target}"))?;
         }
         FuelupState::LatestAndCustomInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
@@ -243,18 +234,12 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
         }
         FuelupState::NightlyAndNightlyDateInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
-            setup_toolchain(
-                &tmp_fuelup_root_path,
-                &format!("nightly-{}-{}", DATE, target),
-            )?;
+            setup_toolchain(&tmp_fuelup_root_path, &format!("nightly-{DATE}-{target}"))?;
             setup_settings_file(&tmp_fuelup_root_path, &nightly)?;
         }
         FuelupState::Beta1Installed => {
             setup_toolchain(&tmp_fuelup_root_path, &beta_1)?;
-            setup_toolchain(
-                &tmp_fuelup_root_path,
-                &format!("beta-1-{}-{}", DATE, target),
-            )?;
+            setup_toolchain(&tmp_fuelup_root_path, &format!("beta-1-{DATE}-{target}"))?;
             setup_settings_file(&tmp_fuelup_root_path, &beta_1)?;
         }
         FuelupState::LatestAndNightlyWithBetaOverride => {

@@ -25,10 +25,7 @@ use crate::target_triple::TargetTriple;
 use crate::toolchain::DistToolchainDescription;
 
 fn github_releases_download_url(repo: &str, tag: &Version, tarball: &str) -> String {
-    format!(
-        "https://github.com/FuelLabs/{}/releases/download/v{}/{}",
-        repo, tag, tarball
-    )
+    format!("https://github.com/FuelLabs/{repo}/releases/download/v{tag}/{tarball}")
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -97,9 +94,9 @@ impl DownloadCfg {
 
 pub fn tarball_name(tarball_prefix: &str, version: &Version, target: &TargetTriple) -> String {
     if tarball_prefix == "forc-binaries" {
-        format!("{}-{}.tar.gz", tarball_prefix, target)
+        format!("{tarball_prefix}-{target}.tar.gz")
     } else {
-        format!("{}-{}-{}.tar.gz", tarball_prefix, version, target)
+        format!("{tarball_prefix}-{version}-{target}.tar.gz")
     }
 }
 

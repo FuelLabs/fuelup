@@ -49,7 +49,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
     for cfg in cfgs {
         match toolchain.add_component(cfg) {
             Ok(cfg) => writeln!(installed_bins, "- {} {}", cfg.name, cfg.version)?,
-            Err(e) => writeln!(errored_bins, "- {}", e)?,
+            Err(e) => writeln!(errored_bins, "- {e}")?,
         };
     }
 

@@ -17,4 +17,6 @@
 - [Overrides](overrides.md)
 - [Configuration](configuration.md)
 - [Examples](examples.md)
-- [Contributing to fuelup](./contributing_to_fuelup.md)
+- [Developer guide](./developer_guide/index.md)
+  - [Contributing to fuelup](./developer_guide/contributing_to_fuelup.md)
+  - [Adding components](./developer_guide/adding_components.md)

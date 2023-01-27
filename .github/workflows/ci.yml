@@ -275,6 +275,9 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v3
 
+      - name: Install build-channel script
+        run: cargo install --debug --path ./ci/build-channel
+
       - name: Checkout gh-pages
         uses: actions/checkout@v3
         with:

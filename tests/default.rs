@@ -23,7 +23,7 @@ fn fuelup_default() -> Result<()> {
     let latest = format_toolchain_with_target("latest");
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["default"]);
-        let expected_stdout = format!("{} (default)\n", latest);
+        let expected_stdout = format!("{latest} (default)\n");
 
         assert_eq!(output.stdout, expected_stdout);
     })?;
@@ -91,7 +91,7 @@ fn fuelup_default_nightly_and_nightly_date() -> Result<()> {
         );
         assert_eq!(output.stdout, expected_stdout);
 
-        let output = cfg.fuelup(&["default", &format!("nightly-{}", DATE)]);
+        let output = cfg.fuelup(&["default", &format!("nightly-{DATE}")]);
         let expected_stdout = format!(
             "default toolchain set to 'nightly-{}-{}'\n",
             DATE,

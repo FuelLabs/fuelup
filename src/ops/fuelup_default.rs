@@ -23,7 +23,7 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
                         Ok(desc) => desc.to_string(),
                         Err(_) => to.cfg.toolchain.channel.to_string(),
                     };
-                result.push_str(&format!("{} (override)", name));
+                result.push_str(&format!("{name} (override)"));
 
                 if current_toolchain.exists() {
                     result.push_str(", ")

@@ -41,7 +41,7 @@ publish = true
 
 A short description of the keys you find above:
 
-`name` 
+`name`
 
 - Name of the component/plugin.
 
@@ -51,7 +51,7 @@ A short description of the keys you find above:
 
 `executables`
 
-- In most cases, the name of the component is the executable itself, 
+- In most cases, the name of the component is the executable itself,
 but certain components like `forc` itself and `forc-client` may package multiple executables and therefore have different names.
 
 `repository_name`

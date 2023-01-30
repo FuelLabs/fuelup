@@ -16,16 +16,17 @@ struct Content {
 fn strip_channel_name(name: &str) -> String {
     name.strip_prefix("channel-fuel-")
         .and_then(|s| s.strip_suffix(".toml"))
-        .unwrap_or_else(|| name)
+        .unwrap_or(name)
         .to_string()
 }
 
 pub fn list_revisions(_command: ListRevisionsCommand) -> Result<()> {
     let handle = ureq::builder().user_agent("fuelup").build();
     let mut data = Vec::new();
-    let url = "https://api.github.com/repos/fuellabs/fuelup/contents/channels/latest?ref=gh-pages";
 
-    let resp = handle.get(&url).call()?;
+    let resp = handle
+        .get("https://api.github.com/repos/fuellabs/fuelup/contents/channels/latest?ref=gh-pages")
+        .call()?;
 
     resp.into_reader().read_to_end(&mut data)?;
     let contents: Vec<Content> = serde_json::from_slice(&data)?;

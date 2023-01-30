@@ -37,6 +37,6 @@ pub fn list_revisions(_command: ListRevisionsCommand) -> Result<()> {
         .map(|c| strip_channel_name(&c.name) + "\n")
         .collect::<String>();
 
-    info!("\n'latest' revisions available:\n{}", revisions);
+    info!("\n'latest' revisions available:\n{}\nfor the full list, visit: https://github.com/FuelLabs/fuelup/tree/gh-pages/channels/latest", revisions);
     Ok(())
 }

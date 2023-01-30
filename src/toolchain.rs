@@ -12,7 +12,7 @@ use crate::channel::{self, is_beta_toolchain, Channel};
 use crate::config::Config;
 use crate::constants::DATE_FORMAT;
 use crate::download::DownloadCfg;
-use crate::file::hard_or_symlink_file;
+use crate::file::{hard_or_symlink_file, is_executable};
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
     ensure_dir_exists, fuelup_bin, fuelup_bin_dir, fuelup_tmp_dir, settings_file,
@@ -264,7 +264,14 @@ impl Toolchain {
             match store.install_component(&download_cfg) {
                 Ok(downloaded) => {
                     for bin in downloaded {
-                        hard_or_symlink_file(&bin, &self.bin_path.join(&download_cfg.name))?;
+                        if is_executable(bin.as_path()) {
+                            if let Some(exe_file_name) = bin.file_name() {
+                                hard_or_symlink_file(
+                                    &bin.as_path(),
+                                    &self.bin_path.join(&exe_file_name),
+                                )?;
+                            }
+                        }
                     }
 
                     // Little hack here to download core and std lib upon installing `forc`
@@ -280,12 +287,20 @@ impl Toolchain {
                 ),
             }
         } else {
-            hard_or_symlink_file(
-                &store
-                    .component_dir_path(&download_cfg.name, &download_cfg.version)
-                    .join(&download_cfg.name),
-                &self.bin_path.join(&download_cfg.name),
-            )?;
+            // We have to iterate here because `fuelup component add forc` has to account for
+            // other built-in plugins as well, eg. forc-fmt
+            for entry in std::fs::read_dir(
+                &store.component_dir_path(&download_cfg.name, &download_cfg.version),
+            )? {
+                let entry = entry?;
+                let exe = entry.path();
+
+                if is_executable(exe.as_path()) {
+                    if let Some(exe_file_name) = exe.file_name() {
+                        hard_or_symlink_file(exe.as_path(), &self.bin_path.join(&exe_file_name))?;
+                    }
+                }
+            }
         };
 
         info!(

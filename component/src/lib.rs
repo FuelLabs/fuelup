@@ -65,6 +65,7 @@ impl Component {
 pub struct Plugin {
     pub name: String,
     pub executables: Vec<String>,
+    pub publish: Option<bool>,
 }
 
 impl Plugin {
@@ -148,6 +149,7 @@ impl Components {
             .map(|p| Plugin {
                 name: p.name.clone(),
                 executables: p.executables.clone(),
+                publish: p.publish,
             })
             .collect();
         plugins.sort_by_key(|p| p.name.clone());

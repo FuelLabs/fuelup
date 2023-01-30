@@ -11,8 +11,8 @@ use tracing::{error, info};
 use crate::channel::{self, is_beta_toolchain, Channel};
 use crate::config::Config;
 use crate::constants::DATE_FORMAT;
-use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
-use crate::file::hard_or_symlink_file;
+use crate::download::DownloadCfg;
+use crate::file::{hard_or_symlink_file, is_executable};
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
     ensure_dir_exists, fuelup_bin, fuelup_bin_dir, fuelup_tmp_dir, settings_file,
@@ -153,7 +153,7 @@ pub struct Toolchain {
 impl Toolchain {
     pub fn new(name: &str) -> Result<Self> {
         let target = TargetTriple::from_host()?;
-        let toolchain = format!("{}-{}", name, target);
+        let toolchain = format!("{name}-{target}");
         Ok(Self {
             name: toolchain.clone(),
             path: toolchain_dir(&toolchain),
@@ -228,46 +228,75 @@ impl Toolchain {
             };
         }
 
+        let store = Store::from_env()?;
+
         info!(
             "\nAdding component {} v{} to '{}'",
             &download_cfg.name, &download_cfg.version, self.name
         );
 
-        if let Err(e) = download_file_and_unpack(&download_cfg, &self.bin_path) {
-            bail!(
-                "Could not add component {}({}): {}",
-                &download_cfg.name,
-                &download_cfg.version,
-                e
-            )
-        };
+        if !store.has_component(&download_cfg.name, &download_cfg.version) {
+            match store.install_component(&download_cfg) {
+                Ok(downloaded) => {
+                    for bin in downloaded {
+                        if is_executable(bin.as_path()) {
+                            if let Some(exe_file_name) = bin.file_name() {
+                                hard_or_symlink_file(
+                                    bin.as_path(),
+                                    &self.bin_path.join(exe_file_name),
+                                )?;
+                            }
+                        }
+                    }
 
-        if let Ok(downloaded) = unpack_bins(&self.bin_path, &fuelup_bin_dir) {
-            link_to_fuelup(downloaded)?;
+                    // Little hack here to download core and std lib upon installing `forc`
+                    if download_cfg.name == component::FORC {
+                        let forc_bin_path = self.bin_path.join(component::FORC);
 
-            // Little hack here to download core and std lib upon installing `forc`
-            if download_cfg.name == component::FORC {
-                let fuelup_tmp_dir = fuelup_tmp_dir();
-                ensure_dir_exists(&fuelup_tmp_dir)?;
-                let forc_bin_path = self.bin_path.join(component::FORC);
-                let temp_project = tempfile::Builder::new().prefix("temp-project").tempdir()?;
-                let temp_project_path = temp_project.path().to_str().unwrap();
-                if Command::new(&forc_bin_path)
-                    .args(["init", "--path", temp_project_path])
-                    .stdout(std::process::Stdio::null())
-                    .status()
-                    .is_ok()
-                {
-                    info!("Fetching core forc dependencies");
-                    if Command::new(forc_bin_path)
-                        .args(["check", "--path", temp_project_path])
-                        .stdout(std::process::Stdio::null())
-                        .status()
-                        .is_err()
-                    {
-                        error!("Failed to fetch core forc dependencies");
+                        let fuelup_tmp_dir = fuelup_tmp_dir();
+                        ensure_dir_exists(&fuelup_tmp_dir)?;
+                        let temp_project =
+                            tempfile::Builder::new().prefix("temp-project").tempdir()?;
+                        let temp_project_path = temp_project.path().to_str().unwrap();
+                        if Command::new(&forc_bin_path)
+                            .args(["init", "--path", temp_project_path])
+                            .stdout(std::process::Stdio::null())
+                            .status()
+                            .is_ok()
+                        {
+                            info!("Fetching core forc dependencies");
+                            if Command::new(forc_bin_path)
+                                .args(["check", "--path", temp_project_path])
+                                .stdout(std::process::Stdio::null())
+                                .status()
+                                .is_err()
+                            {
+                                error!("Failed to fetch core forc dependencies");
+                            };
+                        };
                     };
-                };
+                }
+                Err(e) => bail!(
+                    "Could not add component {}({}): {}",
+                    &download_cfg.name,
+                    &download_cfg.version,
+                    e
+                ),
+            }
+        } else {
+            // We have to iterate here because `fuelup component add forc` has to account for
+            // other built-in plugins as well, eg. forc-fmt
+            for entry in std::fs::read_dir(
+                store.component_dir_path(&download_cfg.name, &download_cfg.version),
+            )? {
+                let entry = entry?;
+                let exe = entry.path();
+
+                if is_executable(exe.as_path()) {
+                    if let Some(exe_file_name) = exe.file_name() {
+                        hard_or_symlink_file(exe.as_path(), &self.bin_path.join(exe_file_name))?;
+                    }
+                }
             }
         };
 
@@ -313,7 +342,7 @@ impl Toolchain {
         let executables = &Components::collect().unwrap().component[component].executables;
         for executable in executables {
             remove_file(self.bin_path.join(executable))
-                .with_context(|| format!("failed to remove executable '{}'", executable))?;
+                .with_context(|| format!("failed to remove executable '{executable}'"))?;
         }
         Ok(())
     }

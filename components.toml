@@ -47,6 +47,14 @@ repository_name = "forc-explorer"
 targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]
 publish = true
 
+[component.forc-tx]
+name = "forc-tx"
+tarball_prefix = "forc-binaries"
+is_plugin = true
+executables = ["forc-tx"]
+repository_name = "sway"
+targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
+
 [component.fuel-core]
 name = "fuel-core"
 tarball_prefix = "fuel-core"

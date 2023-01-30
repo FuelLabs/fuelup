@@ -29,7 +29,7 @@ where
 
 pub fn print_header(header: &str) {
     let mut stdout = StandardStream::stdout(ColorChoice::Auto);
-    bold(|s| writeln!(s, "{}", header));
+    bold(|s| writeln!(s, "{header}"));
     writeln!(stdout, "{}", "-".repeat(header.len())).expect("Unexpected error writing to stdout");
     let _ = stdout.reset();
 }

@@ -39,6 +39,7 @@ my_toolchain (default)
     - forc-fmt - not found
     - forc-index - not found
     - forc-lsp - not found
+    - forc-tx - not found
     - forc-wallet - not found
   fuel-core - not found
   fuel-indexer - not found
@@ -81,6 +82,7 @@ beta-1-{target} (override), path: {}
     - forc-fmt - not found
     - forc-index - not found
     - forc-lsp - not found
+    - forc-tx - not found
     - forc-wallet - not found
   fuel-core - not found
   fuel-indexer - not found

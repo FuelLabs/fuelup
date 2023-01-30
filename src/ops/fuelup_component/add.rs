@@ -51,8 +51,14 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
 
     if toolchain.has_component(component) {
         info!(
-            "{} already exists in toolchain '{}'; replacing existing version with `latest` version",
-            &maybe_versioned_component, toolchain.name
+            "{} already exists in toolchain '{}'; replacing existing version with {}{}",
+            component,
+            toolchain.name,
+            component,
+            version
+                .is_some()
+                .then(|| format!(" ({})", &version.as_ref().unwrap().to_string()))
+                .unwrap_or_else(|| " (latest)".to_string())
         );
     }
 

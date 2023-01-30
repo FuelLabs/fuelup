@@ -10,9 +10,9 @@ struct Content {
     name: String,
 }
 
-/// Helper function to strip the following channel name:
-/// channel-fuel-latest-2023-01-27.toml,
-/// into latest-2023-01-27
+/// Helper function to strip the following channel name from
+/// channel-fuel-latest-2023-01-27.toml -> latest-2023-01-27.
+/// If this fails, default to the original name.
 fn strip_channel_name(name: &str) -> String {
     name.strip_prefix("channel-fuel-")
         .and_then(|s| s.strip_suffix(".toml"))

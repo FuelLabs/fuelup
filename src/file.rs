@@ -1,7 +1,13 @@
 use anyhow::{Context, Result};
 use std::fs;
 use std::io;
+use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
+
+#[cfg(unix)]
+pub(crate) fn is_executable(file: &Path) -> bool {
+    file.is_file() && file.metadata().unwrap().permissions().mode() & 0o111 != 0
+}
 
 pub(crate) fn hardlink(original: &Path, link: &Path) -> io::Result<()> {
     let _ = fs::remove_file(link);

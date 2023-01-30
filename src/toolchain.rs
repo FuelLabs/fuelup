@@ -267,8 +267,8 @@ impl Toolchain {
                         if is_executable(bin.as_path()) {
                             if let Some(exe_file_name) = bin.file_name() {
                                 hard_or_symlink_file(
-                                    &bin.as_path(),
-                                    &self.bin_path.join(&exe_file_name),
+                                    bin.as_path(),
+                                    &self.bin_path.join(exe_file_name),
                                 )?;
                             }
                         }
@@ -290,14 +290,14 @@ impl Toolchain {
             // We have to iterate here because `fuelup component add forc` has to account for
             // other built-in plugins as well, eg. forc-fmt
             for entry in std::fs::read_dir(
-                &store.component_dir_path(&download_cfg.name, &download_cfg.version),
+                store.component_dir_path(&download_cfg.name, &download_cfg.version),
             )? {
                 let entry = entry?;
                 let exe = entry.path();
 
                 if is_executable(exe.as_path()) {
                     if let Some(exe_file_name) = exe.file_name() {
-                        hard_or_symlink_file(exe.as_path(), &self.bin_path.join(&exe_file_name))?;
+                        hard_or_symlink_file(exe.as_path(), &self.bin_path.join(exe_file_name))?;
                     }
                 }
             }

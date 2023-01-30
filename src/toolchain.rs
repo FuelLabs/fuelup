@@ -11,7 +11,7 @@ use tracing::{error, info};
 use crate::channel::{self, is_beta_toolchain, Channel};
 use crate::config::Config;
 use crate::constants::DATE_FORMAT;
-use crate::download::{download_file_and_unpack, link_to_fuelup, unpack_bins, DownloadCfg};
+use crate::download::DownloadCfg;
 use crate::file::hard_or_symlink_file;
 use crate::ops::fuelup_self::self_update;
 use crate::path::{
@@ -143,6 +143,31 @@ impl FromStr for DistToolchainDescription {
     }
 }
 
+fn install_forc_dependencies(forc_bin_path: PathBuf) -> Result<()> {
+    let fuelup_tmp_dir = fuelup_tmp_dir();
+    ensure_dir_exists(&fuelup_tmp_dir)?;
+    let temp_project = tempfile::Builder::new().prefix("temp-project").tempdir()?;
+    let temp_project_path = temp_project.path().to_str().unwrap();
+    if Command::new(&forc_bin_path)
+        .args(["init", "--path", temp_project_path])
+        .stdout(std::process::Stdio::null())
+        .status()
+        .is_ok()
+    {
+        info!("Fetching core forc dependencies");
+        if Command::new(forc_bin_path)
+            .args(["check", "--path", temp_project_path])
+            .stdout(std::process::Stdio::null())
+            .status()
+            .is_err()
+        {
+            error!("Failed to fetch core forc dependencies");
+        };
+    };
+
+    Ok(())
+}
+
 #[derive(Debug)]
 pub struct Toolchain {
     pub name: String,
@@ -228,47 +253,39 @@ impl Toolchain {
             };
         }
 
+        let store = Store::from_env()?;
+
         info!(
             "\nAdding component {} v{} to '{}'",
             &download_cfg.name, &download_cfg.version, self.name
         );
 
-        if let Err(e) = download_file_and_unpack(&download_cfg, &self.bin_path) {
-            bail!(
-                "Could not add component {}({}): {}",
-                &download_cfg.name,
-                &download_cfg.version,
-                e
-            )
-        };
+        if !store.has_component(&download_cfg.name, &download_cfg.version) {
+            match store.install_component(&download_cfg) {
+                Ok(downloaded) => {
+                    for bin in downloaded {
+                        hard_or_symlink_file(&bin, &self.bin_path.join(&download_cfg.name))?;
+                    }
 
-        if let Ok(downloaded) = unpack_bins(&self.bin_path, &fuelup_bin_dir) {
-            link_to_fuelup(downloaded)?;
-
-            // Little hack here to download core and std lib upon installing `forc`
-            if download_cfg.name == component::FORC {
-                let fuelup_tmp_dir = fuelup_tmp_dir();
-                ensure_dir_exists(&fuelup_tmp_dir)?;
-                let forc_bin_path = self.bin_path.join(component::FORC);
-                let temp_project = tempfile::Builder::new().prefix("temp-project").tempdir()?;
-                let temp_project_path = temp_project.path().to_str().unwrap();
-                if Command::new(&forc_bin_path)
-                    .args(["init", "--path", temp_project_path])
-                    .stdout(std::process::Stdio::null())
-                    .status()
-                    .is_ok()
-                {
-                    info!("Fetching core forc dependencies");
-                    if Command::new(forc_bin_path)
-                        .args(["check", "--path", temp_project_path])
-                        .stdout(std::process::Stdio::null())
-                        .status()
-                        .is_err()
-                    {
-                        error!("Failed to fetch core forc dependencies");
-                    };
-                };
+                    // Little hack here to download core and std lib upon installing `forc`
+                    if download_cfg.name == component::FORC {
+                        install_forc_dependencies(self.bin_path.join(component::FORC))?;
+                    }
+                }
+                Err(e) => bail!(
+                    "Could not add component {}({}): {}",
+                    &download_cfg.name,
+                    &download_cfg.version,
+                    e
+                ),
             }
+        } else {
+            hard_or_symlink_file(
+                &store
+                    .component_dir_path(&download_cfg.name, &download_cfg.version)
+                    .join(&download_cfg.name),
+                &self.bin_path.join(&download_cfg.name),
+            )?;
         };
 
         info!(

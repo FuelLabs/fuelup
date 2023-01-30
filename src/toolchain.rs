@@ -143,31 +143,6 @@ impl FromStr for DistToolchainDescription {
     }
 }
 
-fn install_forc_dependencies(forc_bin_path: PathBuf) -> Result<()> {
-    let fuelup_tmp_dir = fuelup_tmp_dir();
-    ensure_dir_exists(&fuelup_tmp_dir)?;
-    let temp_project = tempfile::Builder::new().prefix("temp-project").tempdir()?;
-    let temp_project_path = temp_project.path().to_str().unwrap();
-    if Command::new(&forc_bin_path)
-        .args(["init", "--path", temp_project_path])
-        .stdout(std::process::Stdio::null())
-        .status()
-        .is_ok()
-    {
-        info!("Fetching core forc dependencies");
-        if Command::new(forc_bin_path)
-            .args(["check", "--path", temp_project_path])
-            .stdout(std::process::Stdio::null())
-            .status()
-            .is_err()
-        {
-            error!("Failed to fetch core forc dependencies");
-        };
-    };
-
-    Ok(())
-}
-
 #[derive(Debug)]
 pub struct Toolchain {
     pub name: String,
@@ -276,8 +251,30 @@ impl Toolchain {
 
                     // Little hack here to download core and std lib upon installing `forc`
                     if download_cfg.name == component::FORC {
-                        install_forc_dependencies(self.bin_path.join(component::FORC))?;
-                    }
+                        let forc_bin_path = self.bin_path.join(component::FORC);
+
+                        let fuelup_tmp_dir = fuelup_tmp_dir();
+                        ensure_dir_exists(&fuelup_tmp_dir)?;
+                        let temp_project =
+                            tempfile::Builder::new().prefix("temp-project").tempdir()?;
+                        let temp_project_path = temp_project.path().to_str().unwrap();
+                        if Command::new(&forc_bin_path)
+                            .args(["init", "--path", temp_project_path])
+                            .stdout(std::process::Stdio::null())
+                            .status()
+                            .is_ok()
+                        {
+                            info!("Fetching core forc dependencies");
+                            if Command::new(forc_bin_path)
+                                .args(["check", "--path", temp_project_path])
+                                .stdout(std::process::Stdio::null())
+                                .status()
+                                .is_err()
+                            {
+                                error!("Failed to fetch core forc dependencies");
+                            };
+                        };
+                    };
                 }
                 Err(e) => bail!(
                     "Could not add component {}({}): {}",

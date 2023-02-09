@@ -45,7 +45,8 @@ jobs:
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@master
-        toolchain: ${{ env.RUST_VERSION }}
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
       
       - uses: Swatinem/rust-cache@v2
 

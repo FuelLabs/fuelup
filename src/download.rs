@@ -19,8 +19,6 @@ use tracing::{error, info};
 use crate::channel::Channel;
 use crate::channel::Package;
 use crate::constants::CHANNEL_LATEST_URL;
-use crate::file::hard_or_symlink_file;
-use crate::path::fuelup_bin;
 use crate::target_triple::TargetTriple;
 use crate::toolchain::DistToolchainDescription;
 

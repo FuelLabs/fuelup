@@ -50,6 +50,12 @@ jobs:
       
       - uses: Swatinem/rust-cache@v2
 
+      - name: Install Forc
+        run: cargo install --locked --debug --path ./forc
+
+      - name: Build sway-lib-core and sway-lib-std
+        run: forc build --path sway-lib-core && forc build --path sway-lib-std
+     
         # In the next steps we run the integration tests found in the Sway CI:
         # https://github.com/FuelLabs/sway/blob/3bd8eaf4a0f11a3009c9421100cc06c2e897b6c2/.github/workflows/ci.yml#L229-L270
       - name: Cargo Run E2E Tests 

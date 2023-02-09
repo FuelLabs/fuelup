@@ -2,8 +2,8 @@ name: Check Versions
 
 on:
   schedule:
-    # Run at minute 0 and 30 every hour
-    - cron: '0,30 * * * *'
+    # Run at minute 0 every hour
+    - cron: '0 * * * *'
 env:
   LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
 

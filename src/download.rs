@@ -19,8 +19,6 @@ use tracing::{error, info};
 use crate::channel::Channel;
 use crate::channel::Package;
 use crate::constants::CHANNEL_LATEST_URL;
-use crate::file::hard_or_symlink_file;
-use crate::path::fuelup_bin;
 use crate::target_triple::TargetTriple;
 use crate::toolchain::DistToolchainDescription;
 
@@ -276,14 +274,6 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path)
 
     unpack(&tarball_path, dst_dir_path)?;
 
-    Ok(())
-}
-
-pub fn link_to_fuelup(bins: Vec<PathBuf>) -> Result<()> {
-    let fuelup_bin_path = fuelup_bin();
-    for path in bins {
-        hard_or_symlink_file(&fuelup_bin_path, &path)?;
-    }
     Ok(())
 }
 

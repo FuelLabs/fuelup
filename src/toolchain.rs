@@ -270,6 +270,12 @@ impl Toolchain {
                                     bin.as_path(),
                                     &self.bin_path.join(exe_file_name),
                                 )?;
+                                if !fuelup_bin_dir.join(exe_file_name).exists() {
+                                    hard_or_symlink_file(
+                                        bin.as_path(),
+                                        &fuelup_bin_dir.join(exe_file_name),
+                                    )?;
+                                }
                             }
                         }
                     }

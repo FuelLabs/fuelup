@@ -9,6 +9,7 @@ pub const CHANNEL_LATEST_FILE_NAME: &str = "channel-fuel-latest.toml";
 pub const CHANNEL_NIGHTLY_FILE_NAME: &str = "channel-fuel-nightly.toml";
 pub const CHANNEL_BETA_1_FILE_NAME: &str = "channel-fuel-beta-1.toml";
 pub const CHANNEL_BETA_2_FILE_NAME: &str = "channel-fuel-beta-2.toml";
+pub const CHANNEL_BETA_3_FILE_NAME: &str = "channel-fuel-beta-3.toml";
 
 pub const DATE_FORMAT: &[FormatItem] = format_description!("[year]-[month]-[day]");
 pub const DATE_FORMAT_URL_FRIENDLY: &[FormatItem] = format_description!("[year]/[month]/[day]");

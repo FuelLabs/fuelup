@@ -245,13 +245,13 @@ impl Toolchain {
         let fuelup_bin_dir = fuelup_bin_dir();
         ensure_dir_exists(&fuelup_bin_dir)?;
 
-        if !fuelup_bin().is_file() {
-            info!("fuelup not found - attempting to self update");
-            match self_update() {
-                Ok(()) => info!("fuelup installed."),
-                Err(e) => bail!("Could not install fuelup: {}", e),
-            };
-        }
+        // if !fuelup_bin().is_file() {
+        //     info!("fuelup not found - attempting to self update");
+        //     match self_update() {
+        //         Ok(()) => info!("fuelup installed."),
+        //         Err(e) => bail!("Could not install fuelup: {}", e),
+        //     };
+        // }
 
         let store = Store::from_env()?;
 
@@ -270,6 +270,12 @@ impl Toolchain {
                                     bin.as_path(),
                                     &self.bin_path.join(exe_file_name),
                                 )?;
+                                if !fuelup_bin_dir.join(exe_file_name).exists() {
+                                    hard_or_symlink_file(
+                                        bin.as_path(),
+                                        &fuelup_bin_dir.join(exe_file_name),
+                                    )?;
+                                }
                             }
                         }
                     }

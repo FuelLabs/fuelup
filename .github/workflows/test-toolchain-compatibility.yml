@@ -63,13 +63,16 @@ jobs:
         run: cd sway && cargo run --locked --release --bin test -- --locked
 
       - name: Cargo Run E2E Tests (EVM)
+        id: e2e-evm-tests
         run: cd sway && cargo run --locked --release --bin test -- --target evm --locked
 
       - name: Build All Tests
         run: cd sway/test/src/sdk-harness && bash build.sh --locked && cd ../../../../
 
       - name: Cargo Test sway-lib-std
+        id: std-lib-tests
         run: cd sway && cargo test --manifest-path ./test/src/sdk-harness/Cargo.toml -- --nocapture
+
       # We use upload artifacts in the remaining steps to collect test results to be used in the subsequent index-versions job.
       #
       # See:
@@ -79,15 +82,20 @@ jobs:
       #
       # We have to explicitly check for:
       # 1) e2e-tests.conclusion == 'failure'
-      # 2) std-lib-tests.conclusion == 'failure'
+      # 2) e2e-evm-tests.conclusion == 'failure'
+      # 3) std-lib-tests.conclusion == 'failure'
       # So that we create failure artifacts only if tests fail and not anywhere before so that we can retry this workflow
       # if it fails for other reasons other than tests.
       - name: Create failure artifact
-        if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || steps.std-lib-tests.conclusion == 'failure' )}}
+        if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || 
+                steps.e2e-evm-tests.conclusion = 'failure' ||
+                steps.std-lib-tests.conclusion == 'failure' )}}
         run: touch incompatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
 
       - name: Upload failure artifact
-        if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || steps.std-lib-tests.conclusion == 'failure' ) }}
+        if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' ||
+                steps.e2e-evm-tests.conclusion = 'failure' ||
+                steps.std-lib-tests.conclusion == 'failure' )}}
         id: upload-failure-artifact
         uses: actions/upload-artifact@v3
         with:

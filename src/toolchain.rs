@@ -26,6 +26,7 @@ pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
     channel::LATEST,
     channel::BETA_1,
     channel::BETA_2,
+    channel::BETA_3,
     channel::NIGHTLY,
     channel::STABLE,
 ];
@@ -34,6 +35,7 @@ pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
 pub enum DistToolchainName {
     Beta1,
     Beta2,
+    Beta3,
     Latest,
     Nightly,
 }
@@ -45,6 +47,7 @@ impl fmt::Display for DistToolchainName {
             DistToolchainName::Nightly => write!(f, "{}", channel::NIGHTLY),
             DistToolchainName::Beta1 => write!(f, "{}", channel::BETA_1),
             DistToolchainName::Beta2 => write!(f, "{}", channel::BETA_2),
+            DistToolchainName::Beta3 => write!(f, "{}", channel::BETA_3),
         }
     }
 }
@@ -57,6 +60,7 @@ impl FromStr for DistToolchainName {
             channel::NIGHTLY => Ok(Self::Nightly),
             channel::BETA_1 => Ok(Self::Beta1),
             channel::BETA_2 => Ok(Self::Beta2),
+            channel::BETA_3 => Ok(Self::Beta3),
             _ => bail!("Unknown name for toolchain: {}", s),
         }
     }
@@ -270,6 +274,12 @@ impl Toolchain {
                                     bin.as_path(),
                                     &self.bin_path.join(exe_file_name),
                                 )?;
+                                if !fuelup_bin_dir.join(exe_file_name).exists() {
+                                    hard_or_symlink_file(
+                                        bin.as_path(),
+                                        &fuelup_bin_dir.join(exe_file_name),
+                                    )?;
+                                }
                             }
                         }
                     }

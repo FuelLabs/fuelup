@@ -69,7 +69,7 @@ where
         |_| {
             Err(Error::invalid_value(
                 serde::de::Unexpected::Str(&channel_str),
-                &"one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2>",
+                &"one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3>",
             ))
         },
         Result::Ok,
@@ -211,7 +211,7 @@ impl OverrideCfg {
 
 #[cfg(test)]
 mod tests {
-    use crate::channel::{BETA_1, BETA_2, NIGHTLY};
+    use crate::channel::{BETA_1, BETA_2, BETA_3, NIGHTLY};
 
     use super::*;
 
@@ -260,7 +260,7 @@ channel = "nightly"
         let e = result.unwrap_err();
         assert_eq!(e
             .to_string(),
-            "invalid value: string \"latest\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2> for key `toolchain.channel`".to_string());
+            "invalid value: string \"latest\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3> for key `toolchain.channel`".to_string());
 
         let result = OverrideCfg::from_toml(NIGHTLY);
         assert!(result.is_err());
@@ -268,7 +268,7 @@ channel = "nightly"
 
         assert_eq!(e
             .to_string(),
-            "invalid value: string \"nightly\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2> for key `toolchain.channel`".to_string());
+            "invalid value: string \"nightly\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3> for key `toolchain.channel`".to_string());
     }
 
     #[test]
@@ -299,6 +299,7 @@ channel = "beta-2"
     fn channel_from_str() {
         assert!(Channel::from_str(BETA_1).is_ok());
         assert!(Channel::from_str(BETA_2).is_ok());
+        assert!(Channel::from_str(BETA_3).is_ok());
         assert!(Channel::from_str(NIGHTLY).is_err());
         assert!(Channel::from_str(LATEST).is_err());
     }

@@ -88,13 +88,13 @@ jobs:
       # if it fails for other reasons other than tests.
       - name: Create failure artifact
         if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' || 
-                steps.e2e-evm-tests.conclusion = 'failure' ||
+                steps.e2e-evm-tests.conclusion == 'failure' ||
                 steps.std-lib-tests.conclusion == 'failure' )}}
         run: touch incompatible-forc-${{ matrix.job.forc-version }}@fuel-core-${{ matrix.job.fuel-core-version }}
 
       - name: Upload failure artifact
         if: ${{ failure() && (steps.e2e-tests.conclusion == 'failure' ||
-                steps.e2e-evm-tests.conclusion = 'failure' ||
+                steps.e2e-evm-tests.conclusion == 'failure' ||
                 steps.std-lib-tests.conclusion == 'failure' )}}
         id: upload-failure-artifact
         uses: actions/upload-artifact@v3

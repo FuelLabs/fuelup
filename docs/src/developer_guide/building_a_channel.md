@@ -74,7 +74,7 @@ on this codebase.
 [check versions workflow]: https://github.com/FuelLabs/fuelup/actions/workflows/index-versions.yml
 [latest channel developer guide]: ../concepts/channels/latest.html#understanding-the-latest-workflow
 [test-toolchain-compatibility.yml]: https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/test-toolchain-compatibility.yml#L174
-[sway-nightly-binaries repository]: https://github.com/FuelLabs/sway-nightly-binaries 
+[sway-nightly-binaries repository]: https://github.com/FuelLabs/sway-nightly-binaries
 [publish-nightly-channel.yml]: https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/publish-nightly-channel.yml#L37
 [channel]: ../concepts/channels/index.md
 [variable]: https://docs.github.com/en/actions/learn-github-actions/variables

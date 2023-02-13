@@ -2,8 +2,8 @@
 
 `build-channel` is a Rust script that creates a [channel] that serves as a source of distribution of
 the Fuel toolchain. This is accomplished by querying and collecting a list of downloadable components that
-Fuel Labs publishes, creating a TOML file based on the collated data, which is then consumed by `fuelup` 
-during usage. 
+Fuel Labs publishes, creating a TOML file based on the collated data, which is then consumed by `fuelup`
+during usage.
 
 To learn about the args and options used in the script, skip to [Usage].
 
@@ -44,7 +44,6 @@ and `forc` and `fuel-core` versions `0.35.0` and `0.17.1` respectively, and the 
 Other than for these one-off events, manually running `build-channel` locally is a good sanity check when working
 on this codebase.
 
-
 ## Usage
 
 ### Arguments
@@ -65,14 +64,11 @@ on this codebase.
 
 - _Optional_. A list of key-value pairs mapping component names to [SemVer]-compatible versions, eg. 'fuel-core=0.17.1'
 
-
 ### Options
 
 `--nightly`
 
 - _Optional_. Specify if we are building a nightly channel.
-
-
 
 [Usage]: #usage
 [check versions workflow]: https://github.com/FuelLabs/fuelup/actions/workflows/index-versions.yml

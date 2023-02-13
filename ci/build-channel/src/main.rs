@@ -71,6 +71,7 @@ struct Args {
     /// the publish date
     pub publish_date: String,
     /// the GitHub run ID
+    #[clap(long)]
     pub github_run_id: Option<String>,
     /// key-value pairs of components and their versions to include in a channel, eg. forc=0.35.0
     #[clap(value_parser = parse_key_val::<String, Version>)]

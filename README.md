@@ -7,7 +7,9 @@
 ## Quick Links
 
 [The Fuelup Book](https://fuellabs.github.io/fuelup/master/)
+
 [Developing fuelup itself](https://fuellabs.github.io/fuelup/master/developer_guide/index.html)
+
 [Adding components to fuelup](https://fuellabs.github.io/fuelup/master/developer_guide/adding_components.html)
 
 ## Quickstart

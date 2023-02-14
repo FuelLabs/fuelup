@@ -2,9 +2,13 @@
 
 `fuelup` installs the Fuel toolchain from our official release channels, enabling you to easily keep the toolchain updated.
 
-**To start using fuelup**, refer to our [Quickstart](https://github.com/FuelLabs/fuelup#quickstart) below. You can also learn more at [The Fuelup Book](https://fuellabs.github.io/fuelup/master/).
+**To start using fuelup**, refer to our [Quickstart](https://github.com/FuelLabs/fuelup#quickstart) below.
 
-**To start developing fuelup itself**, learn more in the [Contributions chapter](https://fuellabs.github.io/fuelup/master/contributing_to_fuelup.html) of the book.
+## Quick Links
+
+[The Fuelup Book](https://fuellabs.github.io/fuelup/master/)
+[Developing fuelup itself](https://fuellabs.github.io/fuelup/master/developer_guide/index.html)
+[Adding components to fuelup](https://fuellabs.github.io/fuelup/master/developer_guide/adding_components.html)
 
 ## Quickstart
 

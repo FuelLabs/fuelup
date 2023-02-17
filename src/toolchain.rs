@@ -249,7 +249,8 @@ impl Toolchain {
         let fuelup_bin_dir = fuelup_bin_dir();
         ensure_dir_exists(&fuelup_bin_dir)?;
 
-        if !fuelup_bin().is_file() {
+        let fuelup_bin = fuelup_bin();
+        if !fuelup_bin.is_file() {
             info!("fuelup not found - attempting to self update");
             match self_update() {
                 Ok(()) => info!("fuelup installed."),
@@ -270,13 +271,16 @@ impl Toolchain {
                     for bin in downloaded {
                         if is_executable(bin.as_path()) {
                             if let Some(exe_file_name) = bin.file_name() {
+                                // Link binary in store -> binary in the toolchain dir
                                 hard_or_symlink_file(
                                     bin.as_path(),
                                     &self.bin_path.join(exe_file_name),
                                 )?;
                                 if !fuelup_bin_dir.join(exe_file_name).exists() {
+                                    // Link real 'fuelup' bin -> fake 'fuelup' that acts as
+                                    // the installed component in ~/.fuelup/bin, eg. 'forc'
                                     hard_or_symlink_file(
-                                        bin.as_path(),
+                                        &fuelup_bin,
                                         &fuelup_bin_dir.join(exe_file_name),
                                     )?;
                                 }

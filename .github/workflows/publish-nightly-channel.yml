@@ -34,7 +34,7 @@ jobs:
 
             CHANNEL_TOML="channel-fuel-nightly.toml"
 
-            build-channel nightly $CHANNEL_TOML $GITHUB_RUN_ID $PUBLISHED_DATE
+            build-channel --nightly $CHANNEL_TOML $PUBLISHED_DATE --github-run-id $GITHUB_RUN_ID
 
             cp $CHANNEL_TOML ${{ env.NIGHTLY_CHANNEL_DIR }}
 

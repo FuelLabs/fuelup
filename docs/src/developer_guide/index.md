@@ -8,3 +8,4 @@ This section will go through:
 
 - How to setup `fuelup` in your environment for contributions,
 - How to add support for a component to fuelup
+- How 'build-channel' is used in the CI, and how to manually use it to build a channel for fuelup

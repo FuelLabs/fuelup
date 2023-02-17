@@ -1,3 +1,35 @@
+//! # `build-channel`
+//!
+//! This crate is a script that allows the user to generate a channel (TOML file) that
+//! makes components developed by Fuel Labs available for consumption through fuelup.
+//!
+//! # Examples:
+//!
+//! To build a channel with the latest versions,
+//!
+//! ```sh
+//! build-channel my-channel.toml 2023-02-13
+//! ```
+//!
+//! To build a channel while specifying a specific version for a component,
+//!
+//! ```sh
+//! build-channel my-channel.toml 2023-02-13 forc=0.35.0
+//! ```
+//!
+//! To build a channel while specifying the GitHub run ID (used in CI) and
+//! a specific version for a component,
+//!
+//! ```sh
+//! build-channel my-channel.toml 2023-02-13 123456789 forc=0.35.0
+//! ```
+//!
+//! To build a nightly channel,
+//!
+//! ```sh
+//! build-channel --nightly my-channel.toml 2023-02-13
+//! ```
+
 use anyhow::{bail, Result};
 use clap::Parser;
 use component::{Component, Components};
@@ -31,15 +63,17 @@ where
 
 #[derive(Debug, Parser)]
 struct Args {
-    /// Component name [possible values: latest, nightly]
-    pub channel: String,
+    /// Specify if we are building a nightly channel
+    #[clap(long, short)]
+    pub nightly: bool,
     /// the TOML file name
     pub out_file: String,
-    /// the GitHub run ID
-    pub github_run_id: String,
     /// the publish date
     pub publish_date: String,
-    /// Component name [possible values: latest]
+    /// the GitHub run ID
+    #[clap(long)]
+    pub github_run_id: Option<String>,
+    /// key-value pairs of components and their versions to include in a channel, eg. forc=0.35.0
     #[clap(value_parser = parse_key_val::<String, Version>)]
     pub packages: Vec<(String, Version)>,
 }
@@ -100,24 +134,21 @@ fn components_exists(components: &HashMap<String, Version>) -> bool {
         && components.contains_key(&"fuel-core".to_string())
 }
 
-fn validate_components(channel: &str, components: &HashMap<String, Version>) -> Result<()> {
-    match channel {
-        "nightly" => {
-            if !components.is_empty() {
-                bail!("Cannot specify versions when building 'nightly' channel")
-            }
-        }
-        "latest" => {
-            if !components_exists(components) {
-                bail!("You must specify versions for 'forc' and 'fuel-core' when building 'latest' channel")
-            }
-        }
-        _ => bail!("Invalid channel '{channel}'"),
+fn validate_components(nightly: bool, components: &HashMap<String, Version>) -> Result<()> {
+    if nightly && !components.is_empty() {
+        bail!("Cannot specify versions when building 'nightly' channel")
+    } else if !nightly && !components_exists(components) {
+        println!(
+"warning: You are not specifying versions for 'forc' and 'fuel-core' when building a channel.
+This could result in incompatibility between forc and fuel-core."
+        )
     }
 
     Ok(())
 }
 
+/// Generates a channel TOML based on the components downloadable from the 'sway-nightly-binaries'
+/// repository. This TOML should be made available by fuelup.
 fn write_nightly_document(document: &mut Document, components: Vec<Component>) -> Result<()> {
     let mut data = Vec::new();
     let nightly_release_url = format!(
@@ -180,7 +211,10 @@ fn write_nightly_document(document: &mut Document, components: Vec<Component>) -
     Ok(())
 }
 
-fn write_latest_document(
+/// Generates a channel TOML based on the components downloadable from the different Fuel Labs
+/// repositories. This TOML should be made available by fuelup. You may optionally specify
+/// the versions that should be included in this channel.
+fn write_document(
     document: &mut Document,
     components: Vec<Component>,
     component_versions: HashMap<String, Version>,
@@ -252,28 +286,30 @@ fn main() -> Result<()> {
     let args = Args::parse();
 
     let mut component_versions: HashMap<String, Version> = HashMap::new();
-    for package in args.packages {
-        component_versions.insert(package.0, package.1);
+    for (component, version) in args.packages {
+        component_versions.insert(component, version);
     }
-    validate_components(&args.channel, &component_versions)?;
+    validate_components(args.nightly, &component_versions)?;
 
     let components = Components::collect_publishables()?;
 
     let mut document = Document::new();
     document["pkg"] = implicit_table();
 
-    match args.channel.as_str() {
-        "nightly" => write_nightly_document(&mut document, components)?,
-        "latest" => write_latest_document(&mut document, components, component_versions)?,
-        _ => bail!("Unrecognized channel '{}'", args.channel.as_str()),
+    if args.nightly {
+        write_nightly_document(&mut document, components)?;
+    } else {
+        write_document(&mut document, components, component_versions)?;
     }
 
     println!("writing channel: '{}'", &args.out_file);
     let mut channel_str = String::new();
-    channel_str.push_str(&format!(
-        "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/{}\"\n",
-        args.github_run_id
-    ));
+    if let Some(github_run_id) = args.github_run_id {
+        channel_str.push_str(&format!(
+            "published_by = \"https://github.com/FuelLabs/fuelup/actions/runs/{}\"\n",
+            github_run_id
+        ));
+    }
     channel_str.push_str(&format!("date = \"{}\"\n", args.publish_date));
     channel_str.push_str(&document.to_string());
     fs::write(&args.out_file, &channel_str)?;

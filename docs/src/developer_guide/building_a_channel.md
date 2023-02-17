@@ -9,7 +9,7 @@ To learn about the args and options used in the script, skip to [Usage].
 
 ## Use cases
 
-There are 2 main ways where the `build-channel` script is used: in the CI, and manually.
+There are 2 main ways the `build-channel` script is used: in the CI, and manually.
 
 ### CI
 

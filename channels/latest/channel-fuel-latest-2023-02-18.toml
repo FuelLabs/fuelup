@@ -1,0 +1,116 @@
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/4208944191"
+date = "2023-02-18"
+
+[pkg.forc]
+version = "0.35.2"
+
+[pkg.forc.target.linux_amd64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.35.2/forc-binaries-linux_amd64.tar.gz"
+hash = "67b3ddfddf50bdefa7465270aa9b395806b239f51daa7df13f19a2d93d14d945"
+
+[pkg.forc.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.35.2/forc-binaries-linux_arm64.tar.gz"
+hash = "b22c5e5eb4f6e29a226ed5a0a5533ef8b134f05bd32db570ea7b09d00ddf0038"
+
+[pkg.forc.target.darwin_amd64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.35.2/forc-binaries-darwin_amd64.tar.gz"
+hash = "482621c9f21b73e11c3f0044710e6da729d062f7372add96b821964b2fc2017f"
+
+[pkg.forc.target.darwin_arm64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.35.2/forc-binaries-darwin_arm64.tar.gz"
+hash = "a09c8d179699bb52948b239f94cd548e15a78b59c49a4929d19ed41e2718f880"
+
+[pkg.forc-explore]
+version = "0.28.1"
+
+[pkg.forc-explore.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-aarch64-unknown-linux-gnu.tar.gz"
+hash = "8f7ade34ff611eb8ffaea2ec0bd33f5bbf6de6b05aad2bcd39a3a62309ef3a41"
+
+[pkg.forc-explore.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-x86_64-unknown-linux-gnu.tar.gz"
+hash = "b0bfe8ddb4b0a962bc2ce956385392c7dae3f19f3ca97a90aba88f8d5b5f183c"
+
+[pkg.forc-explore.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-aarch64-apple-darwin.tar.gz"
+hash = "4c437e84b4f95e55c97d32595a4d529b3dcb78ebec06f07babccde74e1827566"
+
+[pkg.forc-explore.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-x86_64-apple-darwin.tar.gz"
+hash = "9ef1d8af2c5a611d33f8966881197bd4958da05e4b325eb0dc847b84ea1eac96"
+
+[pkg.forc-index]
+version = "0.3.0"
+
+[pkg.forc-index.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.3.0/forc-index-0.3.0-aarch64-unknown-linux-gnu.tar.gz"
+hash = "c6f3a3e11987205a29d2f72c70f467ba3d28aabea893c03dd0cf7d0164586098"
+
+[pkg.forc-index.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.3.0/forc-index-0.3.0-x86_64-unknown-linux-gnu.tar.gz"
+hash = "6612ecb8ed7474d911f5ec3470205a64870ebb6b139d0ff43074ff9eaa6692db"
+
+[pkg.forc-index.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.3.0/forc-index-0.3.0-aarch64-apple-darwin.tar.gz"
+hash = "b03277644def34caeb5b8c66648cc22b48f7ce47ccb0a96dd4341e257ce66dd8"
+
+[pkg.forc-index.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.3.0/forc-index-0.3.0-x86_64-apple-darwin.tar.gz"
+hash = "1eb3863eecfce963108d7138b72d5f67353899f8815cfdd1d7078a0bda3525b8"
+
+[pkg.forc-wallet]
+version = "0.1.3"
+
+[pkg.forc-wallet.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.1.3/forc-wallet-0.1.3-aarch64-unknown-linux-gnu.tar.gz"
+hash = "87fe156637a4d02cb0a274fdb26fe9bb525dcbc206bb29c959df5d5945b3bb81"
+
+[pkg.forc-wallet.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.1.3/forc-wallet-0.1.3-x86_64-unknown-linux-gnu.tar.gz"
+hash = "8c501d94179b1e43989f18b939e134da2b76380c36535f058aeaab7766725d6a"
+
+[pkg.forc-wallet.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.1.3/forc-wallet-0.1.3-aarch64-apple-darwin.tar.gz"
+hash = "42c3eb97dfa1fdfba51783f163e98b4d5319bd53d9b58456bf2535436a186e90"
+
+[pkg.forc-wallet.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.1.3/forc-wallet-0.1.3-x86_64-apple-darwin.tar.gz"
+hash = "c0d0322771217f69d82ebebfa16dad2a44389cfc26c5947831a5b01940f8b07f"
+
+[pkg.fuel-core]
+version = "0.17.2"
+
+[pkg.fuel-core.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.17.2/fuel-core-0.17.2-aarch64-unknown-linux-gnu.tar.gz"
+hash = "735462c6af9f4812160099702ad7d1901beefee27ba29225650c9abf6236cdc1"
+
+[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.17.2/fuel-core-0.17.2-x86_64-unknown-linux-gnu.tar.gz"
+hash = "1a91ed2cc29893638c12248c1f65b13bfd83a0161421e369513683286ad15211"
+
+[pkg.fuel-core.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.17.2/fuel-core-0.17.2-aarch64-apple-darwin.tar.gz"
+hash = "d66075b8942eca3082d66de903384bccfb64da7e6e22bafd693d630c3c1e32ce"
+
+[pkg.fuel-core.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.17.2/fuel-core-0.17.2-x86_64-apple-darwin.tar.gz"
+hash = "c10000ebf073bb87edd41a76bbb3d81b7239be7aab8973241570beba39030f17"
+
+[pkg.fuel-indexer]
+version = "0.3.0"
+
+[pkg.fuel-indexer.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.3.0/fuel-indexer-0.3.0-aarch64-unknown-linux-gnu.tar.gz"
+hash = "2987bac252b4245a42c6054c6682649d5f37e1a675bd732f850c0414ff5cfb5b"
+
+[pkg.fuel-indexer.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.3.0/fuel-indexer-0.3.0-x86_64-unknown-linux-gnu.tar.gz"
+hash = "0e743db61534f7c12919dc49a30f647c4a460c309ba9550b0c14da398bbe182f"
+
+[pkg.fuel-indexer.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.3.0/fuel-indexer-0.3.0-aarch64-apple-darwin.tar.gz"
+hash = "fce4784efd146bfeb7c2d1939657e6fc0129f4d3ec1280b578854c0245b3a433"
+
+[pkg.fuel-indexer.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.3.0/fuel-indexer-0.3.0-x86_64-apple-darwin.tar.gz"
+hash = "e41296784be81e016704a637eded2f1207e4033c7735da8427dd66993bbf18a0"

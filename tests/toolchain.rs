@@ -2,7 +2,7 @@ use anyhow::Result;
 use fuelup::{channel, fmt::format_toolchain_with_target, target_triple::TargetTriple};
 
 pub mod testcfg;
-use testcfg::{FuelupState, ALL_BINS, DATE};
+use testcfg::{FuelupState, ALL_BINS, CUSTOM_TOOLCHAIN_NAME, DATE};
 
 mod expects;
 use expects::expect_files_exist;
@@ -135,7 +135,7 @@ fn fuelup_toolchain_uninstall_active_switches_default() -> Result<()> {
         cfg.fuelup(&["toolchain", "uninstall", "latest"]);
         let stdout = cfg.fuelup(&["default"]).stdout;
 
-        assert_eq!(stdout, "my-toolchain (default)\n")
+        assert_eq!(stdout, format!("{CUSTOM_TOOLCHAIN_NAME} (default)\n"))
     })?;
 
     Ok(())
@@ -144,17 +144,16 @@ fn fuelup_toolchain_uninstall_active_switches_default() -> Result<()> {
 #[test]
 fn fuelup_toolchain_new() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let name = "my-toolchain";
-        let output = cfg.fuelup(&["toolchain", "new", name]);
+        let output = cfg.fuelup(&["toolchain", "new", CUSTOM_TOOLCHAIN_NAME]);
         let expected_stdout = format!(
-            "New toolchain initialized: {name}
-default toolchain set to '{name}'\n"
+            "New toolchain initialized: {CUSTOM_TOOLCHAIN_NAME}
+default toolchain set to '{CUSTOM_TOOLCHAIN_NAME}'\n"
         );
 
         assert_eq!(output.stdout, expected_stdout);
-        assert!(cfg.toolchain_bin_dir(name).is_dir());
+        assert!(cfg.toolchain_bin_dir(CUSTOM_TOOLCHAIN_NAME).is_dir());
         let default = cfg.default_toolchain();
-        assert_eq!(default, Some(name.to_string()));
+        assert_eq!(default, Some(CUSTOM_TOOLCHAIN_NAME.to_string()));
     })?;
 
     Ok(())

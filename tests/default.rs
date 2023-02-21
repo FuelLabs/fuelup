@@ -2,7 +2,7 @@ use anyhow::Result;
 use fuelup::{fmt::format_toolchain_with_target, target_triple::TargetTriple};
 
 pub mod testcfg;
-use testcfg::{FuelupState, DATE};
+use testcfg::{FuelupState, CUSTOM_TOOLCHAIN_NAME, DATE};
 
 #[test]
 fn fuelup_default_empty() -> Result<()> {
@@ -42,8 +42,8 @@ fn fuelup_default_latest_and_custom() -> Result<()> {
 
         assert_eq!(output.stdout, expected_stdout);
 
-        let output = cfg.fuelup(&["default", "my-toolchain"]);
-        let expected_stdout = "default toolchain set to 'my-toolchain'\n";
+        let output = cfg.fuelup(&["default", CUSTOM_TOOLCHAIN_NAME]);
+        let expected_stdout = format!("default toolchain set to '{CUSTOM_TOOLCHAIN_NAME}'\n");
 
         assert_eq!(output.stdout, expected_stdout);
     })?;
@@ -68,7 +68,7 @@ fn fuelup_default_uninstalled_toolchain() -> Result<()> {
 
 #[test]
 fn fuelup_default_nightly() -> Result<()> {
-    testcfg::setup(FuelupState::LatestAndNightlyInstalled, &|cfg| {
+    testcfg::setup(FuelupState::AllInstalled, &|cfg| {
         let output = cfg.fuelup(&["default", "nightly"]);
         let expected_stdout = format!(
             "default toolchain set to 'nightly-{}'\n",
@@ -105,7 +105,7 @@ fn fuelup_default_nightly_and_nightly_date() -> Result<()> {
 
 #[test]
 fn fuelup_default_override() -> Result<()> {
-    testcfg::setup(FuelupState::LatestAndNightlyWithBetaOverride, &|cfg| {
+    testcfg::setup(FuelupState::LatestWithBetaOverride, &|cfg| {
         let output = cfg.fuelup(&["default"]);
         let triple = TargetTriple::from_host().unwrap();
 

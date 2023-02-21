@@ -12,24 +12,36 @@ use std::{
 };
 use tempfile::tempdir;
 
+/// State of the virtual environment for which tests are ran against.
 pub enum FuelupState {
+    /// Inits a state where `latest`, `nightly`, `nightly-2022-08-30` toolchains are installed.
     AllInstalled,
+    /// Inits an empty state with no toolchains.
     Empty,
+    /// Inits a state with only the `latest` toolchain.
     LatestToolchainInstalled,
-    FuelupUpdateConflict,
+    /// Inits a state with only the `nightly` toolchain.
     NightlyInstalled,
+    /// Inits a state with only the `nightly-2022-08-30` toolchain.
     NightlyDateInstalled,
+    /// Inits a state with the `latest` and custom `my-toolchain` toolchains.
     LatestAndCustomInstalled,
-    LatestAndNightlyInstalled,
+    /// Inits a state with the `latest` toolchain installed, with conflicting binaries in
+    /// other well-known directories like `.cargo` or `.local`.
+    FuelupUpdateConflict,
+    /// Inits a state with the `nightly` and `nightly-2022-08-30` toolchains.
     NightlyAndNightlyDateInstalled,
+    /// Inits a state with only the `beta-1` toolchain.
     Beta1Installed,
-    LatestAndNightlyWithBetaOverride,
+    /// Inits a state with the `latest` toolchain, with `beta-1` declared within fuel-toolchain.toml.
+    LatestWithBetaOverride,
 }
 
 #[derive(Debug)]
 pub struct TestCfg {
+    /// The path to the test environment's fuelup executable. This should usually be <TMP_DIR>/.fuelup/bin/fuelup.
     pub fuelup_path: PathBuf,
-    pub root: PathBuf,
+    /// The path to the test environment's home. This should usually be a created tempfile::tempdir::TempDir.
     pub home: PathBuf,
 }
 
@@ -41,6 +53,7 @@ pub struct TestOutput {
 }
 
 pub const DATE: &str = "2022-08-30";
+pub const CUSTOM_TOOLCHAIN_NAME: &str = "my-toolchain";
 
 pub static ALL_BINS: &[&str] = &[
     "forc",
@@ -54,12 +67,8 @@ pub static ALL_BINS: &[&str] = &[
 ];
 
 impl TestCfg {
-    pub fn new(fuelup_path: PathBuf, root: PathBuf, home: PathBuf) -> Self {
-        Self {
-            fuelup_path,
-            root,
-            home,
-        }
+    pub fn new(fuelup_path: PathBuf, home: PathBuf) -> Self {
+        Self { fuelup_path, home }
     }
 
     pub fn toolchains_dir(&self) -> PathBuf {
@@ -160,21 +169,23 @@ fn setup_override_file(toolchain_override: ToolchainOverride) -> Result<()> {
     Ok(())
 }
 
+/// Based on a given FuelupState, sets up a temporary directory with all the necessary mock
+/// files and directories and provides a TestCfg to test fuelup.
 pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
-    let root = env::current_exe()
-        .unwrap()
-        .parent()
-        .expect("fuelup's directory")
-        .to_path_buf();
-
     let testdir = tempdir().unwrap();
     let tmp_home = testdir.path();
 
     let tmp_fuelup_root_path = tmp_home.join(".fuelup");
     let tmp_fuelup_bin_dir_path = tmp_home.join(".fuelup").join("bin");
-    fs::create_dir(&tmp_fuelup_root_path).unwrap();
-    fs::create_dir(&tmp_fuelup_bin_dir_path).unwrap();
+
+    fs::create_dir_all(&tmp_fuelup_bin_dir_path).unwrap();
     fs::create_dir(tmp_fuelup_root_path.join("toolchains")).unwrap();
+
+    let root = env::current_exe()
+        .unwrap()
+        .parent()
+        .expect("fuelup's directory")
+        .to_path_buf();
     fs::hard_link(
         root.parent().unwrap().join("fuelup"),
         tmp_fuelup_bin_dir_path.join("fuelup"),
@@ -224,12 +235,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
         }
         FuelupState::LatestAndCustomInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
-            setup_toolchain(&tmp_fuelup_root_path, "my-toolchain")?;
-            setup_settings_file(&tmp_fuelup_root_path, &latest)?;
-        }
-        FuelupState::LatestAndNightlyInstalled => {
-            setup_toolchain(&tmp_fuelup_root_path, &latest)?;
-            setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
+            setup_toolchain(&tmp_fuelup_root_path, CUSTOM_TOOLCHAIN_NAME)?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
         }
         FuelupState::NightlyAndNightlyDateInstalled => {
@@ -242,9 +248,8 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, &format!("beta-1-{DATE}-{target}"))?;
             setup_settings_file(&tmp_fuelup_root_path, &beta_1)?;
         }
-        FuelupState::LatestAndNightlyWithBetaOverride => {
+        FuelupState::LatestWithBetaOverride => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
-            setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
             setup_override_file(ToolchainOverride {
                 cfg: OverrideCfg::new(
@@ -260,7 +265,6 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
 
     f(&mut TestCfg::new(
         tmp_fuelup_bin_dir_path.join("fuelup"),
-        root,
         tmp_home.to_path_buf(),
     ));
 

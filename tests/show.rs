@@ -52,7 +52,7 @@ my_toolchain (default)
 
 #[test]
 fn fuelup_show_override() -> Result<()> {
-    testcfg::setup(FuelupState::LatestAndNightlyWithBetaOverride, &|cfg| {
+    testcfg::setup(FuelupState::LatestWithBetaOverride, &|cfg| {
         let stdout = cfg.fuelup(&["show"]).stdout;
 
         let mut lines = stdout.lines();
@@ -68,7 +68,6 @@ fn fuelup_show_override() -> Result<()> {
 installed toolchains
 --------------------
 latest-{target} (default)
-nightly-{target}
 
 active toolchain
 -----------------

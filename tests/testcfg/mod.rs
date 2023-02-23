@@ -63,14 +63,14 @@ const VERSION_2: &Version = &Version::new(0, 2, 0);
 pub static ALL_BINS: &[&str] = &[
     "forc",
     "forc-deploy",
+    "forc-doc",
     "forc-explore",
     "forc-fmt",
+    "forc-index",
     "forc-lsp",
     "forc-run",
-    "forc-wallet",
     "forc-tx",
-    "forc-doc",
-    "forc-index",
+    "forc-wallet",
     "fuel-core",
     "fuel-indexer",
 ];

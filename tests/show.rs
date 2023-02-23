@@ -139,8 +139,7 @@ fn fuelup_show_custom() -> Result<()> {
         );
         assert!(lines.next().unwrap().contains("fuelup home: "));
 
-        let expected_stdout = &format!(
-            r#"
+        let expected_stdout = r#"
 installed toolchains
 --------------------
 my_toolchain (default)
@@ -161,8 +160,7 @@ my_toolchain (default)
     - forc-wallet - not found
   fuel-core - not found
   fuel-indexer - not found
-"#
-        );
+"#;
         assert!(stdout.contains(expected_stdout));
     })?;
     Ok(())
@@ -280,8 +278,7 @@ latest-{target} (default)
             .next()
             .unwrap()
             .starts_with(&format!("nightly-2022-08-30-{target} (override), path:")));
-        let expected_stdout = &format!(
-            r#"forc : 0.2.0
+        let expected_stdout = &r#"forc : 0.2.0
     - forc-client
       - forc-deploy : 0.2.0
       - forc-run : 0.2.0
@@ -294,8 +291,7 @@ latest-{target} (default)
     - forc-wallet : 0.2.0
   fuel-core : 0.2.0
   fuel-indexer : 0.2.0
-"#,
-        );
+"#;
         assert!(stdout.contains(expected_stdout));
     })?;
     Ok(())

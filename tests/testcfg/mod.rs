@@ -138,7 +138,7 @@ fn create_fuel_executable(exe_name: &str, path: &Path, version: &Version) -> std
         .write(true)
         .mode(0o770)
         .open(path)?;
-    exe.write_all(&format!("#!/bin/sh\n\necho {exe_name} {}", version.to_string()).into_bytes())?;
+    exe.write_all(&format!("#!/bin/sh\n\necho {exe_name} {version}").into_bytes())?;
 
     Ok(())
 }

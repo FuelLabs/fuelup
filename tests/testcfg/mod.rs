@@ -1,8 +1,10 @@
 use anyhow::Result;
+use fuelup::channel::{BETA_1, LATEST, NIGHTLY};
 use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;
 use fuelup::settings::SettingsFile;
 use fuelup::target_triple::TargetTriple;
 use fuelup::toolchain_override::{self, OverrideCfg, ToolchainCfg, ToolchainOverride};
+use semver::Version;
 use std::os::unix::fs::OpenOptionsExt;
 use std::str::FromStr;
 use std::{
@@ -55,15 +57,22 @@ pub struct TestOutput {
 pub const DATE: &str = "2022-08-30";
 pub const CUSTOM_TOOLCHAIN_NAME: &str = "my-toolchain";
 
+const VERSION: &Version = &Version::new(0, 1, 0);
+const VERSION_2: &Version = &Version::new(0, 2, 0);
+
 pub static ALL_BINS: &[&str] = &[
     "forc",
     "forc-deploy",
+    "forc-doc",
     "forc-explore",
     "forc-fmt",
+    "forc-index",
     "forc-lsp",
     "forc-run",
+    "forc-tx",
     "forc-wallet",
     "fuel-core",
+    "fuel-indexer",
 ];
 
 impl TestCfg {
@@ -121,12 +130,16 @@ impl TestCfg {
 }
 
 #[cfg(unix)]
-fn create_fuel_executable(path: &Path) -> std::io::Result<()> {
-    fs::OpenOptions::new()
+fn create_fuel_executable(exe_name: &str, path: &Path, version: &Version) -> std::io::Result<()> {
+    use std::io::Write;
+
+    let mut exe = fs::OpenOptions::new()
         .create(true)
         .write(true)
         .mode(0o770)
         .open(path)?;
+    exe.write_all(&format!("#!/bin/sh\n\necho {exe_name} {version}").into_bytes())?;
+
     Ok(())
 }
 
@@ -144,7 +157,11 @@ fn setup_toolchain(fuelup_home_path: &Path, toolchain: &str) -> Result<()> {
     fs::create_dir_all(&bin_dir).expect("Failed to create temporary latest toolchain bin dir");
 
     for bin in ALL_BINS {
-        create_fuel_executable(&bin_dir.join(bin))?;
+        let version = match toolchain.starts_with("latest") {
+            true => VERSION,
+            _ => VERSION_2,
+        };
+        create_fuel_executable(bin, &bin_dir.join(bin), version)?;
     }
 
     Ok(())
@@ -160,7 +177,7 @@ fn setup_settings_file(settings_dir: &Path, default_toolchain: &str) -> Result<(
     Ok(())
 }
 
-fn setup_override_file(toolchain_override: ToolchainOverride) -> Result<()> {
+pub fn setup_override_file(toolchain_override: ToolchainOverride) -> Result<()> {
     let document = toolchain_override.to_toml();
 
     fs::write(toolchain_override.path, document.to_string())
@@ -192,9 +209,9 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     )?;
 
     let target = TargetTriple::from_host().unwrap();
-    let latest = format!("latest-{target}");
-    let nightly = format!("nightly-{target}");
-    let beta_1 = format!("beta-1-{target}");
+    let latest = format!("{LATEST}-{target}");
+    let nightly = format!("{NIGHTLY}-{target}");
+    let beta_1 = format!("{BETA_1}-{target}");
 
     match state {
         FuelupState::Empty => {}
@@ -213,17 +230,33 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
 
             fs::create_dir_all(tmp_home.join(".local/bin"))?;
-            create_fuel_executable(&tmp_home.join(".local/bin/forc"))?;
+            create_fuel_executable("forc", &tmp_home.join(".local/bin/forc"), VERSION)?;
 
-            create_fuel_executable(&tmp_home.join(".local/bin/forc-wallet"))?;
-            create_fuel_executable(&tmp_home.join(".fuelup/bin/forc-wallet"))?;
+            create_fuel_executable(
+                "forc-wallet",
+                &tmp_home.join(".local/bin/forc-wallet"),
+                VERSION,
+            )?;
+            create_fuel_executable(
+                "forc-wallet",
+                &tmp_home.join(".fuelup/bin/forc-wallet"),
+                VERSION,
+            )?;
 
             fs::create_dir_all(tmp_home.join(".cargo/bin"))?;
 
-            create_fuel_executable(&tmp_home.join(".cargo/bin/forc-explore"))?;
-            create_fuel_executable(&tmp_home.join(".fuelup/bin/forc-explore"))?;
+            create_fuel_executable(
+                "forc-explore",
+                &tmp_home.join(".cargo/bin/forc-explore"),
+                VERSION,
+            )?;
+            create_fuel_executable(
+                "forc-explore",
+                &tmp_home.join(".fuelup/bin/forc-explore"),
+                VERSION,
+            )?;
 
-            create_fuel_executable(&tmp_home.join(".cargo/bin/fuel-core"))?;
+            create_fuel_executable("fuel-core", &tmp_home.join(".cargo/bin/fuel-core"), VERSION)?;
         }
         FuelupState::NightlyInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &nightly)?;

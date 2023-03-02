@@ -178,11 +178,11 @@ allowed in the installation step (explained below), which means you can run them
 <h2 id="quickstart"><a class="header" href="#quickstart">Quickstart</a></h2>
 <p>Installation is done through the <code>fuelup-init</code> script found on our <a href="https://github.com/FuelLabs/fuelup">repository</a>, where you may find the source code.</p>
 <p>Run the following command:</p>
-<pre><code class="language-sh">curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh
+<pre><code class="language-sh">curl --proto '=https' --tlsv1.2 -sSf https://install.fuel.network/fuelup-init.sh | sh
 </code></pre>
 <p>This will install <code>forc</code>, <code>forc-client</code>, <code>forc-fmt</code>, <code>forc-lsp</code>, <code>forc-wallet</code> as well as <code>fuel-core</code> in <code>~/.fuelup/bin</code>. The script will ask for permission to add <code>~/.fuelup/bin</code> to your <code>PATH</code>.</p>
 <p>Otherwise, you can also pass <code>--no-modify-path</code> so that <code>fuelup-init</code> does not modify your <code>PATH</code> and will not ask for permission to do so:</p>
-<pre><code class="language-sh">curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh -s -- --no-modify-path
+<pre><code class="language-sh">curl --proto '=https' --tlsv1.2 -sSf https://install.fuel.network/fuelup-init.sh | sh -s -- --no-modify-path
 </code></pre>
 <p>Ensure that all components are downloaded and works:</p>
 <pre><code class="language-sh">fuelup --version

@@ -73,7 +73,7 @@ pub fn self_update() -> Result<()> {
                 "Could not restore backup fuelup. {}
 
 You should re-install fuelup using fuelup-init:
-`curl --proto '=https' --tlsv1.2 -sSf https://fuellabs.github.io/fuelup/fuelup-init.sh | sh`",
+`curl --proto '=https' --tlsv1.2 -sSf https://install.fuel.network/fuelup-init.sh | sh`",
                 e
             );
         } else {

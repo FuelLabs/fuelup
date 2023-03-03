@@ -44,7 +44,7 @@ fn exec_show_version(component_executable: &Path) -> Result<Version> {
         }
     }
 
-    bail!("");
+    bail!("could not show version: {}", component_executable.display());
 }
 
 pub fn show() -> Result<()> {

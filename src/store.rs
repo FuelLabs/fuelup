@@ -45,7 +45,7 @@ impl Store {
     pub(crate) fn install_component(&self, cfg: &DownloadCfg) -> Result<Vec<PathBuf>> {
         let component_dir = self.component_dir_path(&cfg.name, &cfg.version);
 
-        // Cache fuels_version for this component, if show_fuels_version exists and is true.
+        // Cache fuels_version for this component if show_fuels_version exists and is true.
         // We don't want this failure to block installation, so errors are ignored here.
         if let Ok(c) = Component::from_name(&cfg.name) {
             if let Some(true) = c.show_fuels_version {

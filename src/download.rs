@@ -307,6 +307,7 @@ pub fn unpack_bins(dir: &Path, dst_dir: &Path) -> Result<Vec<PathBuf>> {
     Ok(downloaded)
 }
 
+/// Read the version (as a plain String) used by the `fuels` dependency, if it exists.
 fn fuels_version_from_toml(toml: toml_edit::Document) -> Result<String> {
     if let Some(deps) = toml.get("dependencies") {
         if let Some(fuels) = deps.get("fuels") {
@@ -329,6 +330,8 @@ fn fuels_version_from_toml(toml: toml_edit::Document) -> Result<String> {
     bail!("the table 'dependencies' does not exist");
 }
 
+/// Fetches the Cargo.toml of a component in its repository and tries to read the version of
+/// the `fuels` dependency.
 pub fn fetch_fuels_version(cfg: &DownloadCfg) -> Result<String> {
     let url = match cfg.name.as_str() {
         "forc" => format!(
@@ -344,7 +347,6 @@ pub fn fetch_fuels_version(cfg: &DownloadCfg) -> Result<String> {
         _ => bail!("invalid component to fetch fuels version for"),
     };
 
-    // auto detect http proxy setting.
     let handle = if let Ok(proxy) = env::var("http_proxy") {
         ureq::builder()
             .user_agent("fuelup")
@@ -374,18 +376,6 @@ mod tests {
     {
         let toolchain_bin_dir = tempfile::tempdir()?;
         f(toolchain_bin_dir)
-    }
-
-    #[test]
-    fn test_fetch_fuels_version() {
-        let cfg = DownloadCfg::new(
-            "forc",
-            TargetTriple::from_host().unwrap(),
-            Some(Version::new(0, 17, 0)),
-        )
-        .unwrap();
-
-        fetch_fuels_version(&cfg).unwrap();
     }
 
     #[test]

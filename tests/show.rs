@@ -47,6 +47,7 @@ latest-{target} (default)
 "#
         );
         assert!(stdout.contains(expected_stdout));
+        assert!(!stdout.contains("fuels versions"));
     })?;
     Ok(())
 }
@@ -89,6 +90,7 @@ latest-{target} (default)
 "#
         );
         assert!(stdout.contains(expected_stdout));
+        assert!(!stdout.contains("fuels versions"));
 
         cfg.fuelup(&["default", "nightly"]);
         stdout = cfg.fuelup(&["show"]).stdout;
@@ -121,6 +123,7 @@ nightly-{target} (default)
 "#
         );
         assert!(stdout.contains(expected_stdout));
+        assert!(!stdout.contains("fuels versions"));
     })?;
 
     Ok(())
@@ -162,6 +165,7 @@ my_toolchain (default)
   fuel-indexer - not found
 "#;
         assert!(stdout.contains(expected_stdout));
+        assert!(!stdout.contains("fuels versions"));
     })?;
     Ok(())
 }
@@ -205,6 +209,7 @@ beta-1-{target} (override), path: {}
             cfg.home.join(FUEL_TOOLCHAIN_TOML_FILE).display()
         );
         assert!(stdout.contains(expected_stdout));
+        assert!(!stdout.contains("fuels versions"));
     })?;
     Ok(())
 }
@@ -248,6 +253,7 @@ latest-{target} (default)
 "#,
         );
         assert!(stdout.contains(expected_stdout));
+        assert!(!stdout.contains("fuels versions"));
 
         let toolchain_override = ToolchainOverride {
             cfg: OverrideCfg::new(
@@ -293,6 +299,7 @@ latest-{target} (default)
   fuel-indexer : 0.2.0
 "#;
         assert!(stdout.contains(expected_stdout));
+        assert!(!stdout.contains("fuels versions"));
     })?;
     Ok(())
 }

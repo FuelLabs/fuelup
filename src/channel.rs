@@ -39,6 +39,7 @@ pub struct Channel {
 pub struct Package {
     pub target: BTreeMap<String, HashedBinary>,
     pub version: Version,
+    pub fuels_version: Option<String>,
 }
 
 pub fn is_beta_toolchain(name: &str) -> bool {
@@ -98,10 +99,10 @@ impl Channel {
         Ok(channel)
     }
 
-    pub fn build_download_configs(self) -> Vec<DownloadCfg> {
+    pub fn build_download_configs(&self) -> Vec<DownloadCfg> {
         let mut cfgs = self
             .pkg
-            .into_iter()
+            .iter()
             .filter(|(component_name, _)| Components::contains_published(component_name))
             .map(|(name, package)| {
                 DownloadCfg::from_package(&name, package).map_err(|_| {
@@ -138,11 +139,13 @@ mod tests {
             channel.pkg["forc"].version,
             Version::parse("0.17.0").unwrap()
         );
+        assert_eq!(channel.pkg["forc"].fuels_version, Some("0.36".to_string()));
         assert!(channel.pkg.contains_key("fuel-core"));
         assert_eq!(
             channel.pkg["fuel-core"].version,
             Version::parse("0.9.4").unwrap()
         );
+        assert_eq!(channel.pkg["fuel-core"].fuels_version, None);
 
         let targets = &channel.pkg["forc"].target;
         assert_eq!(targets.len(), 4);

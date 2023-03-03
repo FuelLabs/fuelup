@@ -74,7 +74,7 @@ impl DownloadCfg {
         })
     }
 
-    pub fn from_package(name: &str, package: Package) -> Result<Self> {
+    pub fn from_package(name: &str, package: &Package) -> Result<Self> {
         let target = TargetTriple::from_component(name)?;
         let tarball_name = tarball_name(name, &package.version, &target);
         let tarball_url = package.target[&target.to_string()].url.clone();
@@ -82,7 +82,7 @@ impl DownloadCfg {
         Ok(Self {
             name: name.to_string(),
             target,
-            version: package.version,
+            version: package.version.clone(),
             tarball_name,
             tarball_url,
             hash,
@@ -307,6 +307,61 @@ pub fn unpack_bins(dir: &Path, dst_dir: &Path) -> Result<Vec<PathBuf>> {
     Ok(downloaded)
 }
 
+fn fuels_version_from_toml(toml: toml_edit::Document) -> Result<String> {
+    if let Some(deps) = toml.get("dependencies") {
+        if let Some(fuels) = deps.get("fuels") {
+            let version_str = match fuels.as_value() {
+                Some(toml_edit::Value::String(s)) => s.value().to_string(),
+                Some(toml_edit::Value::InlineTable(t)) => t.get("version").map_or_else(
+                    || "".to_string(),
+                    |v| v.as_str().unwrap_or_default().to_string(),
+                ),
+                _ => String::default(),
+            };
+            println!("vs: {}", version_str);
+
+            return Ok(version_str);
+        } else {
+            bail!("'fuels' dependency does not exist");
+        };
+    };
+
+    bail!("the table 'dependencies' does not exist");
+}
+
+pub fn fetch_fuels_version(cfg: &DownloadCfg) -> Result<String> {
+    let url = match cfg.name.as_str() {
+        "forc" => format!(
+            "https://raw.githubusercontent.com/FuelLabs/sway/v{}/test/src/sdk-harness/Cargo.toml",
+            cfg.version
+        ),
+        "forc-wallet" => {
+            format!(
+                "https://raw.githubusercontent.com/FuelLabs/forc-wallet/v{}/Cargo.toml",
+                cfg.version
+            )
+        }
+        _ => bail!("invalid component to fetch fuels version for"),
+    };
+
+    // auto detect http proxy setting.
+    let handle = if let Ok(proxy) = env::var("http_proxy") {
+        ureq::builder()
+            .user_agent("fuelup")
+            .proxy(ureq::Proxy::new(proxy)?)
+            .build()
+    } else {
+        ureq::builder().user_agent("fuelup").build()
+    };
+
+    if let Ok(resp) = handle.get(&url).call() {
+        let cargo_toml = toml_edit::Document::from_str(&resp.into_string()?)?;
+        return Ok(fuels_version_from_toml(cargo_toml)?);
+    }
+
+    bail!("Failed to get fuels version");
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -319,6 +374,46 @@ mod tests {
     {
         let toolchain_bin_dir = tempfile::tempdir()?;
         f(toolchain_bin_dir)
+    }
+
+    #[test]
+    fn test_fetch_fuels_version() {
+        let cfg = DownloadCfg::new(
+            "forc",
+            TargetTriple::from_host().unwrap(),
+            Some(Version::new(0, 17, 0)),
+        )
+        .unwrap();
+
+        fetch_fuels_version(&cfg).unwrap();
+    }
+
+    #[test]
+    fn test_fuels_version_from_toml() {
+        let toml = r#"
+[package]        
+name = "forc"
+
+[dependencies]
+fuels = "0.1"
+"#;
+        assert_eq!(
+            "0.1",
+            fuels_version_from_toml(toml_edit::Document::from_str(toml).unwrap()).unwrap()
+        );
+
+        let toml = r#"
+[package]        
+name = "forc"
+
+[dependencies]
+fuels = { version = "0.1", features = ["some-feature"] }
+"#;
+
+        assert_eq!(
+            "0.1",
+            fuels_version_from_toml(toml_edit::Document::from_str(toml).unwrap()).unwrap()
+        );
     }
 
     #[test]

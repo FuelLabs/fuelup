@@ -310,7 +310,7 @@ pub fn unpack_bins(dir: &Path, dst_dir: &Path) -> Result<Vec<PathBuf>> {
 fn fuels_version_from_toml(toml: toml_edit::Document) -> Result<String> {
     if let Some(deps) = toml.get("dependencies") {
         if let Some(fuels) = deps.get("fuels") {
-            let version_str = match fuels.as_value() {
+            let version = match fuels.as_value() {
                 Some(toml_edit::Value::String(s)) => s.value().to_string(),
                 Some(toml_edit::Value::InlineTable(t)) => t.get("version").map_or_else(
                     || "".to_string(),
@@ -318,9 +318,9 @@ fn fuels_version_from_toml(toml: toml_edit::Document) -> Result<String> {
                 ),
                 _ => String::default(),
             };
-            println!("vs: {}", version_str);
+            println!("vs: {version}");
 
-            return Ok(version_str);
+            return Ok(version);
         } else {
             bail!("'fuels' dependency does not exist");
         };
@@ -356,7 +356,7 @@ pub fn fetch_fuels_version(cfg: &DownloadCfg) -> Result<String> {
 
     if let Ok(resp) = handle.get(&url).call() {
         let cargo_toml = toml_edit::Document::from_str(&resp.into_string()?)?;
-        return Ok(fuels_version_from_toml(cargo_toml)?);
+        return fuels_version_from_toml(cargo_toml);
     }
 
     bail!("Failed to get fuels version");

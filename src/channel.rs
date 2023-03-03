@@ -105,7 +105,7 @@ impl Channel {
             .iter()
             .filter(|(component_name, _)| Components::contains_published(component_name))
             .map(|(name, package)| {
-                DownloadCfg::from_package(&name, package).map_err(|_| {
+                DownloadCfg::from_package(name, package).map_err(|_| {
                     warn!(
                         "Failed to recognize component: '{}'.
 If this component should be downloadable, try running `fuelup self update` and re-run the installation.",

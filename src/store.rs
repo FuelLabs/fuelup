@@ -47,7 +47,7 @@ impl Store {
 
         // Cache fuels_version for this component, if show_fuels_version exists and is true.
         // We don't want this failure to block installation, so errors are ignored here.
-        Component::from_name(&cfg.name).ok().map(|c| {
+        if let Ok(c) = Component::from_name(&cfg.name) {
             if let Some(true) = c.show_fuels_version {
                 if let Err(e) = self.cache_fuels_version(cfg) {
                     warn!(
@@ -56,7 +56,7 @@ impl Store {
                     );
                 };
             }
-        });
+        };
 
         ensure_dir_exists(&component_dir)?;
         download_file_and_unpack(cfg, &component_dir)?;
@@ -73,7 +73,7 @@ impl Store {
             let fuels_version_path = self.path().join(dirname).join("fuels_version");
             let mut fuels_version_file = std::fs::File::create(fuels_version_path)?;
 
-            fuels_version_file.write(&format!("{fuels_version}").into_bytes())?;
+            write!(fuels_version_file, "{fuels_version}")?;
         };
 
         Ok(())

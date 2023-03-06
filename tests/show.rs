@@ -44,10 +44,15 @@ latest-{target} (default)
     - forc-wallet : 0.1.0
   fuel-core : 0.1.0
   fuel-indexer : 0.1.0
+
+fuels versions
+---------------
+forc : 0.1.0
+forc-wallet : 0.1.0
 "#
         );
+
         assert!(stdout.contains(expected_stdout));
-        assert!(!stdout.contains("fuels versions"));
     })?;
     Ok(())
 }
@@ -87,10 +92,14 @@ latest-{target} (default)
     - forc-wallet : 0.1.0
   fuel-core : 0.1.0
   fuel-indexer : 0.1.0
+
+fuels versions
+---------------
+forc : 0.1.0
+forc-wallet : 0.1.0
 "#
         );
         assert!(stdout.contains(expected_stdout));
-        assert!(!stdout.contains("fuels versions"));
 
         cfg.fuelup(&["default", "nightly"]);
         stdout = cfg.fuelup(&["show"]).stdout;
@@ -120,10 +129,14 @@ nightly-{target} (default)
     - forc-wallet : 0.2.0
   fuel-core : 0.2.0
   fuel-indexer : 0.2.0
+
+fuels versions
+---------------
+forc : 0.2.0
+forc-wallet : 0.2.0
 "#
         );
         assert!(stdout.contains(expected_stdout));
-        assert!(!stdout.contains("fuels versions"));
     })?;
 
     Ok(())
@@ -250,10 +263,14 @@ latest-{target} (default)
     - forc-wallet : 0.1.0
   fuel-core : 0.1.0
   fuel-indexer : 0.1.0
+
+fuels versions
+---------------
+forc : 0.1.0
+forc-wallet : 0.1.0
 "#,
         );
         assert!(stdout.contains(expected_stdout));
-        assert!(!stdout.contains("fuels versions"));
 
         let toolchain_override = ToolchainOverride {
             cfg: OverrideCfg::new(
@@ -297,9 +314,13 @@ latest-{target} (default)
     - forc-wallet : 0.2.0
   fuel-core : 0.2.0
   fuel-indexer : 0.2.0
+
+fuels versions
+---------------
+forc : 0.2.0
+forc-wallet : 0.2.0
 "#;
         assert!(stdout.contains(expected_stdout));
-        assert!(!stdout.contains("fuels versions"));
     })?;
     Ok(())
 }

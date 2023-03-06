@@ -14,7 +14,7 @@ pub(crate) fn hardlink(original: &Path, link: &Path) -> io::Result<()> {
     fs::hard_link(original, link)
 }
 
-pub(crate) fn hard_or_symlink_file(original: &Path, link: &Path) -> Result<()> {
+pub fn hard_or_symlink_file(original: &Path, link: &Path) -> Result<()> {
     if hardlink_file(original, link).is_err() {
         symlink_file(original, link)?;
     }
@@ -32,7 +32,7 @@ pub fn hardlink_file(original: &Path, link: &Path) -> Result<()> {
 }
 
 #[cfg(unix)]
-fn symlink_file(original: &Path, link: &Path) -> Result<()> {
+pub fn symlink_file(original: &Path, link: &Path) -> Result<()> {
     std::os::unix::fs::symlink(original, link).with_context(|| {
         format!(
             "Could not create link: {}->{}",
@@ -43,7 +43,7 @@ fn symlink_file(original: &Path, link: &Path) -> Result<()> {
 }
 
 #[cfg(not(unix))]
-fn symlink_file(_original: &Path, _link: &Path) -> Result<()> {
+pub fn symlink_file(_original: &Path, _link: &Path) -> Result<()> {
     bail!("Symbolic link currently only supported on Unix");
 }
 

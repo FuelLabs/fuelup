@@ -1,4 +1,5 @@
 use anyhow::Result;
+use component::Components;
 use fuelup::channel::{BETA_1, LATEST, NIGHTLY};
 use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;
 use fuelup::file::hard_or_symlink_file;
@@ -174,7 +175,9 @@ fn create_fuel_executable(path: &Path) -> std::io::Result<()> {
 }
 
 fn should_check_fuels_compatibility(component_name: &str) -> bool {
-    ["forc", "forc-wallet"].contains(&component_name)
+    let components = Components::collect_show_fuels_versions().unwrap();
+
+    components.iter().any(|c| c.name == component_name)
 }
 
 fn setup_toolchain(fuelup_home_path: &Path, toolchain: &str) -> Result<()> {
@@ -187,6 +190,7 @@ fn setup_toolchain(fuelup_home_path: &Path, toolchain: &str) -> Result<()> {
     ensure_dir_exists(&toolchain_bin_dir)?;
 
     for bin in ALL_BINS {
+        // For simplicity, we use 2 dummy versions to test showing versions when switching between toolchains.
         let version = match toolchain.starts_with("latest") {
             true => VERSION,
             _ => VERSION_2,
@@ -200,6 +204,7 @@ fn setup_toolchain(fuelup_home_path: &Path, toolchain: &str) -> Result<()> {
         create_fuel_executable(&exe_path, version)?;
 
         if should_check_fuels_compatibility(bin) {
+            // For simplicity, we use 2 dummy versions to test showing versions when switching between toolchains.
             let fuels_version = match toolchain.starts_with("latest") {
                 true => VERSION,
                 _ => VERSION_2,

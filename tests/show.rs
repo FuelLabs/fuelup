@@ -4,7 +4,7 @@ use fuelup::{
     target_triple::TargetTriple,
     toolchain_override::{self, OverrideCfg, ToolchainCfg, ToolchainOverride},
 };
-use std::str::FromStr;
+use std::{fs, str::FromStr};
 
 pub mod testcfg;
 use testcfg::FuelupState;
@@ -321,6 +321,60 @@ forc : 0.2.0
 forc-wallet : 0.2.0
 "#;
         assert!(stdout.contains(expected_stdout));
+    })?;
+    Ok(())
+}
+
+#[test]
+fn fuelup_show_latest_fuels_version_omitted() -> Result<()> {
+    testcfg::setup(FuelupState::AllInstalled, &|cfg| {
+        // Remove fuels_version here to check if the command works as intended.
+        fs::remove_file(cfg.store.join("forc-wallet-0.1.0/fuels_version")).unwrap();
+
+        cfg.fuelup(&["show"]);
+        let stdout = cfg.fuelup(&["show"]).stdout;
+        let target = TargetTriple::from_host().unwrap();
+
+        let mut lines = stdout.lines();
+        assert_eq!(lines.next().unwrap(), &format!("Default host: {target}"));
+        assert!(lines.next().unwrap().contains("fuelup home: "));
+
+        let expected_stdout = &format!(
+            r#"
+installed toolchains
+--------------------
+latest-{target} (default)
+nightly-{target}
+nightly-2022-08-30-{target}
+
+active toolchain
+-----------------
+latest-{target} (default)
+  forc : 0.1.0
+    - forc-client
+      - forc-deploy : 0.1.0
+      - forc-run : 0.1.0
+    - forc-doc : 0.1.0
+    - forc-explore : 0.1.0
+    - forc-fmt : 0.1.0
+    - forc-index : 0.1.0
+    - forc-lsp : 0.1.0
+    - forc-tx : 0.1.0
+    - forc-wallet : 0.1.0
+  fuel-core : 0.1.0
+  fuel-indexer : 0.1.0
+
+fuels versions
+---------------
+forc : 0.1.0
+"#
+        );
+
+        assert!(stdout.contains(expected_stdout));
+        println!("{}", stdout);
+
+        // Check that the removed fuels_version doesn't show up at the end.
+        assert_ne!(lines.last(), Some("forc-wallet : 0.1.0"));
     })?;
     Ok(())
 }

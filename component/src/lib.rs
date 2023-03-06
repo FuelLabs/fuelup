@@ -138,7 +138,7 @@ impl Components {
     pub fn collect_show_fuels_versions() -> Result<Vec<Component>> {
         let components = Self::from_toml(COMPONENTS_TOML)?;
 
-        Ok(components
+        let mut components_to_show = components
             .component
             .values()
             .filter_map(|c| {
@@ -148,7 +148,11 @@ impl Components {
                     None
                 }
             })
-            .collect::<Vec<Component>>())
+            .collect::<Vec<Component>>();
+
+        components_to_show.sort_by_key(|c| c.name.clone());
+
+        Ok(components_to_show)
     }
     pub fn collect_plugins() -> Result<Vec<Plugin>> {
         let components = Self::from_toml(COMPONENTS_TOML)?;

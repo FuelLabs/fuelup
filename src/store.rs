@@ -8,6 +8,7 @@ use semver::Version;
 use tracing::{info, warn};
 
 use crate::{
+    constants::FUELS_VERSION_FILE,
     download::{download_file_and_unpack, fetch_fuels_version, unpack_bins, DownloadCfg},
     path::{ensure_dir_exists, store_dir},
 };
@@ -66,12 +67,16 @@ impl Store {
 
     pub(crate) fn cache_fuels_version(&self, cfg: &DownloadCfg) -> Result<()> {
         let dirname = component_dirname(&cfg.name, &cfg.version);
+        let component_dir = self.path().join(dirname);
 
         if let Ok(fuels_version) = fetch_fuels_version(cfg) {
-            info!("caching fuels version");
-            ensure_dir_exists(&self.path().join(&dirname))?;
-            let fuels_version_path = self.path().join(dirname).join("fuels_version");
-            let mut fuels_version_file = std::fs::File::create(fuels_version_path)?;
+            info!(
+                "Caching fuels version at {}",
+                component_dir.join(FUELS_VERSION_FILE).display()
+            );
+            ensure_dir_exists(&component_dir)?;
+            let mut fuels_version_file =
+                std::fs::File::create(component_dir.join(FUELS_VERSION_FILE))?;
 
             write!(fuels_version_file, "{fuels_version}")?;
         };
@@ -86,6 +91,6 @@ impl Store {
     ) -> std::io::Result<String> {
         let dirname = component_dirname(name, version);
 
-        fs::read_to_string(self.path().join(dirname).join("fuels_version"))
+        fs::read_to_string(self.path().join(dirname).join(FUELS_VERSION_FILE))
     }
 }

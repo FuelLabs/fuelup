@@ -3,7 +3,7 @@ use serde::Deserialize;
 use std::io::Read;
 use tracing::info;
 
-use crate::{commands::toolchain::ListRevisionsCommand, download::build_handle};
+use crate::{commands::toolchain::ListRevisionsCommand, download::build_agent};
 
 #[derive(Debug, Deserialize)]
 struct Content {
@@ -21,7 +21,7 @@ fn strip_channel_name(name: &str) -> String {
 }
 
 pub fn list_revisions(_command: ListRevisionsCommand) -> Result<()> {
-    let handle = build_handle()?;
+    let handle = build_agent()?;
 
     let mut data = Vec::new();
 

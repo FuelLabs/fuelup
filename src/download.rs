@@ -90,7 +90,7 @@ impl DownloadCfg {
     }
 }
 
-pub fn build_handle() -> Result<ureq::Agent> {
+pub fn build_agent() -> Result<ureq::Agent> {
     let agent_builder = ureq::builder().user_agent("fuelup");
 
     if let Ok(proxy) = env::var("http_proxy") {
@@ -109,7 +109,7 @@ pub fn tarball_name(tarball_prefix: &str, version: &Version, target: &TargetTrip
 }
 
 pub fn get_latest_version(name: &str) -> Result<Version> {
-    let handle = build_handle()?;
+    let handle = build_agent()?;
 
     let mut data = Vec::new();
     if name == FUELUP {
@@ -166,7 +166,7 @@ pub fn download(url: &str, hasher: &mut Sha256) -> Result<Vec<u8>> {
     const RETRY_ATTEMPTS: u8 = 4;
     const RETRY_DELAY_SECS: u64 = 3;
 
-    let handle = build_handle()?;
+    let handle = build_agent()?;
 
     for _ in 1..RETRY_ATTEMPTS {
         match handle.get(url).call() {
@@ -199,7 +199,7 @@ pub fn download_file(url: &str, path: &PathBuf, hasher: &mut Sha256) -> Result<(
     const RETRY_ATTEMPTS: u8 = 4;
     const RETRY_DELAY_SECS: u64 = 3;
 
-    let handle = build_handle()?;
+    let handle = build_agent()?;
 
     let mut file = OpenOptions::new().write(true).create(true).open(path)?;
 

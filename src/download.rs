@@ -90,6 +90,16 @@ impl DownloadCfg {
     }
 }
 
+pub fn build_agent() -> Result<ureq::Agent> {
+    let agent_builder = ureq::builder().user_agent("fuelup");
+
+    if let Ok(proxy) = env::var("http_proxy") {
+        return Ok(agent_builder.proxy(ureq::Proxy::new(proxy)?).build());
+    }
+
+    Ok(agent_builder.build())
+}
+
 pub fn tarball_name(tarball_prefix: &str, version: &Version, target: &TargetTriple) -> String {
     if tarball_prefix == "forc-binaries" {
         format!("{tarball_prefix}-{target}.tar.gz")
@@ -99,7 +109,8 @@ pub fn tarball_name(tarball_prefix: &str, version: &Version, target: &TargetTrip
 }
 
 pub fn get_latest_version(name: &str) -> Result<Version> {
-    let handle = ureq::builder().user_agent("fuelup").build();
+    let handle = build_agent()?;
+
     let mut data = Vec::new();
     if name == FUELUP {
         const FUELUP_RELEASES_API_URL: &str =
@@ -155,15 +166,7 @@ pub fn download(url: &str, hasher: &mut Sha256) -> Result<Vec<u8>> {
     const RETRY_ATTEMPTS: u8 = 4;
     const RETRY_DELAY_SECS: u64 = 3;
 
-    // auto detect http proxy setting.
-    let handle = if let Ok(proxy) = env::var("http_proxy") {
-        ureq::builder()
-            .user_agent("fuelup")
-            .proxy(ureq::Proxy::new(proxy)?)
-            .build()
-    } else {
-        ureq::builder().user_agent("fuelup").build()
-    };
+    let handle = build_agent()?;
 
     for _ in 1..RETRY_ATTEMPTS {
         match handle.get(url).call() {
@@ -196,15 +199,7 @@ pub fn download_file(url: &str, path: &PathBuf, hasher: &mut Sha256) -> Result<(
     const RETRY_ATTEMPTS: u8 = 4;
     const RETRY_DELAY_SECS: u64 = 3;
 
-    // auto detect http proxy setting.
-    let handle = if let Ok(proxy) = env::var("http_proxy") {
-        ureq::builder()
-            .user_agent("fuelup")
-            .proxy(ureq::Proxy::new(proxy)?)
-            .build()
-    } else {
-        ureq::builder().user_agent("fuelup").build()
-    };
+    let handle = build_agent()?;
 
     let mut file = OpenOptions::new().write(true).create(true).open(path)?;
 

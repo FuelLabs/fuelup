@@ -17,7 +17,7 @@ pub struct Components {
     pub component: HashMap<String, Component>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, PartialEq, Eq, Hash)]
 pub struct Component {
     pub name: String,
     pub is_plugin: Option<bool>,
@@ -26,6 +26,7 @@ pub struct Component {
     pub repository_name: String,
     pub targets: Vec<String>,
     pub publish: Option<bool>,
+    pub show_fuels_version: Option<bool>,
 }
 
 impl Component {
@@ -39,6 +40,7 @@ impl Component {
                 targets: vec![FUELUP.to_string()],
                 is_plugin: Some(false),
                 publish: Some(true),
+                show_fuels_version: Some(false),
             });
         }
 
@@ -133,6 +135,25 @@ impl Components {
         Ok(main_components)
     }
 
+    pub fn collect_show_fuels_versions() -> Result<Vec<Component>> {
+        let components = Self::from_toml(COMPONENTS_TOML)?;
+
+        let mut components_to_show = components
+            .component
+            .values()
+            .filter_map(|c| {
+                if let Some(true) = c.show_fuels_version {
+                    Some(c.clone())
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<Component>>();
+
+        components_to_show.sort_by_key(|c| c.name.clone());
+
+        Ok(components_to_show)
+    }
     pub fn collect_plugins() -> Result<Vec<Plugin>> {
         let components = Self::from_toml(COMPONENTS_TOML)?;
 

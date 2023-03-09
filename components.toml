@@ -5,6 +5,7 @@ executables = ["forc", "forc-fmt", "forc-lsp", "forc-doc", "forc-deploy", "forc-
 repository_name = "sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 publish = true
+show_fuels_version = true
 
 [component.forc-doc]
 name = "forc-doc"
@@ -71,6 +72,7 @@ executables = ["forc-wallet"]
 repository_name = "forc-wallet"
 targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]
 publish = true
+show_fuels_version = true
 
 [component.fuel-indexer]
 name = "fuel-indexer"

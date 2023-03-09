@@ -1,10 +1,15 @@
+use std::fs;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
+use component::Component;
 use semver::Version;
+use tracing::{info, warn};
 
 use crate::{
-    download::{download_file_and_unpack, unpack_bins, DownloadCfg},
+    constants::FUELS_VERSION_FILE,
+    download::{download_file_and_unpack, fetch_fuels_version, unpack_bins, DownloadCfg},
     path::{ensure_dir_exists, store_dir},
 };
 
@@ -41,9 +46,51 @@ impl Store {
     pub(crate) fn install_component(&self, cfg: &DownloadCfg) -> Result<Vec<PathBuf>> {
         let component_dir = self.component_dir_path(&cfg.name, &cfg.version);
 
+        // Cache fuels_version for this component if show_fuels_version exists and is true.
+        // We don't want this failure to block installation, so errors are ignored here.
+        if let Ok(c) = Component::from_name(&cfg.name) {
+            if let Some(true) = c.show_fuels_version {
+                if let Err(e) = self.cache_fuels_version(cfg) {
+                    warn!(
+                        "Failed to cache fuels version for component '{}': {}",
+                        cfg.name, e
+                    );
+                };
+            }
+        };
+
         ensure_dir_exists(&component_dir)?;
         download_file_and_unpack(cfg, &component_dir)?;
         // We ensure that component_dir exists above, so its parent must exist here.
         unpack_bins(&component_dir, &component_dir)
+    }
+
+    pub(crate) fn cache_fuels_version(&self, cfg: &DownloadCfg) -> Result<()> {
+        let dirname = component_dirname(&cfg.name, &cfg.version);
+        let component_dir = self.path().join(dirname);
+
+        if let Ok(fuels_version) = fetch_fuels_version(cfg) {
+            info!(
+                "Caching fuels version at {}",
+                component_dir.join(FUELS_VERSION_FILE).display()
+            );
+            ensure_dir_exists(&component_dir)?;
+            let mut fuels_version_file =
+                std::fs::File::create(component_dir.join(FUELS_VERSION_FILE))?;
+
+            write!(fuels_version_file, "{fuels_version}")?;
+        };
+
+        Ok(())
+    }
+
+    pub(crate) fn get_cached_fuels_version(
+        &self,
+        name: &str,
+        version: &Version,
+    ) -> std::io::Result<String> {
+        let dirname = component_dirname(name, version);
+
+        fs::read_to_string(self.path().join(dirname).join(FUELS_VERSION_FILE))
     }
 }

@@ -15,9 +15,10 @@
 //! we know are compatible, so we can update the channel if necessary.
 
 use anyhow::{bail, Result};
+use component::Components;
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use std::{io::Read, str::FromStr};
+use std::{io::Read, os::unix::process::CommandExt, process::Command, str::FromStr};
 use toml_edit::Document;
 
 const GITHUB_API_REPOS_BASE_URL: &str = "https://api.github.com/repos/FuelLabs/";
@@ -30,6 +31,13 @@ const CHANNEL_FUEL_LATEST_TOML_URL: &str =
 #[derive(Debug, Serialize, Deserialize)]
 struct WorkflowRunApiResponse {
     workflow_runs: Vec<WorkflowRun>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct LatestReleaseApiResponse {
+    url: String,
+    tag_name: String,
+    name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -71,6 +79,29 @@ fn get_workflow_runs(repo: &str) -> Result<WorkflowRunApiResponse> {
             repo
         )),
     )
+}
+
+fn get_latest_release_version(repo: &str) -> Result<Version> {
+    let url = format!(
+        "https://api.github.com/repos/FuelLabs/{}/releases/latest",
+        repo
+    );
+
+    let handle = ureq::builder().user_agent("fuelup").build();
+    let resp = handle
+        .get(&url)
+        .call()
+        .expect(&format!("Could not get latest release for {}", repo));
+
+    let mut data = Vec::new();
+
+    resp.into_reader().read_to_end(&mut data)?;
+    let response: LatestReleaseApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
+
+    let version_str = response.tag_name["v".len()..].to_string();
+
+    let version = Version::parse(&version_str)?;
+    Ok(version)
 }
 
 fn collect_new_versions(channel: &Document, repo: &str) -> Result<Vec<Version>> {
@@ -129,7 +160,74 @@ fn print_selected_versions<'a>(
     output.to_string()
 }
 
-fn main() -> Result<()> {
+fn compare_rest() -> Result<()> {
+    let handle = ureq::builder().user_agent("fuelup").build();
+
+    let toml_resp = match handle.get(&CHANNEL_FUEL_LATEST_TOML_URL).call() {
+        Ok(r) => r
+            .into_string()
+            .expect("Could not convert channel to string"),
+        Err(e) => {
+            bail!(
+                "Unexpected error trying to fetch channel: {} - retrying at the next scheduled time",
+                e
+            );
+        }
+    };
+
+    let channel_doc = toml_resp
+        .parse::<Document>()
+        .expect("invalid channel.toml parsed");
+
+    let components = Components::collect_publishables()?;
+
+    for component in components
+        .iter()
+        .filter(|c| !["forc", "fuel-core"].contains(&c.name.as_str()))
+    {
+        let latest_actual_version = get_latest_version(&component.repository_name)?;
+        let latest_indexed_version = parse_latest_indexed_version(&channel_doc, &component.name);
+
+        // If any of the other components are outdated, execute build-channel and exit this iteration.
+        if latest_indexed_version < latest_actual_version {
+            let latest_forc_indexed_version = parse_latest_indexed_version(&channel_doc, "forc");
+            let latest_fuel_core_indexed_version =
+                parse_latest_indexed_version(&channel_doc, "fuel-core");
+
+            // Gives date in YYYY-MM-DD
+            let date_now = time::OffsetDateTime::now_utc().date().to_string();
+
+            println!(
+                "Running build-channel with inputs: date={}, forc={}, fuel-core={}",
+                &date_now, latest_forc_indexed_version, latest_fuel_core_indexed_version
+            );
+            // Equivalent to running:
+            // build-channel channel-fuel-latest.toml <date_now> forc=<latest_forc_indexed_version> fuel-core=<latest_fuel_core_indexed_version>
+            Command::new("build-channel")
+                .args([
+                    "channel-fuel-latest.toml",
+                    &date_now,
+                    &format!("forc={}", latest_forc_indexed_version),
+                    &format!("fuel-core={}", latest_fuel_core_indexed_version),
+                ])
+                .exec();
+
+            break;
+        }
+    }
+
+    Ok(())
+}
+
+fn get_latest_version(repo: &str) -> Result<Version> {
+    if let Some(latest_run) = get_workflow_runs(repo)?.workflow_runs.first() {
+        return Ok(Version::from_str(&latest_run.head_branch[1..])?);
+    } else {
+        return Ok(get_latest_release_version(repo)?);
+    };
+}
+
+fn compare_compatibility() -> Result<()> {
     let handle = ureq::builder().user_agent("fuelup").build();
 
     let toml_resp = match handle.get(&CHANNEL_FUEL_LATEST_TOML_URL).call() {
@@ -170,6 +268,30 @@ fn main() -> Result<()> {
 
     let versions = select_versions(&channel_doc, forc_versions, fuel_core_versions);
     print_selected_versions(&versions.0, &versions.1);
+    Ok(())
+}
+
+const USAGE: &str = "Usage: compare-versions [compatibility|rest]";
+
+fn main() -> Result<()> {
+    let mut args = std::env::args();
+
+    if args.len() != 2 {
+        bail!("Incorrect number of args.\n{USAGE}");
+    }
+
+    args.next();
+    match args.next().as_deref() {
+        // Compare compatibility between fuel-core and forc, and republish channel if needed.
+        // Note that this does not always publish the latest forc/fuel-core.
+        Some("compatibility") => compare_compatibility()?,
+        // Compare versions of other components, and republish channel if there are new versions.
+        Some("rest") => compare_rest()?,
+        Some(a) => bail!("Unrecognized arg '{}'.\n{USAGE}", a),
+        None => unreachable!(),
+    }
+    // run()
+
     Ok(())
 }
 

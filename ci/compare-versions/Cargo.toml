@@ -8,8 +8,10 @@ publish = false
 
 [dependencies]
 anyhow = "1" 
+component = { path = "../../component" }
 semver = "1"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+time = { version = "0.3", features = ["macros", "parsing", "formatting", "serde-well-known"] }
 toml_edit = "0.14"
 ureq = "2.4"

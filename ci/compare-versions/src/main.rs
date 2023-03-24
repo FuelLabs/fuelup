@@ -88,15 +88,19 @@ fn get_latest_release_version(repo: &str) -> Result<Version> {
     );
 
     let handle = ureq::builder().user_agent("fuelup").build();
-    let resp = handle
-        .get(&url)
-        .call()
-        .expect(&format!("Could not get latest release for {}", repo));
+    let resp = match handle.get(&url).call() {
+        Ok(r) => r
+            .into_string()
+            .expect("Could not convert channel to string"),
+        Err(e) => {
+            bail!(
+                "Unexpected error trying to fetch channel: {} - retrying at the next scheduled time",
+                e
+            );
+        }
+    };
 
-    let mut data = Vec::new();
-
-    resp.into_reader().read_to_end(&mut data)?;
-    let response: LatestReleaseApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
+    let response: LatestReleaseApiResponse = serde_json::from_str(&resp)?;
 
     let version_str = response.tag_name["v".len()..].to_string();
 
@@ -219,7 +223,12 @@ fn compare_rest() -> Result<()> {
     Ok(())
 }
 
+/// Get the latest version of a release using GitHub API, first trying from workflow runs API, then
+/// from the releases API.
 fn get_latest_version(repo: &str) -> Result<Version> {
+    // We prefer using the workflow runs API because we can query for successful and completed runs, which
+    // would guarantee the existence of the release binaries. Releases can be published and be available
+    // without the binaries being ready yet, which causes inconsistency.
     if let Some(latest_run) = get_workflow_runs(repo)?.workflow_runs.first() {
         return Ok(Version::from_str(&latest_run.head_branch[1..])?);
     } else {

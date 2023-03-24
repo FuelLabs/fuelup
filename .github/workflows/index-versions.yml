@@ -21,10 +21,11 @@ jobs:
     steps:
       - name: checkout master
         uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
+
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@stable
+      
+      - uses: Swatinem/rust-cache@v2
 
       - name: Checkout fuelup gh-pages
         uses: actions/checkout@v3
@@ -34,15 +35,17 @@ jobs:
           ref: gh-pages
 
       - uses: Swatinem/rust-cache@v1
+
       - name: Install compare-versions script
         uses: actions-rs/cargo@v1
         with:
           command: install
           args: --debug --path ./ci/compare-versions
+
       - name: Compare versions and set variables for tests if needed
         id: set-version-matrix
         run: |
-          compare-versions >> out
+          compare-versions compatibility >> out
           VERSIONS=''
           # If file is empty, we have no new versions and we are done.
           if [ -s out ]; then
@@ -95,3 +98,54 @@ jobs:
     uses: ./.github/workflows/test-toolchain-compatibility.yml
     with:
       version-matrix: ${{ needs.compare-versions.outputs.version-matrix }}
+
+  check-other-components-latest:
+    name: Check other components for their latest versions
+    needs: compare-versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@stable
+      
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install compare-versions script
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: --debug --path ./ci/compare-versions
+
+      - name: Install build-channel script
+        run: cargo install --debug --path ./ci/build-channel
+
+      - name: Check for latest versions of other components and execute build-channel
+        run: compare-versions rest
+
+      - name: Prepare channel with compatible versions
+        run: |
+            mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
+            CHANNEL_TOML="channel-fuel-latest.toml"
+
+            cp $CHANNEL_TOML ${{ env.LATEST_CHANNEL_DIR }}
+
+            mkdir archive
+            PUBLISHED_DATE=$(date +'%Y-%m-%d')
+            cp $CHANNEL_TOML archive/channel-fuel-latest-${PUBLISHED_DATE}.toml
+
+      - name: Deploy latest channel
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ${{ env.LATEST_CHANNEL_DIR }}
+          keep_files: true
+          destination_dir: ./
+
+      - name: Deploy latest channel (archive)
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./archive
+          keep_files: true
+          destination_dir: ./channels/latest

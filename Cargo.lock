@@ -196,9 +196,11 @@ name = "compare-versions"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "component",
  "semver",
  "serde",
  "serde_json",
+ "time 0.3.14",
  "toml_edit 0.14.4",
  "ureq",
 ]

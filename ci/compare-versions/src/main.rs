@@ -88,19 +88,12 @@ fn get_latest_release_version(repo: &str) -> Result<Version> {
     );
 
     let handle = ureq::builder().user_agent("fuelup").build();
-    let resp = match handle.get(&url).call() {
-        Ok(r) => r
-            .into_string()
-            .expect("Could not convert channel to string"),
+    let response: LatestReleaseApiResponse = match handle.get(&url).call() {
+        Ok(r) => serde_json::from_reader(r.into_reader())?,
         Err(e) => {
-            bail!(
-                "Unexpected error trying to fetch channel: {} - retrying at the next scheduled time",
-                e
-            );
+            bail!("Could not get latest release for {}: {}", repo, e);
         }
     };
-
-    let response: LatestReleaseApiResponse = serde_json::from_str(&resp)?;
 
     let version_str = response.tag_name["v".len()..].to_string();
 

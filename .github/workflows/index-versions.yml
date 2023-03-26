@@ -121,12 +121,18 @@ jobs:
         run: cargo install --debug --path ./ci/build-channel
 
       - name: Check for latest versions of other components and execute build-channel
-        run: compare-versions rest
-
-      - name: Prepare channel with compatible versions
+        id: compare-rest
         run: |
-            mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
+          compare-versions rest
+          if [[ -f "${CHANNEL_TOML}" ]]; then
+            echo "republish=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Prepare channel with latest versions
+        if: ${{ steps.compare-rest.outputs.republish == 'true' }}
+        run: |
             CHANNEL_TOML="channel-fuel-latest.toml"
+            mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
 
             cp $CHANNEL_TOML ${{ env.LATEST_CHANNEL_DIR }}
 
@@ -135,6 +141,7 @@ jobs:
             cp $CHANNEL_TOML archive/channel-fuel-latest-${PUBLISHED_DATE}.toml
 
       - name: Deploy latest channel
+        if: ${{ steps.compare-rest.outputs.republish == 'true' }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -143,6 +150,7 @@ jobs:
           destination_dir: ./
 
       - name: Deploy latest channel (archive)
+        if: ${{ steps.compare-rest.outputs.republish == 'true' }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

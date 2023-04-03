@@ -25,7 +25,7 @@ with some built-in plugin executables, including but not limited to: [`forc-clie
 - [`fuel-core`] — Full node implementation of the Fuel v2 protocol, written in Rust.
 - [`forc-explore`] — A Forc plugin for running the Fuel Block Explorer.
 - [`forc-wallet`] - A Forc plugin for managing Fuel wallets.
-- [`fuel-indexer`] - A standalone service that can be used to index various components of the Fuel blockchain. 
+- [`fuel-indexer`] - A standalone service that can be used to index various components of the Fuel blockchain.
 - [`forc-index`] - A Forc plugin used to interact with a Fuel Indexer service.
 
 [toolchain]: toolchains.md

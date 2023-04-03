@@ -1,25 +1,7 @@
 # Concepts
 
-## How fuelup works
-
-`fuelup` is largely inspired by [`rustup`]. It installs and manages multiple Fuel
-toolchains and presents them all through a single set of tools installed to
-`~/.fuelup/bin`. The [`forc`] and [`fuel-core`] executables installed in
-`~/.fuelup/bin` are _[proxies]_ that delegate to the real toolchain. `fuelup`
-then provides mechanisms to easily change the active toolchain by
-reconfiguring the behavior of the proxies.
-
-When `fuelup-init` is first executed, `fuelup` automatically installs the
-`latest` toolchain. Proxies are created in `$HOME/.fuelup/bin`, while toolchains
-are installed within `$HOME/.fuelup/toolchains`, in their own directories.
-
-Running `forc` on the `latest` toolchain, for example, runs the proxy, which
-then executes the appropriate `forc` found in the `latest` toolchain directory.
-
-[`rustup`]: https://github.com/rust-lang/rustup
-[`forc`]: https://fuellabs.github.io/sway/master/forc/index.html
-[`fuel-core`]: https://github.com/FuelLabs/fuel-core
-[proxies]: proxies.md
+This section will explain how fuelup works on a technical level and explains each
+component of fuelup.
 
 ## Terminology
 

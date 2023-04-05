@@ -1,6 +1,7 @@
 use anyhow::Result;
 use fuelup::channel::{BETA_1, LATEST, NIGHTLY};
 use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;
+use fuelup::file::hard_or_symlink_file;
 use fuelup::settings::SettingsFile;
 use fuelup::target_triple::TargetTriple;
 use fuelup::toolchain_override::{self, OverrideCfg, ToolchainCfg, ToolchainOverride};
@@ -42,7 +43,11 @@ pub enum FuelupState {
 #[derive(Debug)]
 pub struct TestCfg {
     /// The path to the test environment's fuelup executable. This should usually be <TMP_DIR>/.fuelup/bin/fuelup.
+    /// This should be used to execute fuelup in the test environment.
     pub fuelup_path: PathBuf,
+    /// The path to the test environment's fuelup/bin directory. This should usually be <TMP_DIR>/.fuelup/bin/.
+    /// This should be used to execute other binaries (eg. forc) in the test environment.
+    pub fuelup_bin_dirpath: PathBuf,
     /// The path to the test environment's home. This should usually be a created tempfile::tempdir::TempDir.
     pub home: PathBuf,
 }
@@ -76,8 +81,12 @@ pub static ALL_BINS: &[&str] = &[
 ];
 
 impl TestCfg {
-    pub fn new(fuelup_path: PathBuf, home: PathBuf) -> Self {
-        Self { fuelup_path, home }
+    pub fn new(fuelup_path: PathBuf, fuelup_bin_dirpath: PathBuf, home: PathBuf) -> Self {
+        Self {
+            fuelup_path,
+            fuelup_bin_dirpath,
+            home,
+        }
     }
 
     pub fn toolchains_dir(&self) -> PathBuf {
@@ -100,6 +109,31 @@ impl TestCfg {
         self.settings_file()
             .with(|s| Ok(s.default_toolchain.clone()))
             .unwrap()
+    }
+
+    pub fn exec(&mut self, proc_name: &str, args: &[&str]) -> TestOutput {
+        let output = Command::new(proc_name)
+            .args(args)
+            .current_dir(&self.home)
+            .env("HOME", &self.home)
+            .env(
+                "PATH",
+                format!("{}", &self.home.join(".fuelup/bin").display(),),
+            )
+            .env("TERM", "dumb")
+            .output()
+            .expect("Failed to execute command");
+        let stdout = String::from_utf8(output.stdout).unwrap();
+        let stderr = String::from_utf8(output.stderr).unwrap();
+        TestOutput {
+            stdout,
+            stderr,
+            status: output.status,
+        }
+    }
+
+    pub fn forc(&mut self, args: &[&str]) -> TestOutput {
+        self.exec("forc", args)
     }
 
     pub fn fuelup(&mut self, args: &[&str]) -> TestOutput {
@@ -203,10 +237,18 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
         .parent()
         .expect("fuelup's directory")
         .to_path_buf();
-    fs::hard_link(
-        root.parent().unwrap().join("fuelup"),
-        tmp_fuelup_bin_dir_path.join("fuelup"),
+    hard_or_symlink_file(
+        &root.parent().unwrap().join("fuelup"),
+        &tmp_fuelup_bin_dir_path.join("fuelup"),
     )?;
+
+    for bin in ALL_BINS {
+        hard_or_symlink_file(
+            &tmp_fuelup_bin_dir_path.join("fuelup"),
+            &tmp_fuelup_bin_dir_path.join(bin),
+        )
+        .unwrap()
+    }
 
     let target = TargetTriple::from_host().unwrap();
     let latest = format!("{LATEST}-{target}");
@@ -298,6 +340,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
 
     f(&mut TestCfg::new(
         tmp_fuelup_bin_dir_path.join("fuelup"),
+        tmp_fuelup_bin_dir_path,
         tmp_home.to_path_buf(),
     ));
 

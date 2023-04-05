@@ -9,12 +9,12 @@ use fuelup::{
 use testcfg::FuelupState;
 
 #[test]
-fn check_correct_forc_deploy_called() -> Result<()> {
+fn check_correct_forc_plugin_called() -> Result<()> {
     testcfg::setup(FuelupState::AllInstalled, &|cfg| {
-        let mut stdout = cfg.forc(&["deploy", "--version"]).stdout;
-        assert_eq!(stdout, "forc-deploy 0.1.0\n");
-        stdout = cfg.exec("forc-deploy", &["--version"]).stdout;
-        assert_eq!(stdout, "forc-deploy 0.1.0\n");
+        let mut stdout = cfg.forc(&["wallet", "--version"]).stdout;
+        assert_eq!(stdout, "forc-wallet 0.1.0\n");
+        stdout = cfg.exec("forc-wallet", &["--version"]).stdout;
+        assert_eq!(stdout, "forc-wallet 0.1.0\n");
 
         let toolchain_override = ToolchainOverride {
             cfg: OverrideCfg::new(
@@ -27,10 +27,10 @@ fn check_correct_forc_deploy_called() -> Result<()> {
         };
         testcfg::setup_override_file(toolchain_override).unwrap();
 
-        stdout = cfg.forc(&["deploy", "--version"]).stdout;
-        assert_eq!(stdout, "forc-deploy 0.2.0\n");
-        stdout = cfg.exec("forc-deploy", &["--version"]).stdout;
-        assert_eq!(stdout, "forc-deploy 0.2.0\n");
+        stdout = cfg.forc(&["wallet", "--version"]).stdout;
+        assert_eq!(stdout, "forc-wallet 0.2.0\n");
+        stdout = cfg.exec("forc-wallet", &["--version"]).stdout;
+        assert_eq!(stdout, "forc-wallet 0.2.0\n");
     })?;
 
     Ok(())

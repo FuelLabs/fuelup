@@ -112,13 +112,19 @@ impl TestCfg {
     }
 
     pub fn exec(&mut self, proc_name: &str, args: &[&str]) -> TestOutput {
-        let output = Command::new(proc_name)
+        let path = self.fuelup_bin_dirpath.join(proc_name);
+        let output = Command::new(path)
             .args(args)
             .current_dir(&self.home)
             .env("HOME", &self.home)
             .env(
                 "PATH",
-                format!("{}", &self.home.join(".fuelup/bin").display(),),
+                format!(
+                    "{}:{}:{}",
+                    &self.home.join(".local/bin").display(),
+                    &self.home.join(".cargo/bin").display(),
+                    &self.home.join(".fuelup/bin").display(),
+                ),
             )
             .env("TERM", "dumb")
             .output()
@@ -189,6 +195,7 @@ fn setup_toolchain(fuelup_home_path: &Path, toolchain: &str) -> Result<()> {
         .join(toolchain)
         .join("bin");
     fs::create_dir_all(&bin_dir).expect("Failed to create temporary latest toolchain bin dir");
+    let fuelup_bin_dirpath = fuelup_home_path.join("bin");
 
     for bin in ALL_BINS {
         let version = match toolchain.starts_with("latest") {
@@ -196,6 +203,13 @@ fn setup_toolchain(fuelup_home_path: &Path, toolchain: &str) -> Result<()> {
             _ => VERSION_2,
         };
         create_fuel_executable(bin, &bin_dir.join(bin), version)?;
+
+        if !fuelup_bin_dirpath.join(bin).exists() {
+            hard_or_symlink_file(
+                &fuelup_bin_dirpath.join("fuelup"),
+                &fuelup_bin_dirpath.join(bin),
+            )?;
+        }
     }
 
     Ok(())
@@ -242,14 +256,6 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
         &tmp_fuelup_bin_dir_path.join("fuelup"),
     )?;
 
-    for bin in ALL_BINS {
-        hard_or_symlink_file(
-            &tmp_fuelup_bin_dir_path.join("fuelup"),
-            &tmp_fuelup_bin_dir_path.join(bin),
-        )
-        .unwrap()
-    }
-
     let target = TargetTriple::from_host().unwrap();
     let latest = format!("{LATEST}-{target}");
     let nightly = format!("{NIGHTLY}-{target}");
@@ -271,6 +277,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
 
+            // Intentionally create 'binaries' that conflict with update
             fs::create_dir_all(tmp_home.join(".local/bin"))?;
             create_fuel_executable("forc", &tmp_home.join(".local/bin/forc"), VERSION)?;
 
@@ -279,12 +286,6 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
                 &tmp_home.join(".local/bin/forc-wallet"),
                 VERSION,
             )?;
-            create_fuel_executable(
-                "forc-wallet",
-                &tmp_home.join(".fuelup/bin/forc-wallet"),
-                VERSION,
-            )?;
-
             fs::create_dir_all(tmp_home.join(".cargo/bin"))?;
 
             create_fuel_executable(
@@ -292,13 +293,12 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
                 &tmp_home.join(".cargo/bin/forc-explore"),
                 VERSION,
             )?;
-            create_fuel_executable(
-                "forc-explore",
-                &tmp_home.join(".fuelup/bin/forc-explore"),
-                VERSION,
-            )?;
-
             create_fuel_executable("fuel-core", &tmp_home.join(".cargo/bin/fuel-core"), VERSION)?;
+
+            // Here we intentionally remove some of the 'binaries' that were linked in the
+            // setup_toolchain() step so we can expect some error messages from tests.
+            fs::remove_file(tmp_home.join(".fuelup/bin/forc"))?;
+            fs::remove_file(tmp_home.join(".fuelup/bin/fuel-core"))?;
         }
         FuelupState::NightlyInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &nightly)?;

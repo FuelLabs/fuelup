@@ -10,6 +10,11 @@ use testcfg::FuelupState;
 
 #[test]
 fn check_correct_forc_plugin_called() -> Result<()> {
+    // We execute both 'forc wallet' and 'forc-wallet' in this test
+    // to ensure both work as intended.
+    //
+    // The test environment is set up similarly to a real fuelup environment,
+    // complete with links.
     testcfg::setup(FuelupState::AllInstalled, &|cfg| {
         let mut stdout = cfg.forc(&["wallet", "--version"]).stdout;
         assert_eq!(stdout, "forc-wallet 0.1.0\n");

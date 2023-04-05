@@ -111,12 +111,17 @@ impl TestCfg {
             .unwrap()
     }
 
+    /// A function for executing binaries within the fuelup test configuration.
+    ///
+    /// This invokes std::process::Command with some default environment variables
+    /// set up nicely for testing fuelup and its managed binaries.
     pub fn exec(&mut self, proc_name: &str, args: &[&str]) -> TestOutput {
         let path = self.fuelup_bin_dirpath.join(proc_name);
         let output = Command::new(path)
             .args(args)
             .current_dir(&self.home)
             .env("HOME", &self.home)
+            .env("CARGO_HOME", &self.home.join(".cargo"))
             .env(
                 "PATH",
                 format!(
@@ -138,34 +143,16 @@ impl TestCfg {
         }
     }
 
+    /// A convenience wrapper for executing 'forc' binaries within the fuelup test configuration.
+    /// This is just a testcfg::exec() call with "forc" as its first argument.
     pub fn forc(&mut self, args: &[&str]) -> TestOutput {
         self.exec("forc", args)
     }
 
+    /// A convenience wrapper for executing 'fuelup' within the fuelup test configuration.
+    /// This is just a testcfg::exec() call with "fuelup" as its first argument.
     pub fn fuelup(&mut self, args: &[&str]) -> TestOutput {
-        let output = Command::new(&self.fuelup_path)
-            .args(args)
-            .current_dir(&self.home)
-            .env("HOME", &self.home)
-            .env("CARGO_HOME", self.home.join(".cargo").to_str().unwrap())
-            .env(
-                "PATH",
-                format!(
-                    "{}:{}",
-                    &self.home.join(".local/bin").display(),
-                    &self.home.join(".cargo/bin").display()
-                ),
-            )
-            .env("TERM", "dumb")
-            .output()
-            .expect("Failed to execute command");
-        let stdout = String::from_utf8(output.stdout).unwrap();
-        let stderr = String::from_utf8(output.stderr).unwrap();
-        TestOutput {
-            stdout,
-            stderr,
-            status: output.status,
-        }
+        self.exec("fuelup", args)
     }
 }
 

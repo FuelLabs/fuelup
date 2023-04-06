@@ -50,7 +50,8 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
             } else {
                 proc_name
             };
-            // Install components within [components] that are declared but missing from the store.
+
+            // If a specific version is declared, we want to call it from the store and not from the toolchain directory.
             if let Some(version) = to.get_component_version(component_name) {
                 let store = Store::from_env()?;
 
@@ -60,6 +61,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
                         TargetTriple::from_component(component_name)?,
                         Some(version.clone()),
                     )?;
+                    // Install components within [components] that are declared but missing from the store.
                     store.install_component(&download_cfg)?;
                 };
 
@@ -70,10 +72,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
                     description.to_string(),
                 )
             } else {
-                (
-                    toolchain.bin_path.join(component_name),
-                    description.to_string(),
-                )
+                (toolchain.bin_path.join(proc_name), description.to_string())
             }
         }
         None => (

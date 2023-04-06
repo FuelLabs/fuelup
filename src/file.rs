@@ -14,7 +14,7 @@ pub(crate) fn hardlink(original: &Path, link: &Path) -> io::Result<()> {
     fs::hard_link(original, link)
 }
 
-pub(crate) fn hard_or_symlink_file(original: &Path, link: &Path) -> Result<()> {
+pub fn hard_or_symlink_file(original: &Path, link: &Path) -> Result<()> {
     if hardlink_file(original, link).is_err() {
         symlink_file(original, link)?;
     }

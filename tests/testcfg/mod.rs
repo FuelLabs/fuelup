@@ -1,6 +1,7 @@
 use anyhow::Result;
 use fuelup::channel::{BETA_1, LATEST, NIGHTLY};
 use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;
+use fuelup::file::hard_or_symlink_file;
 use fuelup::settings::SettingsFile;
 use fuelup::target_triple::TargetTriple;
 use fuelup::toolchain_override::{self, OverrideCfg, ToolchainCfg, ToolchainOverride};
@@ -42,7 +43,11 @@ pub enum FuelupState {
 #[derive(Debug)]
 pub struct TestCfg {
     /// The path to the test environment's fuelup executable. This should usually be <TMP_DIR>/.fuelup/bin/fuelup.
+    /// This should be used to execute fuelup in the test environment.
     pub fuelup_path: PathBuf,
+    /// The path to the test environment's fuelup/bin directory. This should usually be <TMP_DIR>/.fuelup/bin/.
+    /// This should be used to execute other binaries (eg. forc) in the test environment.
+    pub fuelup_bin_dirpath: PathBuf,
     /// The path to the test environment's home. This should usually be a created tempfile::tempdir::TempDir.
     pub home: PathBuf,
 }
@@ -76,8 +81,12 @@ pub static ALL_BINS: &[&str] = &[
 ];
 
 impl TestCfg {
-    pub fn new(fuelup_path: PathBuf, home: PathBuf) -> Self {
-        Self { fuelup_path, home }
+    pub fn new(fuelup_path: PathBuf, fuelup_bin_dirpath: PathBuf, home: PathBuf) -> Self {
+        Self {
+            fuelup_path,
+            fuelup_bin_dirpath,
+            home,
+        }
     }
 
     pub fn toolchains_dir(&self) -> PathBuf {
@@ -102,18 +111,24 @@ impl TestCfg {
             .unwrap()
     }
 
-    pub fn fuelup(&mut self, args: &[&str]) -> TestOutput {
-        let output = Command::new(&self.fuelup_path)
+    /// A function for executing binaries within the fuelup test configuration.
+    ///
+    /// This invokes std::process::Command with some default environment variables
+    /// set up nicely for testing fuelup and its managed binaries.
+    pub fn exec(&mut self, proc_name: &str, args: &[&str]) -> TestOutput {
+        let path = self.fuelup_bin_dirpath.join(proc_name);
+        let output = Command::new(path)
             .args(args)
             .current_dir(&self.home)
             .env("HOME", &self.home)
-            .env("CARGO_HOME", self.home.join(".cargo").to_str().unwrap())
+            .env("CARGO_HOME", &self.home.join(".cargo"))
             .env(
                 "PATH",
                 format!(
-                    "{}:{}",
+                    "{}:{}:{}",
                     &self.home.join(".local/bin").display(),
-                    &self.home.join(".cargo/bin").display()
+                    &self.home.join(".cargo/bin").display(),
+                    &self.home.join(".fuelup/bin").display(),
                 ),
             )
             .env("TERM", "dumb")
@@ -126,6 +141,18 @@ impl TestCfg {
             stderr,
             status: output.status,
         }
+    }
+
+    /// A convenience wrapper for executing 'forc' binaries within the fuelup test configuration.
+    /// This is just a testcfg::exec() call with "forc" as its first argument.
+    pub fn forc(&mut self, args: &[&str]) -> TestOutput {
+        self.exec("forc", args)
+    }
+
+    /// A convenience wrapper for executing 'fuelup' within the fuelup test configuration.
+    /// This is just a testcfg::exec() call with "fuelup" as its first argument.
+    pub fn fuelup(&mut self, args: &[&str]) -> TestOutput {
+        self.exec("fuelup", args)
     }
 }
 
@@ -155,6 +182,7 @@ fn setup_toolchain(fuelup_home_path: &Path, toolchain: &str) -> Result<()> {
         .join(toolchain)
         .join("bin");
     fs::create_dir_all(&bin_dir).expect("Failed to create temporary latest toolchain bin dir");
+    let fuelup_bin_dirpath = fuelup_home_path.join("bin");
 
     for bin in ALL_BINS {
         let version = match toolchain.starts_with("latest") {
@@ -162,6 +190,13 @@ fn setup_toolchain(fuelup_home_path: &Path, toolchain: &str) -> Result<()> {
             _ => VERSION_2,
         };
         create_fuel_executable(bin, &bin_dir.join(bin), version)?;
+
+        if !fuelup_bin_dirpath.join(bin).exists() {
+            hard_or_symlink_file(
+                &fuelup_bin_dirpath.join("fuelup"),
+                &fuelup_bin_dirpath.join(bin),
+            )?;
+        }
     }
 
     Ok(())
@@ -203,9 +238,9 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
         .parent()
         .expect("fuelup's directory")
         .to_path_buf();
-    fs::hard_link(
-        root.parent().unwrap().join("fuelup"),
-        tmp_fuelup_bin_dir_path.join("fuelup"),
+    hard_or_symlink_file(
+        &root.parent().unwrap().join("fuelup"),
+        &tmp_fuelup_bin_dir_path.join("fuelup"),
     )?;
 
     let target = TargetTriple::from_host().unwrap();
@@ -229,6 +264,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
 
+            // Intentionally create 'binaries' that conflict with update
             fs::create_dir_all(tmp_home.join(".local/bin"))?;
             create_fuel_executable("forc", &tmp_home.join(".local/bin/forc"), VERSION)?;
 
@@ -237,12 +273,6 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
                 &tmp_home.join(".local/bin/forc-wallet"),
                 VERSION,
             )?;
-            create_fuel_executable(
-                "forc-wallet",
-                &tmp_home.join(".fuelup/bin/forc-wallet"),
-                VERSION,
-            )?;
-
             fs::create_dir_all(tmp_home.join(".cargo/bin"))?;
 
             create_fuel_executable(
@@ -250,13 +280,12 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
                 &tmp_home.join(".cargo/bin/forc-explore"),
                 VERSION,
             )?;
-            create_fuel_executable(
-                "forc-explore",
-                &tmp_home.join(".fuelup/bin/forc-explore"),
-                VERSION,
-            )?;
-
             create_fuel_executable("fuel-core", &tmp_home.join(".cargo/bin/fuel-core"), VERSION)?;
+
+            // Here we intentionally remove some of the 'binaries' that were linked in the
+            // setup_toolchain() step so we can expect some error messages from tests.
+            fs::remove_file(tmp_home.join(".fuelup/bin/forc"))?;
+            fs::remove_file(tmp_home.join(".fuelup/bin/fuel-core"))?;
         }
         FuelupState::NightlyInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &nightly)?;
@@ -298,6 +327,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
 
     f(&mut TestCfg::new(
         tmp_fuelup_bin_dir_path.join("fuelup"),
+        tmp_fuelup_bin_dir_path,
         tmp_home.to_path_buf(),
     ));
 

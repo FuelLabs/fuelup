@@ -314,7 +314,6 @@ fn fuels_version_from_toml(toml: toml_edit::Document) -> Result<String> {
                 ),
                 _ => String::default(),
             };
-            println!("vs: {version}");
 
             return Ok(version);
         } else {

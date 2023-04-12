@@ -37,10 +37,7 @@ jobs:
       - uses: Swatinem/rust-cache@v1
 
       - name: Install compare-versions script
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: --debug --path ./ci/compare-versions
+        run: cargo install --debug --path ./ci/compare-versions
 
       - name: Compare versions and set variables for tests if needed
         id: set-version-matrix
@@ -112,10 +109,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: Install compare-versions script
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: --debug --path ./ci/compare-versions
+        run: cargo install --debug --path ./ci/compare-versions
 
       - name: Install build-channel script
         run: cargo install --debug --path ./ci/build-channel

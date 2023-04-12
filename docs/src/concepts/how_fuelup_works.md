@@ -5,7 +5,7 @@ toolchains and presents them all through a single set of tools within `~/.fuelup
 
 Generally, it is not recommended to manually make changes to the fuelup directory, otherwise `fuelup`
 might not function as expected. If you have made changes to the directory, we recommend removing
-the entire directory and re-installing fuelup with fuelup-init.
+the entire directory and re-installing fuelup with [fuelup-init].
 
 ## Proxies
 
@@ -13,7 +13,7 @@ On the surface, the installed executables seem to live in `~/.fuelup/bin`, but t
 and other executables installed in `~/.fuelup/bin` are actually not the real binaries
 but are all just symlinks to `fuelup` itself! `fuelup` contains logic to act as a
 [proxy] for the real binaries, so that it can change its behavior based on what component
-is being called. For example, this is how `fuelup` can switch between active toolchains.
+is being called. This is how `fuelup` can switch between toolchains.
 
 A common mistake is to directly move binaries into the `bin` directory, which would
 break the behavior of `fuelup`.
@@ -33,6 +33,7 @@ This call invokes `forc` (which is actually `fuelup`) within the fuelup bin dire
 turn executes the correct version of `forc` based on either an override file (`fuel-toolchain.toml`)
 or your currently active toolchain (in order of priority).
 
+[fuelup-init]: /installation/index.html#quickstart
 [`rustup`]: https://github.com/rust-lang/rustup
 [`forc`]: https://fuellabs.github.io/sway/master/forc/index.html
 [`fuel-core`]: https://github.com/FuelLabs/fuel-core

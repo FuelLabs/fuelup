@@ -13,7 +13,8 @@ on:
         type: string
 
 env:
-  RUST_VERSION: 1.67.0
+  RUST_VERSION: 1.68.2
+  NIGHTLY_RUST_VERSION: nightly-2023-02-08
   INCOMPATIBLE_DIR: ./incompatible-versions
   LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
 
@@ -153,9 +154,7 @@ jobs:
             done
 
       - name: Install toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Install build-channel script
         run: cargo install --debug --path ./ci/build-channel

@@ -13,7 +13,6 @@ use tracing::info;
 
 const UPDATED: &str = "updated";
 const PARTIALLY_UPDATED: &str = "partially updated";
-const UNCHANGED: &str = "unchanged";
 
 pub fn update() -> Result<()> {
     let config = Config::from_env()?;
@@ -29,13 +28,8 @@ pub fn update() -> Result<()> {
         let description = DistToolchainDescription::from_str(&toolchain)?;
         info!("updating the '{}' toolchain", description);
 
-        let (cfgs, hash) = if let Ok((channel, hash)) = Channel::from_dist_channel(&description) {
-            if let Ok(true) = config.hash_matches(&description, &hash) {
-                info!("'{}' already installed and up to date", description);
-                summary.push((format!("{toolchain} {UNCHANGED}"), "".to_string()));
-                continue;
-            };
-            (channel.build_download_configs(), hash)
+        let cfgs = if let Ok(channel) = Channel::from_dist_channel(&description) {
+            channel.build_download_configs()
         } else {
             bail!("Could not build download configs from channel")
         };
@@ -60,9 +54,7 @@ pub fn update() -> Result<()> {
             installed_bins = format!("  updated components:\n{installed_bins}");
         }
 
-        if errored_bins.is_empty() {
-            config.save_hash(&toolchain, &hash)?;
-        } else {
+        if !errored_bins.is_empty() {
             status = PARTIALLY_UPDATED.to_string();
             errored_bins = format!("  failed to update:\n{errored_bins}");
         };

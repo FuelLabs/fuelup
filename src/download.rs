@@ -3,8 +3,6 @@ use component::{Component, FUELUP};
 use flate2::read::GzDecoder;
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use sha2::Digest;
-use sha2::Sha256;
 use std::env;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
@@ -128,7 +126,7 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
 
         resp.into_reader().read_to_end(&mut data)?;
 
-        if let Ok((channel, _)) =
+        if let Ok(channel) =
             Channel::from_dist_channel(&DistToolchainDescription::from_str("latest")?)
         {
             channel
@@ -162,7 +160,7 @@ fn unpack(tar_path: &Path, dst: &Path) -> Result<()> {
     Ok(())
 }
 
-pub fn download(url: &str, hasher: &mut Sha256) -> Result<Vec<u8>> {
+pub fn download(url: &str) -> Result<Vec<u8>> {
     const RETRY_ATTEMPTS: u8 = 4;
     const RETRY_DELAY_SECS: u64 = 3;
 
@@ -174,7 +172,6 @@ pub fn download(url: &str, hasher: &mut Sha256) -> Result<Vec<u8>> {
                 let mut data = Vec::new();
                 response.into_reader().read_to_end(&mut data)?;
 
-                hasher.update(data.clone());
                 return Ok(data);
             }
             Err(ureq::Error::Status(404, r)) => {
@@ -195,7 +192,7 @@ pub fn download(url: &str, hasher: &mut Sha256) -> Result<Vec<u8>> {
     bail!("Could not read file");
 }
 
-pub fn download_file(url: &str, path: &PathBuf, hasher: &mut Sha256) -> Result<()> {
+pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
     const RETRY_ATTEMPTS: u8 = 4;
     const RETRY_DELAY_SECS: u64 = 3;
 
@@ -217,7 +214,6 @@ pub fn download_file(url: &str, path: &PathBuf, hasher: &mut Sha256) -> Result<(
                     )
                 };
 
-                hasher.update(data);
                 return Ok(());
             }
             Err(ureq::Error::Status(404, r)) => {
@@ -249,23 +245,13 @@ pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path)
 
     let tarball_path = dst_dir_path.join(&download_cfg.tarball_name);
 
-    let mut hasher = Sha256::new();
-    if let Err(e) = download_file(&download_cfg.tarball_url, &tarball_path, &mut hasher) {
+    if let Err(e) = download_file(&download_cfg.tarball_url, &tarball_path) {
         bail!(
             "Failed to download {} - {}. The release may not be ready yet.",
             &download_cfg.tarball_name,
             e
         );
     };
-
-    let actual_hash = format!("{:x}", hasher.finalize());
-    if download_cfg.hash.is_some() && (&actual_hash != download_cfg.hash.as_ref().unwrap()) {
-        bail!(
-            "Attempt to verify sha256 checksum failed:\ndownloaded file: {}\npublished sha256 hash: {}",
-            &actual_hash,
-            download_cfg.hash.as_ref().unwrap()
-        )
-    }
 
     unpack(&tarball_path, dst_dir_path)?;
 

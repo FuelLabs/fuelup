@@ -21,10 +21,12 @@ fuelup component add forc@0.30.1
 The following is an overview of components installable through `fuelup`:
 
 - [`forc`] — The Fuel Orchestrator, a suite of tools to work with the Fuel ecosystem. This comes
-with some built-in plugin executables, namely [`forc-client`], [`forc-fmt`] and [`forc-lsp`].
+with some built-in plugin executables, including but not limited to: [`forc-client`], [`forc-fmt`] and [`forc-lsp`].
 - [`fuel-core`] — Full node implementation of the Fuel v2 protocol, written in Rust.
 - [`forc-explore`] — A Forc plugin for running the Fuel Block Explorer.
 - [`forc-wallet`] - A Forc plugin for managing Fuel wallets.
+- [`fuel-indexer`] - A standalone service that can be used to index various components of the Fuel blockchain.
+- [`forc-index`] - A Forc plugin used to interact with a Fuel Indexer service.
 
 [toolchain]: toolchains.md
 [`forc`]: https://fuellabs.github.io/sway/master/forc/index.html
@@ -34,3 +36,5 @@ with some built-in plugin executables, namely [`forc-client`], [`forc-fmt`] and 
 [`forc-lsp`]: https://fuellabs.github.io/sway/master/forc/plugins/forc_lsp.html
 [`forc-client`]: https://fuellabs.github.io/sway/master/forc/plugins/forc_client/index.html
 [`forc-wallet`]: https://github.com/FuelLabs/forc-wallet
+[`fuel-indexer`]: https://github.com/FuelLabs/fuel-indexer
+[`forc-index`]: https://github.com/FuelLabs/fuel-indexer

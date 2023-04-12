@@ -11,7 +11,6 @@ use anyhow::{bail, Result};
 use component::Components;
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use sha2::{Digest, Sha256};
 use std::{collections::BTreeMap, fmt::Debug};
 use time::Date;
 use toml_edit::de;
@@ -80,18 +79,15 @@ fn construct_channel_url(desc: &DistToolchainDescription) -> Result<String> {
 }
 
 impl Channel {
-    /// The returned `String` is a sha256 hash of the downloaded toolchain TOML bytes.
-    pub fn from_dist_channel(desc: &DistToolchainDescription) -> Result<(Self, String)> {
+    pub fn from_dist_channel(desc: &DistToolchainDescription) -> Result<Self> {
         let channel_url = construct_channel_url(desc)?;
 
-        let mut hasher = Sha256::new();
-        let toml = match download(&channel_url, &mut hasher) {
+        let toml = match download(&channel_url) {
             Ok(t) => String::from_utf8(t)?,
             Err(_) => bail!("Could not read {}", &channel_url),
         };
 
-        let actual_hash = format!("{:x}", hasher.finalize());
-        Ok((Self::from_toml(&toml)?, actual_hash))
+        Self::from_toml(&toml)
     }
 
     pub fn from_toml(toml: &str) -> Result<Self> {

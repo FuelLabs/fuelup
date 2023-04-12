@@ -1,5 +1,4 @@
 use anyhow::{bail, Result};
-use std::fs;
 use std::str::FromStr;
 use tracing::{error, info};
 
@@ -16,14 +15,7 @@ pub fn uninstall(command: UninstallCommand) -> Result<()> {
     let config = Config::from_env()?;
 
     let toolchain = match DistToolchainDescription::from_str(&name) {
-        Ok(desc) => {
-            if config.hash_exists(&desc) {
-                let hash_file = config.hashes_dir().join(desc.to_string());
-                fs::remove_file(hash_file)?;
-            };
-
-            Toolchain::from_path(&desc.to_string())
-        }
+        Ok(desc) => Toolchain::from_path(&desc.to_string()),
         Err(_) => Toolchain::from_path(&name),
     };
 

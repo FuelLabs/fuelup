@@ -246,13 +246,13 @@ which are tools used to develop on Fuel. See the <a href="concepts/components.ht
 toolchains and presents them all through a single set of tools within <code>~/.fuelup/bin</code>.</p>
 <p>Generally, it is not recommended to manually make changes to the fuelup directory, otherwise <code>fuelup</code>
 might not function as expected. If you have made changes to the directory, we recommend removing
-the entire directory and re-installing fuelup with fuelup-init.</p>
+the entire directory and re-installing fuelup with <a href="concepts//installation/index.html#quickstart">fuelup-init</a>.</p>
 <h2 id="proxies"><a class="header" href="#proxies">Proxies</a></h2>
 <p>On the surface, the installed executables seem to live in <code>~/.fuelup/bin</code>, but the <a href="https://fuellabs.github.io/sway/master/forc/index.html"><code>forc</code></a>, <a href="https://github.com/FuelLabs/fuel-core"><code>fuel-core</code></a>
 and other executables installed in <code>~/.fuelup/bin</code> are actually not the real binaries
 but are all just symlinks to <code>fuelup</code> itself! <code>fuelup</code> contains logic to act as a
 <a href="concepts/proxies.html">proxy</a> for the real binaries, so that it can change its behavior based on what component
-is being called. For example, this is how <code>fuelup</code> can switch between active toolchains.</p>
+is being called. This is how <code>fuelup</code> can switch between toolchains.</p>
 <p>A common mistake is to directly move binaries into the <code>bin</code> directory, which would
 break the behavior of <code>fuelup</code>.</p>
 <h2 id="store"><a class="header" href="#store">Store</a></h2>
@@ -376,10 +376,12 @@ modular manner, and to specify specific versions of components to install.</p>
 <p>The following is an overview of components installable through <code>fuelup</code>:</p>
 <ul>
 <li><a href="https://fuellabs.github.io/sway/master/forc/index.html"><code>forc</code></a> — The Fuel Orchestrator, a suite of tools to work with the Fuel ecosystem. This comes
-with some built-in plugin executables, namely <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_client/index.html"><code>forc-client</code></a>, <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_fmt.html"><code>forc-fmt</code></a> and <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_lsp.html"><code>forc-lsp</code></a>.</li>
+with some built-in plugin executables, including but not limited to: <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_client/index.html"><code>forc-client</code></a>, <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_fmt.html"><code>forc-fmt</code></a> and <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_lsp.html"><code>forc-lsp</code></a>.</li>
 <li><a href="https://github.com/FuelLabs/fuel-core"><code>fuel-core</code></a> — Full node implementation of the Fuel v2 protocol, written in Rust.</li>
 <li><a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_explore.html"><code>forc-explore</code></a> — A Forc plugin for running the Fuel Block Explorer.</li>
 <li><a href="https://github.com/FuelLabs/forc-wallet"><code>forc-wallet</code></a> - A Forc plugin for managing Fuel wallets.</li>
+<li><a href="https://github.com/FuelLabs/fuel-indexer"><code>fuel-indexer</code></a> - A standalone service that can be used to index various components of the Fuel blockchain.</li>
+<li><a href="https://github.com/FuelLabs/fuel-indexer"><code>forc-index</code></a> - A Forc plugin used to interact with a Fuel Indexer service.</li>
 </ul>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="proxies-1"><a class="header" href="#proxies-1">Proxies</a></h1>
 <p><code>fuelup</code> provides wrappers for the common Fuel toolchain

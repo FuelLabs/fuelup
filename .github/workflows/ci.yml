@@ -293,7 +293,8 @@ jobs:
             FORC_VERSION=$(grep -A1 '\[pkg.forc\]' ./gh-pages/channel-fuel-latest.toml | cut -d "\"" -f2)
             FUEL_CORE_VERSION=$(grep -A1 '\[pkg.fuel-core\]' ./gh-pages/channel-fuel-latest.toml | cut -d "\"" -f2)
 
-            build-channel latest $CHANNEL_TOML $GITHUB_RUN_ID forc=$FORC_VERSION fuel-core=$FUEL_CORE_VERSION
+            PUBLISHED_DATE=$(date +'%Y-%m-%d')
+            build-channel $CHANNEL_TOML $PUBLISHED_DATE --github-run-id $GITHUB_RUN_ID forc=$FORC_VERSION fuel-core=$FUEL_CORE_VERSION
 
             cp $CHANNEL_TOML ${{ env.LATEST_CHANNEL_DIR }}
 

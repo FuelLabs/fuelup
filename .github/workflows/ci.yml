@@ -56,45 +56,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@stable
+      
       - uses: Swatinem/rust-cache@v1
+
       - name: Check Clippy Linter
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --locked --all-features --all-targets -- -D warnings
+        run: cargo clippy --locked --all-features --all-targets -- -D warnings
 
   cargo-fmt-check:
     needs: cancel-previous-runs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - name: Check Formatting
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
 
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Check Formatting
+        run: cargo fmt --all -- --check
+        
   cargo-test-workspace:
     needs: cancel-previous-runs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-      - name: Run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --locked --workspace
 
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Run tests
+        run: cargo test --locked --workspace
+        
   lint-toml-files:
     needs: cancel-previous-runs
     runs-on: ubuntu-latest
@@ -104,11 +98,8 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
+        uses: dtolnay/rust-toolchain@stable
+      
       - name: Install Cargo.toml linter
         uses: baptiste0928/cargo-install@v1
         with:
@@ -141,12 +132,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Install toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
 
       - name: Verify tag version
         run: |
@@ -192,12 +177,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
           target: ${{ matrix.job.target }}
-          override: true
 
       - uses: Swatinem/rust-cache@v1
         with:

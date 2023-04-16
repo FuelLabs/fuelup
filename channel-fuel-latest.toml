@@ -1,5 +1,5 @@
-published_by = "https://github.com/FuelLabs/fuelup/actions/runs/4692382182"
-date = "2023-04-13"
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/4713700808"
+date = "2023-04-16"
 
 [pkg.forc]
 version = "0.37.1"
@@ -78,23 +78,23 @@ url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.2.2/forc-wal
 hash = "33530736a68d630e11912d50ac96f2ce5251c34e8fbb823e4d6ed502a30dd59f"
 
 [pkg.fuel-core]
-version = "0.17.9"
+version = "0.17.10"
 
 [pkg.fuel-core.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.17.9/fuel-core-0.17.9-aarch64-unknown-linux-gnu.tar.gz"
-hash = "b67367559335f3b51bb655c0d983acccc38cb57be08d2423328f56bf0f905682"
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.17.10/fuel-core-0.17.10-aarch64-unknown-linux-gnu.tar.gz"
+hash = "607b64bf9ecfead183412cdcab2c5fbe28c325ccd5a16b776a36e5bdadb74f79"
 
 [pkg.fuel-core.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.17.9/fuel-core-0.17.9-x86_64-unknown-linux-gnu.tar.gz"
-hash = "420e56df2fa751d92eb7d2cbaf0283667b3d9f89a9e34d08fa03e362753fd7f2"
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.17.10/fuel-core-0.17.10-x86_64-unknown-linux-gnu.tar.gz"
+hash = "be8f6a3ef7fbb40cc1594011cf9b828804eb89870bc913e1cf6306d28b3681e7"
 
 [pkg.fuel-core.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.17.9/fuel-core-0.17.9-aarch64-apple-darwin.tar.gz"
-hash = "504985758dc7defa192902d65efe0716689eb0246b3aa0b1cd269bcd2db05de9"
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.17.10/fuel-core-0.17.10-aarch64-apple-darwin.tar.gz"
+hash = "dac506213a04669e7928c36c508d3652b00a97d43905196b81a59f73bd479ae2"
 
 [pkg.fuel-core.target.x86_64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.17.9/fuel-core-0.17.9-x86_64-apple-darwin.tar.gz"
-hash = "bb65ad1f66ed7889e68dda2ebdfe164720c3eb0c9c6d317d47f3fcbda62a00e9"
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.17.10/fuel-core-0.17.10-x86_64-apple-darwin.tar.gz"
+hash = "cbca1a0f157686f2bf0be4c56a71dac1381bdc658e6b2a448a5cdb959491078e"
 
 [pkg.fuel-indexer]
 version = "0.8.0"

@@ -117,15 +117,11 @@ jobs:
       - name: Check for latest versions of other components and execute build-channel
         id: compare-rest
         run: |
+          CHANNEL_TOML="channel-fuel-latest.toml"
           compare-versions rest
           if [[ -f "${CHANNEL_TOML}" ]]; then
             echo "republish=true" >> $GITHUB_OUTPUT
-          fi
 
-      - name: Prepare channel with latest versions
-        if: ${{ steps.compare-rest.outputs.republish == 'true' }}
-        run: |
-            CHANNEL_TOML="channel-fuel-latest.toml"
             mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
 
             cp $CHANNEL_TOML ${{ env.LATEST_CHANNEL_DIR }}
@@ -133,6 +129,7 @@ jobs:
             mkdir archive
             PUBLISHED_DATE=$(date +'%Y-%m-%d')
             cp $CHANNEL_TOML archive/channel-fuel-latest-${PUBLISHED_DATE}.toml
+          fi
 
       - name: Deploy latest channel
         if: ${{ steps.compare-rest.outputs.republish == 'true' }}

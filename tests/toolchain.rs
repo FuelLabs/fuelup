@@ -164,7 +164,7 @@ fn fuelup_toolchain_new_disallowed() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         for toolchain in [channel::LATEST, channel::NIGHTLY] {
             let output = cfg.fuelup(&["toolchain", "new", toolchain]);
-            let expected_stderr = format!("error: Invalid value \"{toolchain}\" for '<NAME>': Cannot use distributable toolchain name '{toolchain}' as a custom toolchain name\n\nFor more information try --help\n");
+            let expected_stderr = format!("error: invalid value '{toolchain}' for '<NAME>': Cannot use distributable toolchain name '{toolchain}' as a custom toolchain name\n\nFor more information, try '--help'.\n");
             assert_eq!(output.stderr, expected_stderr);
         }
     })?;
@@ -178,7 +178,7 @@ fn fuelup_toolchain_new_disallowed_with_target() -> Result<()> {
         let target_triple = TargetTriple::from_host().unwrap();
         let toolchain_name = "latest-".to_owned() + &target_triple.to_string();
         let output = cfg.fuelup(&["toolchain", "new", &toolchain_name]);
-        let expected_stderr = format!("error: Invalid value \"{toolchain_name}\" for '<NAME>': Cannot use distributable toolchain name '{toolchain_name}' as a custom toolchain name\n\nFor more information try --help\n");
+        let expected_stderr = format!("error: invalid value '{toolchain_name}' for '<NAME>': Cannot use distributable toolchain name '{toolchain_name}' as a custom toolchain name\n\nFor more information, try '--help'.\n");
         assert_eq!(output.stderr, expected_stderr);
     })?;
 

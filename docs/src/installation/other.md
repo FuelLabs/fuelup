@@ -2,8 +2,11 @@
 
 ## Windows
 
+<!-- This section should explain Windows support -->
+<!-- windows:example:start -->
 We currently do not natively support Windows. If you wish to use `fuelup` on Windows, please
 use [Windows Subsystem for Linux].
+<!-- windows:example:end -->
 
 ## Building from source
 

@@ -1,8 +1,11 @@
 # The `latest` channel
 
+<!-- This section should give an overview of the latest channel -->
+<!-- latest:example:start -->
 The `latest` channel is updated by a scheduled GitHub workflow that **runs every 30 minutes** and checks for new, compatible releases of `forc` and `fuel-core`.
 
 The `latest` channel is `fuelup`'s default channel. It provides access to the latest compatible, published releases of `forc` and `fuel-core`.
+<!-- latest:example:end -->
 
 When installing the `latest` channel, fuelup will refer to the `channel-fuel-latest.toml` file published within the fuelup repository in the [gh-pages] branch to determine the set of `forc` and `fuel-core` versions to retrieve. The versions in this file are updated by a scheduled GitHub workflow that runs once every 30 minutes and performs the following steps:
 

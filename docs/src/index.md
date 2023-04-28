@@ -1,9 +1,12 @@
 # Introduction
 
+<!-- This section should explain what fuelup is -->
+<!-- fuelup:example:start -->
 _fuelup_ is the official package manager for [Fuel] that installs The Fuel Toolchain
 from the official release channels, enabling you to easily switch between different
 toolchains and keep them updated. It makes building and maintaining Sway applications
 simpler with [forc] and [fuel-core] for common platforms.
+<!-- fuelup:example:end -->
 
 Check out the [Concepts] chapter for an overview of how _fuelup_ works and some
 of the terminology it uses. The [Installation] chapter covers installing

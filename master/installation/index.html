@@ -170,16 +170,22 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
+<!-- This section should explain what fuelup installs -->
+<!-- fuelup:example:start -->
 <p><code>fuelup</code> installs <code>forc</code> and <code>fuel-core</code>, and other plugins like
 <code>forc-client</code> and <code>forc-fmt</code> to Fuelup's <code>bin</code> directory.
 On Unix it is located at <code>$HOME/.fuelup/bin</code>.</p>
+<!-- fuelup:example:end -->
 <p>This directory can automatically be in your <code>PATH</code> environment variable if
 allowed in the installation step (explained below), which means you can run them from the shell without further configuration.</p>
 <h2 id="quickstart"><a class="header" href="#quickstart">Quickstart</a></h2>
 <p>Installation is done through the <code>fuelup-init</code> script found on our <a href="https://github.com/FuelLabs/fuelup">repository</a>, where you may find the source code.</p>
 <p>Run the following command:</p>
+<!-- This section should have the default command to install fuelup -->
+<!-- install:example:start -->
 <pre><code class="language-sh">curl --proto '=https' --tlsv1.2 -sSf https://install.fuel.network/fuelup-init.sh | sh
 </code></pre>
+<!-- install:example:end -->
 <p>This will install <code>forc</code>, <code>forc-client</code>, <code>forc-fmt</code>, <code>forc-lsp</code>, <code>forc-wallet</code> as well as <code>fuel-core</code> in <code>~/.fuelup/bin</code>. The script will ask for permission to add <code>~/.fuelup/bin</code> to your <code>PATH</code>.</p>
 <p>Otherwise, you can also pass <code>--no-modify-path</code> so that <code>fuelup-init</code> does not modify your <code>PATH</code> and will not ask for permission to do so:</p>
 <pre><code class="language-sh">curl --proto '=https' --tlsv1.2 -sSf https://install.fuel.network/fuelup-init.sh | sh -s -- --no-modify-path

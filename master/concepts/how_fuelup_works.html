@@ -170,8 +170,11 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="how-fuelup-works"><a class="header" href="#how-fuelup-works">How fuelup works</a></h1>
+<!-- This section should explain the purpose of fuelup -->
+<!-- fuelup:example:start -->
 <p><code>fuelup</code> is largely inspired by <a href="https://github.com/rust-lang/rustup"><code>rustup</code></a>. It installs and manages multiple Fuel
 toolchains and presents them all through a single set of tools within <code>~/.fuelup/bin</code>.</p>
+<!-- fuelup:example:end -->
 <p>Generally, it is not recommended to manually make changes to the fuelup directory, otherwise <code>fuelup</code>
 might not function as expected. If you have made changes to the directory, we recommend removing
 the entire directory and re-installing fuelup with <a href="/installation/index.html#quickstart">fuelup-init</a>.</p>
@@ -190,10 +193,13 @@ and <em><a href="/overrides.html">overrides</a></em> through symlinks. <code>fue
 before trying to install them - which means you can avoid the download entirely if something
 is already cached within the store!</p>
 <h3 id="example"><a class="header" href="#example">Example</a></h3>
+<!-- This section should give an example of how fuelup works -->
+<!-- fuelup_example:example:start -->
 <p>To give an example of how this all works together: imagine typing <code>forc build</code> in your terminal.
 This call invokes <code>forc</code> (which is actually <code>fuelup</code>) within the fuelup bin directory, which in
 turn executes the correct version of <code>forc</code> based on either an override file (<code>fuel-toolchain.toml</code>)
 or your currently active toolchain (in order of priority).</p>
+<!-- fuelup_example:example:end -->
 
                     </main>
 

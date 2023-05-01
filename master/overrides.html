@@ -170,10 +170,15 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="overrides"><a class="header" href="#overrides">Overrides</a></h1>
+<!-- This section should explain fuelup overrides -->
+<!-- overrides:example:start -->
 <p><code>fuelup</code> automatically determines which <a href="concepts/toolchains.html">toolchain</a> to use when one of the installed commands like
 <code>forc</code> is executed.</p>
 <p>You can override the installed default toolchain using a <code>fuel-toolchain.toml</code> file.</p>
+<!-- overrides:example:end -->
 <h2 id="the-toolchain-file"><a class="header" href="#the-toolchain-file">The toolchain file</a></h2>
+<!-- This section should explain the fuel-toolchain.toml file -->
+<!-- toolchain:example:start -->
 <p>The fuel-toolchain.toml file allows projects to &quot;pin&quot; to a specific set of fuel toolchain component versions.
 This greatly improves the reproducibility of a project, as the fuel-toolchain.toml contains the set of known,
 working versions for each tool used to build it.</p>
@@ -181,6 +186,7 @@ working versions for each tool used to build it.</p>
 in the toolchain.</p>
 <p>In these cases, the toolchain can be specified in a file called <code>fuel-toolchain.toml</code>. These toolchains can only be
 the <a href="concepts/toolchains.html#toolchains">distributed toolchains</a> at this point in time.</p>
+<!-- toolchain:example:end -->
 <p>Here's what a sample project might look like:</p>
 <pre><code class="language-console">$ tree -L 1 # 'tree -L 1' shows the project structure up to the depth of 1
 .

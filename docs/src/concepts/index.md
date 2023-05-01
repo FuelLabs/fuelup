@@ -5,6 +5,8 @@ component of fuelup.
 
 ## Terminology
 
+<!-- This section should explain fuelup terminology -->
+<!-- terms:example:start -->
 - **channel** — The Fuel toolchain will be released to different "channels".
   Currently, it is only released to the **latest** channel.
   See the [Channels] chapter for more details.
@@ -19,6 +21,7 @@ component of fuelup.
 
 - **component** — Each release of the Fuel toolchain includes several "components",
   which are tools used to develop on Fuel. See the [Components] chapter for more details.
+<!-- terms:example:end -->
 
 [components]: components.md
 [custom toolchain]: toolchains.md#custom-toolchains

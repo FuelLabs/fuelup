@@ -1,10 +1,13 @@
 # Toolchains
 
+<!-- This section should give a basic overview of toolchains -->
+<!-- toolchains:example:start -->
 Many `fuelup` commands deal with _toolchains_, a single installation of the
 Fuel toolchain. `fuelup` supports **two** types of toolchains.
 
 1. Distributable toolchains which track the official release [channels] (eg, _latest_, _nightly_);
 2. Custom toolchains and install individual components in a modular manner.
+<!-- toolchains:example:end -->
 
 [channels]: channels/index.md
 

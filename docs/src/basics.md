@@ -16,18 +16,24 @@ represents the latest release of the Fuel toolchain.
 When new versions of the components within an distributable Fuel toolchain (`latest` or `nightly`)
 are released, simply type `fuelup update` to update:
 
+<!-- This section should show the command to update distributable toolchains -->
+<!-- update:example:start -->
 ```sh
 fuelup update
 ```
+<!-- update:example:end -->
 
 ## Keeping `fuelup` up to date
 
 You can request that `fuelup` update itself to the latest version of `fuelup`
 by running:
 
+<!-- This section should show the command to update fuelup -->
+<!-- update_fuelup:example:start -->
 ```sh
 fuelup self update
 ```
+<!-- update_fuelup:example:end -->
 
 ## Help system
 

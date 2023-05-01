@@ -139,6 +139,8 @@ jobs:
           publish_dir: ${{ env.LATEST_CHANNEL_DIR }}
           keep_files: true
           destination_dir: ./
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
 
       - name: Deploy latest channel (archive)
         if: ${{ steps.compare-rest.outputs.republish == 'true' }}
@@ -148,3 +150,5 @@ jobs:
           publish_dir: ./archive
           keep_files: true
           destination_dir: ./channels/latest
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'

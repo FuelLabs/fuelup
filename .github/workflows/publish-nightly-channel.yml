@@ -45,6 +45,8 @@ jobs:
           publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
           keep_files: true
           destination_dir: ./
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
 
       - name: Deploy nightly channel (archive)
         uses: peaceiris/actions-gh-pages@v3
@@ -53,3 +55,5 @@ jobs:
           publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
           keep_files: true
           destination_dir: ${{ steps.setup.outputs.archive_dir }}
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'

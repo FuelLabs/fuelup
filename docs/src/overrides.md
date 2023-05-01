@@ -1,12 +1,17 @@
 # Overrides
 
+<!-- This section should explain fuelup overrides -->
+<!-- overrides:example:start -->
 `fuelup` automatically determines which [toolchain] to use when one of the installed commands like
 `forc` is executed.
 
 You can override the installed default toolchain using a `fuel-toolchain.toml` file.
+<!-- overrides:example:end -->
 
 ## The toolchain file
 
+<!-- This section should explain the fuel-toolchain.toml file -->
+<!-- toolchain:example:start -->
 The fuel-toolchain.toml file allows projects to "pin" to a specific set of fuel toolchain component versions.
 This greatly improves the reproducibility of a project, as the fuel-toolchain.toml contains the set of known,
 working versions for each tool used to build it.
@@ -16,6 +21,7 @@ in the toolchain.
 
 In these cases, the toolchain can be specified in a file called `fuel-toolchain.toml`. These toolchains can only be
 the [distributed toolchains] at this point in time.
+<!-- toolchain:example:end -->
 
 Here's what a sample project might look like:
 

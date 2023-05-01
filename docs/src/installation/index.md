@@ -1,8 +1,11 @@
 # Installation
 
+<!-- This section should explain what fuelup installs -->
+<!-- fuelup:example:start -->
 `fuelup` installs `forc` and `fuel-core`, and other plugins like
 `forc-client` and `forc-fmt` to Fuelup's `bin` directory.
 On Unix it is located at `$HOME/.fuelup/bin`.
+<!-- fuelup:example:end -->
 
 This directory can automatically be in your `PATH` environment variable if
 allowed in the installation step (explained below), which means you can run them from the shell without further configuration.
@@ -13,9 +16,12 @@ Installation is done through the `fuelup-init` script found on our [repository],
 
 Run the following command:
 
+<!-- This section should have the default command to install fuelup -->
+<!-- install:example:start -->
 ```sh
 curl --proto '=https' --tlsv1.2 -sSf https://install.fuel.network/fuelup-init.sh | sh
 ```
+<!-- install:example:end -->
 
 This will install `forc`, `forc-client`, `forc-fmt`, `forc-lsp`, `forc-wallet` as well as `fuel-core` in `~/.fuelup/bin`. The script will ask for permission to add `~/.fuelup/bin` to your `PATH`.
 

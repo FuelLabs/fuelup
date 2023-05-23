@@ -1,23 +1,24 @@
-date = "2023-05-22"
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/5062011634"
+date = "2023-05-23"
 
 [pkg.forc]
-version = "0.38.0"
+version = "0.39.0"
 
 [pkg.forc.target.linux_amd64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.38.0/forc-binaries-linux_amd64.tar.gz"
-hash = "f506f77f17ad49af391d7fdfa6ef2081a4dee3bd1070d6e0a5373812201b9eca"
+url = "https://github.com/FuelLabs/sway/releases/download/v0.39.0/forc-binaries-linux_amd64.tar.gz"
+hash = "8ae69f9bea39678826498642f14e946d7a256787413c92d062f849c41ba95386"
 
 [pkg.forc.target.linux_arm64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.38.0/forc-binaries-linux_arm64.tar.gz"
-hash = "ac0389e4eb6687614620c4cfb5bb4d5f0bc77a90e4f7d1c3acee9a569cfcde99"
+url = "https://github.com/FuelLabs/sway/releases/download/v0.39.0/forc-binaries-linux_arm64.tar.gz"
+hash = "93b4b07716112f88d981ef7c372894421668ca04ff1c11e0714e9c96fab4025a"
 
 [pkg.forc.target.darwin_amd64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.38.0/forc-binaries-darwin_amd64.tar.gz"
-hash = "1729e522daa0eb24640bc8ce1997bacd3558801d49fbe5f8193d5d957771bb15"
+url = "https://github.com/FuelLabs/sway/releases/download/v0.39.0/forc-binaries-darwin_amd64.tar.gz"
+hash = "b304cdfdc6a6abc57515a2360382a4d1e0374c5618beb3035c377849962d7d53"
 
 [pkg.forc.target.darwin_arm64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.38.0/forc-binaries-darwin_arm64.tar.gz"
-hash = "e0749446d96f70cc8feb088e6c39fbe182da2b69302d54fe3b252a6204b04802"
+url = "https://github.com/FuelLabs/sway/releases/download/v0.39.0/forc-binaries-darwin_arm64.tar.gz"
+hash = "29da5e7955f847223a7068138a353780e012286375d838b8b58628fe2331340a"
 
 [pkg.forc-explore]
 version = "0.28.1"

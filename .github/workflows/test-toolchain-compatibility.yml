@@ -68,7 +68,7 @@ jobs:
         run: cd sway && cargo run --locked --release --bin test -- --target evm --locked
 
       - name: Build All Tests
-        run: cd sway/test/src/sdk-harness && bash build.sh --locked && cd ../../../../
+        run: cd sway && cargo run --locked -p forc -- build --locked --path ./test/src/sdk-harness 
 
       - name: Cargo Test sway-lib-std
         id: std-lib-tests

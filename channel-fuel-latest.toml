@@ -50,6 +50,10 @@ hash = "1ee1ed00f60531b30a992e6ddea3d14028dbfa06b10ab94bd5edf466c1bad81e"
 url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.14.0/forc-index-0.14.0-x86_64-unknown-linux-gnu.tar.gz"
 hash = "7f2fcefcbf12973243c82ba1dc5bc2e26bee4486ec79aecb73d142099804b033"
 
+[pkg.forc-index.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.14.0/forc-index-0.14.0-aarch64-apple-darwin.tar.gz"
+hash = "7fa383c697c8ba9d71c36b4e552e17b3ce41b80d0ef19ba4457318718200c600"
+
 [pkg.forc-index.target.x86_64-apple-darwin]
 url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.14.0/forc-index-0.14.0-x86_64-apple-darwin.tar.gz"
 hash = "24af35a975f4aaf28eef65c51fad492f40400d7aa0c18b49e0635ccd4c0c82d8"

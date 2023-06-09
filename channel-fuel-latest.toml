@@ -1,4 +1,5 @@
-date = "2023-06-06"
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/5223272291"
+date = "2023-06-09"
 
 [pkg.forc]
 version = "0.40.1"
@@ -77,23 +78,23 @@ url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.2.2/forc-wal
 hash = "33530736a68d630e11912d50ac96f2ce5251c34e8fbb823e4d6ed502a30dd59f"
 
 [pkg.fuel-core]
-version = "0.18.1"
+version = "0.18.2"
 
 [pkg.fuel-core.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.18.1/fuel-core-0.18.1-aarch64-unknown-linux-gnu.tar.gz"
-hash = "94d7419fbb96cce5e00adfdf6568985472cad36a9d48d99f33f85fd35cfc6f9a"
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.18.2/fuel-core-0.18.2-aarch64-unknown-linux-gnu.tar.gz"
+hash = "d1ed2040266d294cafaedee10a24681144933839ac52708383e6eedd95151e5e"
 
 [pkg.fuel-core.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.18.1/fuel-core-0.18.1-x86_64-unknown-linux-gnu.tar.gz"
-hash = "77e0c0f091c33976a61bdb7b74c04361029882ae52352ededf58c3aa9852aad2"
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.18.2/fuel-core-0.18.2-x86_64-unknown-linux-gnu.tar.gz"
+hash = "214b53424bf443ebb16f7d68c2624e9f4b717ccdaea2bd50f9c1cb72d924e9f7"
 
 [pkg.fuel-core.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.18.1/fuel-core-0.18.1-aarch64-apple-darwin.tar.gz"
-hash = "45358dfeb1c566f869b84028e7ca02938212734e7e8854544f54d680a50752c7"
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.18.2/fuel-core-0.18.2-aarch64-apple-darwin.tar.gz"
+hash = "64b71d856a472b0f7ac8d388a65db903377eff2533aa351bbe96d125aef1247a"
 
 [pkg.fuel-core.target.x86_64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.18.1/fuel-core-0.18.1-x86_64-apple-darwin.tar.gz"
-hash = "b83f61141e57b90b0ab20801b925dbff2a631ac8918c8a27be4745af19c072fc"
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.18.2/fuel-core-0.18.2-x86_64-apple-darwin.tar.gz"
+hash = "f8b3223233518671b494e071788c696a4814216f172a0d4c57bbf9fff05ff73a"
 
 [pkg.fuel-indexer]
 version = "0.16.2"

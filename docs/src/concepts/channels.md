@@ -1,4 +1,35 @@
-# The `latest` channel
+# Channels
+
+<!-- This section should give an overview of fuelup channels -->
+<!-- channels:example:start -->
+`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, the `latest` and `nightly` channels are published and serve as a source of distribution of Fuel toolchain binaries.
+
+| Channel       | Source          | Integration Tested   | Update Frequency         | Available |
+| ------------- | --------------- | -------------------- | ------------------------ | --------- |
+| **[latest]**  | published bins  | ✔️                    | checked every 30 minutes  | ✔️         |
+| **[nightly]** | `master` branch | ➖                   | nightly (1:00 AM UTC)     | ✔️         |
+| **[beta-3]**  | published bins  | ➖                   | only when necessary       | ✔️         |
+<!-- channels:example:end -->
+
+## The `beta-3` channel
+
+The `beta-3` channel is a published TOML file describing the toolchain that is compatible with our [beta-3 testnet](https://fuel-labs.ghost.io/announcing-beta-3-testnet/). This toolchain should be used to interact with and build on the testnet. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-3.toml).
+
+## The `nightly` channel
+
+<!-- This section should give an overview of the nightly channel -->
+<!-- nightly:example:start -->
+The `nightly` channel is a published TOML file describing successful builds of the `master` branch of `forc` and `fuel-core` for the day.
+These builds are released in the [sway-nightly-binaries] repository and the workflows in that repo start building them every day at **00:00 UTC**.
+
+The `nightly` channel within `fuelup` is updated by a scheduled GitHub workflow that **runs every day at 01:00 UTC**, after builds have finished.
+Note that nightlies might fail to build, in which case it is possible that the `nightly` toolchain may not be available for that day.
+
+You should use `nightly` if you want the latest changes to `master` that have not been officially released yet.
+Keep in mind that compatibility between `forc` and `fuel-core` is not guaranteed here, and you should expect unstable features to break.
+<!-- nightly:example:end -->
+
+## The `latest` channel
 
 <!-- This section should give an overview of the latest channel -->
 <!-- latest:example:start -->
@@ -48,4 +79,8 @@ Some changes you might want to make to allow for easier testing:
 
 You may also use [nektos/act](https://github.com/nektos/act) to run the workflow(s) locally.
 
+[sway-nightly-binaries]: https://github.com/FuelLabs/sway-nightly-binaries/releases
+[latest]: #the-latest-channel
+[nightly]: #the-nightly-channel
+[beta-3]: #the-beta-3-channel
 [gh-pages]: https://github.com/FuelLabs/fuelup/tree/gh-pages

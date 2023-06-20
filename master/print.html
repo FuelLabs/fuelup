@@ -97,7 +97,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><a href="installation/index.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="installation/other.html"><strong aria-hidden="true">1.1.</strong> Other installation methods</a></li></ol></li><li class="chapter-item expanded "><a href="concepts/index.html"><strong aria-hidden="true">2.</strong> Concepts</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="concepts/how_fuelup_works.html"><strong aria-hidden="true">2.1.</strong> How fuelup works</a></li><li class="chapter-item expanded "><a href="concepts/channels/index.html"><strong aria-hidden="true">2.2.</strong> Channels</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="concepts/channels/latest.html"><strong aria-hidden="true">2.2.1.</strong> latest</a></li><li class="chapter-item expanded "><a href="concepts/channels/nightly.html"><strong aria-hidden="true">2.2.2.</strong> nightly</a></li><li class="chapter-item expanded "><a href="concepts/channels/beta-3.html"><strong aria-hidden="true">2.2.3.</strong> beta-3</a></li><li class="chapter-item expanded "><a href="concepts/channels/beta-2.html"><strong aria-hidden="true">2.2.4.</strong> beta-2</a></li><li class="chapter-item expanded "><a href="concepts/channels/beta-1.html"><strong aria-hidden="true">2.2.5.</strong> beta-1</a></li></ol></li><li class="chapter-item expanded "><a href="concepts/toolchains.html"><strong aria-hidden="true">2.3.</strong> Toolchains</a></li><li class="chapter-item expanded "><a href="concepts/components.html"><strong aria-hidden="true">2.4.</strong> Components</a></li><li class="chapter-item expanded "><a href="concepts/proxies.html"><strong aria-hidden="true">2.5.</strong> Proxies</a></li><li class="chapter-item expanded "><a href="concepts/store.html"><strong aria-hidden="true">2.6.</strong> Store</a></li></ol></li><li class="chapter-item expanded "><a href="basics.html"><strong aria-hidden="true">3.</strong> Basic usage</a></li><li class="chapter-item expanded "><a href="overrides.html"><strong aria-hidden="true">4.</strong> Overrides</a></li><li class="chapter-item expanded "><a href="configuration.html"><strong aria-hidden="true">5.</strong> Configuration</a></li><li class="chapter-item expanded "><a href="examples.html"><strong aria-hidden="true">6.</strong> Examples</a></li><li class="chapter-item expanded "><a href="developer_guide/index.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="developer_guide/contributing_to_fuelup.html"><strong aria-hidden="true">7.1.</strong> Contributing to fuelup</a></li><li class="chapter-item expanded "><a href="developer_guide/adding_components.html"><strong aria-hidden="true">7.2.</strong> Adding components</a></li><li class="chapter-item expanded "><a href="developer_guide/building_a_channel.html"><strong aria-hidden="true">7.3.</strong> Building a channel</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><a href="installation/index.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="installation/other.html"><strong aria-hidden="true">1.1.</strong> Other installation methods</a></li></ol></li><li class="chapter-item expanded "><a href="concepts/index.html"><strong aria-hidden="true">2.</strong> Concepts</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="concepts/how_fuelup_works.html"><strong aria-hidden="true">2.1.</strong> How fuelup works</a></li><li class="chapter-item expanded "><a href="concepts/channels.html"><strong aria-hidden="true">2.2.</strong> Channels</a></li><li class="chapter-item expanded "><a href="concepts/toolchains.html"><strong aria-hidden="true">2.3.</strong> Toolchains</a></li><li class="chapter-item expanded "><a href="concepts/components.html"><strong aria-hidden="true">2.4.</strong> Components</a></li><li class="chapter-item expanded "><a href="concepts/proxies.html"><strong aria-hidden="true">2.5.</strong> Proxies</a></li><li class="chapter-item expanded "><a href="concepts/store.html"><strong aria-hidden="true">2.6.</strong> Store</a></li></ol></li><li class="chapter-item expanded "><a href="basics.html"><strong aria-hidden="true">3.</strong> Basic usage</a></li><li class="chapter-item expanded "><a href="overrides.html"><strong aria-hidden="true">4.</strong> Overrides</a></li><li class="chapter-item expanded "><a href="configuration.html"><strong aria-hidden="true">5.</strong> Configuration</a></li><li class="chapter-item expanded "><a href="examples.html"><strong aria-hidden="true">6.</strong> Examples</a></li><li class="chapter-item expanded "><a href="developer_guide/index.html"><strong aria-hidden="true">7.</strong> Developer guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="developer_guide/contributing_to_fuelup.html"><strong aria-hidden="true">7.1.</strong> Contributing to fuelup</a></li><li class="chapter-item expanded "><a href="developer_guide/adding_components.html"><strong aria-hidden="true">7.2.</strong> Adding components</a></li><li class="chapter-item expanded "><a href="developer_guide/building_a_channel.html"><strong aria-hidden="true">7.3.</strong> Building a channel</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -290,16 +290,26 @@ or your currently active toolchain (in order of priority).</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="channels"><a class="header" href="#channels">Channels</a></h1>
 <!-- This section should give an overview of fuelup channels -->
 <!-- channels:example:start -->
-<p><code>fuelup</code> adopts a simplified version of <code>rustup</code> <a href="https://rust-lang.github.io/rustup/concepts/channels.html">channels</a>. Currently, the <code>latest</code> and <code>nightly</code> channels are published and serve as a source of distribution of Fuel toolchain binaries.</p>
+<p><code>fuelup</code> adopts a simplified version of <code>rustup</code> <a href="https://rust-lang.github.io/rustup/concepts/channels.html">channels</a>. Currently, the <code>latest</code>, <code>nightly</code>, and <code>beta</code> channels are published and serve as a source of distribution of Fuel toolchain binaries.</p>
 <table><thead><tr><th>Channel</th><th>Source</th><th>Integration Tested</th><th>Update Frequency</th><th>Available</th></tr></thead><tbody>
-<tr><td><strong><a href="concepts/channels/latest.html">latest</a></strong></td><td>published bins</td><td>✔️</td><td>checked every 30 minutes</td><td>✔️</td></tr>
-<tr><td><strong><a href="concepts/channels/nightly.html">nightly</a></strong></td><td><code>master</code> branch</td><td>➖</td><td>nightly (1:00 AM UTC)</td><td>✔️</td></tr>
-<tr><td><strong><a href="concepts/channels/beta-3.html">beta-3</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
-<tr><td><strong><a href="concepts/channels/beta-2.html">beta-2</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
-<tr><td><strong><a href="concepts/channels/beta-1.html">beta-1</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
+<tr><td><strong><a href="concepts/channels.html#the-latest-channel">latest</a></strong></td><td>published bins</td><td>✔️</td><td>checked every 30 minutes</td><td>✔️</td></tr>
+<tr><td><strong><a href="concepts/channels.html#the-nightly-channel">nightly</a></strong></td><td><code>master</code> branch</td><td>➖</td><td>nightly (1:00 AM UTC)</td><td>✔️</td></tr>
+<tr><td><strong><a href="concepts/channels.html#the-beta-3-channel">beta-3</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
 </tbody></table>
 <!-- channels:example:end -->
-<div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="the-latest-channel"><a class="header" href="#the-latest-channel">The <code>latest</code> channel</a></h1>
+<h2 id="the-beta-3-channel"><a class="header" href="#the-beta-3-channel">The <code>beta-3</code> channel</a></h2>
+<p>The <code>beta-3</code> channel is a published TOML file describing the toolchain that is compatible with our <a href="https://fuel-labs.ghost.io/announcing-beta-3-testnet/">beta-3 testnet</a>. This toolchain should be used to interact with and build on the testnet. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-3.toml">here</a>.</p>
+<h2 id="the-nightly-channel"><a class="header" href="#the-nightly-channel">The <code>nightly</code> channel</a></h2>
+<!-- This section should give an overview of the nightly channel -->
+<!-- nightly:example:start -->
+<p>The <code>nightly</code> channel is a published TOML file describing successful builds of the <code>master</code> branch of <code>forc</code> and <code>fuel-core</code> for the day.
+These builds are released in the <a href="https://github.com/FuelLabs/sway-nightly-binaries/releases">sway-nightly-binaries</a> repository and the workflows in that repo start building them every day at <strong>00:00 UTC</strong>.</p>
+<p>The <code>nightly</code> channel within <code>fuelup</code> is updated by a scheduled GitHub workflow that <strong>runs every day at 01:00 UTC</strong>, after builds have finished.
+Note that nightlies might fail to build, in which case it is possible that the <code>nightly</code> toolchain may not be available for that day.</p>
+<p>You should use <code>nightly</code> if you want the latest changes to <code>master</code> that have not been officially released yet.
+Keep in mind that compatibility between <code>forc</code> and <code>fuel-core</code> is not guaranteed here, and you should expect unstable features to break.</p>
+<!-- nightly:example:end -->
+<h2 id="the-latest-channel"><a class="header" href="#the-latest-channel">The <code>latest</code> channel</a></h2>
 <!-- This section should give an overview of the latest channel -->
 <!-- latest:example:start -->
 <p>The <code>latest</code> channel is updated by a scheduled GitHub workflow that <strong>runs every 30 minutes</strong> and checks for new, compatible releases of <code>forc</code> and <code>fuel-core</code>.</p>
@@ -343,31 +353,13 @@ or your currently active toolchain (in order of priority).</p>
 </li>
 </ol>
 <p>You may also use <a href="https://github.com/nektos/act">nektos/act</a> to run the workflow(s) locally.</p>
-<div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="the-nightly-channel"><a class="header" href="#the-nightly-channel">The <code>nightly</code> channel</a></h1>
-<!-- This section should give an overview of the nightly channel -->
-<!-- nightly:example:start -->
-<p>The <code>nightly</code> channel is a published TOML file describing successful builds of the <code>master</code> branch of <code>forc</code> and <code>fuel-core</code> for the day.
-These builds are released in the <a href="https://github.com/FuelLabs/sway-nightly-binaries/releases">sway-nightly-binaries</a> repository and the workflows in that repo start building them every day at <strong>00:00 UTC</strong>.</p>
-<p>The <code>nightly</code> channel within <code>fuelup</code> is updated by a scheduled GitHub workflow that <strong>runs every day at 01:00 UTC</strong>, after builds have finished.
-Note that nightlies might fail to build, in which case it is possible that the <code>nightly</code> toolchain may not be available for that day.</p>
-<p>You should use <code>nightly</code> if you want the latest changes to <code>master</code> that have not been officially released yet.
-Keep in mind that compatibility between <code>forc</code> and <code>fuel-core</code> is not guaranteed here, and you should expect unstable features to break.</p>
-<!-- nightly:example:end -->
-<div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="the-beta-3-channel"><a class="header" href="#the-beta-3-channel">The <code>beta-3</code> channel</a></h1>
-<p>The <code>beta-3</code> channel is a published TOML file describing the toolchain that is compatible with our <a href="https://fuel-labs.ghost.io/announcing-beta-3-testnet/">beta-3 testnet</a>. This toolchain should be used to interact with and build on the testnet. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-3.toml">here</a>.</p>
-<div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="the-beta-2-channel"><a class="header" href="#the-beta-2-channel">The <code>beta-2</code> channel</a></h1>
-<p>The <code>beta-2</code> channel is a published TOML file describing the toolchain that is compatible with our <a href="https://fuel-labs.ghost.io/announcing-beta-2-testnet/">beta-2 testnet</a>.
-This toolchain should be used to interact with and build on the testnet. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-2.toml">here</a>.</p>
-<div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="the-beta-1-channel"><a class="header" href="#the-beta-1-channel">The <code>beta-1</code> channel</a></h1>
-<p>The <code>beta-1</code> channel is a published TOML file describing the toolchain that is compatible with our <a href="https://fuel-labs.ghost.io/introducing-beta-1-testnet/">beta-1 testnet</a>.
-This toolchain should be used to interact with and build on the testnet. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-1.toml">here</a>.</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="toolchains"><a class="header" href="#toolchains">Toolchains</a></h1>
 <!-- This section should give a basic overview of toolchains -->
 <!-- toolchains:example:start -->
 <p>Many <code>fuelup</code> commands deal with <em>toolchains</em>, a single installation of the
 Fuel toolchain. <code>fuelup</code> supports <strong>two</strong> types of toolchains.</p>
 <ol>
-<li>Distributable toolchains which track the official release <a href="concepts/channels/index.html">channels</a> (eg, <em>latest</em>, <em>nightly</em>);</li>
+<li>Distributable toolchains which track the official release <a href="concepts/channels.html">channels</a> (eg, <em>latest</em>, <em>nightly</em>);</li>
 <li>Custom toolchains and install individual components in a modular manner.</li>
 </ol>
 <!-- toolchains:example:end -->
@@ -435,7 +427,7 @@ installed <code>fuelup</code> via <code>fuelup-init</code>:</p>
 <pre><code class="language-sh">fuelup toolchain install latest
 </code></pre>
 <h2 id="keeping-the-fuel-toolchain-up-to-date"><a class="header" href="#keeping-the-fuel-toolchain-up-to-date">Keeping the Fuel toolchain up to date</a></h2>
-<p>The Fuel toolchain is distributed on one <a href="concepts/channels/index.html">release channel</a>: latest (with nightly being a WIP).
+<p>The Fuel toolchain is distributed on one <a href="concepts/channels.html">release channel</a>: latest (with nightly being a WIP).
 <code>fuelup</code> uses the <code>latest</code> channel by default, which
 represents the latest release of the Fuel toolchain.</p>
 <p>When new versions of the components within an distributable Fuel toolchain (<code>latest</code> or <code>nightly</code>)
@@ -487,17 +479,16 @@ the <a href="concepts/toolchains.html#toolchains">distributed toolchains</a> at 
 └── SPECIFICATION.md
 </code></pre>
 <h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
-<p>An application using the <a href="concepts/channels/beta-2.html"><code>beta-2</code></a> toolchain:</p>
+<p>An application using the <a href="concepts/channels#the-beta-3-channel"><code>beta-3</code></a> toolchain:</p>
 <pre><code class="language-toml">[toolchain]
-channel = &quot;beta-2&quot;
+channel = &quot;beta-3&quot;
 </code></pre>
-<p>Let's say we have a project on the <code>beta-2</code> testnet, and we want to try using the
-latest (at time of writing) forc to develop on it:</p>
+<p>Let's say we have a project on the <code>beta-3</code> testnet, and we want to try using a different version forc to develop on it:</p>
 <pre><code class="language-toml">[toolchain]
-channel = &quot;beta-2&quot;
+channel = &quot;beta-3&quot;
 
 [components]
-forc = &quot;0.33.0&quot; # in beta-2, forc is pinned to v0.31.1
+forc = &quot;0.36.0&quot; # in beta-3, forc is pinned to v0.37.3
 </code></pre>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
 <p><em>fuelup</em> has a <a href="https://github.com/toml-lang/toml">TOML</a> settings file at
@@ -592,7 +583,7 @@ generated completions.</p>
 </ul>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="contributing-to-fuelup"><a class="header" href="#contributing-to-fuelup">Contributing To Fuelup</a></h1>
 <p>Thanks for your interest in contributing to <code>fuelup</code>! This document outlines the process for installing and setting up <code>fuelup</code>, as well as some conventions on contributing to <code>fuelup</code>.</p>
-<p>If you run into any difficulties getting started, you can always ask questions on our <a href="https://discord.gg/xfpK4Pe">Discord</a>.</p>
+<p>If you run into any difficulties getting started, you can always ask questions on our <a href="https://forum.fuel.network/">Forum</a>.</p>
 <h2 id="getting-the-repository"><a class="header" href="#getting-the-repository">Getting the repository</a></h2>
 <ol>
 <li>Visit the <a href="https://github.com/FuelLabs/fuelup">fuelup</a> repo and fork the project.</li>
@@ -721,7 +712,7 @@ but certain components like <code>forc</code> itself and <code>forc-client</code
 <li><em>Optional</em>. Declares if the component is published as a standalone, or packaged with <code>forc</code>.</li>
 </ul>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="building-a-channel"><a class="header" href="#building-a-channel">Building a channel</a></h1>
-<p><code>build-channel</code> is a Rust script that creates a <a href="developer_guide/../concepts/channels/index.html">channel</a> that serves as a source of distribution of
+<p><code>build-channel</code> is a Rust script that creates a <a href="developer_guide/../concepts/channels.html">channel</a> that serves as a source of distribution of
 the Fuel toolchain. This is accomplished by querying and collecting a list of downloadable components that
 Fuel Labs publishes, creating a TOML file based on the collated data, which is then consumed by <code>fuelup</code>
 during usage.</p>
@@ -732,7 +723,7 @@ during usage.</p>
 <p>This script's main usage is found within the <code>fuelup</code> CI. This script is in charge of publishing the <code>latest</code> and
 <code>nightly</code> channels on a routine basis.</p>
 <p>The <code>latest</code> channel is re-built if the <a href="https://github.com/FuelLabs/fuelup/actions/workflows/index-versions.yml">check versions workflow</a> detects a new release of <code>forc</code> or <code>fuel-core</code>, and
-compatibility tests pass after that. This is explained in detail in the <a href="developer_guide/../concepts/channels/latest.html#understanding-the-latest-workflow">latest channel developer guide</a>.</p>
+compatibility tests pass after that. This is explained in detail in the <a href="developer_guide/../concepts/channels.html#understanding-the-latest-workflow">latest channel developer guide</a>.</p>
 <p>An example of this usage is in <a href="https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/test-toolchain-compatibility.yml#L174">test-toolchain-compatibility.yml</a>.</p>
 <p>The <code>nightly</code> channel is more straightforward - a channel is built at 01:00 UTC every day, containing the download
 links to binaries found within the <a href="https://github.com/FuelLabs/sway-nightly-binaries">sway-nightly-binaries repository</a>.</p>

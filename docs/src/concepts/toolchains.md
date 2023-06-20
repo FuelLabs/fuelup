@@ -9,7 +9,7 @@ Fuel toolchain. `fuelup` supports **two** types of toolchains.
 2. Custom toolchains and install individual components in a modular manner.
 <!-- toolchains:example:end -->
 
-[channels]: channels/index.md
+[channels]: channels.md
 
 ## Toolchain specification
 

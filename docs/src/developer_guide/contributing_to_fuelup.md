@@ -2,7 +2,7 @@
 
 Thanks for your interest in contributing to `fuelup`! This document outlines the process for installing and setting up `fuelup`, as well as some conventions on contributing to `fuelup`.
 
-If you run into any difficulties getting started, you can always ask questions on our [Discord](https://discord.gg/xfpK4Pe).
+If you run into any difficulties getting started, you can always ask questions on our [Forum](https://forum.fuel.network/).
 
 ## Getting the repository
 

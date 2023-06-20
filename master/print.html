@@ -264,9 +264,9 @@ toolchains and presents them all through a single set of tools within <code>~/.f
 <!-- fuelup:example:end -->
 <p>Generally, it is not recommended to manually make changes to the fuelup directory, otherwise <code>fuelup</code>
 might not function as expected. If you have made changes to the directory, we recommend removing
-the entire directory and re-installing fuelup with <a href="concepts//installation/index.html#quickstart">fuelup-init</a>.</p>
+the entire directory and re-installing fuelup with <a href="concepts/../installation/index.html#quickstart">fuelup-init</a>.</p>
 <h2 id="proxies"><a class="header" href="#proxies">Proxies</a></h2>
-<p>On the surface, the installed executables seem to live in <code>~/.fuelup/bin</code>, but the <a href="https://fuellabs.github.io/sway/master/forc/index.html"><code>forc</code></a>, <a href="https://github.com/FuelLabs/fuel-core"><code>fuel-core</code></a>
+<p>On the surface, the installed executables seem to live in <code>~/.fuelup/bin</code>, but the <a href="https://fuellabs.github.io/sway/master/book/forc/index.html"><code>forc</code></a>, <a href="https://github.com/FuelLabs/fuel-core"><code>fuel-core</code></a>
 and other executables installed in <code>~/.fuelup/bin</code> are actually not the real binaries
 but are all just symlinks to <code>fuelup</code> itself! <code>fuelup</code> contains logic to act as a
 <a href="concepts/proxies.html">proxy</a> for the real binaries, so that it can change its behavior based on what component
@@ -276,7 +276,7 @@ break the behavior of <code>fuelup</code>.</p>
 <h2 id="store"><a class="header" href="#store">Store</a></h2>
 <p>All actual executables are installed within the <em><a href="concepts/store.html">store</a></em>. This is usually <code>~/.fuelup/store</code>.
 This is where the real binaries are installed and cached to be used in <em><a href="concepts/toolchains.html">toolchains</a></em>
-and <em><a href="concepts//overrides.html">overrides</a></em> through symlinks. <code>fuelup</code> will always check the store for existing components
+and <em><a href="concepts/../overrides.html">overrides</a></em> through symlinks. <code>fuelup</code> will always check the store for existing components
 before trying to install them - which means you can avoid the download entirely if something
 is already cached within the store!</p>
 <h3 id="example"><a class="header" href="#example">Example</a></h3>
@@ -400,10 +400,10 @@ modular manner, and to specify specific versions of components to install.</p>
 <h2 id="components-overview"><a class="header" href="#components-overview">Components overview</a></h2>
 <p>The following is an overview of components installable through <code>fuelup</code>:</p>
 <ul>
-<li><a href="https://fuellabs.github.io/sway/master/forc/index.html"><code>forc</code></a> — The Fuel Orchestrator, a suite of tools to work with the Fuel ecosystem. This comes
-with some built-in plugin executables, including but not limited to: <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_client/index.html"><code>forc-client</code></a>, <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_fmt.html"><code>forc-fmt</code></a> and <a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_lsp.html"><code>forc-lsp</code></a>.</li>
+<li><a href="https://fuellabs.github.io/sway/master/book/forc/index.html"><code>forc</code></a> — The Fuel Orchestrator, a suite of tools to work with the Fuel ecosystem. This comes
+with some built-in plugin executables, including but not limited to: <a href="https://fuellabs.github.io/sway/master/book/forc/plugins/forc_client/index.html"><code>forc-client</code></a>, <a href="https://fuellabs.github.io/sway/master/book/forc/plugins/forc_fmt.html"><code>forc-fmt</code></a> and <a href="https://fuellabs.github.io/sway/master/book/forc/plugins/forc_lsp.html"><code>forc-lsp</code></a>.</li>
 <li><a href="https://github.com/FuelLabs/fuel-core"><code>fuel-core</code></a> — Full node implementation of the Fuel v2 protocol, written in Rust.</li>
-<li><a href="https://fuellabs.github.io/sway/master/forc/plugins/forc_explore.html"><code>forc-explore</code></a> — A Forc plugin for running the Fuel Block Explorer.</li>
+<li><a href="https://fuellabs.github.io/sway/master/book/forc/plugins/forc_explore.html"><code>forc-explore</code></a> — A Forc plugin for running the Fuel Block Explorer.</li>
 <li><a href="https://github.com/FuelLabs/forc-wallet"><code>forc-wallet</code></a> - A Forc plugin for managing Fuel wallets.</li>
 <li><a href="https://github.com/FuelLabs/fuel-indexer"><code>fuel-indexer</code></a> - A standalone service that can be used to index various components of the Fuel blockchain.</li>
 <li><a href="https://github.com/FuelLabs/fuel-indexer"><code>forc-index</code></a> - A Forc plugin used to interact with a Fuel Indexer service.</li>
@@ -419,7 +419,7 @@ running a component's command will use <code>fuelup</code> as a proxy to execute
 toolchains if they are working on different projects.</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="store-1"><a class="header" href="#store-1">Store</a></h1>
 <p>This is where all the actual binaries are installed and sometimes executed through
-<a href="concepts//overrides.html">overrides</a>. Components will be installed in directories named in the format <code>&lt;NAME&gt;-&lt;VERSION&gt;</code>.</p>
+<a href="concepts/../overrides.html">overrides</a>. Components will be installed in directories named in the format <code>&lt;NAME&gt;-&lt;VERSION&gt;</code>.</p>
 <p>For example, forc v0.35.5 will be installed in a directory called <code>forc-0.35.5</code>.</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="basic-usage"><a class="header" href="#basic-usage">Basic usage</a></h1>
 <p>The quickest way to get started is to install the <code>latest</code> toolchain, although this step should be automatically done if you

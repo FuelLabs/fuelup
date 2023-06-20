@@ -2,7 +2,7 @@
 
 <!-- This section should give an overview of fuelup channels -->
 <!-- channels:example:start -->
-`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, the `latest` and `nightly` channels are published and serve as a source of distribution of Fuel toolchain binaries.
+`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, the `latest`, `nightly`, and `beta` channels are published and serve as a source of distribution of Fuel toolchain binaries.
 
 | Channel       | Source          | Integration Tested   | Update Frequency         | Available |
 | ------------- | --------------- | -------------------- | ------------------------ | --------- |

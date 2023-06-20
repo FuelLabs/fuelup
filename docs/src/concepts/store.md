@@ -5,4 +5,4 @@ This is where all the actual binaries are installed and sometimes executed throu
 
 For example, forc v0.35.5 will be installed in a directory called `forc-0.35.5`.
 
-[overrides]: /overrides.md
+[overrides]: ../overrides.md

@@ -29,12 +29,12 @@ with some built-in plugin executables, including but not limited to: [`forc-clie
 - [`forc-index`] - A Forc plugin used to interact with a Fuel Indexer service.
 
 [toolchain]: toolchains.md
-[`forc`]: https://fuellabs.github.io/sway/master/forc/index.html
+[`forc`]: https://fuellabs.github.io/sway/master/book/forc/index.html
 [`fuel-core`]: https://github.com/FuelLabs/fuel-core
-[`forc-explore`]: https://fuellabs.github.io/sway/master/forc/plugins/forc_explore.html
-[`forc-fmt`]: https://fuellabs.github.io/sway/master/forc/plugins/forc_fmt.html
-[`forc-lsp`]: https://fuellabs.github.io/sway/master/forc/plugins/forc_lsp.html
-[`forc-client`]: https://fuellabs.github.io/sway/master/forc/plugins/forc_client/index.html
+[`forc-explore`]: https://fuellabs.github.io/sway/master/book/forc/plugins/forc_explore.html
+[`forc-fmt`]: https://fuellabs.github.io/sway/master/book/forc/plugins/forc_fmt.html
+[`forc-lsp`]: https://fuellabs.github.io/sway/master/book/forc/plugins/forc_lsp.html
+[`forc-client`]: https://fuellabs.github.io/sway/master/book/forc/plugins/forc_client/index.html
 [`forc-wallet`]: https://github.com/FuelLabs/forc-wallet
 [`fuel-indexer`]: https://github.com/FuelLabs/fuel-indexer
 [`forc-index`]: https://github.com/FuelLabs/fuel-indexer

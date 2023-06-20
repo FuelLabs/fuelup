@@ -39,11 +39,11 @@ turn executes the correct version of `forc` based on either an override file (`f
 or your currently active toolchain (in order of priority).
 <!-- fuelup_example:example:end -->
 
-[fuelup-init]: /installation/index.html#quickstart
+[fuelup-init]: ../installation/index.html#quickstart
 [`rustup`]: https://github.com/rust-lang/rustup
-[`forc`]: https://fuellabs.github.io/sway/master/forc/index.html
+[`forc`]: https://fuellabs.github.io/sway/master/book/forc/index.html
 [`fuel-core`]: https://github.com/FuelLabs/fuel-core
 [proxy]: proxies.md
 [store]: store.md
 [toolchains]: toolchains.md
-[overrides]: /overrides.md
+[overrides]: ../overrides.md

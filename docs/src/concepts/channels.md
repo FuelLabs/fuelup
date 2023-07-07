@@ -15,6 +15,10 @@
 
 The `beta-3` channel is a published TOML file describing the toolchain that is compatible with our [beta-3 testnet](https://fuel-labs.ghost.io/announcing-beta-3-testnet/). This toolchain should be used to interact with and build on the testnet. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-3.toml).
 
+## The `beta-4-rc` channel
+
+The `beta-4-rc` channel offers developers an early opportunity to test out new features and improvements, including enhancements and bug fixes made since the beta-3 version. If maintaining compatibility with the beta-3 testnet is required for your project, we recommend you continue using the beta-3 toolchain. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-4-rc.toml).
+
 ## The `nightly` channel
 
 <!-- This section should give an overview of the nightly channel -->

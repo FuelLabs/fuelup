@@ -1,4 +1,4 @@
-name: Docs Check
+name: Docs
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   markdown-link-check:
-    name: Markdown Link Check
+    name: Check Links
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -27,7 +27,7 @@ jobs:
           npm install -g markdownlint-cli@0.32.1
           markdownlint --config .markdownlint.yaml '**/*.md'
   check-doc-folders:
-    name: Check Doc Folders
+    name: Check SUMMARY & Folders
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

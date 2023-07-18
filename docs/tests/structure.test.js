@@ -11,6 +11,7 @@ describe("Is compatible with the docs hub", () => {
     );
   const summaryFilePath = path.join(srcFolderPath, "SUMMARY.md");
   const summaryContent = fs.readFileSync(summaryFilePath, "utf-8");
+  const splitSummary = summaryContent.split(EOL);
 
   it("should have an index file at the root", () => {
     const indexPath = path.join(srcFolderPath, "index.md");
@@ -26,6 +27,13 @@ describe("Is compatible with the docs hub", () => {
           fs.statSync(path.join(srcFolderPath, subfolder, item)).isDirectory()
         )
     );
+    expect(nestedSubfolders).toHaveLength(0);
+  });
+
+  it("should not have nested subfolders in the SUMMARY file", () => {
+    const nestedSubfolders = splitSummary.filter((line) => {
+     return line.startsWith("    -");
+  });
     expect(nestedSubfolders).toHaveLength(0);
   });
 
@@ -47,7 +55,7 @@ describe("Is compatible with the docs hub", () => {
   });
 
   it("should have a folder structure that matches the SUMMARY.md order", () => {
-    const order = processSummary(summaryContent.split(EOL));
+    const order = processSummary(splitSummary);
 
     Object.keys(order).forEach((key) => {
       const menuOrder = order[key];

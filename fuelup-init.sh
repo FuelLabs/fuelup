@@ -170,7 +170,12 @@ To use the toolchain, you will have to configure your PATH, which tells your mac
 
 If permitted, fuelup-init will configure your PATH for you by running the following:
 
-    echo "export PATH="\$HOME/.fuelup/bin:\$PATH"" >check_cmd
+    echo "export PATH="\$HOME/.fuelup/bin:\$PATH"" >> $SHELL_PROFILE
+Would you like fuelup-init to modify your PATH variable for you? (N/y)
+EOF
+}
+
+add_path_message() {
     cat 1>&2 <<EOF
 
 You might have to add $FUELUP_DIR/bin to path:

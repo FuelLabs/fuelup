@@ -17,6 +17,14 @@ main() {
     check_cargo_bin forc-lsp
     check_cargo_bin fuel-core
 
+    if check_cmd nix; then
+        # check if conf.nix/config.nix/configuration.nix exists, if not ask user permission to create one
+        # if it exists or user grants permission to create one, check if nix-command and flakes features enabled
+        # and fuel.nix cachix is linked, otherwise write to file
+    else
+        # run full fuel.nix install script
+    fi
+
     get_architecture || return 1
     local _arch="$RETVAL"
     assert_nz "$_arch" "arch"
@@ -162,13 +170,7 @@ To use the toolchain, you will have to configure your PATH, which tells your mac
 
 If permitted, fuelup-init will configure your PATH for you by running the following:
 
-    echo "export PATH="\$HOME/.fuelup/bin:\$PATH"" >> $SHELL_PROFILE
-
-Would you like fuelup-init to modify your PATH variable for you? (N/y)
-EOF
-}
-
-add_path_message() {
+    echo "export PATH="\$HOME/.fuelup/bin:\$PATH"" >check_cmd
     cat 1>&2 <<EOF
 
 You might have to add $FUELUP_DIR/bin to path:

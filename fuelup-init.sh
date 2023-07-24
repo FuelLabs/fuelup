@@ -18,12 +18,7 @@ main() {
     check_cargo_bin forc-lsp
     check_cargo_bin fuel-core
 
-    if check_cmd nix; then
-        # check if conf.nix/config.nix/configuration.nix exists, if not ask user permission to create one
-        # if it exists or user grants permission to create one, check if nix-command and flakes features enabled
-        # and fuel.nix cachix is linked, otherwise write to file
-        true
-    else
+    if ! check_cmd nix; then
         run_fuel_nix_install_script
     fi
 

@@ -49,7 +49,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Attempt to install fuelup through fuelup-init.sh
-        run: ./fuelup-init.sh
+        run: ./fuelup-init.sh && nix --version
 
   cargo-clippy:
     needs: cancel-previous-runs
@@ -59,7 +59,7 @@ jobs:
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
-      
+
       - uses: Swatinem/rust-cache@v1
 
       - name: Check Clippy Linter
@@ -73,10 +73,10 @@ jobs:
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
-      
+
       - name: Check Formatting
         run: cargo fmt --all -- --check
-        
+
   cargo-test-workspace:
     needs: cancel-previous-runs
     runs-on: ubuntu-latest
@@ -85,10 +85,10 @@ jobs:
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
-      
+
       - name: Run tests
         run: cargo test --locked --workspace
-        
+
   lint-toml-files:
     needs: cancel-previous-runs
     runs-on: ubuntu-latest
@@ -99,7 +99,7 @@ jobs:
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
-      
+
       - name: Install Cargo.toml linter
         uses: baptiste0928/cargo-install@v1
         with:
@@ -269,16 +269,16 @@ jobs:
       # Re-generate the channel TOML file
       - name: Rebuild channel with updated components
         run: |
-            mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
-            CHANNEL_TOML="channel-fuel-latest.toml"
+          mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
+          CHANNEL_TOML="channel-fuel-latest.toml"
 
-            FORC_VERSION=$(grep -A1 '\[pkg.forc\]' ./gh-pages/channel-fuel-latest.toml | cut -d "\"" -f2)
-            FUEL_CORE_VERSION=$(grep -A1 '\[pkg.fuel-core\]' ./gh-pages/channel-fuel-latest.toml | cut -d "\"" -f2)
+          FORC_VERSION=$(grep -A1 '\[pkg.forc\]' ./gh-pages/channel-fuel-latest.toml | cut -d "\"" -f2)
+          FUEL_CORE_VERSION=$(grep -A1 '\[pkg.fuel-core\]' ./gh-pages/channel-fuel-latest.toml | cut -d "\"" -f2)
 
-            PUBLISHED_DATE=$(date +'%Y-%m-%d')
-            build-channel $CHANNEL_TOML $PUBLISHED_DATE --github-run-id $GITHUB_RUN_ID forc=$FORC_VERSION fuel-core=$FUEL_CORE_VERSION
+          PUBLISHED_DATE=$(date +'%Y-%m-%d')
+          build-channel $CHANNEL_TOML $PUBLISHED_DATE --github-run-id $GITHUB_RUN_ID forc=$FORC_VERSION fuel-core=$FUEL_CORE_VERSION
 
-            cp $CHANNEL_TOML ${{ env.LATEST_CHANNEL_DIR }}
+          cp $CHANNEL_TOML ${{ env.LATEST_CHANNEL_DIR }}
 
       - name: Deploy latest channel
         if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
@@ -288,8 +288,8 @@ jobs:
           publish_dir: ${{ env.LATEST_CHANNEL_DIR }}
           keep_files: true
           destination_dir: ./
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
 
   post-release-checks:
     name: Do post-release checks

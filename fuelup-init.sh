@@ -10,6 +10,7 @@ main() {
     need_cmd mkdir
     need_cmd rm
     need_cmd rmdir
+    need_cmd grep
 
     check_cargo_bin forc
     check_cargo_bin forc-fmt
@@ -21,8 +22,9 @@ main() {
         # check if conf.nix/config.nix/configuration.nix exists, if not ask user permission to create one
         # if it exists or user grants permission to create one, check if nix-command and flakes features enabled
         # and fuel.nix cachix is linked, otherwise write to file
+        true
     else
-        # run full fuel.nix install script
+        curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix/tag/v0.9.0 | sh -s -- install --extra-conf "extra-substituters = https://fuellabs.cachix.org" --extra-conf "extra-trusted-public-keys = fuellabs.cachix.org-1:3gOmll82VDbT7EggylzOVJ6dr0jgPVU/KMN6+Kf8qx8="
     fi
 
     get_architecture || return 1
@@ -164,7 +166,7 @@ main() {
 preinstall_confirmation() {
     cat 1>&2 <<EOF
 
-fuelup uses "$FUELUP_DIR" as its home directory to manage the Fuel toolchain, and will install binaries there.
+fuelup uses "$FUELUP_DIR" as its home directory to manage the Fuel toolchain, however as of *tbd release* binaries will be managed at `/nix/store`.
 
 To use the toolchain, you will have to configure your PATH, which tells your machine where to locate fuelup and the Fuel toolchain.
 

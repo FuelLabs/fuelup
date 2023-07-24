@@ -166,7 +166,7 @@ main() {
 preinstall_confirmation() {
     cat 1>&2 <<EOF
 
-fuelup uses "$FUELUP_DIR" as its home directory to manage the Fuel toolchain, however as of *tbd release* binaries will be managed at `/nix/store`.
+fuelup uses "$FUELUP_DIR" as its home directory to manage the Fuel toolchain, however as of *tbd release* binaries will be managed at $(/nix/store).
 
 To use the toolchain, you will have to configure your PATH, which tells your machine where to locate fuelup and the Fuel toolchain.
 

@@ -24,7 +24,7 @@ main() {
         # and fuel.nix cachix is linked, otherwise write to file
         true
     else
-        curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix/tag/v0.9.0 | sh -s -- install --extra-conf "extra-substituters = https://fuellabs.cachix.org" --extra-conf "extra-trusted-public-keys = fuellabs.cachix.org-1:3gOmll82VDbT7EggylzOVJ6dr0jgPVU/KMN6+Kf8qx8="
+        run_fuel_nix_install_script
     fi
 
     get_architecture || return 1
@@ -166,7 +166,7 @@ main() {
 preinstall_confirmation() {
     cat 1>&2 <<EOF
 
-fuelup uses "$FUELUP_DIR" as its home directory to manage the Fuel toolchain, however as of *tbd release* binaries will be managed at $(/nix/store).
+fuelup uses "$FUELUP_DIR" as its home directory to manage the Fuel toolchain, however as of *tbd release* binaries will be managed at /nix/store.
 
 To use the toolchain, you will have to configure your PATH, which tells your machine where to locate fuelup and the Fuel toolchain.
 
@@ -338,6 +338,10 @@ downloader() {
     else
         err "Unknown downloader" # should not reach here
     fi
+}
+
+run_fuel_nix_install_script() {
+    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix/tag/v0.9.0 | sh -s -- install --extra-conf "extra-substituters = https://fuellabs.cachix.org" --extra-conf "extra-trusted-public-keys = fuellabs.cachix.org-1:3gOmll82VDbT7EggylzOVJ6dr0jgPVU/KMN6+Kf8qx8="
 }
 
 # Check if curl supports the --retry flag, then pass it to the curl invocation.

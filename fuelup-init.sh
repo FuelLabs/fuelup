@@ -158,7 +158,6 @@ main() {
     fi
 
     if [ "$_found_nix" = true ]; then
-        warn "Found pre-configured nix installation."
         found_nix_message
     fi
 
@@ -197,6 +196,8 @@ EOF
 
 found_nix_message() {
     cat 1>&2 <<EOF
+
+Found pre-configured nix installation.
 
 IMPORTANT: Certain nix features must be enabled for fuelup to work.
 

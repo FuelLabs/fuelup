@@ -2,7 +2,6 @@
 set -e
 
 FUELUP_DIR=${FUELUP_DIR-"$HOME/.fuelup"}
-readonly extraSubs="extra-substituters = https://fuellabs.cachix.org"
 
 main() {
     need_cmd git

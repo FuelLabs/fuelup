@@ -158,7 +158,7 @@ main() {
         add_path_message
     fi
 
-    if ["$_found_nix" = true]; then
+    if [ "$_found_nix" = true ]; then
         found_nix_message
     fi
 

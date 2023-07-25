@@ -22,8 +22,22 @@ pub enum ToolchainCommand {
 
 #[derive(Debug, Parser)]
 pub struct InstallCommand {
-    /// Toolchain name [possible values: latest, beta-1, beta-2, beta-3, nightly]
+    /// Toolchain name [possible values: latest, beta-1, beta-2, beta-3, beta-4-rc, nightly]
     pub name: String,
+}
+impl InstallCommand {
+    pub(crate) fn nix_suffix(&self) -> Result<&str> {
+        let suffix = match self.name.as_str() {
+            "latest" => "#fuel",
+            "nightly" => "#fuel-nightly",
+            "beta-1" | "beta1" => "#fuel-beta-1",
+            "beta-2" | "beta2" => "#fuel-beta-2",
+            "beta-3" | "beta3" => "#fuel-beta-3",
+            "beta-4-rc" | "beta-4rc" | "beta4rc" => "#fuel-beta-4-rc",
+            _ => bail!("available toolchains:\n  -latest\n  -nightly\n  -beta-1\n  -beta-2\n  -beta-3\n  -beta-4-rc")
+        };
+        Ok(suffix)
+    }
 }
 
 #[derive(Debug, Parser)]

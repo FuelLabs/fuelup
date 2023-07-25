@@ -347,7 +347,6 @@ run_fuel_nix_install_script() {
     curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix/tag/v0.9.0 | sh -s -- install --no-confirm --extra-conf "extra-substituters = https://fuellabs.cachix.org" --extra-conf "extra-trusted-public-keys = fuellabs.cachix.org-1:3gOmll82VDbT7EggylzOVJ6dr0jgPVU/KMN6+Kf8qx8="
     # Start a new shell of the same type
     $shell
-    need_cmd nix
 }
 
 # Check if curl supports the --retry flag, then pass it to the curl invocation.

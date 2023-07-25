@@ -18,7 +18,7 @@ main() {
     check_cargo_bin fuel-core
 
     local _found_nix=false
-    if ! check_cmd nix; then
+    if check_cmd nix; then
         _found_nix=true
     else
         run_fuel_nix_install_script

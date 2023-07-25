@@ -198,7 +198,7 @@ EOF
 found_nix_message() {
     cat 1>&2 <<EOF
 
-Certain nix features must be enabled for fuelup to work.
+IMPORTANT: Certain nix features must be enabled for fuelup to work.
 
 Please follow the instructions below to finish your setup, as fuelup will not amend nix config files for you at this time.
 

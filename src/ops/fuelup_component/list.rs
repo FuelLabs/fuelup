@@ -38,8 +38,9 @@ fn format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
 
 const PROFILE_LIST: &[&str; 2] = &["profile", "list"];
 pub fn list(_command: ListCommand) -> Result<()> {
-    if let Err(err) = Command::new(NIX_CMD).args(PROFILE_LIST).output() {
-        bail!("failed to show installed binaries for profile: {err}")
+    match Command::new(NIX_CMD).args(PROFILE_LIST).output() {
+        Ok(output) => info!("{:#?}", std::str::from_utf8(&output.stdout)?),
+        Err(err) => bail!("failed to show installed binaries for profile: {err}"),
     }
 
     // let toolchain = Toolchain::from_settings()?;

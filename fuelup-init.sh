@@ -10,7 +10,6 @@ main() {
     need_cmd mkdir
     need_cmd rm
     need_cmd rmdir
-    need_cmd grep
 
     check_cargo_bin forc
     check_cargo_bin forc-fmt
@@ -18,7 +17,12 @@ main() {
     check_cargo_bin forc-lsp
     check_cargo_bin fuel-core
 
-    if ! check_cmd nix; then
+    if check_cmd nix; then
+        # check if conf.nix/config.nix/configuration.nix exists, if not ask user permission to create one
+        # if it exists or user grants permission to create one, check if nix-command and flakes features enabled
+        # and fuel.nix cachix is linked, otherwise write to file
+        true
+    else
         run_fuel_nix_install_script
     fi
 
@@ -336,7 +340,7 @@ downloader() {
 }
 
 run_fuel_nix_install_script() {
-    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix/tag/v0.9.0 | sh -s -- install --extra-conf "extra-substituters = https://fuellabs.cachix.org" --extra-conf "extra-trusted-public-keys = fuellabs.cachix.org-1:3gOmll82VDbT7EggylzOVJ6dr0jgPVU/KMN6+Kf8qx8="
+    $(curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix/tag/v0.9.0 | sh -s -- install --extra-conf "extra-substituters = https://fuellabs.cachix.org" --extra-conf "extra-trusted-public-keys = fuellabs.cachix.org-1:3gOmll82VDbT7EggylzOVJ6dr0jgPVU/KMN6+Kf8qx8=")
 }
 
 # Check if curl supports the --retry flag, then pass it to the curl invocation.

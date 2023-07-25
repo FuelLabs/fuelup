@@ -203,8 +203,8 @@ Certain nix features must be enabled for fuelup to work.
 
 Please follow the instructions below to finish your setup, as fuelup will not amend nix config files for you at this time.
 
-- Nix package manager:
-- NixOS:
+- Nix   : https://github.com/FuelLabs/fuel.nix/blob/master/book/src/nix-setup.md#configuring-an-existing-nix-installation
+- NixOS : https://github.com/FuelLabs/fuel.nix/blob/master/book/src/nix-setup.md#configuring-nixos
 EOF
 }
 

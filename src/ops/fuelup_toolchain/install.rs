@@ -2,9 +2,9 @@ use crate::commands::toolchain::InstallCommand;
 use anyhow::{bail, Result};
 use std::process::Command;
 
-const NIX_CMD: &str = "nix";
+pub(crate) const NIX_CMD: &str = "nix";
 const PROFILE_INSTALL: &[&str; 2] = &["profile", "install"];
-const FUEL_NIX_LINK: &str = "github:fuellabs/fuel.nix";
+pub(crate) const FUEL_NIX_LINK: &str = "github:fuellabs/fuel.nix";
 
 pub fn install(command: InstallCommand) -> Result<()> {
     if let Err(err) = Command::new(NIX_CMD)

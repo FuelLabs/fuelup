@@ -2,6 +2,7 @@
 set -e
 
 FUELUP_DIR=${FUELUP_DIR-"$HOME/.fuelup"}
+readonly extraSubs="extra-substituters = https://fuellabs.cachix.org"
 
 main() {
     need_cmd git
@@ -17,12 +18,9 @@ main() {
     check_cargo_bin forc-lsp
     check_cargo_bin fuel-core
 
-    if check_cmd nix; then
-        # check if conf.nix/config.nix/configuration.nix exists, if not ask user permission to create one
-        # if it exists or user grants permission to create one, check if nix-command and flakes features enabled
-        # and fuel.nix cachix is linked, otherwise write to file
-        echo "found nix"
-        true
+    local _found_nix=false
+    if ! check_cmd nix; then
+        _found_nix=true
     else
         run_fuel_nix_install_script
     fi
@@ -160,6 +158,10 @@ main() {
         add_path_message
     fi
 
+    if ["$_found_nix" = true]; then
+        found_nix_message
+    fi
+
     return "$_retval"
 }
 
@@ -190,6 +192,20 @@ export PATH="\${HOME}/.fuelup/bin:\${PATH}"
 fish:
 
 fish_add_path ~/.fuelup/bin
+EOF
+}
+
+found_nix_message() {
+    cat 1>&2 <<EOF
+
+Found pre-configured nix installation.
+
+Certain nix features must be enabled for fuelup to work.
+
+Please follow the instructions below to finish your setup, as fuelup will not amend nix config files for you at this time.
+
+- Nix package manager:
+- NixOS:
 EOF
 }
 

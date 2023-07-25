@@ -21,6 +21,7 @@ main() {
         # check if conf.nix/config.nix/configuration.nix exists, if not ask user permission to create one
         # if it exists or user grants permission to create one, check if nix-command and flakes features enabled
         # and fuel.nix cachix is linked, otherwise write to file
+        echo "found nix"
         true
     else
         run_fuel_nix_install_script
@@ -340,7 +341,9 @@ downloader() {
 }
 
 run_fuel_nix_install_script() {
+    echo "trying to install nix"
     $(curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix/tag/v0.9.0 | sh -s -- install --extra-conf "extra-substituters = https://fuellabs.cachix.org" --extra-conf "extra-trusted-public-keys = fuellabs.cachix.org-1:3gOmll82VDbT7EggylzOVJ6dr0jgPVU/KMN6+Kf8qx8=")
+    need_cmd nix
 }
 
 # Check if curl supports the --retry flag, then pass it to the curl invocation.

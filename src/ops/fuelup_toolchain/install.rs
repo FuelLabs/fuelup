@@ -1,15 +1,18 @@
 use crate::commands::toolchain::InstallCommand;
 use anyhow::{bail, Result};
 use std::process::Command;
+use tracing::info;
 
 pub(crate) const NIX_CMD: &str = "nix";
 const PROFILE_INSTALL: &[&str; 2] = &["profile", "install"];
 pub(crate) const FUEL_NIX_LINK: &str = "github:fuellabs/fuel.nix";
 
 pub fn install(command: InstallCommand) -> Result<()> {
+    let nix_suffix = command.nix_suffix()?;
+    info!("downloading and installing {command:?} toolchain, if this is the first time it may take a while...");
     if let Err(err) = Command::new(NIX_CMD)
         .args(PROFILE_INSTALL)
-        .arg(format!("{FUEL_NIX_LINK}{}", command.nix_suffix()?))
+        .arg(format!("{FUEL_NIX_LINK}{}", nix_suffix))
         .output()
     {
         bail!("failed to install {} toolchain: {err}", command.name)

@@ -9,8 +9,7 @@ on:
     types: [published]
 
 jobs:
-  
-  call-workflow:
+  test:
     uses: FuelLabs/github-actions/.github/workflows/mdbook-docs.yml@sarah/docs
     with:
       docs-src-path: 'docs/src'

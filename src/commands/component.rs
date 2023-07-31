@@ -26,7 +26,7 @@ pub struct RemoveCommand {
 }
 
 #[derive(Debug, Parser)]
-pub struct ListCommand {}
+pub struct ListCommand;
 
 pub fn exec(command: ComponentCommand) -> Result<()> {
     match command {

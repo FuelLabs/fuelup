@@ -36,8 +36,6 @@ fn _format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
     )
 }
 
-// todo: format output for listed components, currently shows toolchains as well which
-// needs to be changed
 const PROFILE_LIST: &[&str; 2] = &["profile", "list"];
 pub fn list(_command: ListCommand) -> Result<()> {
     match Command::new(NIX_CMD).args(PROFILE_LIST).output() {

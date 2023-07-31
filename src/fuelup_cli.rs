@@ -1,6 +1,7 @@
 use anyhow::Result;
 use clap::Parser;
 
+use crate::commands::shell::{self, ShellCommand};
 use crate::commands::show::ShowCommand;
 use crate::commands::{check, completions, component, default, fuelup, show, toolchain, update};
 
@@ -23,13 +24,10 @@ pub struct Cli {
 enum Commands {
     /// Check for updates to Fuel toolchains and fuelup
     Check(CheckCommand),
-    /// Generate shell completions
-    Completions(CompletionsCommand),
-    /// Add or remove components from the currently active toolchain
-    #[clap(subcommand)]
-    Component(ComponentCommand),
     /// Set default toolchain
     Default_(DefaultCommand),
+    /// Opens a new bash shell instace with specified toolchain available on `$PATH`
+    Shell(ShellCommand),
     /// Manage your fuelup installation.
     #[clap(name = "self", subcommand)]
     Fuelup(FuelupCommand),
@@ -47,8 +45,9 @@ pub fn fuelup_cli() -> Result<()> {
 
     match cli.command {
         Commands::Check(command) => check::exec(command),
-        Commands::Completions(command) => completions::exec(command),
-        Commands::Component(command) => component::exec(command),
+        Commands::Shell(command) => shell::exec(command),
+        // Commands::Completions(command) => completions::exec(command),
+        // Commands::Component(command) => component::exec(command),
         Commands::Default_(command) => default::exec(command),
         Commands::Fuelup(command) => match command {
             FuelupCommand::Update => fuelup::exec(),

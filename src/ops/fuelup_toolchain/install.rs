@@ -9,7 +9,10 @@ pub(crate) const FUEL_NIX_LINK: &str = "github:fuellabs/fuel.nix";
 
 pub fn install(command: InstallCommand) -> Result<()> {
     let nix_suffix = command.nix_suffix()?;
-    info!("downloading and installing {command:?} toolchain, if this is the first time it may take a while...");
+    info!(
+        "downloading and installing {} toolchain, if this is the first time it may take a while...",
+        command.name
+    );
     if let Err(err) = Command::new(NIX_CMD)
         .args(PROFILE_INSTALL)
         .arg(format!("{FUEL_NIX_LINK}{}", nix_suffix))

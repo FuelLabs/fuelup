@@ -72,13 +72,7 @@ impl NeedsNix for NixInstallCommand {
         self.name.as_str()
     }
 }
-// impl NeedsNix for NixShellCommand {
-//     fn name(&self) -> &str {
-//         self.name.as_str()
-//     }
-// }
 impl NixName for NixInstallCommand {}
-// impl NixName for NixShellCommand {}
 
 #[derive(Eq, PartialEq, Debug)]
 pub(crate) enum FuelToolchain {

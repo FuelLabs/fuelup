@@ -45,6 +45,7 @@ pub trait NixName: NeedsNix {
 pub struct InstallCommand {
     /// Toolchain name [possible values: latest, beta-1, beta-2, beta-3, beta-4-rc, nightly]
     pub name: String,
+    pub priority: Option<String>,
 }
 impl NeedsNix for InstallCommand {
     fn get_toolchain(&self) -> &str {

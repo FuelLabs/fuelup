@@ -57,4 +57,4 @@ forc = "0.36.0" # in beta-3, forc is pinned to v0.37.3
 
 [toolchain]: concepts/toolchains.md
 [distributed toolchains]: concepts/toolchains.md#toolchains
-[`beta-3`]: concepts/channels#the-beta-3-channel
+[`beta-3`]: concepts/channels.md#the-beta-3-channel

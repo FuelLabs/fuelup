@@ -63,11 +63,15 @@ jobs:
     runs-on: ${{ matrix.job.os }}
     steps:
       - uses: actions/checkout@v3
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@stable
       - name: Attempt to install fuelup through fuelup-init.sh
         run: ./fuelup-init.sh
       - uses: cachix/install-nix-action@v22
         with:
           nix_path: nixpkgs=channel:nixos-unstable
+      - name: Find cargo
+        run: which cargo
       - name: Add fuelup to PATH
         run: export PATH="$HOME/.fuelup/bin:$PATH"
       - name: Test fuelup nix install

@@ -9,6 +9,7 @@
 | **[latest]**  | published bins  | ✔️                    | checked every 30 minutes  | ✔️         |
 | **[nightly]** | `master` branch | ➖                   | nightly (1:00 AM UTC)     | ✔️         |
 | **[beta-3]**  | published bins  | ➖                   | only when necessary       | ✔️         |
+| **[beta-4-rc]**  | published bins  | ➖                   | only when necessary       | ✔️         |
 <!-- channels:example:end -->
 
 ## The `beta-3` channel
@@ -87,4 +88,5 @@ You may also use [nektos/act](https://github.com/nektos/act) to run the workflow
 [latest]: #the-latest-channel
 [nightly]: #the-nightly-channel
 [beta-3]: #the-beta-3-channel
+[beta-4-rc]: #the-beta-4-rc-channel
 [gh-pages]: https://github.com/FuelLabs/fuelup/tree/gh-pages

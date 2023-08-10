@@ -25,7 +25,7 @@ mkdir -p ~/.local/share/bash-completion/completions
 fuelup completions --shell=bash >> ~/.local/share/bash-completion/completions/fuelup
 ```
 
-## BASH (macOS/Homebrew)
+### BASH (macOS/Homebrew)
 
 Homebrew stores bash completion files within the Homebrew directory. With the `bash-completion` brew
 formula installed.

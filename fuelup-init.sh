@@ -201,7 +201,7 @@ found_nix_message() {
 
 Found pre-configured nix installation.
 
-IMPORTANT: Certain nix features must be enabled for fuelup to work.
+IMPORTANT: Certain nix features must be enabled for fuelup nix to work.
 
 Please follow the instructions below to finish your setup, as fuelup will not amend nix config files for you at this time.
 

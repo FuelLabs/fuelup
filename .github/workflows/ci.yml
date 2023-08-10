@@ -54,7 +54,7 @@ jobs:
   test-fuelup-nix:
     needs: cancel-previous-runs
     if: github.event_name != 'release' || github.event.action != 'published'
-    name: Try fuelup installation with fuelup-init
+    name: Test fuelup nix
     strategy:
       matrix:
         job:
@@ -63,21 +63,19 @@ jobs:
     runs-on: ${{ matrix.job.os }}
     steps:
       - uses: actions/checkout@v3
-      - name: Install toolchain
-        uses: dtolnay/rust-toolchain@stable
       - name: Attempt to install fuelup through fuelup-init.sh
         run: ./fuelup-init.sh
       - uses: cachix/install-nix-action@v22
         with:
           nix_path: nixpkgs=channel:nixos-unstable
       - name: Test fuelup nix install
-        run: cargo run ~/.cargo/bin/fuelup -- nix install latest
+        run: ~/.cargo/bin/fuelup nix install latest
       - name: Test fuelup nix list
-        run: cargo run ~/.cargo/bin/fuelup -- nix list
+        run: ~/.cargo/bin/fuelup nix list
       - name: Test fuelup nix upgrade
-        run: cargo run ~/.cargo/bin/fuelup -- nix upgrade
+        run: ~/.cargo/bin/fuelup nix upgrade
       - name: Test fuelup nix remove
-        run: cargo run ~/.cargo/bin/fuelup -- nix remove 0
+        run: ~/.cargo/bin/fuelup nix remove 0
 
   cargo-clippy:
     needs: cancel-previous-runs

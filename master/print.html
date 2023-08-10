@@ -295,6 +295,7 @@ or your currently active toolchain (in order of priority).</p>
 <tr><td><strong><a href="concepts/channels.html#the-latest-channel">latest</a></strong></td><td>published bins</td><td>✔️</td><td>checked every 30 minutes</td><td>✔️</td></tr>
 <tr><td><strong><a href="concepts/channels.html#the-nightly-channel">nightly</a></strong></td><td><code>master</code> branch</td><td>➖</td><td>nightly (1:00 AM UTC)</td><td>✔️</td></tr>
 <tr><td><strong><a href="concepts/channels.html#the-beta-3-channel">beta-3</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
+<tr><td><strong><a href="concepts/channels.html#the-beta-4-rc-channel">beta-4-rc</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
 </tbody></table>
 <!-- channels:example:end -->
 <h2 id="the-beta-3-channel"><a class="header" href="#the-beta-3-channel">The <code>beta-3</code> channel</a></h2>
@@ -510,7 +511,7 @@ be stored in <code>~/.local/share/bash-completion/completions</code> for user-sp
 <pre><code class="language-sh">mkdir -p ~/.local/share/bash-completion/completions
 fuelup completions --shell=bash &gt;&gt; ~/.local/share/bash-completion/completions/fuelup
 </code></pre>
-<h2 id="bash-macoshomebrew"><a class="header" href="#bash-macoshomebrew">BASH (macOS/Homebrew)</a></h2>
+<h3 id="bash-macoshomebrew"><a class="header" href="#bash-macoshomebrew">BASH (macOS/Homebrew)</a></h3>
 <p>Homebrew stores bash completion files within the Homebrew directory. With the <code>bash-completion</code> brew
 formula installed.</p>
 <pre><code class="language-sh">mkdir -p $(brew --prefix)/etc/bash_completion.d

@@ -272,8 +272,8 @@ jobs:
             mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
             CHANNEL_TOML="channel-fuel-latest.toml"
 
-            FORC_VERSION=$(grep -A1 '\[pkg.forc\]' ./gh-pages/channel-fuel-latest.toml | cut -d "\"" -f2)
-            FUEL_CORE_VERSION=$(grep -A1 '\[pkg.fuel-core\]' ./gh-pages/channel-fuel-latest.toml | cut -d "\"" -f2)
+            FORC_VERSION=$(grep -A1 '\[pkg.forc\]' ./gh-pages/channel-fuel-latest.toml | cut -d "\"" -f2 | sed "1 d")
+            FUEL_CORE_VERSION=$(grep -A1 '\[pkg.fuel-core\]' ./gh-pages/channel-fuel-latest.toml | cut -d "\"" -f2 | sed "1 d")
 
             PUBLISHED_DATE=$(date +'%Y-%m-%d')
             build-channel $CHANNEL_TOML $PUBLISHED_DATE --github-run-id $GITHUB_RUN_ID forc=$FORC_VERSION fuel-core=$FUEL_CORE_VERSION

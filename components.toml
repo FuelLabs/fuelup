@@ -64,6 +64,14 @@ repository_name = "fuel-core"
 targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]
 publish = true
 
+[component.fuel-core-keygen]
+name = "fuel-core-keygen"
+tarball_prefix = "fuel-core"
+executables = ["fuel-core-keygen"]
+repository_name = "fuel-core"
+targets = [ "aarch64-unknown-linux-gnu", "x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin" ]
+publish = true
+
 [component.forc-wallet]
 name = "forc-wallet"
 tarball_prefix = "forc-wallet"

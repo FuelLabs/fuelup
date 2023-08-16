@@ -180,7 +180,7 @@ fn compare_rest() -> Result<()> {
 
     for component in components
         .iter()
-        .filter(|c| !["forc", "fuel-core"].contains(&c.name.as_str()))
+        .filter(|c| !["forc", "fuel-core", "fuel-core-keygen"].contains(&c.name.as_str()))
     {
         let latest_actual_version = get_latest_version(&component.repository_name)?;
         let latest_indexed_version = parse_latest_indexed_version(&channel_doc, &component.name);

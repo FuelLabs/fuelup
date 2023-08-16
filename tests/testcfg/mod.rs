@@ -225,7 +225,7 @@ pub fn setup_override_file(toolchain_override: ToolchainOverride) -> Result<()> 
 /// files and directories and provides a TestCfg to test fuelup.
 pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     let testdir = tempdir().unwrap();
-    let tmp_home = testdir.path();
+    let tmp_home = testdir.path().canonicalize()?;
 
     let tmp_fuelup_root_path = tmp_home.join(".fuelup");
     let tmp_fuelup_bin_dir_path = tmp_home.join(".fuelup").join("bin");

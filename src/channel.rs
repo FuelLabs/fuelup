@@ -22,7 +22,7 @@ pub const BETA_1: &str = "beta-1";
 pub const BETA_2: &str = "beta-2";
 pub const BETA_3: &str = "beta-3";
 pub const BETA_4_RC: &str = "beta-4-rc";
-pub const BETA_4_RC_2: &str = "beta-4-rc2";
+pub const BETA_4_RC_2: &str = "beta-4-rc.2";
 pub const NIGHTLY: &str = "nightly";
 
 #[derive(Debug, Deserialize, Serialize)]

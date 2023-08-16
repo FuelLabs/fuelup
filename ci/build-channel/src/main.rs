@@ -223,6 +223,8 @@ fn write_document(
         println!("\nWriting package info for component '{}'", &component.name);
         let tag_prefix = if component.name == "forc" {
             "forc-binaries"
+        } else if component.name == "fuel-core" || component.name == "fuel-core-keygen" {
+            "fuel-core"
         } else {
             &component.name
         };

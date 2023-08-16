@@ -70,6 +70,7 @@ jobs:
       - uses: cachix/install-nix-action@v22
         with:
           nix_path: nixpkgs=channel:nixos-unstable
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
       - name: Copy nix.conf to /etc/nix/nix.conf
         run: sudo cp -f /etc/nix/nix.conf ./nix.conf
       - name: Test fuelup nix install

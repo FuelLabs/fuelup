@@ -43,7 +43,7 @@ latest-{target} (default)
     - forc-tx : 0.1.0
     - forc-wallet : 0.1.0
   fuel-core : 0.1.0
-  fuel-core-keygen - 0.1.0
+  fuel-core-keygen - not found
   fuel-indexer : 0.1.0
 "#
         );
@@ -87,7 +87,7 @@ latest-{target} (default)
     - forc-tx : 0.1.0
     - forc-wallet : 0.1.0
   fuel-core : 0.1.0
-  fuel-core-keygen - 0.1.0
+  fuel-core-keygen - not found
   fuel-indexer : 0.1.0
 "#
         );
@@ -121,7 +121,7 @@ nightly-{target} (default)
     - forc-tx : 0.2.0
     - forc-wallet : 0.2.0
   fuel-core : 0.2.0
-  fuel-core-keygen - 0.2.0
+  fuel-core-keygen - not found
   fuel-indexer : 0.2.0
 "#
         );
@@ -254,6 +254,7 @@ latest-{target} (default)
     - forc-tx : 0.1.0
     - forc-wallet : 0.1.0
   fuel-core : 0.1.0
+  fuel-core-keygen - not found
   fuel-indexer : 0.1.0
 "#,
         );
@@ -301,6 +302,7 @@ latest-{target} (default)
     - forc-tx : 0.2.0
     - forc-wallet : 0.2.0
   fuel-core : 0.2.0
+  fuel-core-keygen - not found
   fuel-indexer : 0.2.0
 "#;
         assert!(stdout.contains(expected_stdout));

@@ -43,6 +43,7 @@ latest-{target} (default)
     - forc-tx : 0.1.0
     - forc-wallet : 0.1.0
   fuel-core : 0.1.0
+  fuel-core-keygen - not found
   fuel-indexer : 0.1.0
 "#
         );
@@ -86,6 +87,7 @@ latest-{target} (default)
     - forc-tx : 0.1.0
     - forc-wallet : 0.1.0
   fuel-core : 0.1.0
+  fuel-core-keygen - not found
   fuel-indexer : 0.1.0
 "#
         );
@@ -119,6 +121,7 @@ nightly-{target} (default)
     - forc-tx : 0.2.0
     - forc-wallet : 0.2.0
   fuel-core : 0.2.0
+  fuel-core-keygen - not found
   fuel-indexer : 0.2.0
 "#
         );
@@ -162,6 +165,7 @@ my_toolchain (default)
     - forc-tx - not found
     - forc-wallet - not found
   fuel-core - not found
+  fuel-core-keygen - not found
   fuel-indexer - not found
 "#;
         assert!(stdout.contains(expected_stdout));
@@ -204,6 +208,7 @@ beta-1-{target} (override), path: {}
     - forc-tx - not found
     - forc-wallet - not found
   fuel-core - not found
+  fuel-core-keygen - not found
   fuel-indexer - not found
 "#,
             cfg.home.join(FUEL_TOOLCHAIN_TOML_FILE).display()
@@ -249,6 +254,7 @@ latest-{target} (default)
     - forc-tx : 0.1.0
     - forc-wallet : 0.1.0
   fuel-core : 0.1.0
+  fuel-core-keygen - not found
   fuel-indexer : 0.1.0
 "#,
         );
@@ -296,6 +302,7 @@ latest-{target} (default)
     - forc-tx : 0.2.0
     - forc-wallet : 0.2.0
   fuel-core : 0.2.0
+  fuel-core-keygen - not found
   fuel-indexer : 0.2.0
 "#;
         assert!(stdout.contains(expected_stdout));

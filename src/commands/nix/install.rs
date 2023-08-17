@@ -114,7 +114,7 @@ fn auto_prioritize_installed_package(
     if let Some(prio) = iter.next() {
         let chars = prio.chars();
         if let Ok(num) = chars
-            .filter(|c| c.is_digit(10))
+            .filter(|c| c.is_ascii_digit())
             .collect::<String>()
             .parse::<u32>()
         {

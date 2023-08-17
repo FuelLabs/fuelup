@@ -16,7 +16,6 @@ pub fn nix_upgrade(command: NixUpgradeCommand) -> Result<()> {
             .args(PROFILE_UPGRADE_ARGS)
             .arg(pkg.clone())
             .stdout(Stdio::inherit())
-            .stderr(Stdio::null())
             .spawn()?
             .wait()?;
         // capture output of the command
@@ -33,7 +32,6 @@ pub fn nix_upgrade(command: NixUpgradeCommand) -> Result<()> {
             .args(PROFILE_UPGRADE_ARGS)
             .arg(UNLOCKED_FLAKE_REF)
             .stdout(Stdio::inherit())
-            .stderr(Stdio::null())
             .spawn()?
             .wait()?;
         Command::new(NIX_CMD)

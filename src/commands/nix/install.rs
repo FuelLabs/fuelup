@@ -24,24 +24,20 @@ pub fn nix_install(command: NixInstallCommand) -> Result<()> {
             command.name
         );
         let link = command.toolchain_link()?;
-        let mut process = Command::new(NIX_CMD);
-        process
+        Command::new(NIX_CMD)
             .args(PROFILE_INSTALL_ARGS)
             .arg(link.clone())
             .stdout(Stdio::inherit())
-            .stderr(Stdio::null())
             .spawn()
             .map_err(|err| anyhow!("failed to install fuel {} toolchain: {err}", command.name))?
             .wait()?;
         // second process is ran to get the output since we silence errors in the first
         // this doesn't incur any overhead since nix will look to see if the toolchain is already installed
-        let mut process = Command::new(NIX_CMD);
         (
-            process
+            Command::new(NIX_CMD)
                 .args(PROFILE_INSTALL_ARGS)
                 .arg(link.clone())
-                .output()
-                .unwrap(),
+                .output()?,
             link,
         )
     } else if command.is_component() {
@@ -50,21 +46,18 @@ pub fn nix_install(command: NixInstallCommand) -> Result<()> {
             command.name
         );
         let link = command.component_link()?;
-        let mut process = Command::new(NIX_CMD);
-        process
+        Command::new(NIX_CMD)
             .args(PROFILE_INSTALL_ARGS)
             .arg(link.clone())
             .stdout(Stdio::inherit())
-            .stderr(Stdio::null())
             .spawn()
             .map_err(|err| anyhow!("failed to install {} component: {err}", command.name))?
             .wait()?;
         (
-            process
+            Command::new(NIX_CMD)
                 .args(PROFILE_INSTALL_ARGS)
                 .arg(link.clone())
-                .output()
-                .unwrap(),
+                .output()?,
             link,
         )
     } else {
@@ -85,16 +78,14 @@ please form a valid component or toolchain, like so: fuel-core-beta-3 or beta-3"
         if let Some(index) = err_str.find(NIX_PKG_MSG) {
             let (_first, last) = err_str.split_at(index);
             let iter = last.split_whitespace();
-            auto_prioritize_installed_package(iter, 7, link)?;
+            auto_prioritize_installed_package(iter, 7, link, command.name)?;
         // nixos
         } else if let Some(index) = err_str.find(NIXOS_MSG) {
             let (_first, last) = err_str.split_at(index);
             let iter = last.split_whitespace();
-            auto_prioritize_installed_package(iter, 4, link)?;
+            auto_prioritize_installed_package(iter, 4, link, command.name)?;
         }
     }
-
-    // nix_info!(output);
 
     Ok(())
 }
@@ -107,6 +98,7 @@ fn auto_prioritize_installed_package(
     mut iter: SplitWhitespace,
     len: usize,
     link: String,
+    name: String,
 ) -> Result<()> {
     for _ in 0..len {
         iter.next();
@@ -118,16 +110,24 @@ fn auto_prioritize_installed_package(
             .collect::<String>()
             .parse::<u32>()
         {
-            Command::new(NIX_CMD)
+            let priority = num - 1;
+            let mut process = Command::new(NIX_CMD)
                 .args(PROFILE_INSTALL_ARGS)
                 .arg(link)
                 .arg(PRIORITY_FLAG)
-                .arg((num - 1).to_string())
+                .arg(priority.to_string())
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::null())
                 .spawn()
-                .map_err(|err| anyhow!("failed to auto set package priority: {err}"))?
-                .wait()?;
+                .map_err(|err| anyhow!("failed to auto set package priority: {err}"))?;
+            process.wait()?;
+            info!(
+                "
+Fuelup: newly installed binaries for '{name}' were given priority {}, making it the default.
+
+No further action is necessary.",
+                priority
+            );
         }
     }
     Ok(())

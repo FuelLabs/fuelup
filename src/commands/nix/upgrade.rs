@@ -11,7 +11,7 @@ pub struct NixUpgradeCommand {
 
 pub fn nix_upgrade(command: NixUpgradeCommand) -> Result<()> {
     let output = if let Some(pkg) = command.pkg {
-        info!("upgrading {pkg}, this may take a while...");
+        info!("upgrading package {pkg}, this may take a while...");
         Command::new(NIX_CMD)
             .args(PROFILE_UPGRADE_ARGS)
             .arg(pkg.clone())

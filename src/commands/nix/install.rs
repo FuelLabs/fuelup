@@ -96,14 +96,11 @@ fn filter_command(
             while let Some(stderr) = child.stderr.take() {
                 let reader = BufReader::new(stderr);
 
-                for line in reader.lines() {
-                    if let Ok(line) = line {
-                        if line.contains(NIXOS_PRIORITY_MSG) || line.contains(NIX_PKG_PRIORITY_MSG)
-                        {
-                            tx.send((None, Some(line))).unwrap();
-                        } else {
-                            tx.send((Some(line), None)).unwrap();
-                        }
+                for line in reader.lines().flatten() {
+                    if line.contains(NIXOS_PRIORITY_MSG) || line.contains(NIX_PKG_PRIORITY_MSG) {
+                        tx.send((None, Some(line))).unwrap();
+                    } else {
+                        tx.send((Some(line), None)).unwrap();
                     }
                 }
             }

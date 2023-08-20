@@ -71,7 +71,7 @@ please form a valid component or toolchain, like so: fuel-core-beta-3 or beta-3"
     Ok(())
 }
 
-/// Filter the priority errors so we can handle it for the user automatically.
+/// Execute the `Command` and filter the priority errors so we can handle it for the user automatically.
 fn filter_command(
     link_clone: String,
     command_name: String,

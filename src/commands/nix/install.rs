@@ -14,8 +14,8 @@ use std::{
 };
 use tracing::info;
 
-const NIX_PKG_MSG: &str = "The conflicting packages have a priority of";
-const NIXOS_MSG: &str = "have the same priority";
+const NIX_PKG_PRIORITY_MSG: &str = "The conflicting packages have a priority of";
+const NIXOS_PRIORITY_MSG: &str = "have the same priority";
 
 #[derive(Debug, Parser)]
 pub struct NixInstallCommand {
@@ -56,12 +56,12 @@ please form a valid component or toolchain, like so: fuel-core-beta-3 or beta-3"
     // hacky way of getting the priority of the package automatically
     if !priority_err.is_empty() {
         // nix package manager
-        if let Some(index) = priority_err.find(NIX_PKG_MSG) {
+        if let Some(index) = priority_err.find(NIX_PKG_PRIORITY_MSG) {
             let (_, err) = priority_err.split_at(index);
             let iter = err.split_whitespace();
             auto_prioritize_installed_package(iter, 7, link)?;
         // nixos
-        } else if let Some(index) = priority_err.find(NIXOS_MSG) {
+        } else if let Some(index) = priority_err.find(NIXOS_PRIORITY_MSG) {
             let (_, err) = priority_err.split_at(index);
             let iter = err.split_whitespace();
             auto_prioritize_installed_package(iter, 4, link)?;
@@ -98,7 +98,8 @@ fn filter_command(
 
                 for line in reader.lines() {
                     if let Ok(line) = line {
-                        if line.contains(NIXOS_MSG) || line.contains(NIX_PKG_MSG) {
+                        if line.contains(NIXOS_PRIORITY_MSG) || line.contains(NIX_PKG_PRIORITY_MSG)
+                        {
                             tx.send((None, Some(line))).unwrap();
                         } else {
                             tx.send((Some(line), None)).unwrap();
@@ -160,7 +161,7 @@ fn try_prioritize(mut pkg_priority: i32, link: String) -> Result<()> {
         .output()?;
     if !output.stderr.is_empty() {
         let stderr_str = String::from_utf8_lossy(&output.stderr);
-        if stderr_str.contains(NIXOS_MSG) || stderr_str.contains(NIX_PKG_MSG) {
+        if stderr_str.contains(NIXOS_PRIORITY_MSG) || stderr_str.contains(NIX_PKG_PRIORITY_MSG) {
             // recursively decriment the package priority until the
             // newly installed package has the highest priority
             try_prioritize(pkg_priority, link)?

@@ -19,11 +19,16 @@ macro_rules! nix_info {
             info!("{}", String::from_utf8_lossy(&$output.stdout));
         }
         if !$output.stderr.is_empty() {
-            info!(
+            let err_str = String::from_utf8_lossy(&$output.stderr);
+            if err_str.contains("error") {
+                info!(
 "fuelup nix encountered an problem, please open an issue at https://github.com/FuelLabs/fuelup/issues/new
 
-{}", String::from_utf8_lossy(&$output.stderr)
-            );
+{}", err_str
+                );
+            } else {
+                info!("{}", err_str);
+            }
         }
     };
 }

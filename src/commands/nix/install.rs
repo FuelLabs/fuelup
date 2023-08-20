@@ -7,7 +7,7 @@ use clap::Parser;
 use std::{
     fmt::Debug,
     io::{BufRead, BufReader},
-    process::{Command, Output, Stdio},
+    process::{Command, Stdio},
     str::SplitWhitespace,
     sync::mpsc,
     thread,
@@ -24,51 +24,14 @@ pub struct NixInstallCommand {
 }
 
 pub fn nix_install(command: NixInstallCommand) -> Result<()> {
-    let (tx, rx) = mpsc::channel();
     let (priority_err, link) = if command.is_toolchain() {
         info!(
             "downloading and installing fuel {} toolchain, this may take a while...",
             command.name
         );
         let link = command.toolchain_link()?;
-        let link_clone = link.clone();
-        let command_name = command.name.clone();
         let mut priority_err = Vec::new();
-
-        // filter the priority errors so we can handle this for the user.
-        if let Ok(mut child) = Command::new(NIX_CMD)
-            .args(PROFILE_INSTALL_ARGS)
-            .arg(link_clone)
-            .stderr(Stdio::piped())
-            .spawn()
-            .map_err(|err| anyhow!("failed to install fuel {} toolchain: {err}", command_name))
-        {
-            let handle = thread::spawn(move || {
-                while let Some(stderr) = child.stderr.take() {
-                    let reader = BufReader::new(stderr);
-
-                    for line in reader.lines() {
-                        if let Ok(line) = line {
-                            if line.contains(NIXOS_MSG) || line.contains(NIX_PKG_MSG) {
-                                tx.send((None, Some(line))).unwrap();
-                            } else {
-                                tx.send((Some(line), None)).unwrap();
-                            }
-                        }
-                    }
-                }
-            });
-
-            while let Ok((line, err)) = rx.recv() {
-                if let Some(line) = line {
-                    info!("{line}");
-                }
-                if let Some(err) = err {
-                    priority_err.push(err);
-                }
-            }
-            handle.join().unwrap();
-        }
+        filter_command(link.clone(), command.name.clone(), &mut priority_err, true);
 
         (priority_err.concat(), link)
     } else if command.is_component() {
@@ -77,44 +40,8 @@ pub fn nix_install(command: NixInstallCommand) -> Result<()> {
             command.name
         );
         let link = command.component_link()?;
-        let link_clone = link.clone();
-        let command_name = command.name.clone();
         let mut priority_err = Vec::new();
-
-        // filter the priority errors so we can handle this for the user.
-        if let Ok(mut child) = Command::new(NIX_CMD)
-            .args(PROFILE_INSTALL_ARGS)
-            .arg(link_clone)
-            .stderr(Stdio::piped())
-            .spawn()
-            .map_err(|err| anyhow!("failed to install component {}: {err}", command_name))
-        {
-            let handle = thread::spawn(move || {
-                while let Some(stderr) = child.stderr.take() {
-                    let reader = BufReader::new(stderr);
-
-                    for line in reader.lines() {
-                        if let Ok(line) = line {
-                            if line.contains(NIXOS_MSG) || line.contains(NIX_PKG_MSG) {
-                                tx.send((None, Some(line))).unwrap();
-                            } else {
-                                tx.send((Some(line), None)).unwrap();
-                            }
-                        }
-                    }
-                }
-            });
-
-            while let Ok((line, err)) = rx.recv() {
-                if let Some(line) = line {
-                    info!("{line}");
-                }
-                if let Some(err) = err {
-                    priority_err.push(err);
-                }
-            }
-            handle.join().unwrap();
-        }
+        filter_command(link.clone(), command.name.clone(), &mut priority_err, false);
 
         (priority_err.concat(), link)
     } else {
@@ -144,6 +71,55 @@ please form a valid component or toolchain, like so: fuel-core-beta-3 or beta-3"
     Ok(())
 }
 
+/// Filter the priority errors so we can handle it for the user automatically.
+fn filter_command(
+    link_clone: String,
+    command_name: String,
+    priority_err: &mut Vec<String>,
+    is_toolchain_cmd: bool,
+) {
+    let (tx, rx) = mpsc::channel();
+    if let Ok(mut child) = Command::new(NIX_CMD)
+        .args(PROFILE_INSTALL_ARGS)
+        .arg(link_clone)
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|err| {
+            if is_toolchain_cmd {
+                anyhow!("failed to install fuel {} toolchain: {err}", command_name)
+            } else {
+                anyhow!("failed to install component {}: {err}", command_name)
+            }
+        })
+    {
+        let handle = thread::spawn(move || {
+            while let Some(stderr) = child.stderr.take() {
+                let reader = BufReader::new(stderr);
+
+                for line in reader.lines() {
+                    if let Ok(line) = line {
+                        if line.contains(NIXOS_MSG) || line.contains(NIX_PKG_MSG) {
+                            tx.send((None, Some(line))).unwrap();
+                        } else {
+                            tx.send((Some(line), None)).unwrap();
+                        }
+                    }
+                }
+            }
+        });
+
+        while let Ok((line, err)) = rx.recv() {
+            if let Some(line) = line {
+                info!("{line}");
+            }
+            if let Some(err) = err {
+                priority_err.push(err);
+            }
+        }
+        handle.join().unwrap();
+    }
+}
+
 /// Given an iterator over a priority error message, get the priority for the installed packages
 /// and prioritize the newly installed package.
 ///
@@ -168,6 +144,7 @@ fn auto_prioritize_installed_package(
     }
     Ok(())
 }
+
 /// `nix profile install --priority` can be negative, so here we just continue to try
 /// installing the package with decreasing priority number until the error goes away.
 ///

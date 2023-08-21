@@ -21,19 +21,28 @@ const NIXOS_PRIORITY_MSG: &str = "have the same priority";
 pub struct NixInstallCommand {
     /// Toolchain or component
     pub name: String,
+    pub verbose: Option<bool>,
 }
 
 pub fn nix_install(command: NixInstallCommand) -> Result<()> {
-    let (priority_err, link) = if command.is_toolchain() {
+    let mut success = false;
+    let (priority_err, all_errs, link) = if command.is_toolchain() {
         info!(
             "downloading and installing fuel {} toolchain, this may take a while...",
             command.name
         );
         let link = command.toolchain_link()?;
         let mut priority_err = Vec::new();
-        filter_command(link.clone(), command.name.clone(), &mut priority_err, true);
+        let mut all_errs = Vec::new();
+        filter_command(
+            link.clone(),
+            command.name.clone(),
+            &mut priority_err,
+            &mut all_errs,
+            true,
+        );
 
-        (priority_err.concat(), link)
+        (priority_err.concat(), all_errs.concat(), link)
     } else if command.is_component() {
         info!(
             "downloading and installing component {}, this may take a while...",
@@ -41,9 +50,16 @@ pub fn nix_install(command: NixInstallCommand) -> Result<()> {
         );
         let link = command.component_link()?;
         let mut priority_err = Vec::new();
-        filter_command(link.clone(), command.name.clone(), &mut priority_err, false);
+        let mut all_errs = Vec::new();
+        filter_command(
+            link.clone(),
+            command.name.clone(),
+            &mut priority_err,
+            &mut all_errs,
+            false,
+        );
 
-        (priority_err.concat(), link)
+        (priority_err.concat(), all_errs.concat(), link)
     } else {
         bail!(
             "available distrubuted components:\n  -fuel-core\n  -fuel-core-client\n  -fuel-indexer\n  -forc\n  -forc-client\n  -forc-doc\n  -forc-explore\n  -forc-fmt\n  -forc-index\n  -forc-lsp\n  -forc-tx\n  -forc-wallet\n  -sway-vim\n
@@ -59,13 +75,26 @@ please form a valid component or toolchain, like so: fuel-core-beta-3 or beta-3"
         if let Some(index) = priority_err.find(NIX_PKG_PRIORITY_MSG) {
             let (_, err) = priority_err.split_at(index);
             let iter = err.split_whitespace();
-            auto_prioritize_installed_package(iter, 7, link)?;
+            success = auto_prioritize_installed_package(iter, 7, link)?;
         // nixos
         } else if let Some(index) = priority_err.find(NIXOS_PRIORITY_MSG) {
             let (_, err) = priority_err.split_at(index);
             let iter = err.split_whitespace();
-            auto_prioritize_installed_package(iter, 4, link)?;
+            success = auto_prioritize_installed_package(iter, 4, link)?;
         }
+    }
+    if success || all_errs.is_empty() {
+        if command.is_toolchain() {
+            info!(
+                "successfully installed {:?} toolchain",
+                command.get_toolchain()?
+            );
+        } else {
+            let (component, toolchain) = command.get_component()?;
+            info!("successfully installed {toolchain:?} component {component:?}");
+        }
+    } else {
+        info!("{all_errs:?}");
     }
 
     Ok(())
@@ -76,6 +105,7 @@ fn filter_command(
     link_clone: String,
     command_name: String,
     priority_err: &mut Vec<String>,
+    all_errs: &mut Vec<String>,
     is_toolchain_cmd: bool,
 ) {
     let (tx, rx) = mpsc::channel();
@@ -95,23 +125,35 @@ fn filter_command(
         let handle = thread::spawn(move || {
             while let Some(stderr) = child.stderr.take() {
                 let reader = BufReader::new(stderr);
-
+                let mut is_error = false;
                 for line in reader.lines().flatten() {
-                    if line.contains(NIXOS_PRIORITY_MSG) || line.contains(NIX_PKG_PRIORITY_MSG) {
-                        tx.send((None, Some(line))).unwrap();
+                    if line.contains("error:") || is_error {
+                        is_error = true;
+                        if line.contains(NIXOS_PRIORITY_MSG) || line.contains(NIX_PKG_PRIORITY_MSG)
+                        {
+                            // send to priority err and all err
+                            tx.send((None, Some(line.clone()), Some(line))).unwrap();
+                        } else {
+                            // send to all err
+                            // useful if the build fails for reasons other than priority
+                            tx.send((None, None, Some(line))).unwrap();
+                        }
                     } else {
-                        tx.send((Some(line), None)).unwrap();
+                        tx.send((Some(line), None, None)).unwrap();
                     }
                 }
             }
         });
 
-        while let Ok((line, err)) = rx.recv() {
-            if let Some(line) = line {
-                info!("{line}");
+        while let Ok((line_opt, priority_err_opt, all_errs_opt)) = rx.recv() {
+            if let Some(line) = line_opt {
+                info!("hi: {line}");
             }
-            if let Some(err) = err {
+            if let Some(err) = priority_err_opt {
                 priority_err.push(err);
+            }
+            if let Some(err) = all_errs_opt {
+                all_errs.push(err);
             }
         }
         handle.join().unwrap();
@@ -126,7 +168,7 @@ fn auto_prioritize_installed_package(
     mut iter: SplitWhitespace,
     msg_len: usize,
     link: String,
-) -> Result<()> {
+) -> Result<bool> {
     for _ in 0..msg_len {
         iter.next();
     }
@@ -140,7 +182,8 @@ fn auto_prioritize_installed_package(
             try_prioritize(current_pkg_priority, link)?
         }
     }
-    Ok(())
+
+    Ok(true)
 }
 
 /// `nix profile install --priority` can be negative, so here we just continue to try
@@ -164,5 +207,6 @@ fn try_prioritize(mut pkg_priority: i32, link: String) -> Result<()> {
             try_prioritize(pkg_priority, link)?
         }
     }
+
     Ok(())
 }

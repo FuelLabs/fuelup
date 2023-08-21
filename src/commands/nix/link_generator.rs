@@ -100,6 +100,8 @@ impl FuelToolchain {
         *self == FuelToolchain::Latest
     }
 }
+
+#[derive(Debug)]
 pub(crate) enum FuelComponent {
     FuelCore,
     FuelCoreClient,

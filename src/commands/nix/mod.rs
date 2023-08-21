@@ -65,6 +65,9 @@ pub fn exec(command: NixCommand) -> Result<()> {
         NixCommand::Install(command) => nix_install(command),
         NixCommand::Remove(command) => nix_remove(command),
         NixCommand::Upgrade(command) => nix_upgrade(command),
-        NixCommand::List(_command) => nix_list(_command),
+        NixCommand::List(_command) => {
+            nix_list(_command)?;
+            Ok(())
+        }
     }
 }

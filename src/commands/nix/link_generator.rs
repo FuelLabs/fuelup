@@ -1,9 +1,11 @@
-use super::{install::NixInstallCommand, FUEL_NIX_LINK};
+use crate::commands::fuelup::FuelupCommand;
+
+use super::{install::NixInstallCommand, list::UnlockedAttributePath, FUEL_NIX_LINK};
 use anyhow::{bail, Result};
 
 /// Handles getting toolchain or component information to translate
 /// into fuel.nix flake links and info presented to the user.
-pub(crate) trait NeedsNix {
+pub(crate) trait FlakeLinkInfo {
     /// the name of a toolchain or component
     fn name(&self) -> &str;
     fn get_toolchain(&self) -> Result<FuelToolchain> {
@@ -20,7 +22,7 @@ pub(crate) trait NeedsNix {
     }
 }
 /// Create toolchain and component links for the fuel.nix flake.
-pub(crate) trait NixName: NeedsNix {
+pub(crate) trait CachixLinkGenerator: FlakeLinkInfo {
     fn nix_toolchain_suffix(&self) -> Result<&str> {
         Ok(match self.get_toolchain()? {
             FuelToolchain::Latest => "fuel",
@@ -55,6 +57,7 @@ pub(crate) trait NixName: NeedsNix {
             FuelToolchain::Beta2 => "-beta-2",
             FuelToolchain::Beta3 => "-beta-3",
             FuelToolchain::Beta4rc => "-beta-4-rc",
+            FuelToolchain::Unknown => bail!("available distributed toolchains:\n  -latest\n  -nightly\n  -beta-1\n  -beta-2\n  -beta-3\n  -beta-4-rc") 
         };
         Ok((comp, tool))
     }
@@ -67,12 +70,24 @@ pub(crate) trait NixName: NeedsNix {
     }
 }
 
-impl NeedsNix for NixInstallCommand {
+impl FlakeLinkInfo for NixInstallCommand {
     fn name(&self) -> &str {
         self.name.as_str()
     }
 }
-impl NixName for NixInstallCommand {}
+impl FlakeLinkInfo for UnlockedAttributePath {
+    fn name(&self) -> &str {
+        let Ok((comp, toolchain)) = split_at_toolchain(self.0.clone()) else {
+
+        };
+        if comp == ".fuel" {
+            toolchain.into()
+        } else {
+            &comp
+        }
+    }
+}
+impl CachixLinkGenerator for NixInstallCommand {}
 
 #[derive(Eq, PartialEq, Debug)]
 pub(crate) enum FuelToolchain {
@@ -82,6 +97,7 @@ pub(crate) enum FuelToolchain {
     Beta2,
     Beta3,
     Beta4rc,
+    Unknown,
 }
 
 impl FuelToolchain {
@@ -98,6 +114,32 @@ impl FuelToolchain {
     }
     fn is_latest(&self) -> bool {
         *self == FuelToolchain::Latest
+    }
+}
+impl<'a> From<&'a str> for FuelToolchain {
+    fn from(s: &'a str) -> Self {
+        match s.to_lowercase().as_str() {
+            "latest" => Self::Latest,
+            "nightly" => Self::Nightly,
+            "beta-1" | "beta1" => Self::Beta1,
+            "beta-2" | "beta2" => Self::Beta2,
+            "beta-3" | "beta3" => Self::Beta3,
+            "beta-4-rc" | "beta-4rc" | "beta4rc" => Self::Beta4rc,
+            _ => Self::Unknown,
+        }
+    }
+}
+impl From<FuelToolchain> for &str {
+    fn from(ft: FuelToolchain) -> &'static str {
+        match ft {
+            FuelToolchain::Latest => "latest",
+            FuelToolchain::Nightly => "nightly",
+            FuelToolchain::Beta1 => "beta-1",
+            FuelToolchain::Beta2 => "beta-2",
+            FuelToolchain::Beta3 => "beta-3",
+            FuelToolchain::Beta4rc => "beta-4-rc",
+            FuelToolchain::Unknown => "unknown",
+        }
     }
 }
 
@@ -151,7 +193,7 @@ please form a valid component, like so: fuel-core-beta-3"
         }, tool))
     }
 }
-fn split_at_toolchain(s: String) -> Result<(String, FuelToolchain)> {
+pub(crate) fn split_at_toolchain(s: String) -> Result<(String, FuelToolchain)> {
     let (comp, tool) = if let Some(index) = s.find("beta") {
         let (comp, tool) = s.split_at(index);
         (comp.into(), FuelToolchain::from_str(tool)?)

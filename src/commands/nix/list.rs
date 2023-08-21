@@ -1,4 +1,4 @@
-use super::{NIX_CMD, PROFILE_LIST_ARGS};
+use super::{link_generator::FlakeLinkInfo, NIX_CMD, PROFILE_LIST_ARGS};
 use crate::commands::nix::nix_info;
 use anyhow::{bail, Result};
 use clap::Parser;
@@ -33,6 +33,8 @@ impl NixBinaryInfo {
         }
     }
 }
+
+pub(crate) struct UnlockedAttributePath(pub(crate) String);
 
 #[derive(Debug)]
 pub(crate) struct NixBinaryList(pub(crate) HashMap<String, Vec<NixBinaryInfo>>);

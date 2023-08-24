@@ -105,7 +105,6 @@ impl FlakeLinkInfo for UnlockedFlakeURL {
     }
 }
 impl CachixLinkGenerator for NixInstallCommand {}
-impl CachixLinkGenerator for UnlockedFlakeURL {}
 
 #[derive(Eq, PartialEq, Debug, Hash)]
 pub(crate) enum FuelToolchain {

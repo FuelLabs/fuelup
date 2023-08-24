@@ -176,10 +176,6 @@ const DIST_COMPONENTS: &[FuelComponent; 13] = &[
     FuelComponent::SwayVim,
 ];
 
-// ...
-//
-// bail!("available distrubuted components: {err_str}\n")
-
 #[derive(Debug)]
 pub(crate) enum FuelComponent {
     FuelCore,

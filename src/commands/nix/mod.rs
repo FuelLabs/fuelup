@@ -7,8 +7,8 @@ use self::{
 use anyhow::Result;
 use clap::Parser;
 
+mod flake_utils;
 mod install;
-mod link_generator;
 mod list;
 mod remove;
 mod upgrade;

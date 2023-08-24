@@ -1,5 +1,5 @@
 use super::{
-    link_generator::{split_at_toolchain, FlakeLinkInfo, FuelToolchain},
+    flake_utils::{split_at_toolchain, FlakeLinkInfo, FuelToolchain},
     NIX_CMD, PROFILE_LIST_ARGS,
 };
 use crate::commands::nix::nix_info;

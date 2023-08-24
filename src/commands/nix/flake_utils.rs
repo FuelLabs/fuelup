@@ -1,6 +1,9 @@
-use crate::commands::fuelup::FuelupCommand;
+//! Utility for translating user commands into flake links,
+//! and flake links into display messages or internal debug info
+//! for handling toolchain or component management for the user automatically.
 
 use super::{install::NixInstallCommand, list::UnlockedFlakeURL, FUEL_NIX_LINK};
+use crate::commands::fuelup::FuelupCommand;
 use anyhow::{bail, Result};
 
 /// Handles getting toolchain or component information to translate
@@ -12,18 +15,18 @@ pub(crate) trait FlakeLinkInfo {
         FuelToolchain::from_str(self.name())
     }
     fn get_component(&self) -> Result<(FuelComponent, FuelToolchain)> {
-        FuelComponent::from_str(self.name())
+        FuelComponent::from_str_with_toolchain(self.name())
     }
     fn is_toolchain(&self) -> bool {
         FuelToolchain::from_str(self.name()).is_ok()
     }
     fn is_component(&self) -> bool {
-        FuelComponent::from_str(self.name()).is_ok()
+        FuelComponent::from_str_with_toolchain(self.name()).is_ok()
     }
 }
 /// Create toolchain and component links for the fuel.nix flake.
 pub(crate) trait CachixLinkGenerator: FlakeLinkInfo {
-    fn nix_toolchain_suffix(&self) -> Result<&str> {
+    fn flake_link_toolchain_suffix(&self) -> Result<&str> {
         Ok(match self.get_toolchain()? {
             FuelToolchain::Latest => "fuel",
             FuelToolchain::Nightly => "fuel-nightly",
@@ -34,7 +37,7 @@ pub(crate) trait CachixLinkGenerator: FlakeLinkInfo {
             FuelToolchain::Unknown => bail!("available distributed toolchains:\n  -latest\n  -nightly\n  -beta-1\n  -beta-2\n  -beta-3\n  -beta-4-rc")
         })
     }
-    fn nix_component_suffix(&self) -> Result<(&str, &str)> {
+    fn flake_link_component_suffix(&self) -> Result<(&str, &str)> {
         let (comp, tool) = self.get_component()?;
         let comp = match comp {
             FuelComponent::FuelCore => "fuel-core",
@@ -62,11 +65,14 @@ pub(crate) trait CachixLinkGenerator: FlakeLinkInfo {
         };
         Ok((comp, tool))
     }
-    fn toolchain_link(&self) -> Result<String> {
-        Ok(format!("{FUEL_NIX_LINK}#{}", self.nix_toolchain_suffix()?))
+    fn flake_toolchain_link(&self) -> Result<String> {
+        Ok(format!(
+            "{FUEL_NIX_LINK}#{}",
+            self.flake_link_toolchain_suffix()?
+        ))
     }
-    fn component_link(&self) -> Result<String> {
-        let (comp, tool) = self.nix_component_suffix()?;
+    fn flake_component_link(&self) -> Result<String> {
+        let (comp, tool) = self.flake_link_component_suffix()?;
         Ok(format!("{FUEL_NIX_LINK}#{}{}", comp, tool))
     }
 }
@@ -155,6 +161,26 @@ impl From<FuelToolchain> for &str {
     }
 }
 
+const DIST_COMPONENTS: &[FuelComponent; 13] = &[
+    FuelComponent::FuelCore,
+    FuelComponent::FuelCoreClient,
+    FuelComponent::FuelIndexer,
+    FuelComponent::Forc,
+    FuelComponent::ForcClient,
+    FuelComponent::ForcDoc,
+    FuelComponent::ForcExplore,
+    FuelComponent::ForcFmt,
+    FuelComponent::ForcIndex,
+    FuelComponent::ForcLsp,
+    FuelComponent::ForcTx,
+    FuelComponent::ForcWallet,
+    FuelComponent::SwayVim,
+];
+
+// ...
+//
+// bail!("available distrubuted components: {err_str}\n")
+
 #[derive(Debug)]
 pub(crate) enum FuelComponent {
     FuelCore,
@@ -172,37 +198,67 @@ pub(crate) enum FuelComponent {
     SwayVim,
 }
 impl FuelComponent {
-    fn from_str(s: String) -> Result<(Self, FuelToolchain)> {
-        let (comp, tool) = split_at_toolchain(s.to_lowercase())?;
+    fn from_str_with_toolchain(s: String) -> Result<(Self, FuelToolchain)> {
+        let (raw_comp_str, tool) = split_at_toolchain(s.to_lowercase())?;
         // remove the excess '-' between the comp and toolchain vers
-        let comp = if !tool.is_latest() {
-            let mut comp = comp.chars();
-            comp.next_back();
-            comp.collect::<String>()
+        let comp_str = if !tool.is_latest() {
+            let mut comp_str = raw_comp_str.chars();
+            comp_str.next_back();
+            comp_str.collect::<String>()
         } else {
-            comp
+            raw_comp_str
         };
-        Ok((match comp.as_str() {
-            "fuel-core" => Self::FuelCore,
-            "fuel-core-client" => Self::FuelCoreClient,
-            "fuel-indexer" => Self::FuelIndexer,
-            "forc" => Self::Forc,
-            "forc-client" => Self::ForcClient,
-            "forc-doc" => Self::ForcDoc,
-            "forc-explore" => Self::ForcExplore,
-            "forc-fmt" => Self::ForcFmt,
-            "forc-index" => Self::ForcIndex,
-            "forc-lsp" => Self::ForcLsp,
-            "forc-tx" => Self::ForcTx,
-            "forc-wallet" => Self::ForcWallet,
-            "sway-vim" => Self::SwayVim,
-            _ => bail!(
-                "available distrubuted components:\n  -fuel-core\n  -fuel-core-client\n  -fuel-indexer\n  -forc\n  -forc-client\n  -forc-doc\n  -forc-explore\n  -forc-fmt\n  -forc-index\n  -forc-lsp\n  -forc-tx\n  -forc-wallet\n  -sway-vim\n
+        let comp = Self::from_str(comp_str)?;
+        Ok((comp, tool))
+    }
+
+    fn from_str(comp_str: String) -> Result<Self> {
+        match comp_str.as_str() {
+            "fuel-core" => Ok(Self::FuelCore),
+            "fuel-core-client" => Ok(Self::FuelCoreClient),
+            "fuel-indexer" => Ok(Self::FuelIndexer),
+            "forc" => Ok(Self::Forc),
+            "forc-client" => Ok(Self::ForcClient),
+            "forc-doc" => Ok(Self::ForcDoc),
+            "forc-explore" => Ok(Self::ForcExplore),
+            "forc-fmt" => Ok(Self::ForcFmt),
+            "forc-index" => Ok(Self::ForcIndex),
+            "forc-lsp" => Ok(Self::ForcLsp),
+            "forc-tx" => Ok(Self::ForcTx),
+            "forc-wallet" => Ok(Self::ForcWallet),
+            "sway-vim" => Ok(Self::SwayVim),
+            _ => {
+                let available_components = DIST_COMPONENTS
+                    .iter()
+                    .map(|comp| comp.as_display_str())
+                    .collect::<Vec<&str>>()
+                    .join("\n");
+                bail!("available distrubuted components:\n  {available_components}\n
+
 available distributed toolchains:\n  -latest\n  -nightly\n  -beta-1\n  -beta-2\n  -beta-3\n  -beta-4-rc
 
 please form a valid component, like so: fuel-core-beta-3"
-            )
-        }, tool))
+                )
+            }
+        }
+    }
+
+    fn as_display_str(&self) -> &'static str {
+        match self {
+            FuelComponent::FuelCore => "- fuel-core",
+            FuelComponent::FuelCoreClient => "- fuel-core-client",
+            FuelComponent::FuelIndexer => "- fuel-indexer",
+            FuelComponent::Forc => "- forc",
+            FuelComponent::ForcClient => "- forc-client",
+            FuelComponent::ForcDoc => "- forc-doc",
+            FuelComponent::ForcExplore => "- forc-explore",
+            FuelComponent::ForcFmt => "- forc-fmt",
+            FuelComponent::ForcIndex => "- forc-index",
+            FuelComponent::ForcLsp => "- forc-lsp",
+            FuelComponent::ForcTx => "- forc-tx",
+            FuelComponent::ForcWallet => "- forc-wallet",
+            FuelComponent::SwayVim => "- sway-vim",
+        }
     }
 }
 pub(crate) fn split_at_toolchain(s: String) -> Result<(String, FuelToolchain)> {

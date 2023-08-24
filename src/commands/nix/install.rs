@@ -1,5 +1,5 @@
 use crate::commands::nix::{
-    link_generator::{CachixLinkGenerator, FlakeLinkInfo},
+    flake_utils::{CachixLinkGenerator, FlakeLinkInfo},
     NIX_CMD, PRIORITY_FLAG, PROFILE_INSTALL_ARGS,
 };
 use anyhow::{anyhow, bail, Result};
@@ -31,7 +31,7 @@ pub fn nix_install(command: NixInstallCommand) -> Result<()> {
             "downloading and installing fuel {} toolchain, this may take a while...",
             command.name
         );
-        let link = command.toolchain_link()?;
+        let link = command.flake_toolchain_link()?;
         let mut priority_err = Vec::new();
         let mut all_errs = Vec::new();
         filter_command(
@@ -48,7 +48,7 @@ pub fn nix_install(command: NixInstallCommand) -> Result<()> {
             "downloading and installing component {}, this may take a while...",
             command.name
         );
-        let link = command.component_link()?;
+        let link = command.flake_component_link()?;
         let mut priority_err = Vec::new();
         let mut all_errs = Vec::new();
         filter_command(

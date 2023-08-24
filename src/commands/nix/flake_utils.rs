@@ -120,7 +120,7 @@ impl FlakeLinkInfo for UnlockedFlakeURL {
 }
 impl CachixLinkGenerator for NixInstallCommand {}
 
-const DIST_TOOLCHAINS: &[FuelToolchain; 6] = &[
+pub(crate) const DIST_TOOLCHAINS: &[FuelToolchain; 6] = &[
     FuelToolchain::Latest,
     FuelToolchain::Nightly,
     FuelToolchain::Beta1,
@@ -159,7 +159,7 @@ impl FuelToolchain {
             }
         })
     }
-    fn as_display_str(&self) -> &'static str {
+    pub(crate) fn as_display_str(&self) -> &'static str {
         match self {
             FuelToolchain::Latest => "- latest",
             FuelToolchain::Nightly => "- nightly",
@@ -201,7 +201,7 @@ impl From<FuelToolchain> for &str {
     }
 }
 
-const DIST_COMPONENTS: &[FuelComponent; 13] = &[
+pub(crate) const DIST_COMPONENTS: &[FuelComponent; 13] = &[
     FuelComponent::FuelCore,
     FuelComponent::FuelCoreClient,
     FuelComponent::FuelIndexer,
@@ -285,7 +285,7 @@ please form a valid component, like so: fuel-core-beta-3"
         }
     }
 
-    fn as_display_str(&self) -> &'static str {
+    pub(crate) fn as_display_str(&self) -> &'static str {
         match self {
             FuelComponent::FuelCore => "- fuel-core",
             FuelComponent::FuelCoreClient => "- fuel-core-client",

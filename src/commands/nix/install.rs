@@ -1,5 +1,5 @@
 use crate::commands::nix::{
-    flake_utils::{CachixLinkGenerator, FlakeLinkInfo},
+    flake_utils::{CachixLinkGenerator, FlakeLinkInfo, DIST_COMPONENTS, DIST_TOOLCHAINS},
     NIX_CMD, PRIORITY_FLAG, PROFILE_INSTALL_ARGS,
 };
 use anyhow::{anyhow, bail, Result};

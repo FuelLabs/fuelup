@@ -34,7 +34,14 @@ pub(crate) trait CachixLinkGenerator: FlakeLinkInfo {
             FuelToolchain::Beta2 => "fuel-beta-2",
             FuelToolchain::Beta3 => "fuel-beta-3",
             FuelToolchain::Beta4rc => "fuel-beta-4-rc",
-            FuelToolchain::Unknown => bail!("available distributed toolchains:\n  -latest\n  -nightly\n  -beta-1\n  -beta-2\n  -beta-3\n  -beta-4-rc")
+            FuelToolchain::Unknown => {
+                let available_toolchains = DIST_TOOLCHAINS
+                    .iter()
+                    .map(|tc| tc.as_display_str())
+                    .collect::<Vec<&str>>()
+                    .join("\n");
+                bail!("available distributed toolchains:\n  {available_toolchains}\n")
+            }
         })
     }
     fn flake_link_component_suffix(&self) -> Result<(&str, &str)> {
@@ -61,7 +68,14 @@ pub(crate) trait CachixLinkGenerator: FlakeLinkInfo {
             FuelToolchain::Beta2 => "-beta-2",
             FuelToolchain::Beta3 => "-beta-3",
             FuelToolchain::Beta4rc => "-beta-4-rc",
-            FuelToolchain::Unknown => bail!("available distributed toolchains:\n  -latest\n  -nightly\n  -beta-1\n  -beta-2\n  -beta-3\n  -beta-4-rc")
+            FuelToolchain::Unknown => {
+                let available_toolchains = DIST_TOOLCHAINS
+                    .iter()
+                    .map(|tc| tc.as_display_str())
+                    .collect::<Vec<&str>>()
+                    .join("\n");
+                bail!("available distributed toolchains:\n  {available_toolchains}\n")
+            }
         };
         Ok((comp, tool))
     }
@@ -106,6 +120,15 @@ impl FlakeLinkInfo for UnlockedFlakeURL {
 }
 impl CachixLinkGenerator for NixInstallCommand {}
 
+const DIST_TOOLCHAINS: &[FuelToolchain; 6] = &[
+    FuelToolchain::Latest,
+    FuelToolchain::Nightly,
+    FuelToolchain::Beta1,
+    FuelToolchain::Beta2,
+    FuelToolchain::Beta3,
+    FuelToolchain::Beta4rc,
+];
+
 #[derive(Eq, PartialEq, Debug, Hash)]
 pub(crate) enum FuelToolchain {
     Latest,
@@ -126,8 +149,26 @@ impl FuelToolchain {
             "beta-2" | "beta2" | "fuel-beta-2" => Self::Beta2,
             "beta-3" | "beta3" | "fuel-beta-3" => Self::Beta3,
             "beta-4-rc" | "beta-4rc" | "beta4rc" | "fuel-beta-4-rc" => Self::Beta4rc,
-            _ => bail!("available distributed toolchains:\n  -latest\n  -nightly\n  -beta-1\n  -beta-2\n  -beta-3\n  -beta-4-rc") 
+            _ => {
+                let available_toolchains = DIST_TOOLCHAINS
+                    .iter()
+                    .map(|tc| tc.as_display_str())
+                    .collect::<Vec<&str>>()
+                    .join("\n");
+                bail!("available distributed toolchains:\n  {available_toolchains}\n")
+            }
         })
+    }
+    fn as_display_str(&self) -> &'static str {
+        match self {
+            FuelToolchain::Latest => "- latest",
+            FuelToolchain::Nightly => "- nightly",
+            FuelToolchain::Beta1 => "- beta-1",
+            FuelToolchain::Beta2 => "- beta-2",
+            FuelToolchain::Beta3 => "- beta-3",
+            FuelToolchain::Beta4rc => "- beta-4-rc",
+            FuelToolchain::Unknown => "unknown",
+        }
     }
     fn is_latest(&self) -> bool {
         *self == FuelToolchain::Latest
@@ -228,9 +269,15 @@ impl FuelComponent {
                     .map(|comp| comp.as_display_str())
                     .collect::<Vec<&str>>()
                     .join("\n");
-                bail!("available distrubuted components:\n  {available_components}\n
+                let available_toolchains = DIST_TOOLCHAINS
+                    .iter()
+                    .map(|tc| tc.as_display_str())
+                    .collect::<Vec<&str>>()
+                    .join("\n");
+                bail!(
+                    "available distrubuted components:\n  {available_components}
 
-available distributed toolchains:\n  -latest\n  -nightly\n  -beta-1\n  -beta-2\n  -beta-3\n  -beta-4-rc
+available distributed toolchains:\n  {available_toolchains}
 
 please form a valid component, like so: fuel-core-beta-3"
                 )

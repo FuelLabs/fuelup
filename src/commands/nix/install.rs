@@ -61,9 +61,20 @@ pub fn nix_install(command: NixInstallCommand) -> Result<()> {
 
         (priority_err.concat(), all_errs.concat(), link)
     } else {
+        let available_components = DIST_COMPONENTS
+            .iter()
+            .map(|comp| comp.as_display_str())
+            .collect::<Vec<&str>>()
+            .join("\n");
+        let available_toolchains = DIST_TOOLCHAINS
+            .iter()
+            .map(|tc| tc.as_display_str())
+            .collect::<Vec<&str>>()
+            .join("\n");
         bail!(
-            "available distrubuted components:\n  -fuel-core\n  -fuel-core-client\n  -fuel-indexer\n  -forc\n  -forc-client\n  -forc-doc\n  -forc-explore\n  -forc-fmt\n  -forc-index\n  -forc-lsp\n  -forc-tx\n  -forc-wallet\n  -sway-vim\n
-available distributed toolchains:\n  -latest\n  -nightly\n  -beta-1\n  -beta-2\n  -beta-3\n  -beta-4-rc
+            "available distrubuted components:\n  {available_components}
+
+available distributed toolchains:\n  {available_toolchains}
 
 please form a valid component or toolchain, like so: fuel-core-beta-3 or beta-3"
         )

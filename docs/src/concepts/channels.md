@@ -10,6 +10,8 @@
 | **[nightly]** | `master` branch | ➖                   | nightly (1:00 AM UTC)     | ✔️         |
 | **[beta-3]**  | published bins  | ➖                   | only when necessary       | ✔️         |
 | **[beta-4-rc]**  | published bins  | ➖                   | only when necessary       | ✔️         |
+| **[beta-4-rc2]**  | published bins  | ➖                   | only when necessary       | ✔️         |
+| **[beta-4]**  | published bins  | ➖                   | only when necessary       | ✔️         |
 <!-- channels:example:end -->
 
 ## The `beta-3` channel
@@ -23,6 +25,10 @@ The `beta-4-rc` channel offers developers an early opportunity to test out new f
 ## The `beta-4-rc.2` channel
 
 The `beta-4-rc.2` channel offers developers an early opportunity to test out new features and improvements, including enhancements and bug fixes made since the beta-4-rc version. If maintaining compatibility with the beta-3 testnet is required for your project, we recommend you continue using the beta-3 toolchain. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-4-rc-2.toml).
+
+## The `beta-4` channel
+
+The `beta-4` channel is a published TOML file describing the toolchain that is compatible with our [beta-4 testnet](https://fuel-labs.ghost.io/announcing-beta-4-testnet/). This toolchain should be used to interact with and build on the testnet. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-4.toml).
 
 ## The `nightly` channel
 
@@ -93,4 +99,6 @@ You may also use [nektos/act](https://github.com/nektos/act) to run the workflow
 [nightly]: #the-nightly-channel
 [beta-3]: #the-beta-3-channel
 [beta-4-rc]: #the-beta-4-rc-channel
+[beta-4-rc2]: #the-beta-4-rc2-channel
+[beta-4]: #the-beta-4-channel
 [gh-pages]: https://github.com/FuelLabs/fuelup/tree/gh-pages

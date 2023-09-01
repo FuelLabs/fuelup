@@ -28,7 +28,9 @@ The `beta-4-rc.2` channel offers developers an early opportunity to test out new
 
 ## The `beta-4` channel
 
+<!-- markdown-link-check-disable -->
 The `beta-4` channel is a published TOML file describing the toolchain that is compatible with our [beta-4 testnet](https://fuel-labs.ghost.io/announcing-beta-4-testnet/). This toolchain should be used to interact with and build on the testnet. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-4.toml).
+<!-- markdown-link-check-enable -->
 
 ## The `nightly` channel
 

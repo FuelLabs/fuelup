@@ -69,7 +69,7 @@ where
         |_| {
             Err(Error::invalid_value(
                 serde::de::Unexpected::Str(&channel_str),
-                &"one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3>",
+                &"one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4>",
             ))
         },
         Result::Ok,
@@ -260,7 +260,7 @@ channel = "nightly"
         let e = result.unwrap_err();
         assert_eq!(e
             .to_string(),
-            "invalid value: string \"latest\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3> for key `toolchain.channel`".to_string());
+            "invalid value: string \"latest\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4> for key `toolchain.channel`".to_string());
 
         let result = OverrideCfg::from_toml(NIGHTLY);
         assert!(result.is_err());
@@ -268,7 +268,7 @@ channel = "nightly"
 
         assert_eq!(e
             .to_string(),
-            "invalid value: string \"nightly\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3> for key `toolchain.channel`".to_string());
+            "invalid value: string \"nightly\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4> for key `toolchain.channel`".to_string());
     }
 
     #[test]

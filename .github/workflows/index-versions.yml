@@ -1,9 +1,10 @@
 name: Check Versions
 
 on:
+  workflow_dispatch:
   schedule:
-    # Run at minute 0 every hour
-    - cron: '0 * * * *'
+    # Run at minute 0 every 6 hours
+    - cron: '0 */6 * * *'
 env:
   LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
 

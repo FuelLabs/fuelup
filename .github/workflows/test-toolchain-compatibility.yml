@@ -21,7 +21,7 @@ env:
 jobs:
   test-toolchain-compatibility:
     name: Test forc-${{ matrix.job.forc-version }} against fuel-core-${{ matrix.job.fuel-core-version }}
-    runs-on: ubuntu-latest
+    runs-on: buildjet-8vcpu-ubuntu-2204
     # Init parallelized jobs running tests for toolchain version sets in a matrix.
     # `fail-fast` is set to false so that we run the tests to completion even if a single version set fails.
     # We use the fromJSON expression to have an easier time setting up a matrix with dynamic inputs.

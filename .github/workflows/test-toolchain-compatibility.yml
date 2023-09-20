@@ -49,7 +49,15 @@ jobs:
         with:
           toolchain: ${{ env.RUST_VERSION }}
       
-      - uses: Swatinem/rust-cache@v2
+      - uses: buildjet/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install Forc
         run: cd sway && cargo install --locked --debug --path ./forc

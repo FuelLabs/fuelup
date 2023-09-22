@@ -1,5 +1,4 @@
-published_by = "https://github.com/FuelLabs/fuelup/actions/runs/6241343034"
-date = "2023-09-19"
+date = "2023-09-22"
 
 [pkg.forc]
 version = "0.46.0"
@@ -40,23 +39,23 @@ url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-
 hash = "9ef1d8af2c5a611d33f8966881197bd4958da05e4b325eb0dc847b84ea1eac96"
 
 [pkg.forc-index]
-version = "0.20.9"
+version = "0.20.10"
 
 [pkg.forc-index.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.9/forc-index-0.20.9-aarch64-unknown-linux-gnu.tar.gz"
-hash = "5006341f5312773b5577b1d5b862522d15a5f512f0b3669adfdfe9cabdc692ce"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.10/forc-index-0.20.10-aarch64-unknown-linux-gnu.tar.gz"
+hash = "3f56441a4c82d793b92ac3d1a8cec8137a9f038028a953e2029e53b0d1239f86"
 
 [pkg.forc-index.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.9/forc-index-0.20.9-x86_64-unknown-linux-gnu.tar.gz"
-hash = "cd78839f370a8acb6a9a9913397ac823f84091bb70104272fccd3d537be4cfc1"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.10/forc-index-0.20.10-x86_64-unknown-linux-gnu.tar.gz"
+hash = "44552b797d64a9e9ada35d0bd26093cffca3a6b839e52ce9866ab30e2a5796fe"
 
 [pkg.forc-index.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.9/forc-index-0.20.9-aarch64-apple-darwin.tar.gz"
-hash = "0bc20a6e959478a9c7769a002f9e0b6ecd7f6ad8892867f993bd3852d7a040e7"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.10/forc-index-0.20.10-aarch64-apple-darwin.tar.gz"
+hash = "3c956d276b3b13d9e913871bb23d22dfdd98509a15c4e8ff3e45237a52b05e27"
 
 [pkg.forc-index.target.x86_64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.9/forc-index-0.20.9-x86_64-apple-darwin.tar.gz"
-hash = "3fc8bc55dc9237802ae54f033c83cd9ced4c34b18f82f83860bbfa3a2ce04f2f"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.10/forc-index-0.20.10-x86_64-apple-darwin.tar.gz"
+hash = "3106ef769e582a1e0973e91a2ebb62b9c5ad4b84f582108cf892599c0a493e82"
 
 [pkg.forc-wallet]
 version = "0.3.0"
@@ -97,39 +96,39 @@ url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.20.4/fuel-core
 hash = "cb229ffad1106d14bb07db6bf7022af265ad6c0d5f0b017ccf98cb460905fcd5"
 
 [pkg.fuel-core-keygen]
-version = "0.20.4"
+version = "0.20.5"
 
 [pkg.fuel-core-keygen.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.20.4/fuel-core-0.20.4-aarch64-unknown-linux-gnu.tar.gz"
-hash = "4900ab8bc5e7111d2ad2993e90559ceaa74c67b7d0b5bde9187a73da3d0eb4ee"
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.20.5/fuel-core-0.20.5-aarch64-unknown-linux-gnu.tar.gz"
+hash = "08cdfde5a3b21f48d460d3d762b59dcb6de89b33d8da14ec07b9223dce6047bf"
 
 [pkg.fuel-core-keygen.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.20.4/fuel-core-0.20.4-x86_64-unknown-linux-gnu.tar.gz"
-hash = "7f94f9cef46b8d2f7a5584b847d521977d1067c27b3df7d03e65c156956936b8"
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.20.5/fuel-core-0.20.5-x86_64-unknown-linux-gnu.tar.gz"
+hash = "5a8b4bfca539613a393980400a14787ee9bb1a8b57ac0e83ca8d25585e8e4b92"
 
 [pkg.fuel-core-keygen.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.20.4/fuel-core-0.20.4-aarch64-apple-darwin.tar.gz"
-hash = "32c347d6f0685b0f16d7fef00fc2b32c078a3f9f2b9c1a581b83b60e0acd025f"
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.20.5/fuel-core-0.20.5-aarch64-apple-darwin.tar.gz"
+hash = "7ebb6d5672bec814ff46eab8edaf7a9771bcd42847076c2d7825eb1867eea3f1"
 
 [pkg.fuel-core-keygen.target.x86_64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.20.4/fuel-core-0.20.4-x86_64-apple-darwin.tar.gz"
-hash = "cb229ffad1106d14bb07db6bf7022af265ad6c0d5f0b017ccf98cb460905fcd5"
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.20.5/fuel-core-0.20.5-x86_64-apple-darwin.tar.gz"
+hash = "6957fb3f51b282c5625f4c5f618775efc0862b793a69bff35783d333d3e119f4"
 
 [pkg.fuel-indexer]
-version = "0.20.9"
+version = "0.20.10"
 
 [pkg.fuel-indexer.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.9/fuel-indexer-0.20.9-aarch64-unknown-linux-gnu.tar.gz"
-hash = "c469140a9b9248d19ae48241a53661213484efb24b36cd61a981c66d9bd063ab"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.10/fuel-indexer-0.20.10-aarch64-unknown-linux-gnu.tar.gz"
+hash = "a801f95f5341814c10bc1794d1c067e5f398444969c7e6276a64affc5b0865c4"
 
 [pkg.fuel-indexer.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.9/fuel-indexer-0.20.9-x86_64-unknown-linux-gnu.tar.gz"
-hash = "7ec895d23e52d3911ceaf66f4af1be09d461dc8047a80be5f2ade22100141954"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.10/fuel-indexer-0.20.10-x86_64-unknown-linux-gnu.tar.gz"
+hash = "003a5ac9aba4fc29adb76a40a56be10ecbe90485a5927a4bd6f88340ea8a0189"
 
 [pkg.fuel-indexer.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.9/fuel-indexer-0.20.9-aarch64-apple-darwin.tar.gz"
-hash = "1f57bb12c1e623e605391c4359009bbc9fa1aac374169d4b0971694db1bf5046"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.10/fuel-indexer-0.20.10-aarch64-apple-darwin.tar.gz"
+hash = "38c643cc60daaf160f1a718dc3bb27e38e67a4fa7b3683fa21277137b308ace1"
 
 [pkg.fuel-indexer.target.x86_64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.9/fuel-indexer-0.20.9-x86_64-apple-darwin.tar.gz"
-hash = "ebc6623e756d7280059f53edfc6515204d59a8d785619d60b4f29dd1d932ccc1"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.20.10/fuel-indexer-0.20.10-x86_64-apple-darwin.tar.gz"
+hash = "a21435bedfcd4d704017b0a37eb4f0230cb294286c0813f0cd42c64faaf92235"

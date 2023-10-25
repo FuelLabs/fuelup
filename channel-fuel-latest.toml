@@ -1,4 +1,4 @@
-date = "2023-10-23"
+date = "2023-10-25"
 
 [pkg.forc]
 version = "0.46.0"
@@ -39,23 +39,23 @@ url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-
 hash = "9ef1d8af2c5a611d33f8966881197bd4958da05e4b325eb0dc847b84ea1eac96"
 
 [pkg.forc-index]
-version = "0.21.2"
+version = "0.22.0"
 
 [pkg.forc-index.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.21.2/forc-index-0.21.2-aarch64-unknown-linux-gnu.tar.gz"
-hash = "bba7f13255fd763a8f1106f366f3a8087aaed13c7a4b959ee7b94b65b18f0904"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.22.0/forc-index-0.22.0-aarch64-unknown-linux-gnu.tar.gz"
+hash = "f145dfbeb4673824b845d0e0531caae64a455989100c04987b73f2c41584379f"
 
 [pkg.forc-index.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.21.2/forc-index-0.21.2-x86_64-unknown-linux-gnu.tar.gz"
-hash = "7dbbcfda68a7688c68531407622d2345057d7fe44f96b811af8d663f7fd441bb"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.22.0/forc-index-0.22.0-x86_64-unknown-linux-gnu.tar.gz"
+hash = "82dff37a2bf15e194bb727e04b169f88d3e537272ba9aa30a9df453f95ce6f53"
 
 [pkg.forc-index.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.21.2/forc-index-0.21.2-aarch64-apple-darwin.tar.gz"
-hash = "34f332e20fd5226db89cda996a4ca41ec2394067b614af30a8128d11794f2ef3"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.22.0/forc-index-0.22.0-aarch64-apple-darwin.tar.gz"
+hash = "96e32a6c5eb1de0ade8b9ad71ef34737e3432f81b58b7f76d5d94f8650cefd27"
 
 [pkg.forc-index.target.x86_64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.21.2/forc-index-0.21.2-x86_64-apple-darwin.tar.gz"
-hash = "45de3e3094ac1b2a553890eece08b847f8f0fa707fefee037693c21480241416"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.22.0/forc-index-0.22.0-x86_64-apple-darwin.tar.gz"
+hash = "46d7430ce4ad41a7b7ba2405661a92f917789592250d3e405d5939fad37529ea"
 
 [pkg.forc-wallet]
 version = "0.3.0"
@@ -115,20 +115,20 @@ url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.20.8/fuel-core
 hash = "cd1dd01b101796014a659a8b005d9856dd57f547c4e993008d248046b51e140e"
 
 [pkg.fuel-indexer]
-version = "0.21.2"
+version = "0.22.0"
 
 [pkg.fuel-indexer.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.21.2/fuel-indexer-0.21.2-aarch64-unknown-linux-gnu.tar.gz"
-hash = "9840ddcae8669a0e554cf1174ef0a808250855f07f5895acdd449618113b3b93"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.22.0/fuel-indexer-0.22.0-aarch64-unknown-linux-gnu.tar.gz"
+hash = "00ed89e553c7d9a39a0c58f1b6a775e5fc48c767743850720a8e5468bdfc12be"
 
 [pkg.fuel-indexer.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.21.2/fuel-indexer-0.21.2-x86_64-unknown-linux-gnu.tar.gz"
-hash = "6decfbe3f7059da796f03614c3af3eddca2cf8ed2fa420f7bbdb93e0c8a707b8"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.22.0/fuel-indexer-0.22.0-x86_64-unknown-linux-gnu.tar.gz"
+hash = "eecb0c7b15d1cf3139597c1b251e5024dc1de75dfc75b202670ada4550862c73"
 
 [pkg.fuel-indexer.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.21.2/fuel-indexer-0.21.2-aarch64-apple-darwin.tar.gz"
-hash = "3892d9f58438a2cf9ead729911826b7099e749d71e947458f0a901891e9b828c"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.22.0/fuel-indexer-0.22.0-aarch64-apple-darwin.tar.gz"
+hash = "8078b543832e375366447a05d1d79f7cb9cf8392b7444da422a4835a19d8fe66"
 
 [pkg.fuel-indexer.target.x86_64-apple-darwin]
-url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.21.2/fuel-indexer-0.21.2-x86_64-apple-darwin.tar.gz"
-hash = "6de7134f2664aacd927e3620bcd3a46e0d18567b571f0d03c9e600238beeca6a"
+url = "https://github.com/FuelLabs/fuel-indexer/releases/download/v0.22.0/fuel-indexer-0.22.0-x86_64-apple-darwin.tar.gz"
+hash = "5955e774bc8eb65bb69f9046e5f2b24ce2cd057e240039eee0093e95ed0eff10"

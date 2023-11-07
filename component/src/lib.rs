@@ -127,7 +127,8 @@ impl Components {
                     .get(c)
                     .expect("Failed to parse components.toml")
             })
-            .filter_map(|c| c.is_plugin.is_none().then(|| c.clone()))
+            .filter(|&c| c.is_plugin.is_none())
+            .cloned()
             .collect();
 
         main_components.sort_by_key(|c| c.name.clone());

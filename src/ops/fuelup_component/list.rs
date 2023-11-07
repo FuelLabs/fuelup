@@ -24,13 +24,16 @@ fn format_installable_component_info(name: &str, latest_version: &str) -> String
 }
 
 fn format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
+    use std::fmt::Write;
     format!(
         "    - {}\n",
         plugin_executables
             .iter()
             .filter(|c| *c != component::FORC)
-            .map(|s| format!("{s} "))
-            .collect::<String>(),
+            .fold(String::new(), |mut output, b| {
+                let _ = write!(output, "{b}");
+                output
+            })
     )
 }
 

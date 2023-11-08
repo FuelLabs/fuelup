@@ -6,9 +6,9 @@
 
 | Channel       | Source          | Integration Tested   | Update Frequency         | Available |
 | ------------- | --------------- | -------------------- | ------------------------ | --------- |
-| **[latest]**  | published bins  | ✔️                    | checked every 30 minutes  | ✔️         |
-| **[nightly]** | `master` branch | ➖                   | nightly (1:00 AM UTC)     | ✔️         |
-| **[beta-3]**  | published bins  | ➖                   | only when necessary       | ✔️         |
+| **[latest]**  | published bins  | ✔️                    | only when necessary      | ✔️         |
+| **[nightly]** | `master` branch | ➖                   | nightly (1:00 AM UTC)    | ✔️         |
+| **[beta-3]**  | published bins  | ➖                   | only when necessary      | ✔️         |
 | **[beta-4-rc]**  | published bins  | ➖                   | only when necessary       | ✔️         |
 | **[beta-4-rc2]**  | published bins  | ➖                   | only when necessary       | ✔️         |
 | **[beta-4]**  | published bins  | ➖                   | only when necessary       | ✔️         |
@@ -50,17 +50,12 @@ Keep in mind that compatibility between `forc` and `fuel-core` is not guaranteed
 
 <!-- This section should give an overview of the latest channel -->
 <!-- latest:example:start -->
-The `latest` channel is updated by a scheduled GitHub workflow that **runs every 30 minutes** and checks for new, compatible releases of `forc` and `fuel-core`.
-
-The `latest` channel is `fuelup`'s default channel. It provides access to the latest compatible, published releases of `forc` and `fuel-core`.
+The `latest` channel is pointing to our latest beta network. This toolchain should be used to interact with and build on the latest testnet. This is also the default channel for `fuelup`.
 <!-- latest:example:end -->
 
-When installing the `latest` channel, fuelup will refer to the `channel-fuel-latest.toml` file published within the fuelup repository in the [gh-pages] branch to determine the set of `forc` and `fuel-core` versions to retrieve. The versions in this file are updated by a scheduled GitHub workflow that runs once every 30 minutes and performs the following steps:
-
-1. Checks for newly published versions of forc and fuel-core.
-2. Tests compatibility of new versions against a set of integration tests.
-3. Selects the latest set of versions that successfully pass the tests.
-4. Publishes the selected versions to the channel-fuel-latest.toml manifest.
+> **Note**
+>
+> The `latest` channel used to point latest compatible versions of `forc` and `fuel-core`, after version v0.20.0 latest is changed to point latest network. This is a breaking change and should be taken into account for existing workflows.
 
 ## Developer Guide
 

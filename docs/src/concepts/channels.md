@@ -98,4 +98,3 @@ You may also use [nektos/act](https://github.com/nektos/act) to run the workflow
 [beta-4-rc]: #the-beta-4-rc-channel
 [beta-4-rc2]: #the-beta-4-rc2-channel
 [beta-4]: #the-beta-4-channel
-[gh-pages]: https://github.com/FuelLabs/fuelup/tree/gh-pages

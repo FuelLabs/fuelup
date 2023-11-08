@@ -68,17 +68,13 @@ fn get_workflow_runs(repo: &str) -> Result<WorkflowRunApiResponse> {
     let resp = handle
         .get(&github_actions_runs_api_url)
         .call()
-        .expect(&format!("Could not get workflow runs for {}", repo));
+        .unwrap_or_else(|_| panic!("Could not get workflow runs for {}", repo));
 
     let mut data = Vec::new();
     resp.into_reader().read_to_end(&mut data)?;
 
-    Ok(
-        serde_json::from_str(&String::from_utf8_lossy(&data)).expect(&format!(
-            "Failed to deserialize a workflow run for repo {}",
-            repo
-        )),
-    )
+    Ok(serde_json::from_str(&String::from_utf8_lossy(&data))
+        .unwrap_or_else(|_| panic!("Failed to deserialize a workflow run for repo {}", repo)))
 }
 
 fn get_latest_release_version(repo: &str) -> Result<Version> {
@@ -127,28 +123,31 @@ fn collect_new_versions(channel: &Document, repo: &str) -> Result<Vec<Version>> 
 }
 
 fn parse_latest_indexed_version(channel: &Document, package: &str) -> Version {
-    Version::from_str(channel["pkg"][package]["version"].as_str().expect(&format!(
-        "Could not parse {} version str from {} toml",
-        package, channel
-    )))
-    .expect(&format!("Could not create version from {}", package))
+    Version::from_str(
+        channel["pkg"][package]["version"]
+            .as_str()
+            .unwrap_or_else(|| {
+                panic!(
+                    "Could not parse {} version str from {} toml",
+                    package, channel
+                )
+            }),
+    )
+    .unwrap_or_else(|_| panic!("Could not create version from {}", package))
 }
 
 fn fmt_versions(forc_version: &str, fuel_core_version: &str) -> String {
     format!("forc-{}@fuel-core-{}", forc_version, fuel_core_version)
 }
 
-fn print_selected_versions<'a>(
-    forc_versions: &[Version],
-    fuel_core_versions: &[Version],
-) -> String {
+fn print_selected_versions(forc_versions: &[Version], fuel_core_versions: &[Version]) -> String {
     let mut output = String::new();
 
     for forc in forc_versions {
         for fuel_core in fuel_core_versions {
             let formatted_versions = fmt_versions(&forc.to_string(), &fuel_core.to_string());
             output.push_str(&formatted_versions);
-            output.push_str("\n");
+            output.push('\n');
         }
     }
 
@@ -160,7 +159,7 @@ fn print_selected_versions<'a>(
 fn compare_rest() -> Result<()> {
     let handle = ureq::builder().user_agent("fuelup").build();
 
-    let toml_resp = match handle.get(&CHANNEL_FUEL_LATEST_TOML_URL).call() {
+    let toml_resp = match handle.get(CHANNEL_FUEL_LATEST_TOML_URL).call() {
         Ok(r) => r
             .into_string()
             .expect("Could not convert channel to string"),
@@ -223,16 +222,16 @@ fn get_latest_version(repo: &str) -> Result<Version> {
     // would guarantee the existence of the release binaries. Releases can be published and be available
     // without the binaries being ready yet, which causes inconsistency.
     if let Some(latest_run) = get_workflow_runs(repo)?.workflow_runs.first() {
-        return Ok(Version::from_str(&latest_run.head_branch[1..])?);
+        Ok(Version::from_str(&latest_run.head_branch[1..])?)
     } else {
-        return Ok(get_latest_release_version(repo)?);
-    };
+        get_latest_release_version(repo)
+    }
 }
 
 fn compare_compatibility() -> Result<()> {
     let handle = ureq::builder().user_agent("fuelup").build();
 
-    let toml_resp = match handle.get(&CHANNEL_FUEL_LATEST_TOML_URL).call() {
+    let toml_resp = match handle.get(CHANNEL_FUEL_LATEST_TOML_URL).call() {
         Ok(r) => r
             .into_string()
             .expect("Could not convert channel to string"),

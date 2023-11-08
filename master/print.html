@@ -292,7 +292,7 @@ or your currently active toolchain (in order of priority).</p>
 <!-- channels:example:start -->
 <p><code>fuelup</code> adopts a simplified version of <code>rustup</code> <a href="https://rust-lang.github.io/rustup/concepts/channels.html">channels</a>. Currently, the <code>latest</code>, <code>nightly</code>, and <code>beta</code> channels are published and serve as a source of distribution of Fuel toolchain binaries.</p>
 <table><thead><tr><th>Channel</th><th>Source</th><th>Integration Tested</th><th>Update Frequency</th><th>Available</th></tr></thead><tbody>
-<tr><td><strong><a href="concepts/channels.html#the-latest-channel">latest</a></strong></td><td>published bins</td><td>✔️</td><td>checked every 30 minutes</td><td>✔️</td></tr>
+<tr><td><strong><a href="concepts/channels.html#the-latest-channel">latest</a></strong></td><td>published bins</td><td>✔️</td><td>only when necessary</td><td>✔️</td></tr>
 <tr><td><strong><a href="concepts/channels.html#the-nightly-channel">nightly</a></strong></td><td><code>master</code> branch</td><td>➖</td><td>nightly (1:00 AM UTC)</td><td>✔️</td></tr>
 <tr><td><strong><a href="concepts/channels.html#the-beta-3-channel">beta-3</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
 <tr><td><strong><a href="concepts/channels.html#the-beta-4-rc-channel">beta-4-rc</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
@@ -323,16 +323,12 @@ Keep in mind that compatibility between <code>forc</code> and <code>fuel-core</c
 <h2 id="the-latest-channel"><a class="header" href="#the-latest-channel">The <code>latest</code> channel</a></h2>
 <!-- This section should give an overview of the latest channel -->
 <!-- latest:example:start -->
-<p>The <code>latest</code> channel is updated by a scheduled GitHub workflow that <strong>runs every 30 minutes</strong> and checks for new, compatible releases of <code>forc</code> and <code>fuel-core</code>.</p>
-<p>The <code>latest</code> channel is <code>fuelup</code>'s default channel. It provides access to the latest compatible, published releases of <code>forc</code> and <code>fuel-core</code>.</p>
+<p>The <code>latest</code> channel is pointing to our latest beta network. This toolchain should be used to interact with and build on the latest testnet. This is also the default channel for <code>fuelup</code>.</p>
 <!-- latest:example:end -->
-<p>When installing the <code>latest</code> channel, fuelup will refer to the <code>channel-fuel-latest.toml</code> file published within the fuelup repository in the <a href="https://github.com/FuelLabs/fuelup/tree/gh-pages">gh-pages</a> branch to determine the set of <code>forc</code> and <code>fuel-core</code> versions to retrieve. The versions in this file are updated by a scheduled GitHub workflow that runs once every 30 minutes and performs the following steps:</p>
-<ol>
-<li>Checks for newly published versions of forc and fuel-core.</li>
-<li>Tests compatibility of new versions against a set of integration tests.</li>
-<li>Selects the latest set of versions that successfully pass the tests.</li>
-<li>Publishes the selected versions to the channel-fuel-latest.toml manifest.</li>
-</ol>
+<blockquote>
+<p><strong>Note</strong></p>
+<p>The <code>latest</code> channel used to point latest compatible versions of <code>forc</code> and <code>fuel-core</code>, after version v0.20.0 latest is changed to point to the latest network. This is a breaking change and should be taken into account for existing workflows.</p>
+</blockquote>
 <h2 id="developer-guide"><a class="header" href="#developer-guide">Developer Guide</a></h2>
 <h3 id="understanding-the-latest-workflow"><a class="header" href="#understanding-the-latest-workflow">Understanding the <code>latest</code> workflow</a></h3>
 <blockquote>

@@ -26,8 +26,7 @@ pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
     channel::BETA_1,
     channel::BETA_2,
     channel::BETA_3,
-    channel::BETA_4_RC,
-    channel::BETA_4_RC_2,
+    channel::BETA_4,
     channel::NIGHTLY,
     channel::STABLE,
 ];
@@ -37,8 +36,6 @@ pub enum DistToolchainName {
     Beta1,
     Beta2,
     Beta3,
-    Beta4Rc,
-    Beta4Rc2,
     Beta4,
     Latest,
     Nightly,
@@ -52,8 +49,6 @@ impl fmt::Display for DistToolchainName {
             DistToolchainName::Beta1 => write!(f, "{}", channel::BETA_1),
             DistToolchainName::Beta2 => write!(f, "{}", channel::BETA_2),
             DistToolchainName::Beta3 => write!(f, "{}", channel::BETA_3),
-            DistToolchainName::Beta4Rc => write!(f, "{}", channel::BETA_4_RC),
-            DistToolchainName::Beta4Rc2 => write!(f, "{}", channel::BETA_4_RC_2),
             DistToolchainName::Beta4 => write!(f, "{}", channel::BETA_4),
         }
     }
@@ -68,8 +63,6 @@ impl FromStr for DistToolchainName {
             channel::BETA_1 => Ok(Self::Beta1),
             channel::BETA_2 => Ok(Self::Beta2),
             channel::BETA_3 => Ok(Self::Beta3),
-            channel::BETA_4_RC => Ok(Self::Beta4Rc),
-            channel::BETA_4_RC_2 => Ok(Self::Beta4Rc2),
             channel::BETA_4 => Ok(Self::Beta4),
             _ => bail!("Unknown name for toolchain: {}", s),
         }

@@ -177,8 +177,36 @@ fn write_nightly_document(document: &mut Document, components: Vec<Component>) -
 
                 // Example output: Some((0.15.1+nightly.20230111.a5514420e5, x86_64-unknown-linux-gnu.tar.gz))
                 // We want to record the version and target in the channel toml.
-                let split = stripped[1..].split_once('-');
-                if let Some((version, tarball_name)) = split {
+                let mut split = stripped[1..].split('-').peekable();
+                // We have two options for version string, either it is the first sub string or
+                // first two substrings. This is because a version can be either in the form of:
+                //  - v0.15.1
+                //  - v0.15.1-rc1
+                let version_number = split
+                    .next()
+                    .map(|version_number| version_number.to_string());
+                let version = if split
+                    .peek()
+                    .map(|version_str| version_str.starts_with("rc"))
+                    == Some(true)
+                {
+                    let version_rc = split.next();
+                    println!("rc: {version_rc:?}");
+
+                    match (version_number, version_rc) {
+                        (Some(version_number), Some(version_rc)) => {
+                            Some(format!("{version_number}-{version_rc}"))
+                        }
+                        _ => None,
+                    }
+                } else {
+                    version_number
+                };
+                let tarball_name_parts = split.collect::<Vec<&str>>();
+                let tarball_name = tarball_name_parts.join("-");
+                if let Some((version, tarball_name)) =
+                    version.map(|version| (version, tarball_name))
+                {
                     document["pkg"][&component.name]["version"] = value(version.to_string());
 
                     // Example output: Some((x86_64-unknown-linux-gnu, tar.gz))

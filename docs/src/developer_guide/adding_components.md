@@ -7,6 +7,16 @@ new release of `fuelup`.
 
 This section describes how you may add support for a binary within `fuelup`.
 
+### Required interface
+
+All `fuelup` components must implement the `--version` argument. `fuelup` uses this to display version information
+in its CLI. It should print the name of the executable and the full semver version number. For example:
+
+```sh
+$ forc-tx --version
+forc-tx 0.44.1
+```
+
 ### Binary packaged natively in forc
 
 This refers to binaries like `forc-fmt` that are added within the Sway repository.

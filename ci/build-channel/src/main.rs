@@ -191,8 +191,6 @@ fn write_nightly_document(document: &mut Document, components: Vec<Component>) -
                     == Some(true)
                 {
                     let version_rc = split.next();
-                    println!("rc: {version_rc:?}");
-
                     match (version_number, version_rc) {
                         (Some(version_number), Some(version_rc)) => {
                             Some(format!("{version_number}-{version_rc}"))

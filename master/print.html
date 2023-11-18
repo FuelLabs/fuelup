@@ -659,6 +659,12 @@ Any changes to the branch will require a re-review.</li>
 new release of <code>fuelup</code>.</p>
 <h2 id="contributing-to-componentstoml"><a class="header" href="#contributing-to-componentstoml">Contributing to components.toml</a></h2>
 <p>This section describes how you may add support for a binary within <code>fuelup</code>.</p>
+<h3 id="required-interface"><a class="header" href="#required-interface">Required interface</a></h3>
+<p>All <code>fuelup</code> components must implement the <code>--version</code> argument. <code>fuelup</code> uses this to display version information
+in its CLI. It should print the name of the executable and the full semver version number. For example:</p>
+<pre><code class="language-sh">$ forc-tx --version
+forc-tx 0.44.1
+</code></pre>
 <h3 id="binary-packaged-natively-in-forc"><a class="header" href="#binary-packaged-natively-in-forc">Binary packaged natively in forc</a></h3>
 <p>This refers to binaries like <code>forc-fmt</code> that are added within the Sway repository.</p>
 <p>In this scenario, <code>fuelup</code> will already automatically download the tar file from the Sway repository and

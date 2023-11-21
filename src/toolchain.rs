@@ -268,7 +268,7 @@ impl Toolchain {
             &download_cfg.name, &download_cfg.version, self.name
         );
 
-        if !store.has_component(&download_cfg.name, &download_cfg.version) {
+        if !store.has_component(&download_cfg.name, &download_cfg.version) || !self.has_component(&download_cfg.name) {
             match store.install_component(&download_cfg) {
                 Ok(downloaded) => {
                     for bin in downloaded {

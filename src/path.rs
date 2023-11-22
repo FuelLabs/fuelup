@@ -25,6 +25,10 @@ pub fn fuelup_bin() -> PathBuf {
     fuelup_bin_dir().join("fuelup")
 }
 
+pub fn fuelup_log_dir() -> PathBuf {
+    fuelup_dir().join("log")
+}
+
 pub fn settings_file() -> PathBuf {
     fuelup_dir().join("settings.toml")
 }

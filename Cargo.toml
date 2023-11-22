@@ -34,6 +34,7 @@ termcolor = "1"
 time = { version = "0.3", features = ["macros", "parsing", "formatting", "serde-well-known"] }
 toml_edit = { version = "0.13", features = ["serde", "easy"] }
 tracing = "0.1"
+tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3", features = ["ansi", "env-filter", "json"] }
 ureq = "2.4"
 

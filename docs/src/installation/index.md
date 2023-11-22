@@ -14,7 +14,7 @@ allowed in the installation step (explained below), which means you can run them
 
 Installation is done through the `fuelup-init` script found on our [repository], where you may find the source code.
 
-Run the following command:
+Run the following command (you may need to set a [http proxy](../basics.md#using-http-proxy) before running this command):
 
 <!-- This section should have the default command to install fuelup -->
 <!-- install:example:start -->

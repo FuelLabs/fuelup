@@ -13,6 +13,7 @@ use std::{fs, thread};
 use tar::Archive;
 use tracing::warn;
 use tracing::{error, info};
+use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::channel::Channel;
 use crate::channel::Package;
@@ -170,7 +171,37 @@ pub fn download(url: &str) -> Result<Vec<u8>> {
         match handle.get(url).call() {
             Ok(response) => {
                 let mut data = Vec::new();
-                response.into_reader().read_to_end(&mut data)?;
+
+                let total_size = response
+                .header("Content-Length")
+                .and_then(|s| s.parse::<u64>().ok())
+                .unwrap_or(0);
+                let mut downloaded_size = 0;
+                let mut buffer = [0; 8192];
+                let progress_bar = ProgressBar::new(total_size);
+                progress_bar.set_style(
+                    ProgressStyle::default_bar()
+                        .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} {bytes_per_sec} ({eta}) - {msg:.cyan}")
+                        .unwrap()
+                        .progress_chars("##-"),
+                );
+                let mut reader = progress_bar.wrap_read(response.into_reader());
+                loop {
+                    let bytes_read = reader.read(&mut buffer)?;
+                    if bytes_read == 0 {
+                        break;
+                    }
+                    if let Err(e) = data.write_all(&buffer[..bytes_read]) {
+                        error!(
+                            "Something went wrong writing data: {}",
+                            e
+                        )
+                    };
+                    downloaded_size += bytes_read as u64;
+                    progress_bar.set_position(downloaded_size);
+                }
+            
+                progress_bar.finish_with_message("Download complete");
 
                 return Ok(data);
             }
@@ -203,16 +234,38 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
     for _ in 1..RETRY_ATTEMPTS {
         match handle.get(url).call() {
             Ok(response) => {
-                let mut data = Vec::new();
-                response.into_reader().read_to_end(&mut data)?;
-
-                if let Err(e) = file.write_all(&data) {
-                    error!(
-                        "Something went wrong writing data to {}: {}",
-                        path.display(),
-                        e
-                    )
-                };
+                let total_size = response
+                .header("Content-Length")
+                .and_then(|s| s.parse::<u64>().ok())
+                .unwrap_or(0);
+                let mut downloaded_size = 0;
+                let mut buffer = [0; 8192];
+                let progress_bar = ProgressBar::new(total_size);
+                progress_bar.set_style(
+                    ProgressStyle::default_bar()
+                        .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} {bytes_per_sec} ({eta}) - {msg:.cyan}")
+                        .unwrap()
+                        .progress_chars("##-"),
+                );
+                let mut reader = progress_bar.wrap_read(response.into_reader());
+            
+                loop {
+                    let bytes_read = reader.read(&mut buffer)?;
+                    if bytes_read == 0 {
+                        break;
+                    }
+                    if let Err(e) = file.write_all(&buffer[..bytes_read]) {
+                        error!(
+                            "Something went wrong writing data to {}: {}",
+                            path.display(),
+                            e
+                        )
+                    };
+                    downloaded_size += bytes_read as u64;
+                    progress_bar.set_position(downloaded_size);
+                }
+            
+                progress_bar.finish_with_message("Download complete");
 
                 return Ok(());
             }

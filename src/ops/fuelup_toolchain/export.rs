@@ -10,6 +10,7 @@ use std::str::FromStr;
 use semver::Version;
 use anyhow::{bail, Result};
 use component::{self, Components};
+use tracing::info;
 
 pub fn export(command: ExportCommand) -> Result<()> {
     let ExportCommand { name, force} = command;
@@ -65,6 +66,7 @@ pub fn export(command: ExportCommand) -> Result<()> {
     std::fs::write(toolchain_override.path, document.to_string())
         .unwrap_or_else(|_| panic!("failed to write {FUEL_TOOLCHAIN_TOML_FILE}"));
 
+    info!("exported '{toolchain_name}' into '{FUEL_TOOLCHAIN_TOML_FILE}'");
     Ok(())
 }
 

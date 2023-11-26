@@ -1,5 +1,5 @@
 use crate::{
-    commands::component::ListCommand, download::get_latest_version, fmt::bold, toolchain::Toolchain,
+    commands::component::ListCommand, download::get_latest_version, fmt::{bold}, toolchain::Toolchain,
 };
 use anyhow::Result;
 use component::Components;
@@ -26,12 +26,12 @@ fn format_installable_component_info(name: &str, latest_version: &str) -> String
 fn format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
     use std::fmt::Write;
     format!(
-        "    - {}\n",
+        "{}",
         plugin_executables
             .iter()
             .filter(|c| *c != component::FORC)
             .fold(String::new(), |mut output, b| {
-                let _ = write!(output, "{b}");
+                let _ = write!(output, "    - {b}\n");
                 output
             })
     )
@@ -39,10 +39,6 @@ fn format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
 
 pub fn list(_command: ListCommand) -> Result<()> {
     let toolchain = Toolchain::from_settings()?;
-
-    // use write! instead of writeln! here to prevent this from printing first.
-    bold(|s| write!(s, "{}", toolchain.name));
-
     let mut installed_components_summary = String::from("\nInstalled:\n");
     let mut available_components_summary = String::from("Installable:\n");
 
@@ -95,6 +91,7 @@ pub fn list(_command: ListCommand) -> Result<()> {
             }
         }
     }
+    info!("{}", bold(&toolchain.name));
     info!(
         "{}\n{}",
         installed_components_summary, available_components_summary

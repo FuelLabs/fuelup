@@ -33,6 +33,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ansiterm"
+version = "0.12.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ab587f5395da16dd2e6939adf53dede583221b320cadfb94e02b5b7b9bf24cc"
+dependencies = [
+ "winapi",
+]
+
+[[package]]
 name = "anstream"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -465,6 +474,7 @@ dependencies = [
 name = "fuelup"
 version = "0.20.0"
 dependencies = [
+ "ansiterm",
  "anyhow",
  "clap 4.4.7",
  "clap_complete",

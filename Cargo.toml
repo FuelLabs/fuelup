@@ -40,3 +40,6 @@ ureq = "2.4"
 
 [workspace]
 members = ["component", "ci/build-channel", "ci/compare-versions"]
+
+[dev-dependencies]
+strip-ansi-escapes = "0.2.0"

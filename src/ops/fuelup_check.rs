@@ -17,7 +17,6 @@ use std::{
     path::Path,
 };
 use std::{collections::HashMap, process::Command};
-// use termcolor::Color;
 use tracing::{error, info};
 
 fn collect_package_versions(channel: Channel) -> HashMap<String, Version> {
@@ -78,7 +77,6 @@ fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version
             };
         }
         Err(e) => {
-            // TODO: use e
             let error_text = if plugin_executable.exists() {
                 format!("execution error - {e}")
             } else {

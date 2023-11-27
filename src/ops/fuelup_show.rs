@@ -2,15 +2,15 @@ use anyhow::{bail, Result};
 use component::{self, Components};
 use semver::Version;
 use std::collections::HashMap;
+use std::path::Path;
 use std::str::FromStr;
-use std::{io::Write, path::Path};
-use tracing::{error, info};
+use tracing::info;
 
 use crate::fmt::bold;
 use crate::store::Store;
 use crate::{
     config::Config,
-    fmt::{ print_header},
+    fmt::print_header,
     path::fuelup_dir,
     target_triple::TargetTriple,
     toolchain::{DistToolchainDescription, Toolchain},
@@ -27,12 +27,12 @@ fn exec_version(component_executable: &Path) -> Result<Version> {
             match output.split_whitespace().last() {
                 Some(v) => {
                     let version = Version::parse(v)?;
-                    return Ok(version);
+                    Ok(version)
                 }
                 None => {
                     bail!("Error getting version string");
                 }
-            };
+            }
         }
         Err(e) => {
             if component_executable.exists() {
@@ -45,11 +45,7 @@ fn exec_version(component_executable: &Path) -> Result<Version> {
 }
 
 pub fn show() -> Result<()> {
-    info!(
-        "{}: {}",
-        bold("Default host"),
-        TargetTriple::from_host()?
-    );
+    info!("{}: {}", bold("Default host"), TargetTriple::from_host()?);
     info!("{}: {}", bold("fuelup home"), fuelup_dir().display());
 
     print_header("installed toolchains");
@@ -133,7 +129,7 @@ pub fn show() -> Result<()> {
                                 format!("{}", e)
                             }
                         };
-                        info!("      - {} : {}", bold(&executable), version_text);
+                        info!("      - {} : {}", bold(executable), version_text);
                     }
                 } else {
                     let plugin_executable = active_toolchain.bin_path.join(&plugin.name);

@@ -7,7 +7,6 @@ use crate::{
 };
 use ansiterm::Color;
 use anyhow::{bail, Result};
-use std::io::Write;
 use std::str::FromStr;
 use tracing::info;
 
@@ -72,7 +71,7 @@ pub fn update() -> Result<()> {
             .collect::<String>()
             .is_empty()
         {
-            info!("{}",colored_bold(Color::Green, &toolchain_info));
+            info!("{}", colored_bold(Color::Green, &toolchain_info));
         } else {
             info!("{}", bold(&toolchain_info));
         }

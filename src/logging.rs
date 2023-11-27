@@ -5,7 +5,10 @@ use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, Layer};
 
 pub fn log_command() {
-    debug!("Command: {}", env::args().collect::<Vec<String>>().join(" "));
+    debug!(
+        "Command: {}",
+        env::args().collect::<Vec<String>>().join(" ")
+    );
 }
 
 pub fn log_environment() {
@@ -18,7 +21,7 @@ pub fn log_environment() {
             debug!("PATH does not include {}", FUELUP_DIR);
         }
     }
-    if let Some(val) = env::var_os("FUELUP_HOME") {
+    if let Some(val) = env::var_os(FUELUP_HOME) {
         debug!("FUELUP_HOME: {}", val.to_string_lossy());
     } else {
         debug!("FUELUP_HOME is not set");
@@ -34,7 +37,8 @@ pub fn init_tracing() -> WorkerGuard {
             tracing_subscriber::fmt::Layer::default()
                 .with_writer(file_writer)
                 .log_internal_errors(false)
-                .with_target(false),
+                .with_target(false)
+                .with_filter(LevelFilter::DEBUG),
         )
         .with(
             tracing_subscriber::fmt::Layer::default()

@@ -1,10 +1,10 @@
 use crate::{
-    commands::component::ListCommand, download::get_latest_version, fmt::{bold}, toolchain::Toolchain,
+    commands::component::ListCommand, download::get_latest_version, fmt::bold, toolchain::Toolchain,
 };
 use anyhow::Result;
 use component::Components;
 use semver::Version;
-use std::io::Write;
+use std::fmt::Write;
 use tracing::info;
 
 fn format_installed_component_info(
@@ -24,17 +24,13 @@ fn format_installable_component_info(name: &str, latest_version: &str) -> String
 }
 
 fn format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
-    use std::fmt::Write;
-    format!(
-        "{}",
-        plugin_executables
-            .iter()
-            .filter(|c| *c != component::FORC)
-            .fold(String::new(), |mut output, b| {
-                let _ = write!(output, "    - {b}\n");
-                output
-            })
-    )
+    plugin_executables
+        .iter()
+        .filter(|c| *c != component::FORC)
+        .fold(String::new(), |mut output, b| {
+            let _ = writeln!(output, "    - {b}");
+            output
+        })
 }
 
 pub fn list(_command: ListCommand) -> Result<()> {

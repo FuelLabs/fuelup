@@ -1,6 +1,4 @@
-use std::io::Write;
 use ansiterm::Style;
-use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 use tracing::info;
 
 use crate::target_triple::TargetTriple;

@@ -2,7 +2,6 @@ use anyhow::Result;
 use fuelup::{
     fuelup_cli,
     logging::{init_tracing, log_command, log_environment},
-    path::fuelup_log_dir,
     proxy_cli,
 };
 use std::{env, panic, path::PathBuf};

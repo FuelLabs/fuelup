@@ -11,7 +11,6 @@ use ansiterm::Color;
 use anyhow::Result;
 use component::{self, Components};
 use semver::Version;
-use std::io::Write;
 use std::str::FromStr;
 use std::{
     cmp::Ordering::{Equal, Greater, Less},
@@ -38,16 +37,12 @@ fn format_version_comparison(current_version: &Version, latest_version: &Version
                 "{} : {current_version} -> {latest_version}",
                 colored_bold(Color::Yellow, "Update available")
             )
-            // colored_bold(Color::Yellow, |s| write!(s, "Update available"));
-            // println!(" : {current_version} -> {latest_version}");
         }
         Equal => {
             format!(
                 "{} : {current_version}",
                 colored_bold(Color::Green, "Up to date")
             )
-            // colored_bold(Color::Green, |s| write!(s, "Up to date"));
-            // println!(" : {current_version}");
         }
         Greater => {
             format!(
@@ -57,11 +52,6 @@ fn format_version_comparison(current_version: &Version, latest_version: &Version
                 latest_version,
                 colored_bold(Color::Green, "(recommended)")
             )
-
-            // print!(" : {current_version}");
-            // colored_bold(Color::Yellow, |s| write!(s, " (unstable)"));
-            // print!(" -> {latest_version}");
-            // colored_bold(Color::Green, |s| writeln!(s, " (recommended)"));
         }
     }
 }
@@ -87,11 +77,12 @@ fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version
                 }
             };
         }
-        Err(e) => { // TODO: use e
+        Err(e) => {
+            // TODO: use e
             let error_text = if plugin_executable.exists() {
-                "execution error - {e}"
+                format!("execution error - {e}")
             } else {
-                "not found"
+                "not found".into()
             };
             info!("    - {} - {}", bold(plugin), error_text);
         }

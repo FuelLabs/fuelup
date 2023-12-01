@@ -120,7 +120,7 @@ jobs:
           footer: ""
           notify_when: "failure"
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_NOTIFY_BUILD }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_TOOLING }}
 
   publish-check:
     # Only do this job if publishing a release
@@ -150,7 +150,7 @@ jobs:
           footer: ""
           notify_when: "failure"
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_NOTIFY_BUILD }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_TOOLING }}
 
   build-release:
     name: build fuelup release binaries

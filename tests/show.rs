@@ -36,6 +36,7 @@ latest-{target} (default)
     - forc-client
       - forc-deploy : 0.1.0
       - forc-run : 0.1.0
+    - forc-crypto : 0.1.0
     - forc-doc : 0.1.0
     - forc-explore : 0.1.0
     - forc-fmt : 0.1.0
@@ -81,6 +82,7 @@ latest-{target} (default)
     - forc-client
       - forc-deploy : 0.1.0
       - forc-run : 0.1.0
+    - forc-crypto : 0.1.0
     - forc-doc : 0.1.0
     - forc-explore : 0.1.0
     - forc-fmt : 0.1.0
@@ -116,6 +118,7 @@ nightly-{target} (default)
     - forc-client
       - forc-deploy : 0.2.0
       - forc-run : 0.2.0
+    - forc-crypto : 0.2.0
     - forc-doc : 0.2.0
     - forc-explore : 0.2.0
     - forc-fmt : 0.2.0
@@ -161,6 +164,7 @@ my_toolchain (default)
     - forc-client
       - forc-deploy : not found
       - forc-run : not found
+    - forc-crypto : not found
     - forc-doc : not found
     - forc-explore : not found
     - forc-fmt : not found
@@ -206,6 +210,7 @@ beta-1-{target} (override), path: {}
     - forc-client
       - forc-deploy : not found
       - forc-run : not found
+    - forc-crypto : not found
     - forc-doc : not found
     - forc-explore : not found
     - forc-fmt : not found
@@ -253,6 +258,7 @@ latest-{target} (default)
     - forc-client
       - forc-deploy : 0.1.0
       - forc-run : 0.1.0
+    - forc-crypto : 0.1.0
     - forc-doc : 0.1.0
     - forc-explore : 0.1.0
     - forc-fmt : 0.1.0
@@ -302,6 +308,7 @@ latest-{target} (default)
     - forc-client
       - forc-deploy : 0.2.0
       - forc-run : 0.2.0
+    - forc-crypto : 0.2.0
     - forc-doc : 0.2.0
     - forc-explore : 0.2.0
     - forc-fmt : 0.2.0

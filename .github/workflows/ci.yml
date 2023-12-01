@@ -137,7 +137,6 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_TOOLING }}
 
-
   build-release:
     name: build fuelup release binaries
     runs-on: ${{ matrix.job.os }}

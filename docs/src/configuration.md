@@ -12,7 +12,7 @@ depend on which shell, and which operating system you are using. Your particular
 also determine where these scripts need to be placed.
 
 Here are some common set ups for the supported shells under Unix and similar operating systems
-(such as GNU/Linux). For these settings to take effect, you may have to log out and log back in to
+(such as GNU/Linux). For these settings to take effect, you may have to log out and log back into
 your shell session.
 
 ### BASH

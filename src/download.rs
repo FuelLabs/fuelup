@@ -207,7 +207,8 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
                 response.into_reader().read_to_end(&mut data)?;
 
                 if let Err(e) = file.write_all(&data) {
-                    error!(
+                    fs::remove_file(path)?;
+                    bail!(
                         "Something went wrong writing data to {}: {}",
                         path.display(),
                         e

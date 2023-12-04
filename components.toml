@@ -23,6 +23,14 @@ executables = ["forc-fmt"]
 repository_name = "sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 
+[component.forc-crypto]
+name = "forc-crypto"
+tarball_prefix = "forc-binaries"
+is_plugin = true
+executables = ["forc-crypto"]
+repository_name = "sway"
+targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
+
 [component.forc-lsp]
 name = "forc-lsp"
 tarball_prefix = "forc-binaries"

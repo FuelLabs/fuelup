@@ -12,6 +12,7 @@ use dirs;
 use crate::constants::FUEL_TOOLCHAIN_TOML_FILE;
 
 pub const FUELUP_DIR: &str = ".fuelup";
+pub const FUELUP_HOME: &str = "FUELUP_HOME";
 
 pub fn fuelup_dir() -> PathBuf {
     dirs::home_dir().unwrap().join(FUELUP_DIR)
@@ -23,6 +24,10 @@ pub fn fuelup_bin_dir() -> PathBuf {
 
 pub fn fuelup_bin() -> PathBuf {
     fuelup_bin_dir().join("fuelup")
+}
+
+pub fn fuelup_log_dir() -> PathBuf {
+    fuelup_dir().join("log")
 }
 
 pub fn settings_file() -> PathBuf {

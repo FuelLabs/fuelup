@@ -84,20 +84,24 @@ fn fuelup_default_nightly() -> Result<()> {
 #[test]
 fn fuelup_default_nightly_and_nightly_date() -> Result<()> {
     testcfg::setup(FuelupState::NightlyAndNightlyDateInstalled, &|cfg| {
-        let output = cfg.fuelup(&["default", "nightly"]);
+        let stripped = strip_ansi_escapes::strip(cfg.fuelup(&["default", "nightly"]).stdout);
+        let stdout = String::from_utf8_lossy(&stripped);
+
         let expected_stdout = format!(
             "default toolchain set to 'nightly-{}'\n",
             TargetTriple::from_host().unwrap()
         );
-        assert_eq!(output.stdout, expected_stdout);
+        assert_eq!(stdout, expected_stdout);
 
-        let output = cfg.fuelup(&["default", &format!("nightly-{DATE}")]);
+        let stripped =
+            strip_ansi_escapes::strip(cfg.fuelup(&["default", &format!("nightly-{DATE}")]).stdout);
+        let stdout = String::from_utf8_lossy(&stripped);
         let expected_stdout = format!(
             "default toolchain set to 'nightly-{}-{}'\n",
             DATE,
             TargetTriple::from_host().unwrap()
         );
-        assert_eq!(output.stdout, expected_stdout);
+        assert_eq!(stdout, expected_stdout);
     })?;
 
     Ok(())

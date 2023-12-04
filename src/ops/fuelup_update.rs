@@ -5,10 +5,9 @@ use crate::{
     path::warn_existing_fuel_executables,
     toolchain::{DistToolchainDescription, Toolchain},
 };
+use ansiterm::Color;
 use anyhow::{bail, Result};
-use std::io::Write;
 use std::str::FromStr;
-use termcolor::Color;
 use tracing::info;
 
 const UPDATED: &str = "updated";
@@ -60,7 +59,7 @@ pub fn update() -> Result<()> {
         };
 
         summary.push((
-            format!("{toolchain} {status}\n"),
+            format!("{toolchain} {status}"),
             format!("{installed_bins}{errored_bins}"),
         ));
     }
@@ -72,9 +71,9 @@ pub fn update() -> Result<()> {
             .collect::<String>()
             .is_empty()
         {
-            colored_bold(Color::Green, |s| write!(s, "{toolchain_info}"));
+            info!("{}", colored_bold(Color::Green, &toolchain_info));
         } else {
-            bold(|s| write!(s, "{toolchain_info}"));
+            info!("{}", bold(&toolchain_info));
         }
         info!("{}", components_info);
     }

@@ -11,11 +11,7 @@ use component::{self, Components};
 use forc_tracing::println_warning;
 use semver::Version;
 use std::collections::HashMap;
-use std::{
-    fs,
-    io::BufRead,
-    str::FromStr,
-};
+use std::{fs, io::BufRead, str::FromStr};
 use tracing::info;
 
 pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {

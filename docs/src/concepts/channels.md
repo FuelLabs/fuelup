@@ -45,7 +45,7 @@ The `latest` channel is pointing to our latest beta network. This toolchain shou
 
 > **Note**
 >
-> The `latest` channel is used to point latest compatible versions of `forc` and `fuel-core`, after version v0.20.0 latest is changed to point to the latest network. This is a breaking change and should be taken into account for existing workflows.
+> The `latest` channel used to point latest compatible versions of `forc` and `fuel-core`, after version v0.20.0 latest is changed to point to the latest network. This is a breaking change and should be taken into account for existing workflows.
 
 ## Developer Guide
 

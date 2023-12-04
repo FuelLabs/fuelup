@@ -1,5 +1,6 @@
 use anyhow::{bail, Result};
 use clap::Parser;
+use std::io::stdin;
 
 use crate::ops::fuelup_toolchain::export::export;
 use crate::ops::fuelup_toolchain::install::install;
@@ -82,7 +83,7 @@ pub fn exec(command: ToolchainCommand) -> Result<()> {
         ToolchainCommand::New(command) => new(command)?,
         ToolchainCommand::Uninstall(command) => uninstall(command)?,
         ToolchainCommand::ListRevisions(command) => list_revisions(command)?,
-        ToolchainCommand::Export(command) => export(command)?,
+        ToolchainCommand::Export(command) => export(command, stdin().lock())?,
     };
 
     Ok(())

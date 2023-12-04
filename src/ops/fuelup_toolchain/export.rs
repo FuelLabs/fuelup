@@ -1,23 +1,53 @@
 use crate::{
     commands::toolchain::ExportCommand,
     constants::FUEL_TOOLCHAIN_TOML_FILE,
+    path::get_fuel_toolchain_toml,
     toolchain::Toolchain,
     toolchain_override::{self, OverrideCfg, ToolchainCfg, ToolchainOverride},
+    util::version::exec_version,
 };
 use anyhow::{bail, Result};
 use component::{self, Components};
+use forc_tracing::println_warning;
 use semver::Version;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
-use std::str::FromStr;
+use std::{
+    fs,
+    io::BufRead,
+    str::FromStr,
+};
 use tracing::info;
 
-pub fn export(command: ExportCommand) -> Result<()> {
+pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
     let ExportCommand { name, force } = command;
-    let path = PathBuf::from("./").join(FUEL_TOOLCHAIN_TOML_FILE);
-    if !force && path.exists() {
-        bail!("{FUEL_TOOLCHAIN_TOML_FILE} already exists");
+    let toolchain_info_path = get_fuel_toolchain_toml().unwrap();
+    if toolchain_info_path.exists() {
+        if force {
+            println_warning(&format!(
+                "Because the `--force` argument was supplied, the toolchain info file at {} will be removed.",
+                &toolchain_info_path.display(),
+            ));
+            fs::remove_file(&toolchain_info_path).unwrap();
+        } else {
+            println_warning(&format!(
+                "There is an existing toolchain info file at {}. \
+                Do you wish to replace it with a new one? (y/N) ",
+                &toolchain_info_path.display(),
+            ));
+            let mut need_replace = String::new();
+            reader.read_line(&mut need_replace).unwrap();
+            if need_replace.trim() == "y" {
+                fs::remove_file(&toolchain_info_path).unwrap();
+            } else {
+                bail!(
+                    "Failed to create a new toolchain info file at {} \
+                    because a toolchain info file already exists at that location.",
+                    &toolchain_info_path.display(),
+                );
+            }
+        }
     }
+
     let mut toolchain_name = Toolchain::from_settings()?.name;
     if let Some(name) = name {
         toolchain_name = name;
@@ -27,7 +57,7 @@ pub fn export(command: ExportCommand) -> Result<()> {
     let mut version_map: HashMap<String, Version> = HashMap::new();
     for component in Components::collect_exclude_plugins()? {
         let component_executable = export_toolchain.bin_path.join(&component.name);
-        if let Ok(version) = get_exec_version(component_executable.as_path()) {
+        if let Ok(version) = exec_version(component_executable.as_path()) {
             version_map.insert(component.name.clone(), version);
         };
 
@@ -38,13 +68,13 @@ pub fn export(command: ExportCommand) -> Result<()> {
                     if !plugin.is_main_executable() {
                         for executable in plugin.executables.iter() {
                             let plugin_executable = export_toolchain.bin_path.join(executable);
-                            if let Ok(version) = get_exec_version(plugin_executable.as_path()) {
+                            if let Ok(version) = exec_version(plugin_executable.as_path()) {
                                 version_map.insert(executable.clone(), version);
                             };
                         }
                     } else {
                         let plugin_executable = export_toolchain.bin_path.join(&plugin.name);
-                        if let Ok(version) = get_exec_version(plugin_executable.as_path()) {
+                        if let Ok(version) = exec_version(plugin_executable.as_path()) {
                             version_map.insert(plugin.name.clone(), version);
                         };
                     }
@@ -60,7 +90,7 @@ pub fn export(command: ExportCommand) -> Result<()> {
             },
             Some(version_map),
         ),
-        path,
+        path: toolchain_info_path,
     };
     let document = toolchain_override.to_toml();
     std::fs::write(toolchain_override.path, document.to_string())
@@ -68,35 +98,4 @@ pub fn export(command: ExportCommand) -> Result<()> {
 
     info!("exported '{toolchain_name}' into '{FUEL_TOOLCHAIN_TOML_FILE}'");
     Ok(())
-}
-
-fn get_exec_version(component_executable: &Path) -> Result<Version> {
-    match std::process::Command::new(component_executable)
-        .arg("--version")
-        .output()
-    {
-        Ok(o) => {
-            let output = String::from_utf8_lossy(&o.stdout).into_owned();
-            match output.split_whitespace().last() {
-                Some(v) => {
-                    let version = Version::parse(v)?;
-                    return Ok(version);
-                }
-                None => {
-                    bail!("error getting version string");
-                }
-            };
-        }
-        Err(e) => {
-            if component_executable.exists() {
-                bail!(
-                    "execute '{} --version' error - {}",
-                    component_executable.display(),
-                    e
-                );
-            }
-        }
-    }
-
-    bail!("could not show version: {}", component_executable.display());
 }

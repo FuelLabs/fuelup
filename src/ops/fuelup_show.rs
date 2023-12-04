@@ -1,8 +1,7 @@
-use anyhow::{bail, Result};
+use anyhow::Result;
 use component::{self, Components};
 use semver::Version;
 use std::collections::HashMap;
-use std::path::Path;
 use std::str::FromStr;
 use tracing::info;
 
@@ -15,34 +14,8 @@ use crate::{
     target_triple::TargetTriple,
     toolchain::{DistToolchainDescription, Toolchain},
     toolchain_override::ToolchainOverride,
+    util::version::exec_version,
 };
-
-fn exec_version(component_executable: &Path) -> Result<Version> {
-    match std::process::Command::new(component_executable)
-        .arg("--version")
-        .output()
-    {
-        Ok(o) => {
-            let output = String::from_utf8_lossy(&o.stdout).into_owned();
-            match output.split_whitespace().last() {
-                Some(v) => {
-                    let version = Version::parse(v)?;
-                    Ok(version)
-                }
-                None => {
-                    bail!("Error getting version string");
-                }
-            }
-        }
-        Err(e) => {
-            if component_executable.exists() {
-                bail!("execution error - {}", e);
-            } else {
-                bail!("not found");
-            }
-        }
-    }
-}
 
 pub fn show() -> Result<()> {
     info!("{}: {}", bold("Default host"), TargetTriple::from_host()?);

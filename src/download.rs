@@ -1,6 +1,7 @@
 use anyhow::{anyhow, bail, Result};
 use component::{Component, FUELUP};
 use flate2::read::GzDecoder;
+use indicatif::{ProgressBar, ProgressStyle};
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::env;
@@ -13,7 +14,6 @@ use std::{fs, thread};
 use tar::Archive;
 use tracing::warn;
 use tracing::{error, info};
-use indicatif::{ProgressBar, ProgressStyle};
 
 use crate::channel::Channel;
 use crate::channel::Package;
@@ -173,9 +173,9 @@ pub fn download(url: &str) -> Result<Vec<u8>> {
                 let mut data = Vec::new();
 
                 let total_size = response
-                .header("Content-Length")
-                .and_then(|s| s.parse::<u64>().ok())
-                .unwrap_or(0);
+                    .header("Content-Length")
+                    .and_then(|s| s.parse::<u64>().ok())
+                    .unwrap_or(0);
                 let mut downloaded_size = 0;
                 let mut buffer = [0; 8192];
                 let progress_bar = ProgressBar::new(total_size);
@@ -192,15 +192,12 @@ pub fn download(url: &str) -> Result<Vec<u8>> {
                         break;
                     }
                     if let Err(e) = data.write_all(&buffer[..bytes_read]) {
-                        error!(
-                            "Something went wrong writing data: {}",
-                            e
-                        )
+                        error!("Something went wrong writing data: {}", e)
                     };
                     downloaded_size += bytes_read as u64;
                     progress_bar.set_position(downloaded_size);
                 }
-            
+
                 progress_bar.finish_with_message("Download complete");
 
                 return Ok(data);
@@ -235,9 +232,9 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
         match handle.get(url).call() {
             Ok(response) => {
                 let total_size = response
-                .header("Content-Length")
-                .and_then(|s| s.parse::<u64>().ok())
-                .unwrap_or(0);
+                    .header("Content-Length")
+                    .and_then(|s| s.parse::<u64>().ok())
+                    .unwrap_or(0);
                 let mut downloaded_size = 0;
                 let mut buffer = [0; 8192];
                 let progress_bar = ProgressBar::new(total_size);
@@ -248,7 +245,7 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
                         .progress_chars("##-"),
                 );
                 let mut reader = progress_bar.wrap_read(response.into_reader());
-            
+
                 loop {
                     let bytes_read = reader.read(&mut buffer)?;
                     if bytes_read == 0 {
@@ -264,7 +261,7 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
                     downloaded_size += bytes_read as u64;
                     progress_bar.set_position(downloaded_size);
                 }
-            
+
                 progress_bar.finish_with_message("Download complete");
 
                 return Ok(());

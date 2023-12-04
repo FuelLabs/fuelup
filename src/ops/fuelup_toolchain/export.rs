@@ -1,19 +1,19 @@
 use crate::{
     commands::toolchain::ExportCommand,
-    toolchain::Toolchain,
     constants::FUEL_TOOLCHAIN_TOML_FILE,
+    toolchain::Toolchain,
     toolchain_override::{self, OverrideCfg, ToolchainCfg, ToolchainOverride},
 };
+use anyhow::{bail, Result};
+use component::{self, Components};
+use semver::Version;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
-use semver::Version;
-use anyhow::{bail, Result};
-use component::{self, Components};
 use tracing::info;
 
 pub fn export(command: ExportCommand) -> Result<()> {
-    let ExportCommand { name, force} = command;
+    let ExportCommand { name, force } = command;
     let path = PathBuf::from("./").join(FUEL_TOOLCHAIN_TOML_FILE);
     if !force && path.exists() {
         bail!("{FUEL_TOOLCHAIN_TOML_FILE} already exists");
@@ -89,7 +89,11 @@ fn get_exec_version(component_executable: &Path) -> Result<Version> {
         }
         Err(e) => {
             if component_executable.exists() {
-                bail!("execute '{} --version' error - {}", component_executable.display(), e);
+                bail!(
+                    "execute '{} --version' error - {}",
+                    component_executable.display(),
+                    e
+                );
             }
         }
     }

@@ -67,6 +67,7 @@ const VERSION_2: &Version = &Version::new(0, 2, 0);
 
 pub static ALL_BINS: &[&str] = &[
     "forc",
+    "forc-crypto",
     "forc-deploy",
     "forc-doc",
     "forc-explore",

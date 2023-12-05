@@ -2,7 +2,7 @@ use crate::{
     commands::toolchain::ExportCommand,
     constants::FUEL_TOOLCHAIN_TOML_FILE,
     path::get_fuel_toolchain_toml,
-    toolchain::Toolchain,
+    toolchain::{DistToolchainDescription, Toolchain},
     toolchain_override::{self, OverrideCfg, ToolchainCfg, ToolchainOverride},
     util::version::exec_version,
 };
@@ -76,6 +76,23 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
                     }
                 }
             }
+        }
+    }
+    if DistToolchainDescription::from_str(&toolchain_name).is_err() {
+        println_warning(&format!(
+            "Invalid channel '{}', expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4>. \
+            Please input a valid channel: ",
+            &toolchain_info_path.display(),
+        ));
+        let mut input_toolchain_name = String::new();
+        reader.read_line(&mut input_toolchain_name).unwrap();
+        if DistToolchainDescription::from_str(&input_toolchain_name).is_err() {
+            bail!(
+                "Invalid channel '{}', expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4>.",
+                input_toolchain_name,
+            )
+        } else {
+            toolchain_name = input_toolchain_name;
         }
     }
 

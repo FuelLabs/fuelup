@@ -48,7 +48,8 @@ pub struct ListRevisionsCommand {}
 
 #[derive(Debug, Parser)]
 pub struct ExportCommand {
-    /// Toolchain to export, your currently active toolchain will be exported if name isn't specified
+    /// Toolchain to export, [possible values: latest, beta-1, beta-2, beta-3, beta-4, nightly].
+    /// Your currently active toolchain will be exported if name isn't specified
     pub name: Option<String>,
     /// Set true to disregard the existing TOML output file
     #[arg(short, long)]

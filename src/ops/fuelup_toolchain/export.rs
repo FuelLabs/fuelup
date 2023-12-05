@@ -3,13 +3,14 @@ use crate::{
     constants::FUEL_TOOLCHAIN_TOML_FILE,
     path::get_fuel_toolchain_toml,
     toolchain::{DistToolchainDescription, Toolchain},
-    toolchain_override::{self, OverrideCfg, ToolchainCfg, ToolchainOverride},
+    toolchain_override::{self, deserialize_channel, OverrideCfg, ToolchainCfg, ToolchainOverride},
     util::version::exec_version,
 };
 use anyhow::{bail, Result};
 use component::{self, Components};
 use forc_tracing::println_warning;
 use semver::Version;
+use serde::{Deserialize, Deserializer, Serialize};
 use std::{collections::HashMap, path::PathBuf};
 use std::{fs, io::BufRead, str::FromStr};
 use tracing::info;
@@ -48,7 +49,11 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
     if let Some(name) = name {
         toolchain_name = name;
     }
-    let export_toolchain = Toolchain::from_path(&toolchain_name);
+
+    let export_toolchain = match DistToolchainDescription::from_str(&toolchain_name) {
+        Ok(desc) => Toolchain::from_path(&desc.to_string()),
+        Err(_) => Toolchain::from_path(&toolchain_name),
+    };
 
     let mut version_map: HashMap<String, Version> = HashMap::new();
     for component in Components::collect_exclude_plugins()? {
@@ -78,7 +83,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
             }
         }
     }
-    if DistToolchainDescription::from_str(&toolchain_name).is_err() {
+    if toolchain_override::Channel::from_str(&toolchain_name).is_err() {
         println_warning(&format!(
             "Invalid channel '{}', expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4>. \
             Please input a valid channel: ",
@@ -87,7 +92,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
         let mut input_toolchain_name = String::new();
         reader.read_line(&mut input_toolchain_name).unwrap();
         input_toolchain_name = String::from(input_toolchain_name.trim());
-        if DistToolchainDescription::from_str(&input_toolchain_name).is_err() {
+        if toolchain_override::Channel::from_str(&input_toolchain_name).is_err() {
             bail!(
                 "Invalid channel '{}', expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4>.",
                 input_toolchain_name,

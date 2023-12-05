@@ -3,14 +3,13 @@ use crate::{
     constants::FUEL_TOOLCHAIN_TOML_FILE,
     path::get_fuel_toolchain_toml,
     toolchain::{DistToolchainDescription, Toolchain},
-    toolchain_override::{self, deserialize_channel, OverrideCfg, ToolchainCfg, ToolchainOverride},
+    toolchain_override::{self, OverrideCfg, ToolchainCfg, ToolchainOverride},
     util::version::exec_version,
 };
 use anyhow::{bail, Result};
 use component::{self, Components};
 use forc_tracing::println_warning;
 use semver::Version;
-use serde::{Deserialize, Deserializer, Serialize};
 use std::{collections::HashMap, path::PathBuf};
 use std::{fs, io::BufRead, str::FromStr};
 use tracing::info;

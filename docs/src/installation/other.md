@@ -10,8 +10,7 @@ use [Windows Subsystem for Linux].
 
 ## Building from source
 
-You can also install `fuelup` from source. Check out the git repository from
-<https://github.com/FuelLabs/fuelup> and run `cargo run --release`.
+You can also install `fuelup` from source. Check out the [git repository](https://github.com/FuelLabs/fuelup) and run `cargo run --release`.
 
 You should then manually move the `fuelup` binary to `.fuelup/bin`.
 

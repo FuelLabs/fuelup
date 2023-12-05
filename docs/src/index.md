@@ -12,8 +12,7 @@ Check out the [Concepts] chapter for an overview of how _fuelup_ works and some
 of the terminology it uses. The [Installation] chapter covers installing
 fuelup and getting started.
 
-The source code of _fuelup_ and this manual may be found at
-<https://github.com/FuelLabs/fuelup>. If you find a problem, check out the
+The source code of _fuelup_ and this manual may be found [here](https://github.com/FuelLabs/fuelup). If you find a problem, check out the
 [issue tracker].
 
 Release notes for _fuelup_ may be found under [Releases] in our GitHub repository.

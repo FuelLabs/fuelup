@@ -3,7 +3,7 @@
 Adding components in `fuelup` is often just a small PR to [`components.toml`] in the repo, followed by a
 new release of `fuelup`.
 
-## Contributing to components.toml
+## Contributing to `components.toml`
 
 This section describes how you may add support for a binary within `fuelup`.
 

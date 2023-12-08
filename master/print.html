@@ -182,8 +182,7 @@ simpler with <a href="https://github.com/FuelLabs/sway/tree/master/forc">forc</a
 <p>Check out the <a href="concepts/index.html">Concepts</a> chapter for an overview of how <em>fuelup</em> works and some
 of the terminology it uses. The <a href="installation/index.html">Installation</a> chapter covers installing
 fuelup and getting started.</p>
-<p>The source code of <em>fuelup</em> and this manual may be found at
-<a href="https://github.com/FuelLabs/fuelup">https://github.com/FuelLabs/fuelup</a>. If you find a problem, check out the
+<p>The source code of <em>fuelup</em> and this manual may be found <a href="https://github.com/FuelLabs/fuelup">here</a>. If you find a problem, check out the
 <a href="https://github.com/FuelLabs/fuelup/issues">issue tracker</a>.</p>
 <p>Release notes for <em>fuelup</em> may be found under <a href="https://github.com/FuelLabs/fuelup/releases">Releases</a> in our GitHub repository.</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
@@ -225,8 +224,7 @@ forc-run --version
 use <a href="https://docs.microsoft.com/en-us/windows/wsl/install">Windows Subsystem for Linux</a>.</p>
 <!-- windows:example:end -->
 <h2 id="building-from-source"><a class="header" href="#building-from-source">Building from source</a></h2>
-<p>You can also install <code>fuelup</code> from source. Check out the git repository from
-<a href="https://github.com/FuelLabs/fuelup">https://github.com/FuelLabs/fuelup</a> and run <code>cargo run --release</code>.</p>
+<p>You can also install <code>fuelup</code> from source. Check out the <a href="https://github.com/FuelLabs/fuelup">git repository</a> and run <code>cargo run --release</code>.</p>
 <p>You should then manually move the <code>fuelup</code> binary to <code>.fuelup/bin</code>.</p>
 <h2 id="direct-download"><a class="header" href="#direct-download">Direct download</a></h2>
 <p><code>fuelup</code> binaries are released on our GitHub <a href="https://github.com/FuelLabs/fuelup/releases">releases page</a> where you can directly
@@ -265,7 +263,7 @@ toolchains and presents them all through a single set of tools within <code>~/.f
 <!-- fuelup:example:end -->
 <p>Generally, it is not recommended to manually make changes to the fuelup directory, otherwise <code>fuelup</code>
 might not function as expected. If you have made changes to the directory, we recommend removing
-the entire directory and re-installing fuelup with <a href="concepts/../installation/index.html#quickstart">fuelup-init</a>.</p>
+the entire directory and re-installing fuelup with <a href="concepts/../installation/index.html#quickstart"><code>fuelup-init</code></a>.</p>
 <h2 id="proxies"><a class="header" href="#proxies">Proxies</a></h2>
 <p>On the surface, the installed executables seem to live in <code>~/.fuelup/bin</code>, but the <a href="https://fuellabs.github.io/sway/master/book/forc/index.html"><code>forc</code></a>, <a href="https://github.com/FuelLabs/fuel-core"><code>fuel-core</code></a>
 and other executables installed in <code>~/.fuelup/bin</code> are actually not the real binaries
@@ -311,7 +309,7 @@ or your currently active toolchain (in order of priority).</p>
 <p>The <code>nightly</code> channel is a published TOML file describing successful builds of the <code>master</code> branch of <code>forc</code> and <code>fuel-core</code> for the day.
 These builds are released in the <a href="https://github.com/FuelLabs/sway-nightly-binaries/releases">sway-nightly-binaries</a> repository and the workflows in that repo start building them every day at <strong>00:00 UTC</strong>.</p>
 <p>The <code>nightly</code> channel within <code>fuelup</code> is updated by a scheduled GitHub workflow that <strong>runs every day at 01:00 UTC</strong>, after builds have finished.
-Note that nightlies might fail to build, in which case it is possible that the <code>nightly</code> toolchain may not be available for that day.</p>
+Note that the <code>nightly</code> channel might fail to build, in which case it is possible that the <code>nightly</code> toolchain may not be available for that day.</p>
 <p>You should use <code>nightly</code> if you want the latest changes to <code>master</code> that have not been officially released yet.
 Keep in mind that compatibility between <code>forc</code> and <code>fuel-core</code> is not guaranteed here, and you should expect unstable features to break.</p>
 <!-- nightly:example:end -->
@@ -330,17 +328,17 @@ Keep in mind that compatibility between <code>forc</code> and <code>fuel-core</c
 <p><strong>Note</strong></p>
 <p>Reading the information below is only really necessary if you wish to contribute to the workflows or want a deeper understanding on how channels are updated.</p>
 </blockquote>
-<p>The entrypoint of the scheduled workflow is within <code>index-versions.yml</code>. We run the Rust script <code>compare-versions</code> to collect versions of <code>forc</code> and <code>fuel-core</code> to be tested. These versions are filtered for incompatible versions prior to being used as a JSON string input to <code>test-toolchain-compatibility.yml</code>, where the testing occurs.</p>
-<p>In <code>test-toolchain-compatibility.yml</code>, The versions JSON string input is used to init a matrix using the <a href="https://docs.github.com/en/actions/learn-github-actions/expressions#fromjson">fromJSON</a> expression. We checkout the Sway repo at the given <code>forc</code> version and pull the <code>fuel-core</code> Docker image at the given <code>fuel-core</code> version and run integration tests found in the <a href="https://github.com/FuelLabs/sway/blob/3bd8eaf4a0f11a3009c9421100cc06c2e897b6c2/.github/workflows/ci.yml#L229-L270">Sway CI</a> for them.</p>
-<p>Note that we only mark versions as incompatible specifically if tests fail, and not if other prior steps fail (eg. we do not want to mark versions as incompatible if there were errors pulling the Docker image)</p>
+<p>The entry point of the scheduled workflow is within <code>index-versions.yml</code>. We run the Rust script <code>compare-versions</code> to collect versions of <code>forc</code> and <code>fuel-core</code> to be tested. These versions are filtered for incompatible versions prior to being used as a JSON string input to <code>test-toolchain-compatibility.yml</code>, where the testing occurs.</p>
+<p>In <code>test-toolchain-compatibility.yml</code>, The versions JSON string input is used to initialize a matrix using the <a href="https://docs.github.com/en/actions/learn-github-actions/expressions#fromjson"><code>fromJSON</code></a> expression. We checkout the Sway repo at the given <code>forc</code> version and pull the <code>fuel-core</code> Docker image at the given <code>fuel-core</code> version and run integration tests found in the <a href="https://github.com/FuelLabs/sway/blob/3bd8eaf4a0f11a3009c9421100cc06c2e897b6c2/.github/workflows/ci.yml#L229-L270">Sway CI</a> for them.</p>
+<p>Note that we only mark versions as incompatible specifically if tests fail, and not if other prior steps fail (e.g. we do not want to mark versions as incompatible if there were errors pulling the Docker image)</p>
 <p>The <a href="https://github.com/actions/upload-artifact">upload-artifact</a> action is used to collect the test results from the matrix to be used later in a <a href="https://github.com/actions/download-artifact">download-artifact</a> step.</p>
 <p>If tests were not skipped and are now done, we finally get to the <code>index-versions</code> job. We download the artifacts that were previously uploaded to be used here. This job will:</p>
 <ol>
 <li>
-<p>upload incompatible versions to gh-pages. These incompatible versions are named in the format <code>incompatible-forc-&lt;FORC_VERSION&gt;@fuel-core-&lt;FUEL_CORE_VERSION&gt;</code>.</p>
+<p>upload incompatible versions to <code>gh-pages</code>. These incompatible versions are named in the format <code>incompatible-forc-&lt;FORC_VERSION&gt;@fuel-core-&lt;FUEL_CORE_VERSION&gt;</code>.</p>
 </li>
 <li>
-<p>update the channel by filtering for the latest versions of <code>forc</code> and <code>fuel-core</code> that passed tests within the matrix by running <code>index-versions.sh</code>. These are named in the format <code>compatible-forc-&lt;FORC_VERSION&gt;@fuel-core-&lt;FUEL_CORE_VERSION&gt;</code>. Note that these files are not saved or uploaded onto gh-pages - they are only a way for the <code>test-toolchain-compatibility</code> job to share test results with this job.</p>
+<p>update the channel by filtering for the latest versions of <code>forc</code> and <code>fuel-core</code> that passed tests within the matrix by running <code>index-versions.sh</code>. These are named in the format <code>compatible-forc-&lt;FORC_VERSION&gt;@fuel-core-&lt;FUEL_CORE_VERSION&gt;</code>. Note that these files are not saved or uploaded onto <code>gh-pages</code> - they are only a way for the <code>test-toolchain-compatibility</code> job to share test results with this job.</p>
 </li>
 </ol>
 <h3 id="debugging-the-workflow"><a class="header" href="#debugging-the-workflow">Debugging the workflow</a></h3>
@@ -354,14 +352,14 @@ Keep in mind that compatibility between <code>forc</code> and <code>fuel-core</c
 <p>You can also exit with 0 or 1 in jobs or steps where you want it to pass/fail.</p>
 </li>
 </ol>
-<p>You may also use <a href="https://github.com/nektos/act">nektos/act</a> to run the workflow(s) locally.</p>
+<p>You may also use <a href="https://github.com/nektos/act"><code>nektos/act</code></a> to run the workflow(s) locally.</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="toolchains"><a class="header" href="#toolchains">Toolchains</a></h1>
 <!-- This section should give a basic overview of toolchains -->
 <!-- toolchains:example:start -->
 <p>Many <code>fuelup</code> commands deal with <em>toolchains</em>, a single installation of the
 Fuel toolchain. <code>fuelup</code> supports <strong>two</strong> types of toolchains.</p>
 <ol>
-<li>Distributable toolchains which track the official release <a href="concepts/channels.html">channels</a> (eg, <em>latest</em>, <em>nightly</em>);</li>
+<li>Distributable toolchains which track the official release <a href="concepts/channels.html">channels</a> (e.g., <em>latest</em>, <em>nightly</em>);</li>
 <li>Custom toolchains and install individual components in a modular manner.</li>
 </ol>
 <!-- toolchains:example:end -->
@@ -381,7 +379,7 @@ is downloaded from the archive for that date.</p>
 <p>For most use cases, using the officially packaged toolchains is good enough.</p>
 <p>For advanced use cases, <code>fuelup</code> allows you to build a toolchain in a
 modular manner, and to specify specific versions of components to install.</p>
-<p>To init a new, empty toolchain:</p>
+<p>To initialize a new, empty toolchain:</p>
 <pre><code class="language-sh">fuelup toolchain new my_toolchain
 </code></pre>
 <p>Now you can add/remove components to/from the toolchain as you wish:</p>
@@ -460,10 +458,10 @@ help for each subcommand is also available.</p>
 <p>You can override the installed default toolchain using a <code>fuel-toolchain.toml</code> file.</p>
 <!-- overrides:example:end -->
 <h2 id="the-toolchain-file"><a class="header" href="#the-toolchain-file">The toolchain file</a></h2>
-<!-- This section should explain the fuel-toolchain.toml file -->
+<!-- This section should explain the fuel-toolchain TOML file -->
 <!-- toolchain:example:start -->
-<p>The fuel-toolchain.toml file allows projects to &quot;pin&quot; to a specific set of fuel toolchain component versions.
-This greatly improves the reproducibility of a project, as the fuel-toolchain.toml contains the set of known,
+<p>The <code>fuel-toolchain.toml</code> file allows projects to &quot;pin&quot; to a specific set of fuel toolchain component versions.
+This greatly improves the reproducibility of a project, as the <code>fuel-toolchain.toml</code> contains the set of known,
 working versions for each tool used to build it.</p>
 <p>When this file is present, <code>fuelup</code> will override the default toolchain with the specified toolchain when executing binaries
 in the toolchain.</p>
@@ -535,8 +533,8 @@ create the directory; for this example we'll create a hidden directory inside ou
 <p>Now you can install the completions script using the following command:</p>
 <pre><code class="language-sh">fuelup completions --shell=zsh &gt; ~/.zfunc/_fuelup
 </code></pre>
-<h3 id="powershell"><a class="header" href="#powershell">POWERSHELL</a></h3>
-<p>The powershell completion scripts require PowerShell v5.0+ (which comes with Windows 10, but can be
+<h3 id="powershell"><a class="header" href="#powershell">PowerShell</a></h3>
+<p>The <code>powershell</code> completion scripts require PowerShell v5.0+ (which comes with Windows 10, but can be
 downloaded separately for windows 7 or 8.1).</p>
 <p>First, check if a profile has already been set</p>
 <pre><code class="language-sh">Test-Path $profile
@@ -658,7 +656,7 @@ Any changes to the branch will require a re-review.</li>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="adding-components"><a class="header" href="#adding-components">Adding components</a></h1>
 <p>Adding components in <code>fuelup</code> is often just a small PR to <a href="https://github.com/FuelLabs/fuelup/blob/master/components.toml"><code>components.toml</code></a> in the repo, followed by a
 new release of <code>fuelup</code>.</p>
-<h2 id="contributing-to-componentstoml"><a class="header" href="#contributing-to-componentstoml">Contributing to components.toml</a></h2>
+<h2 id="contributing-to-componentstoml"><a class="header" href="#contributing-to-componentstoml">Contributing to <code>components.toml</code></a></h2>
 <p>This section describes how you may add support for a binary within <code>fuelup</code>.</p>
 <h3 id="required-interface"><a class="header" href="#required-interface">Required interface</a></h3>
 <p>All <code>fuelup</code> components must implement the <code>--version</code> argument. <code>fuelup</code> uses this to display version information
@@ -732,18 +730,18 @@ during usage.</p>
 <code>nightly</code> channels on a routine basis.</p>
 <p>The <code>latest</code> channel is re-built if the <a href="https://github.com/FuelLabs/fuelup/actions/workflows/index-versions.yml">check versions workflow</a> detects a new release of <code>forc</code> or <code>fuel-core</code>, and
 compatibility tests pass after that. This is explained in detail in the <a href="developer_guide/../concepts/channels.html#understanding-the-latest-workflow">latest channel developer guide</a>.</p>
-<p>An example of this usage is in <a href="https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/test-toolchain-compatibility.yml#L174">test-toolchain-compatibility.yml</a>.</p>
+<p>An example of this usage is in <a href="https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/test-toolchain-compatibility.yml#L174"><code>test-toolchain-compatibility.yml</code></a>.</p>
 <p>The <code>nightly</code> channel is more straightforward - a channel is built at 01:00 UTC every day, containing the download
 links to binaries found within the <a href="https://github.com/FuelLabs/sway-nightly-binaries">sway-nightly-binaries repository</a>.</p>
-<p>An example of this usage is in <a href="https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/publish-nightly-channel.yml#L37">publish-nightly-channel.yml</a>.</p>
+<p>An example of this usage is in <a href="https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/publish-nightly-channel.yml#L37"><code>publish-nightly-channel.yml</code></a>.</p>
 <h3 id="manual"><a class="header" href="#manual">Manual</a></h3>
-<p>There may be times where we need a channel for a one-off event eg. testnets. During these events, we do not
+<p>There may be times where we need a channel for a one-off event e.g. testnets. During these events, we do not
 require a routine update, and can essentially publish once and be done. This is when manual publishing is done.</p>
 <p>For example, building a <code>beta-3</code> toolchain is done like so:</p>
 <pre><code class="language-sh"># from fuelup project root
 cd ci/build-channel &amp;&amp; cargo run -- channel-fuel-beta-3.toml 2023-02-13 forc=0.35.0 fuel-core=0.17.1
 </code></pre>
-<p>The above command means that we're building a channel named <code>channel-fuel-beta-3.toml</code> with the date <code>2023-02-13</code> (YYYY-MM-DD)
+<p>The above command means that we're building a channel named <code>channel-fuel-beta-3.toml</code> with the date <code>2023-02-13</code> (<code>YYYY-MM-DD</code>)
 and <code>forc</code> and <code>fuel-core</code> versions <code>0.35.0</code> and <code>0.17.1</code> respectively, and the latest versions for the other unlisted components.</p>
 <p>Other than for these one-off events, manually running <code>build-channel</code> locally is a good sanity check when working
 on this codebase.</p>
@@ -763,7 +761,7 @@ on this codebase.</p>
 </ul>
 <p><code>PACKAGES</code></p>
 <ul>
-<li><em>Optional</em>. A list of key-value pairs mapping component names to <a href="https://semver.org/">SemVer</a>-compatible versions, eg. 'fuel-core=0.17.1'</li>
+<li><em>Optional</em>. A list of key-value pairs mapping component names to <a href="https://semver.org/">SemVer</a>-compatible versions, e.g. 'fuel-core=0.17.1'</li>
 </ul>
 <h3 id="options"><a class="header" href="#options">Options</a></h3>
 <p><code>--nightly</code></p>

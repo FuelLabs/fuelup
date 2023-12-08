@@ -182,18 +182,18 @@ during usage.</p>
 <code>nightly</code> channels on a routine basis.</p>
 <p>The <code>latest</code> channel is re-built if the <a href="https://github.com/FuelLabs/fuelup/actions/workflows/index-versions.yml">check versions workflow</a> detects a new release of <code>forc</code> or <code>fuel-core</code>, and
 compatibility tests pass after that. This is explained in detail in the <a href="../concepts/channels.html#understanding-the-latest-workflow">latest channel developer guide</a>.</p>
-<p>An example of this usage is in <a href="https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/test-toolchain-compatibility.yml#L174">test-toolchain-compatibility.yml</a>.</p>
+<p>An example of this usage is in <a href="https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/test-toolchain-compatibility.yml#L174"><code>test-toolchain-compatibility.yml</code></a>.</p>
 <p>The <code>nightly</code> channel is more straightforward - a channel is built at 01:00 UTC every day, containing the download
 links to binaries found within the <a href="https://github.com/FuelLabs/sway-nightly-binaries">sway-nightly-binaries repository</a>.</p>
-<p>An example of this usage is in <a href="https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/publish-nightly-channel.yml#L37">publish-nightly-channel.yml</a>.</p>
+<p>An example of this usage is in <a href="https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/publish-nightly-channel.yml#L37"><code>publish-nightly-channel.yml</code></a>.</p>
 <h3 id="manual"><a class="header" href="#manual">Manual</a></h3>
-<p>There may be times where we need a channel for a one-off event eg. testnets. During these events, we do not
+<p>There may be times where we need a channel for a one-off event e.g. testnets. During these events, we do not
 require a routine update, and can essentially publish once and be done. This is when manual publishing is done.</p>
 <p>For example, building a <code>beta-3</code> toolchain is done like so:</p>
 <pre><code class="language-sh"># from fuelup project root
 cd ci/build-channel &amp;&amp; cargo run -- channel-fuel-beta-3.toml 2023-02-13 forc=0.35.0 fuel-core=0.17.1
 </code></pre>
-<p>The above command means that we're building a channel named <code>channel-fuel-beta-3.toml</code> with the date <code>2023-02-13</code> (YYYY-MM-DD)
+<p>The above command means that we're building a channel named <code>channel-fuel-beta-3.toml</code> with the date <code>2023-02-13</code> (<code>YYYY-MM-DD</code>)
 and <code>forc</code> and <code>fuel-core</code> versions <code>0.35.0</code> and <code>0.17.1</code> respectively, and the latest versions for the other unlisted components.</p>
 <p>Other than for these one-off events, manually running <code>build-channel</code> locally is a good sanity check when working
 on this codebase.</p>
@@ -213,7 +213,7 @@ on this codebase.</p>
 </ul>
 <p><code>PACKAGES</code></p>
 <ul>
-<li><em>Optional</em>. A list of key-value pairs mapping component names to <a href="https://semver.org/">SemVer</a>-compatible versions, eg. 'fuel-core=0.17.1'</li>
+<li><em>Optional</em>. A list of key-value pairs mapping component names to <a href="https://semver.org/">SemVer</a>-compatible versions, e.g. 'fuel-core=0.17.1'</li>
 </ul>
 <h3 id="options"><a class="header" href="#options">Options</a></h3>
 <p><code>--nightly</code></p>

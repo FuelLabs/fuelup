@@ -49,7 +49,7 @@ pub struct ListRevisionsCommand {}
 #[derive(Debug, Parser)]
 pub struct ExportCommand {
     /// Toolchain to export, [possible values: latest, beta-1, beta-2, beta-3, beta-4, nightly].
-    /// Your currently active toolchain will be exported if name isn't specified
+    /// The default toolchain will be exported if name isn't specified
     pub name: Option<String>,
     /// Forces exporting the toolchain, replacing any existing toolchain override file
     #[arg(short, long)]

@@ -15,7 +15,11 @@ use std::{fs, io::BufRead, str::FromStr};
 use tracing::info;
 
 pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
-    let ExportCommand { name, force } = command;
+    let ExportCommand {
+        name,
+        channel,
+        force,
+    } = command;
     let mut toolchain_info_path = PathBuf::from("./").join(FUEL_TOOLCHAIN_TOML_FILE);
     if let Some(path) = get_fuel_toolchain_toml() {
         toolchain_info_path = path;
@@ -82,30 +86,34 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
             }
         }
     }
-    if toolchain_override::Channel::from_str(&toolchain_name).is_err() {
+    let mut export_channel = toolchain_name.clone();
+    if let Some(channel) = channel {
+        export_channel = channel;
+    }
+    if toolchain_override::Channel::from_str(&export_channel).is_err() {
         println_warning(&format!(
             "Invalid channel '{}', expected one of {}. \
             Please input a valid channel: ",
-            toolchain_name, VALID_CHANNEL_STR,
+            export_channel, VALID_CHANNEL_STR,
         ));
-        let mut input_toolchain_name = String::new();
-        reader.read_line(&mut input_toolchain_name).unwrap();
-        input_toolchain_name = String::from(input_toolchain_name.trim());
-        if toolchain_override::Channel::from_str(&input_toolchain_name).is_err() {
+        let mut input_channel_name = String::new();
+        reader.read_line(&mut input_channel_name).unwrap();
+        input_channel_name = String::from(input_channel_name.trim());
+        if toolchain_override::Channel::from_str(&input_channel_name).is_err() {
             bail!(
                 "Invalid channel '{}', expected one of {}.",
-                input_toolchain_name,
+                input_channel_name,
                 VALID_CHANNEL_STR,
             );
         } else {
-            toolchain_name = input_toolchain_name;
+            export_channel = input_channel_name;
         }
     }
 
     let toolchain_override = ToolchainOverride {
         cfg: OverrideCfg::new(
             ToolchainCfg {
-                channel: toolchain_override::Channel::from_str(&toolchain_name).unwrap(),
+                channel: toolchain_override::Channel::from_str(&export_channel).unwrap(),
             },
             Some(version_map),
         ),
@@ -125,7 +133,8 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{channel::BETA_3, toolchain_override::ToolchainOverride};
+    use crate::{channel, toolchain::DistToolchainName, toolchain_override::ToolchainOverride};
+    use serial_test::serial;
     use std::fs;
 
     use super::*;
@@ -134,8 +143,8 @@ mod tests {
     const INPUT_NOP: &[u8; 1] = b"\n";
     const INPUT_YES: &[u8; 2] = b"y\n";
     const INPUT_NO: &[u8; 2] = b"n\n";
-    const INPUT_INVALID_CHANNEL: &[u8; 10] = b"my-custom\n";
-    const INVALID_CHANNEL: &str = "my-custom";
+    const INPUT_INVALID_CHANNEL: &[u8; 11] = b"my-channel\n";
+    const INVALID_CHANNEL: &str = "my-channel";
 
     fn remove_toolchain_info() {
         if let Some(fuel_toolchain_toml_file) = get_fuel_toolchain_toml() {
@@ -149,6 +158,8 @@ mod tests {
             if !fuel_toolchain_toml_file.exists() {
                 fs::File::create(fuel_toolchain_toml_file).unwrap();
             }
+        } else {
+            fs::File::create(FUEL_TOOLCHAIN_TOML_FILE).unwrap();
         }
     }
     fn check_toolchain_info_with_channel(channel_name: &String) -> Result<()> {
@@ -167,12 +178,14 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     #[should_panic]
     fn export_toolchain_with_exists_toolchain_info_throws_err() {
         create_toolchain_info();
         export(
             ExportCommand {
-                name: Some(BETA_3.to_string()),
+                name: Some(DistToolchainName::Beta3.to_string()),
+                channel: None,
                 force: false,
             },
             &INPUT_NO[..],
@@ -181,12 +194,14 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     #[should_panic]
-    fn export_toolchain_with_invalid_channel_throws_err() {
+    fn export_toolchain_with_invalid_channel_provided_throws_err() {
         remove_toolchain_info();
         export(
             ExportCommand {
-                name: Some(INVALID_CHANNEL.to_string()),
+                name: Some(DistToolchainName::Beta3.to_string()),
+                channel: Some(INVALID_CHANNEL.to_string()),
                 force: false,
             },
             &INPUT_INVALID_CHANNEL[..],
@@ -195,14 +210,32 @@ mod tests {
     }
 
     #[test]
+    #[serial]
+    #[should_panic]
+    fn export_toolchain_with_invalid_channel_inputted_throws_err() {
+        remove_toolchain_info();
+        export(
+            ExportCommand {
+                name: Some(DistToolchainName::Latest.to_string()),
+                channel: None,
+                force: false,
+            },
+            &INPUT_INVALID_CHANNEL[..],
+        )
+        .unwrap();
+    }
+
+    #[test]
+    #[serial]
     fn export_toolchain_with_exists_toolchain_info() {
         create_toolchain_info();
 
-        // case: path exist with valid channel and with --force
-        let channel = BETA_3.to_string();
+        // case: path exist with valid channel provided and with --force
+        let channel = channel::BETA_3.to_string();
         export(
             ExportCommand {
-                name: Some(channel.to_string()),
+                name: Some(DistToolchainName::Latest.to_string()),
+                channel: Some(channel.clone()),
                 force: true,
             },
             &INPUT_NOP[..],
@@ -210,11 +243,26 @@ mod tests {
         .unwrap();
         check_toolchain_info_with_channel(&channel).unwrap();
 
-        // case: path exist with valid channel and without --force and input[yes]
-        let channel = BETA_3.to_string();
+        // case: path exist with valid channel inputted and with --force
+        let channel = channel::BETA_3.to_string();
+        let channel_input = format!("{}\n", channel);
         export(
             ExportCommand {
-                name: Some(channel.to_string()),
+                name: Some(DistToolchainName::Latest.to_string()),
+                channel: None,
+                force: true,
+            },
+            channel_input.as_bytes(),
+        )
+        .unwrap();
+        check_toolchain_info_with_channel(&channel).unwrap();
+
+        // case: path exist with valid channel and without --force and input[yes]
+        let channel = channel::BETA_3.to_string();
+        export(
+            ExportCommand {
+                name: Some(DistToolchainName::Latest.to_string()),
+                channel: Some(channel.clone()),
                 force: false,
             },
             &INPUT_YES[..],
@@ -223,11 +271,12 @@ mod tests {
         check_toolchain_info_with_channel(&channel).unwrap();
 
         // case: path exist with invalid channel and with --force and input valid channel
-        let channel = BETA_3.to_string();
+        let channel = channel::BETA_3.to_string();
         let channel_input = format!("{}\n", channel);
         export(
             ExportCommand {
-                name: Some(INVALID_CHANNEL.to_string()),
+                name: Some(DistToolchainName::Latest.to_string()),
+                channel: Some(INVALID_CHANNEL.to_string()),
                 force: true,
             },
             channel_input.as_bytes(),
@@ -237,13 +286,15 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn export_toolchain_without_exists_toolchain_info() {
         // case: path not exist with valid channel
         remove_toolchain_info();
-        let channel = BETA_3.to_string();
+        let channel = channel::BETA_3.to_string();
         export(
             ExportCommand {
-                name: Some(channel.to_string()),
+                name: Some(DistToolchainName::Latest.to_string()),
+                channel: Some(channel.clone()),
                 force: false,
             },
             &INPUT_NOP[..],
@@ -253,11 +304,12 @@ mod tests {
 
         // case: path not exist with invalid channel and input valid channel
         remove_toolchain_info();
-        let channel = BETA_3.to_string();
+        let channel = channel::BETA_3.to_string();
         let channel_input = format!("{}\n", channel);
         export(
             ExportCommand {
-                name: Some(INVALID_CHANNEL.to_string()),
+                name: Some(DistToolchainName::Latest.to_string()),
+                channel: None,
                 force: false,
             },
             channel_input.as_bytes(),

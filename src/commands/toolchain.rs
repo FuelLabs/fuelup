@@ -1,7 +1,10 @@
-use anyhow::{bail, Result};
+use anyhow::{bail, Ok, Result};
 use clap::Parser;
+use serde::Deserialize;
 use std::io::stdin;
+use std::str::FromStr;
 
+use crate::constants::VALID_CHANNEL_STR;
 use crate::ops::fuelup_toolchain::export::export;
 use crate::ops::fuelup_toolchain::install::install;
 use crate::ops::fuelup_toolchain::list_revisions::list_revisions;
@@ -9,6 +12,7 @@ use crate::ops::fuelup_toolchain::new::new;
 use crate::ops::fuelup_toolchain::uninstall::uninstall;
 use crate::target_triple::TargetTriple;
 use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
+use crate::toolchain_override;
 
 #[derive(Debug, Parser)]
 pub enum ToolchainCommand {
@@ -46,11 +50,14 @@ pub struct UninstallCommand {
 #[derive(Debug, Parser)]
 pub struct ListRevisionsCommand {}
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Deserialize, Parser)]
 pub struct ExportCommand {
     /// Toolchain to export, [possible values: latest, beta-1, beta-2, beta-3, beta-4, nightly].
     /// The default toolchain will be exported if name isn't specified
     pub name: Option<String>,
+    /// Channel to export, [possible values: latest-YYYY-MM-DD, nightly-YYYY-MM-DD, beta-1, beta-2, beta-3, beta-4].
+    #[clap(value_parser = channel_allowed)]
+    pub channel: Option<String>,
     /// Forces exporting the toolchain, replacing any existing toolchain override file
     #[arg(short, long)]
     pub force: bool,
@@ -76,6 +83,20 @@ fn name_allowed(s: &str) -> Result<String> {
     } else {
         Ok(s.to_string())
     }
+}
+
+fn channel_allowed(s: &str) -> Result<Option<String>> {
+    if s.is_empty() {
+        return Ok(None);
+    }
+    if toolchain_override::Channel::from_str(s).is_err() {
+        bail!(
+            "Invalid channel '{}', expected one of {}.",
+            s,
+            VALID_CHANNEL_STR,
+        );
+    }
+    Ok(Some(s.to_string()))
 }
 
 pub fn exec(command: ToolchainCommand) -> Result<()> {

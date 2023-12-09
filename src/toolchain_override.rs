@@ -12,7 +12,7 @@ use tracing::{info, warn};
 
 use crate::channel::{is_beta_toolchain, LATEST, NIGHTLY};
 use crate::constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE, VALID_CHANNEL_STR};
-use crate::toolchain::{DistToolchainDescription, Toolchain};
+use crate::toolchain::{DistToolchainDescription, DistToolchainName, Toolchain};
 use crate::{
     download::DownloadCfg, file, path::get_fuel_toolchain_toml, target_triple::TargetTriple,
 };
@@ -97,8 +97,8 @@ impl FromStr for Channel {
 
         if let Some((name, d)) = s.split_once('-') {
             Ok(Self {
-                name: name.to_string(),
-                date: Date::parse(d, DATE_FORMAT).ok(),
+                name: DistToolchainName::from_str(name)?.to_string(),
+                date: Some(Date::parse(d, DATE_FORMAT)?),
             })
         } else {
             if s == LATEST || s == NIGHTLY {

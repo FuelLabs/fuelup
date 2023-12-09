@@ -57,6 +57,7 @@ pub struct ExportCommand {
     pub name: Option<String>,
     /// Channel to export, [possible values: latest-YYYY-MM-DD, nightly-YYYY-MM-DD, beta-1, beta-2, beta-3, beta-4].
     #[clap(value_parser = channel_allowed)]
+    #[arg(short, long)]
     pub channel: Option<String>,
     /// Forces exporting the toolchain, replacing any existing toolchain override file
     #[arg(short, long)]
@@ -85,9 +86,9 @@ fn name_allowed(s: &str) -> Result<String> {
     }
 }
 
-fn channel_allowed(s: &str) -> Result<Option<String>> {
+fn channel_allowed(s: &str) -> Result<String> {
     if s.is_empty() {
-        return Ok(None);
+        return Ok(s.to_string());
     }
     if toolchain_override::Channel::from_str(s).is_err() {
         bail!(
@@ -96,7 +97,7 @@ fn channel_allowed(s: &str) -> Result<Option<String>> {
             VALID_CHANNEL_STR,
         );
     }
-    Ok(Some(s.to_string()))
+    Ok(s.to_string())
 }
 
 pub fn exec(command: ToolchainCommand) -> Result<()> {

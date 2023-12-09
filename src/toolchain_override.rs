@@ -11,7 +11,7 @@ use toml_edit::{de, ser, value, Document};
 use tracing::{info, warn};
 
 use crate::channel::{is_beta_toolchain, LATEST, NIGHTLY};
-use crate::constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE};
+use crate::constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE, VALID_CHANNEL_STR};
 use crate::toolchain::{DistToolchainDescription, Toolchain};
 use crate::{
     download::DownloadCfg, file, path::get_fuel_toolchain_toml, target_triple::TargetTriple,
@@ -69,7 +69,7 @@ where
         |_| {
             Err(Error::invalid_value(
                 serde::de::Unexpected::Str(&channel_str),
-                &"one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4>",
+                &format!("one of {}", VALID_CHANNEL_STR).as_str(),
             ))
         },
         Result::Ok,
@@ -258,17 +258,25 @@ channel = "nightly"
         let result = OverrideCfg::from_toml(LATEST);
         assert!(result.is_err());
         let e = result.unwrap_err();
-        assert_eq!(e
-            .to_string(),
-            "invalid value: string \"latest\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4> for key `toolchain.channel`".to_string());
+        assert_eq!(
+            e.to_string(),
+            format!(
+                "invalid value: string \"latest\", expected one of {} for key `toolchain.channel`",
+                VALID_CHANNEL_STR
+            )
+        );
 
         let result = OverrideCfg::from_toml(NIGHTLY);
         assert!(result.is_err());
         let e = result.unwrap_err();
 
-        assert_eq!(e
-            .to_string(),
-            "invalid value: string \"nightly\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4> for key `toolchain.channel`".to_string());
+        assert_eq!(
+            e.to_string(),
+            format!(
+                "invalid value: string \"nightly\", expected one of {} for key `toolchain.channel`",
+                VALID_CHANNEL_STR
+            )
+        );
     }
 
     #[test]

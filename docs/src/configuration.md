@@ -69,9 +69,9 @@ Now you can install the completions script using the following command:
 fuelup completions --shell=zsh > ~/.zfunc/_fuelup
 ```
 
-### POWERSHELL
+### PowerShell
 
-The powershell completion scripts require PowerShell v5.0+ (which comes with Windows 10, but can be
+The `powershell` completion scripts require PowerShell v5.0+ (which comes with Windows 10, but can be
 downloaded separately for windows 7 or 8.1).
 
 First, check if a profile has already been set

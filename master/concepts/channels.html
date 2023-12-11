@@ -192,7 +192,7 @@
 <p>The <code>nightly</code> channel is a published TOML file describing successful builds of the <code>master</code> branch of <code>forc</code> and <code>fuel-core</code> for the day.
 These builds are released in the <a href="https://github.com/FuelLabs/sway-nightly-binaries/releases">sway-nightly-binaries</a> repository and the workflows in that repo start building them every day at <strong>00:00 UTC</strong>.</p>
 <p>The <code>nightly</code> channel within <code>fuelup</code> is updated by a scheduled GitHub workflow that <strong>runs every day at 01:00 UTC</strong>, after builds have finished.
-Note that nightlies might fail to build, in which case it is possible that the <code>nightly</code> toolchain may not be available for that day.</p>
+Note that the <code>nightly</code> channel might fail to build, in which case it is possible that the <code>nightly</code> toolchain may not be available for that day.</p>
 <p>You should use <code>nightly</code> if you want the latest changes to <code>master</code> that have not been officially released yet.
 Keep in mind that compatibility between <code>forc</code> and <code>fuel-core</code> is not guaranteed here, and you should expect unstable features to break.</p>
 <!-- nightly:example:end -->
@@ -211,17 +211,17 @@ Keep in mind that compatibility between <code>forc</code> and <code>fuel-core</c
 <p><strong>Note</strong></p>
 <p>Reading the information below is only really necessary if you wish to contribute to the workflows or want a deeper understanding on how channels are updated.</p>
 </blockquote>
-<p>The entrypoint of the scheduled workflow is within <code>index-versions.yml</code>. We run the Rust script <code>compare-versions</code> to collect versions of <code>forc</code> and <code>fuel-core</code> to be tested. These versions are filtered for incompatible versions prior to being used as a JSON string input to <code>test-toolchain-compatibility.yml</code>, where the testing occurs.</p>
-<p>In <code>test-toolchain-compatibility.yml</code>, The versions JSON string input is used to init a matrix using the <a href="https://docs.github.com/en/actions/learn-github-actions/expressions#fromjson">fromJSON</a> expression. We checkout the Sway repo at the given <code>forc</code> version and pull the <code>fuel-core</code> Docker image at the given <code>fuel-core</code> version and run integration tests found in the <a href="https://github.com/FuelLabs/sway/blob/3bd8eaf4a0f11a3009c9421100cc06c2e897b6c2/.github/workflows/ci.yml#L229-L270">Sway CI</a> for them.</p>
-<p>Note that we only mark versions as incompatible specifically if tests fail, and not if other prior steps fail (eg. we do not want to mark versions as incompatible if there were errors pulling the Docker image)</p>
+<p>The entry point of the scheduled workflow is within <code>index-versions.yml</code>. We run the Rust script <code>compare-versions</code> to collect versions of <code>forc</code> and <code>fuel-core</code> to be tested. These versions are filtered for incompatible versions prior to being used as a JSON string input to <code>test-toolchain-compatibility.yml</code>, where the testing occurs.</p>
+<p>In <code>test-toolchain-compatibility.yml</code>, The versions JSON string input is used to initialize a matrix using the <a href="https://docs.github.com/en/actions/learn-github-actions/expressions#fromjson"><code>fromJSON</code></a> expression. We checkout the Sway repo at the given <code>forc</code> version and pull the <code>fuel-core</code> Docker image at the given <code>fuel-core</code> version and run integration tests found in the <a href="https://github.com/FuelLabs/sway/blob/3bd8eaf4a0f11a3009c9421100cc06c2e897b6c2/.github/workflows/ci.yml#L229-L270">Sway CI</a> for them.</p>
+<p>Note that we only mark versions as incompatible specifically if tests fail, and not if other prior steps fail (e.g. we do not want to mark versions as incompatible if there were errors pulling the Docker image)</p>
 <p>The <a href="https://github.com/actions/upload-artifact">upload-artifact</a> action is used to collect the test results from the matrix to be used later in a <a href="https://github.com/actions/download-artifact">download-artifact</a> step.</p>
 <p>If tests were not skipped and are now done, we finally get to the <code>index-versions</code> job. We download the artifacts that were previously uploaded to be used here. This job will:</p>
 <ol>
 <li>
-<p>upload incompatible versions to gh-pages. These incompatible versions are named in the format <code>incompatible-forc-&lt;FORC_VERSION&gt;@fuel-core-&lt;FUEL_CORE_VERSION&gt;</code>.</p>
+<p>upload incompatible versions to <code>gh-pages</code>. These incompatible versions are named in the format <code>incompatible-forc-&lt;FORC_VERSION&gt;@fuel-core-&lt;FUEL_CORE_VERSION&gt;</code>.</p>
 </li>
 <li>
-<p>update the channel by filtering for the latest versions of <code>forc</code> and <code>fuel-core</code> that passed tests within the matrix by running <code>index-versions.sh</code>. These are named in the format <code>compatible-forc-&lt;FORC_VERSION&gt;@fuel-core-&lt;FUEL_CORE_VERSION&gt;</code>. Note that these files are not saved or uploaded onto gh-pages - they are only a way for the <code>test-toolchain-compatibility</code> job to share test results with this job.</p>
+<p>update the channel by filtering for the latest versions of <code>forc</code> and <code>fuel-core</code> that passed tests within the matrix by running <code>index-versions.sh</code>. These are named in the format <code>compatible-forc-&lt;FORC_VERSION&gt;@fuel-core-&lt;FUEL_CORE_VERSION&gt;</code>. Note that these files are not saved or uploaded onto <code>gh-pages</code> - they are only a way for the <code>test-toolchain-compatibility</code> job to share test results with this job.</p>
 </li>
 </ol>
 <h3 id="debugging-the-workflow"><a class="header" href="#debugging-the-workflow">Debugging the workflow</a></h3>
@@ -235,7 +235,7 @@ Keep in mind that compatibility between <code>forc</code> and <code>fuel-core</c
 <p>You can also exit with 0 or 1 in jobs or steps where you want it to pass/fail.</p>
 </li>
 </ol>
-<p>You may also use <a href="https://github.com/nektos/act">nektos/act</a> to run the workflow(s) locally.</p>
+<p>You may also use <a href="https://github.com/nektos/act"><code>nektos/act</code></a> to run the workflow(s) locally.</p>
 
                     </main>
 

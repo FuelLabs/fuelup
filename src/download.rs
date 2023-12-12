@@ -211,6 +211,7 @@ pub fn download(url: &str) -> Result<Vec<u8>> {
                     progress_bar.set_position(downloaded_size);
                 }
 
+                progress_bar.finish_with_message("Download complete");
                 debug!(
                     "[{}] [{}] {}/{} {}/s ({}) - {}",
                     FormattedDuration(progress_bar.elapsed()),
@@ -221,7 +222,6 @@ pub fn download(url: &str) -> Result<Vec<u8>> {
                     HumanDuration(progress_bar.eta()),
                     progress_bar.message(),
                 );
-                progress_bar.finish_with_message("Download complete");
 
                 return Ok(data);
             }

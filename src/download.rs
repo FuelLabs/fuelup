@@ -1,7 +1,7 @@
 use anyhow::{anyhow, bail, Result};
 use component::{Component, FUELUP};
 use flate2::read::GzDecoder;
-use indicatif::{ProgressBar, ProgressStyle};
+use indicatif::{FormattedDuration, HumanBytes, HumanDuration, ProgressBar, ProgressStyle};
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::env;
@@ -13,7 +13,7 @@ use std::time::Duration;
 use std::{fs, thread};
 use tar::Archive;
 use tracing::warn;
-use tracing::{error, info};
+use tracing::{debug, error, info};
 
 use crate::channel::Channel;
 use crate::channel::Package;
@@ -252,6 +252,19 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
                         break;
                     }
                     if let Err(e) = file.write_all(&buffer[..bytes_read]) {
+                        debug!(
+                            "[{}] [{}] {}/{} {}/s ({}) - {}",
+                            FormattedDuration(progress_bar.elapsed()),
+                            "#".repeat(
+                                (progress_bar.position() / progress_bar.length().unwrap() * 40)
+                                    as usize
+                            ),
+                            HumanBytes(progress_bar.position()),
+                            HumanBytes(progress_bar.length().unwrap_or(progress_bar.position())),
+                            HumanBytes(progress_bar.per_sec() as u64),
+                            HumanDuration(progress_bar.eta()),
+                            progress_bar.message(),
+                        );
                         error!(
                             "Something went wrong writing data to {}: {}",
                             path.display(),
@@ -261,9 +274,17 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
                     downloaded_size += bytes_read as u64;
                     progress_bar.set_position(downloaded_size);
                 }
-
                 progress_bar.finish_with_message("Download complete");
-
+                debug!(
+                    "[{}] [{}] {}/{} {}/s ({}) - {}",
+                    FormattedDuration(progress_bar.elapsed()),
+                    "#".repeat(40),
+                    HumanBytes(progress_bar.position()),
+                    HumanBytes(progress_bar.length().unwrap_or(progress_bar.position())),
+                    HumanBytes(progress_bar.per_sec() as u64),
+                    HumanDuration(progress_bar.eta()),
+                    progress_bar.message(),
+                );
                 return Ok(());
             }
             Err(ureq::Error::Status(404, r)) => {

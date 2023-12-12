@@ -192,12 +192,35 @@ pub fn download(url: &str) -> Result<Vec<u8>> {
                         break;
                     }
                     if let Err(e) = data.write_all(&buffer[..bytes_read]) {
+                        debug!(
+                            "[{}] [{}] {}/{} {}/s ({}) - {}",
+                            FormattedDuration(progress_bar.elapsed()),
+                            "#".repeat(
+                                (progress_bar.position() / progress_bar.length().unwrap() * 40)
+                                    as usize
+                            ),
+                            HumanBytes(progress_bar.position()),
+                            HumanBytes(progress_bar.length().unwrap_or(progress_bar.position())),
+                            HumanBytes(progress_bar.per_sec() as u64),
+                            HumanDuration(progress_bar.eta()),
+                            progress_bar.message(),
+                        );
                         error!("Something went wrong writing data: {}", e)
                     };
                     downloaded_size += bytes_read as u64;
                     progress_bar.set_position(downloaded_size);
                 }
 
+                debug!(
+                    "[{}] [{}] {}/{} {}/s ({}) - {}",
+                    FormattedDuration(progress_bar.elapsed()),
+                    "#".repeat(40),
+                    HumanBytes(progress_bar.position()),
+                    HumanBytes(progress_bar.length().unwrap_or(progress_bar.position())),
+                    HumanBytes(progress_bar.per_sec() as u64),
+                    HumanDuration(progress_bar.eta()),
+                    progress_bar.message(),
+                );
                 progress_bar.finish_with_message("Download complete");
 
                 return Ok(data);

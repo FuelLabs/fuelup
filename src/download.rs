@@ -279,7 +279,7 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
                             "[{}] [{}] {}/{} {}/s ({}) - {}",
                             FormattedDuration(progress_bar.elapsed()),
                             "#".repeat(
-                                (progress_bar.position() / progress_bar.length().unwrap() * 40)
+                                (progress_bar.position() * 40 / progress_bar.length().unwrap())
                                     as usize
                             ),
                             HumanBytes(progress_bar.position()),

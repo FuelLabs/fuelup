@@ -25,7 +25,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
         toolchain_info_path = path;
         if force {
             println_warning(&format!(
-                "Because the `--force` argument was supplied, the toolchain info file at {} will be removed.",
+                "Because the `--force` argument was supplied, this file will be overwritten: {}",
                 &toolchain_info_path.display(),
             ));
             fs::remove_file(&toolchain_info_path).unwrap();

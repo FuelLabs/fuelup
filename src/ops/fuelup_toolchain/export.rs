@@ -41,8 +41,8 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
                 fs::remove_file(&toolchain_info_path).unwrap();
             } else {
                 bail!(
-                    "Failed to create a new toolchain info file at {} \
-                    because a toolchain info file already exists at that location.",
+                    "Failed to export toolchain \
+                    because a toolchain override file already exists at {}.",
                     &toolchain_info_path.display(),
                 );
             }

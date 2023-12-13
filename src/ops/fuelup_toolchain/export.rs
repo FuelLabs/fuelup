@@ -57,7 +57,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
 
     let mut version_map: HashMap<String, Version> = HashMap::new();
     for component in Components::collect_exclude_plugins()? {
-        exec_version(export_toolchain.bin_path.join(&component.name))
+        let _ = exec_version(&export_toolchain.bin_path.join(&component.name))
             .map(|version| version_map.insert(component.name.clone(), version));
 
         if component.name == component::FORC {
@@ -65,17 +65,14 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
             for plugin in Components::collect_plugins()? {
                 if !forc_executables.contains(&plugin.name) {
                     plugin.executables.iter().for_each(|executable| {
-                        exec_version(export_toolchain.bin_path.join(executable))
+                        let _ = exec_version(&export_toolchain.bin_path.join(executable))
                             .map(|version| version_map.insert(executable.clone(), version));
                     });
                 }
             }
         }
     }
-    let mut export_channel = toolchain_name.clone();
-    if let Some(channel) = channel {
-        export_channel = channel;
-    }
+    let mut export_channel = channel.unwrap_or(toolchain_name.clone());
     if toolchain_override::Channel::from_str(&export_channel).is_err() {
         println_warning(&format!(
             "Invalid channel '{}', expected one of {}. \

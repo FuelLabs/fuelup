@@ -116,7 +116,10 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{channel, toolchain::DistToolchainName, toolchain_override::ToolchainOverride};
+    use crate::{
+        channel, path::settings_file, toolchain::DistToolchainName,
+        toolchain_override::ToolchainOverride,
+    };
     use serial_test::serial;
     use std::fs;
 
@@ -145,6 +148,12 @@ mod tests {
             fs::File::create(FUEL_TOOLCHAIN_TOML_FILE).unwrap();
         }
     }
+    fn create_toolchain_settings_file() {
+        let setting_file_path = settings_file();
+        if !setting_file_path.exists() {
+            fs::File::create(setting_file_path).unwrap();
+        }
+    }
     fn check_toolchain_info_with_channel(channel_name: &String) -> Result<()> {
         let toolchain_override = ToolchainOverride::from_project_root().unwrap();
         if toolchain_override
@@ -164,6 +173,7 @@ mod tests {
     #[serial]
     #[should_panic]
     fn export_toolchain_with_exists_toolchain_info_throws_err() {
+        create_toolchain_settings_file();
         create_toolchain_info();
         export(
             ExportCommand {
@@ -180,6 +190,7 @@ mod tests {
     #[serial]
     #[should_panic]
     fn export_toolchain_with_invalid_channel_provided_throws_err() {
+        create_toolchain_settings_file();
         remove_toolchain_info();
         export(
             ExportCommand {
@@ -196,6 +207,7 @@ mod tests {
     #[serial]
     #[should_panic]
     fn export_toolchain_with_invalid_channel_inputted_throws_err() {
+        create_toolchain_settings_file();
         remove_toolchain_info();
         export(
             ExportCommand {
@@ -211,6 +223,7 @@ mod tests {
     #[test]
     #[serial]
     fn export_toolchain_with_exists_toolchain_info() {
+        create_toolchain_settings_file();
         create_toolchain_info();
 
         // case: path exist with valid channel provided and with --force
@@ -271,6 +284,7 @@ mod tests {
     #[test]
     #[serial]
     fn export_toolchain_without_exists_toolchain_info() {
+        create_toolchain_settings_file();
         // case: path not exist with valid channel
         remove_toolchain_info();
         let channel = channel::BETA_3.to_string();

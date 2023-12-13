@@ -48,10 +48,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
             }
         }
     }
-    let mut toolchain_name = Toolchain::from_settings()?.name;
-    if let Some(name) = name {
-        toolchain_name = name;
-    }
+    let toolchain_name = name.unwrap_or(Toolchain::from_settings()?.name);
 
     let export_toolchain = match DistToolchainDescription::from_str(&toolchain_name) {
         Ok(desc) => Toolchain::from_path(&desc.to_string()),

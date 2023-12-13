@@ -288,6 +288,7 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
                             HumanDuration(progress_bar.eta()),
                             progress_bar.message(),
                         );
+                        fs::remove_file(path)?;
                         error!(
                             "Something went wrong writing data to {}: {}",
                             path.display(),
@@ -319,12 +320,14 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
                 thread::sleep(Duration::from_secs(retry));
             }
             Err(e) => {
+                fs::remove_file(path)?;
                 // handle other status code and non-status code errors
                 bail!("Unexpected error: {}", e.to_string());
             }
         }
     }
 
+    fs::remove_file(path)?;
     bail!("Could not download file");
 }
 

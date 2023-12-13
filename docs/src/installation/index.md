@@ -23,7 +23,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://install.fuel.network/fuelup-init.sh
 ```
 <!-- install:example:end -->
 
-This will install `forc`, `forc-client`, `forc-fmt`, `forc-lsp`, `forc-wallet` as well as `fuel-core` in `~/.fuelup/bin`. The script will ask for permission to add `~/.fuelup/bin` to your `PATH`.
+This will install `forc`, `forc-client`, `forc-fmt`, `forc-crypto`, `forc-lsp`, `forc-wallet` as well as `fuel-core` in `~/.fuelup/bin`. The script will ask for permission to add `~/.fuelup/bin` to your `PATH`.
 
 Otherwise, you can also pass `--no-modify-path` so that `fuelup-init` does not modify your `PATH` and will not ask for permission to do so:
 
@@ -39,6 +39,7 @@ forc --version
 fuel-core --version
 forc-deploy --version
 forc-fmt --version
+forc-crypto --version
 forc-lsp --version
 forc-run --version
 ```

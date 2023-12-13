@@ -31,7 +31,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
             fs::remove_file(&toolchain_info_path).unwrap();
         } else {
             println_warning(&format!(
-                "There is an existing toolchain info file at {}. \
+                "There is an existing toolchain override file at {}. \
                 Do you wish to replace it with a new one? (y/N) ",
                 &toolchain_info_path.display(),
             ));

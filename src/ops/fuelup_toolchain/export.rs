@@ -121,7 +121,7 @@ mod tests {
         toolchain_override::ToolchainOverride,
     };
     use serial_test::serial;
-    use std::fs;
+    use std::{fs, io::Write};
 
     use super::*;
 
@@ -142,16 +142,20 @@ mod tests {
     fn create_toolchain_info() {
         if let Some(fuel_toolchain_toml_file) = get_fuel_toolchain_toml() {
             if !fuel_toolchain_toml_file.exists() {
-                fs::File::create(fuel_toolchain_toml_file).unwrap();
+                fs::create_dir_all(fuel_toolchain_toml_file.parent().unwrap()).unwrap();
+                fs::File::create(&fuel_toolchain_toml_file).unwrap();
             }
         } else {
             fs::File::create(FUEL_TOOLCHAIN_TOML_FILE).unwrap();
         }
     }
+    // mock setting.toml
     fn create_toolchain_settings_file() {
         let setting_file_path = settings_file();
         if !setting_file_path.exists() {
-            fs::File::create(setting_file_path).unwrap();
+            fs::create_dir_all(&setting_file_path.parent().unwrap()).unwrap();
+            let mut file = fs::File::create(&setting_file_path).unwrap();
+            file.write_all(b"default_toolchain = \"latest\"").unwrap();
         }
     }
     fn check_toolchain_info_with_channel(channel_name: &String) -> Result<()> {

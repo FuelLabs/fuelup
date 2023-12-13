@@ -153,7 +153,7 @@ mod tests {
     fn create_toolchain_settings_file() {
         let setting_file_path = settings_file();
         if !setting_file_path.exists() {
-            fs::create_dir_all(&setting_file_path.parent().unwrap()).unwrap();
+            fs::create_dir_all(setting_file_path.parent().unwrap()).unwrap();
             let mut file = fs::File::create(&setting_file_path).unwrap();
             file.write_all(b"default_toolchain = \"latest\"").unwrap();
         }

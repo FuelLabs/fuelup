@@ -64,19 +64,10 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
             let forc_executables = component.executables;
             for plugin in Components::collect_plugins()? {
                 if !forc_executables.contains(&plugin.name) {
-                    if !plugin.is_main_executable() {
-                        for executable in plugin.executables.iter() {
-                            let plugin_executable = export_toolchain.bin_path.join(executable);
-                            if let Ok(version) = exec_version(plugin_executable.as_path()) {
-                                version_map.insert(executable.clone(), version);
-                            };
-                        }
-                    } else {
-                        let plugin_executable = export_toolchain.bin_path.join(&plugin.name);
-                        if let Ok(version) = exec_version(plugin_executable.as_path()) {
-                            version_map.insert(plugin.name.clone(), version);
-                        };
-                    }
+                    plugin.executables.iter().for_each(|executable| {
+                        exec_version(export_toolchain.bin_path.join(executable))
+                            .map(|version| version_map.insert(executable.clone(), version));
+                    });
                 }
             }
         }

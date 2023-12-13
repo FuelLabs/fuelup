@@ -57,10 +57,8 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
 
     let mut version_map: HashMap<String, Version> = HashMap::new();
     for component in Components::collect_exclude_plugins()? {
-        let component_executable = export_toolchain.bin_path.join(&component.name);
-        if let Ok(version) = exec_version(component_executable.as_path()) {
-            version_map.insert(component.name.clone(), version);
-        };
+        exec_version(export_toolchain.bin_path.join(&component.name))
+            .map(|version| version_map.insert(component.name.clone(), version));
 
         if component.name == component::FORC {
             let forc_executables = component.executables;

@@ -12,8 +12,8 @@ use std::str::FromStr;
 use std::time::Duration;
 use std::{fs, thread};
 use tar::Archive;
-use tracing::warn;
-use tracing::{debug, error, info};
+use tracing::{debug, error, info, warn};
+use ureq::Response;
 
 use crate::channel::Channel;
 use crate::channel::Package;
@@ -171,58 +171,7 @@ pub fn download(url: &str) -> Result<Vec<u8>> {
         match handle.get(url).call() {
             Ok(response) => {
                 let mut data = Vec::new();
-
-                let total_size = response
-                    .header("Content-Length")
-                    .and_then(|s| s.parse::<u64>().ok())
-                    .unwrap_or(0);
-                let mut downloaded_size = 0;
-                let mut buffer = [0; 8192];
-                let progress_bar = ProgressBar::new(total_size);
-                progress_bar.set_style(
-                    ProgressStyle::default_bar()
-                        .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} {bytes_per_sec} ({eta}) - {msg:.cyan}")
-                        .unwrap()
-                        .progress_chars("##-"),
-                );
-                let mut reader = progress_bar.wrap_read(response.into_reader());
-                loop {
-                    let bytes_read = reader.read(&mut buffer)?;
-                    if bytes_read == 0 {
-                        break;
-                    }
-                    if let Err(e) = data.write_all(&buffer[..bytes_read]) {
-                        debug!(
-                            "[{}] [{}] {}/{} {}/s ({}) - {}",
-                            FormattedDuration(progress_bar.elapsed()),
-                            "#".repeat(
-                                (progress_bar.position() / progress_bar.length().unwrap() * 40)
-                                    as usize
-                            ),
-                            HumanBytes(progress_bar.position()),
-                            HumanBytes(progress_bar.length().unwrap_or(progress_bar.position())),
-                            HumanBytes(progress_bar.per_sec() as u64),
-                            HumanDuration(progress_bar.eta()),
-                            progress_bar.message(),
-                        );
-                        error!("Something went wrong writing data: {}", e)
-                    };
-                    downloaded_size += bytes_read as u64;
-                    progress_bar.set_position(downloaded_size);
-                }
-
-                progress_bar.finish_with_message("Download complete");
-                debug!(
-                    "[{}] [{}] {}/{} {}/s ({}) - {}",
-                    FormattedDuration(progress_bar.elapsed()),
-                    "#".repeat(40),
-                    HumanBytes(progress_bar.position()),
-                    HumanBytes(progress_bar.length().unwrap_or(progress_bar.position())),
-                    HumanBytes(progress_bar.per_sec() as u64),
-                    HumanDuration(progress_bar.eta()),
-                    progress_bar.message(),
-                );
-
+                write_response_with_progress_bar(response, &mut data)?;
                 return Ok(data);
             }
             Err(ureq::Error::Status(404, r)) => {
@@ -254,61 +203,10 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
     for _ in 1..RETRY_ATTEMPTS {
         match handle.get(url).call() {
             Ok(response) => {
-                let total_size = response
-                    .header("Content-Length")
-                    .and_then(|s| s.parse::<u64>().ok())
-                    .unwrap_or(0);
-                let mut downloaded_size = 0;
-                let mut buffer = [0; 8192];
-                let progress_bar = ProgressBar::new(total_size);
-                progress_bar.set_style(
-                    ProgressStyle::default_bar()
-                        .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} {bytes_per_sec} ({eta}) - {msg:.cyan}")
-                        .unwrap()
-                        .progress_chars("##-"),
-                );
-                let mut reader = progress_bar.wrap_read(response.into_reader());
-
-                loop {
-                    let bytes_read = reader.read(&mut buffer)?;
-                    if bytes_read == 0 {
-                        break;
-                    }
-                    if let Err(e) = file.write_all(&buffer[..bytes_read]) {
-                        debug!(
-                            "[{}] [{}] {}/{} {}/s ({}) - {}",
-                            FormattedDuration(progress_bar.elapsed()),
-                            "#".repeat(
-                                (progress_bar.position() * 40 / progress_bar.length().unwrap())
-                                    as usize
-                            ),
-                            HumanBytes(progress_bar.position()),
-                            HumanBytes(progress_bar.length().unwrap_or(progress_bar.position())),
-                            HumanBytes(progress_bar.per_sec() as u64),
-                            HumanDuration(progress_bar.eta()),
-                            progress_bar.message(),
-                        );
-                        fs::remove_file(path)?;
-                        error!(
-                            "Something went wrong writing data to {}: {}",
-                            path.display(),
-                            e
-                        )
-                    };
-                    downloaded_size += bytes_read as u64;
-                    progress_bar.set_position(downloaded_size);
+                if let Err(e) = write_response_with_progress_bar(response, &mut file) {
+                    fs::remove_file(path)?;
+                    return Err(e);
                 }
-                progress_bar.finish_with_message("Download complete");
-                debug!(
-                    "[{}] [{}] {}/{} {}/s ({}) - {}",
-                    FormattedDuration(progress_bar.elapsed()),
-                    "#".repeat(40),
-                    HumanBytes(progress_bar.position()),
-                    HumanBytes(progress_bar.length().unwrap_or(progress_bar.position())),
-                    HumanBytes(progress_bar.per_sec() as u64),
-                    HumanDuration(progress_bar.eta()),
-                    progress_bar.message(),
-                );
                 return Ok(());
             }
             Err(ureq::Error::Status(404, r)) => {
@@ -318,6 +216,8 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
                 let retry = retry.unwrap_or(RETRY_DELAY_SECS);
                 info!("Retrying..");
                 thread::sleep(Duration::from_secs(retry));
+                // clean file content every retry
+                file = OpenOptions::new().write(true).truncate(true).open(path)?;
             }
             Err(e) => {
                 fs::remove_file(path)?;
@@ -383,6 +283,63 @@ pub fn unpack_bins(dir: &Path, dst_dir: &Path) -> Result<Vec<PathBuf>> {
     }
 
     Ok(downloaded)
+}
+
+/// write Ok(Response) to provided writer with progress bar displaying writing status
+pub fn write_response_with_progress_bar<W: Write>(
+    response: Response,
+    writer: &mut W,
+) -> Result<()> {
+    let total_size = response
+        .header("Content-Length")
+        .and_then(|s| s.parse::<u64>().ok())
+        .unwrap_or(0);
+    let mut downloaded_size = 0;
+    let mut buffer = [0; 8192];
+    let progress_bar = ProgressBar::new(total_size);
+    progress_bar.set_style(
+                ProgressStyle::default_bar()
+                    .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} {bytes_per_sec} ({eta}) - {msg:.cyan}")
+                    .unwrap()
+                    .progress_chars("##-"),
+            );
+    let mut reader = progress_bar.wrap_read(response.into_reader());
+
+    loop {
+        let bytes_read = reader.read(&mut buffer)?;
+        if bytes_read == 0 {
+            break;
+        }
+        if let Err(e) = writer.write_all(&buffer[..bytes_read]) {
+            debug!(
+                "[{}] [{}] {}/{} {}/s ({}) - {}",
+                FormattedDuration(progress_bar.elapsed()),
+                "#".repeat(
+                    (progress_bar.position() * 40 / progress_bar.length().unwrap()) as usize
+                ),
+                HumanBytes(progress_bar.position()),
+                HumanBytes(progress_bar.length().unwrap_or(progress_bar.position())),
+                HumanBytes(progress_bar.per_sec() as u64),
+                HumanDuration(progress_bar.eta()),
+                progress_bar.message(),
+            );
+            error!("Something went wrong writing data: {}", e)
+        };
+        downloaded_size += bytes_read as u64;
+        progress_bar.set_position(downloaded_size);
+    }
+    progress_bar.finish_with_message("Download complete");
+    debug!(
+        "[{}] [{}] {}/{} {}/s ({}) - {}",
+        FormattedDuration(progress_bar.elapsed()),
+        "#".repeat(40),
+        HumanBytes(progress_bar.position()),
+        HumanBytes(progress_bar.length().unwrap_or(progress_bar.position())),
+        HumanBytes(progress_bar.per_sec() as u64),
+        HumanDuration(progress_bar.eta()),
+        progress_bar.message(),
+    );
+    Ok(())
 }
 
 /// Read the version (as a plain String) used by the `fuels` dependency, if it exists.
@@ -509,5 +466,23 @@ fuels = { version = "0.1", features = ["some-feature"] }
             assert!(mock_bin_dir.join("forc-mock-exec-2").metadata().is_ok());
             Ok(())
         })
+    }
+
+    #[test]
+    fn test_write_response_with_progress_bar() -> Result<()> {
+        let mut data = Vec::new();
+        let len = 100;
+        let body = "A".repeat(len);
+        let s = format!(
+            "HTTP/1.1 200 OK\r\n\
+                 \r\n
+                 {}",
+            body,
+        );
+        let res = s.parse::<Response>().unwrap();
+        assert!(write_response_with_progress_bar(res, &mut data).is_ok());
+        let written_res = String::from_utf8(data)?;
+        assert!(written_res.trim().eq(&body));
+        Ok(())
     }
 }

@@ -44,7 +44,7 @@ There are many ways in which you may contribute to `fuelup`, some of which invol
 
 Check out our [Help Wanted](https://github.com/FuelLabs/fuelup/labels/help%20wanted), [Fuelup Book](https://github.com/FuelLabs/fuelup/labels/book) or [Good First Issue](https://github.com/FuelLabs/fuelup/labels/good%20first%20issue) issues to find a suitable task.
 
-If you are planning something big, for example, related to multiple components or changes in current behaviors, make sure to open an issue to discuss with us before starting on the implementation.
+If you wish to make a significant change that alters current behavior or touches multiple components, make sure to open an issue for discussion before starting on the implementation.
 
 ## Contribution flow
 

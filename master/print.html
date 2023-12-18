@@ -500,7 +500,7 @@ allowing one to re-direct the output to the file of their choosing. Where you pl
 depend on which shell, and which operating system you are using. Your particular configuration may
 also determine where these scripts need to be placed.</p>
 <p>Here are some common set ups for the supported shells under Unix and similar operating systems
-(such as GNU/Linux). For these settings to take effect, you may have to log out and log back in to
+(such as GNU/Linux). For these settings to take effect, you may have to log out and log back into
 your shell session.</p>
 <h3 id="bash"><a class="header" href="#bash">BASH</a></h3>
 <p>Completion files are commonly stored in <code>/etc/bash_completion.d/</code> for system-wide commands, but can
@@ -612,7 +612,7 @@ will fail without internet connection.</p>
 <li>Making feature requests</li>
 </ul>
 <p>Check out our <a href="https://github.com/FuelLabs/fuelup/labels/help%20wanted">Help Wanted</a>, <a href="https://github.com/FuelLabs/fuelup/labels/book">Fuelup Book</a> or <a href="https://github.com/FuelLabs/fuelup/labels/good%20first%20issue">Good First Issue</a> issues to find a suitable task.</p>
-<p>If you are planning something big, for example, related to multiple components or changes current behaviors, make sure to open an issue to discuss with us before starting on the implementation.</p>
+<p>If you wish to make a significant change that alters current behavior or touches multiple components, make sure to open an issue for discussion before starting on the implementation.</p>
 <h2 id="contribution-flow"><a class="header" href="#contribution-flow">Contribution flow</a></h2>
 <p>This is a rough outline of what a contributor's workflow looks like:</p>
 <ul>
@@ -627,7 +627,7 @@ will fail without internet connection.</p>
 <li>If the PR contains any breaking changes, add the breaking label to your PR.</li>
 <li>Push your changes to a branch in your fork of the repository and submit a pull request.
 <ul>
-<li>Make sure mention the issue, which is created at step 1, in the commit message.</li>
+<li>Make sure to mention the issue, which is created in step 1, in the commit message.</li>
 </ul>
 </li>
 <li>Your PR will be reviewed and some changes may be requested.
@@ -650,7 +650,7 @@ Any changes to the branch will require a re-review.</li>
 <p>If the pull request links an issue but does not close it, you can use the keyword <code>ref</code> like this:</p>
 <pre><code class="language-text">ref #456
 </code></pre>
-<p>Multiple issues should use full syntax for each issue and separate by a comma, like:</p>
+<p>Multiple issues should use full syntax for each issue and be separated by a comma, like:</p>
 <pre><code class="language-text">close #123, ref #456
 </code></pre>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="adding-components"><a class="header" href="#adding-components">Adding components</a></h1>
@@ -735,8 +735,8 @@ compatibility tests pass after that. This is explained in detail in the <a href=
 links to binaries found within the <a href="https://github.com/FuelLabs/sway-nightly-binaries">sway-nightly-binaries repository</a>.</p>
 <p>An example of this usage is in <a href="https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/publish-nightly-channel.yml#L37"><code>publish-nightly-channel.yml</code></a>.</p>
 <h3 id="manual"><a class="header" href="#manual">Manual</a></h3>
-<p>There may be times where we need a channel for a one-off event e.g. testnets. During these events, we do not
-require a routine update, and can essentially publish once and be done. This is when manual publishing is done.</p>
+<p>There may be times when we need a channel for a one-off event e.g. testnets. During these events, we do not</p>
+<p>require a routine update, and can essentially publish once and be done. This is when manual publishing is done.</p>
 <p>For example, building a <code>beta-3</code> toolchain is done like so:</p>
 <pre><code class="language-sh"># from fuelup project root
 cd ci/build-channel &amp;&amp; cargo run -- channel-fuel-beta-3.toml 2023-02-13 forc=0.35.0 fuel-core=0.17.1

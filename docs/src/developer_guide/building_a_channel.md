@@ -28,7 +28,7 @@ An example of this usage is in [`publish-nightly-channel.yml`].
 
 ### Manual
 
-There may be times when we need a channel for a one-off event eg. testnets. During these events, we do not
+There may be times when we need a channel for a one-off event e.g. testnets. During these events, we do not
 
 require a routine update, and can essentially publish once and be done. This is when manual publishing is done.
 

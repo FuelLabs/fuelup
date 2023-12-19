@@ -13,14 +13,14 @@ fn format_installed_component_info(
     version_info: &str,
 ) -> String {
     if let Some(v) = version {
-        format!("  {name} {v} ({version_info})\n")
+        format!("{:>2}{name} {v} ({version_info})\n", "")
     } else {
-        format!("  {name} : failed getting current version\n")
+        format!("{:>2}{name} : failed getting current version\n", "")
     }
 }
 
 fn format_installable_component_info(name: &str, latest_version: &str) -> String {
-    format!("  {name} (latest: {latest_version})\n")
+    format!("{:>2}{name} (latest: {latest_version})\n", "")
 }
 
 fn format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
@@ -28,7 +28,7 @@ fn format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
         .iter()
         .filter(|c| *c != component::FORC)
         .fold(String::new(), |mut output, b| {
-            let _ = writeln!(output, "    - {b}");
+            let _ = writeln!(output, "{:>4}- {}", "", b);
             output
         })
 }

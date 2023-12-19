@@ -50,12 +50,12 @@ pub fn update() -> Result<()> {
         let mut status = String::new();
         if !installed_bins.is_empty() {
             status = UPDATED.to_string();
-            installed_bins = format!("  updated components:\n{installed_bins}");
+            installed_bins = format!("{:>2}updated components:\n{}", "", installed_bins);
         }
 
         if !errored_bins.is_empty() {
             status = PARTIALLY_UPDATED.to_string();
-            errored_bins = format!("  failed to update:\n{errored_bins}");
+            errored_bins = format!("{:>2}failed to update:\n{}", "", errored_bins);
         };
 
         summary.push((

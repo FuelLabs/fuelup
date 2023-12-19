@@ -28,9 +28,9 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
                 "Because the `--force` argument was supplied, this file will be overwritten: {}",
                 &toolchain_info_path.display(),
             ));
-            fs::remove_file(&toolchain_info_path).unwrap_or_else(|_| {
-                panic!("failed to remove file {}", &toolchain_info_path.display())
-            });
+            if fs::remove_file(&toolchain_info_path).is_err() {
+                bail!("failed to remove file {}", &toolchain_info_path.display());
+            }
         } else {
             println_warning(&format!(
                 "There is an existing toolchain override file at {}. \
@@ -38,13 +38,13 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
                 &toolchain_info_path.display(),
             ));
             let mut need_replace = String::new();
-            reader
-                .read_line(&mut need_replace)
-                .unwrap_or_else(|_| panic!("failed to read user input"));
+            if reader.read_line(&mut need_replace).is_err() {
+                bail!("failed to read user input");
+            }
             if need_replace.trim() == "y" {
-                fs::remove_file(&toolchain_info_path).unwrap_or_else(|_| {
-                    panic!("failed to remove file {}", &toolchain_info_path.display())
-                });
+                if fs::remove_file(&toolchain_info_path).is_err() {
+                    bail!("failed to remove file {}", &toolchain_info_path.display());
+                };
             } else {
                 bail!(
                     "Failed to export toolchain \
@@ -86,9 +86,9 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
             export_channel, VALID_CHANNEL_STR,
         ));
         let mut input_channel_name = String::new();
-        reader
-            .read_line(&mut input_channel_name)
-            .unwrap_or_else(|_| panic!("failed to read user input"));
+        if reader.read_line(&mut input_channel_name).is_err() {
+            bail!("failed to read user input");
+        }
         input_channel_name = String::from(input_channel_name.trim());
         if toolchain_override::Channel::from_str(&input_channel_name).is_err() {
             bail!(
@@ -112,8 +112,9 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
         path: toolchain_info_path.clone(),
     };
     let document = toolchain_override.to_toml();
-    std::fs::write(toolchain_override.path, document.to_string())
-        .unwrap_or_else(|_| panic!("failed to write {}", toolchain_info_path.display()));
+    if std::fs::write(toolchain_override.path, document.to_string()).is_err() {
+        bail!("failed to write {}", toolchain_info_path.display());
+    }
 
     info!(
         "exported '{}' into '{}'",

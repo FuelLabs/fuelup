@@ -66,13 +66,14 @@ fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version
                 Some(v) => {
                     let version = Version::parse(v)?;
                     info!(
-                        "    - {} - {}",
+                        "{:>4}- {} - {}",
+                        "",
                         bold(plugin),
                         format_version_comparison(&version, latest_version)
                     );
                 }
                 None => {
-                    info!("    - {} - Error getting version string", plugin);
+                    info!("{:>4}- {} - Error getting version string", "", plugin);
                 }
             };
         }
@@ -82,7 +83,7 @@ fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version
             } else {
                 "not found".into()
             };
-            info!("    - {} - {}", bold(plugin), error_text);
+            info!("{:>4}- {} - {}", "", bold(plugin), error_text);
         }
     }
     Ok(())
@@ -128,23 +129,32 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                         Some(v) => {
                             let version = Version::parse(v)?;
                             info!(
-                                "  {} - {}",
+                                "{:>2}{} - {}",
+                                "",
                                 bold(&component.name),
                                 format_version_comparison(&version, latest_version)
                             );
                         }
                         None => {
-                            error!("  {} - Error getting version string", bold(&component.name));
+                            error!(
+                                "{:>2}{} - Error getting version string",
+                                "",
+                                bold(&component.name)
+                            );
                         }
                     }
                 }
-                Err(_) => error!("  {} - Error getting version string", bold(&component.name)),
+                Err(_) => error!(
+                    "{:>2}{} - Error getting version string",
+                    "",
+                    bold(&component.name)
+                ),
             };
 
             if verbose && component.name == component::FORC {
                 for plugin in component::Components::collect_plugins()? {
                     if !plugin.is_main_executable() {
-                        info!("    - {}", bold(&plugin.name));
+                        info!("{:>4}- {}", "", bold(&plugin.name));
                     }
 
                     for (index, executable) in plugin.executables.iter().enumerate() {
@@ -153,7 +163,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                         let mut plugin_name = &plugin.name;
 
                         if !plugin.is_main_executable() {
-                            print!("  ");
+                            print!("{:>2}", "");
                             plugin_name = &plugin.executables[index];
                         }
 

@@ -110,12 +110,12 @@ pub fn show() -> Result<()> {
             Err(e) => format!("{}", e),
         };
 
-        info!("  {} : {}", bold(&component.name), version_text);
+        info!("{:>2}{} : {}", "", bold(&component.name), version_text);
 
         if component.name == component::FORC {
             for plugin in Components::collect_plugins()? {
                 if !plugin.is_main_executable() {
-                    info!("    - {}", bold(&plugin.name));
+                    info!("{:>4}- {}", "", bold(&plugin.name));
 
                     for executable in plugin.executables.iter() {
                         let plugin_executable = active_toolchain.bin_path.join(executable);
@@ -129,7 +129,7 @@ pub fn show() -> Result<()> {
                                 format!("{}", e)
                             }
                         };
-                        info!("      - {} : {}", bold(executable), version_text);
+                        info!("{:>6}- {} : {}", "", bold(executable), version_text);
                     }
                 } else {
                     let plugin_executable = active_toolchain.bin_path.join(&plugin.name);
@@ -140,7 +140,7 @@ pub fn show() -> Result<()> {
                         }
                         Err(e) => format!("{}", e),
                     };
-                    info!("    - {} : {}", bold(&plugin.name), version_text);
+                    info!("{:>4}- {} : {}", "", bold(&plugin.name), version_text);
                 }
             }
         }

@@ -286,7 +286,7 @@ pub fn unpack_bins(dir: &Path, dst_dir: &Path) -> Result<Vec<PathBuf>> {
 }
 
 /// write Ok(Response) to provided writer with progress bar displaying writing status
-pub fn write_response_with_progress_bar<W: Write>(
+fn write_response_with_progress_bar<W: Write>(
     response: Response,
     writer: &mut W,
 ) -> Result<()> {

@@ -400,7 +400,30 @@ pub fn fetch_fuels_version(cfg: &DownloadCfg) -> Result<String> {
 mod tests {
     use super::*;
     use dirs::home_dir;
+    use std::io::{self, Result};
     use tempfile;
+
+    struct MockWriter;
+
+    impl Write for MockWriter {
+        fn write_all(&mut self, _: &[u8]) -> Result<()> {
+            Err(io::Error::new(
+                io::ErrorKind::Interrupted,
+                "Mock Interrupted Error",
+            ))
+        }
+
+        fn write(&mut self, _: &[u8]) -> Result<usize> {
+            Err(io::Error::new(
+                io::ErrorKind::Interrupted,
+                "Mock Interrupted Error",
+            ))
+        }
+
+        fn flush(&mut self) -> Result<()> {
+            Ok(())
+        }
+    }
 
     pub(crate) fn with_toolchain_dir<F>(f: F) -> Result<()>
     where
@@ -467,7 +490,7 @@ fuels = { version = "0.1", features = ["some-feature"] }
     }
 
     #[test]
-    fn test_write_response_with_progress_bar() -> Result<()> {
+    fn test_write_response_with_progress_bar() -> anyhow::Result<()> {
         let mut data = Vec::new();
         let len = 100;
         let body = "A".repeat(len);
@@ -482,5 +505,22 @@ fuels = { version = "0.1", features = ["some-feature"] }
         let written_res = String::from_utf8(data)?;
         assert!(written_res.trim().eq(&body));
         Ok(())
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_write_response_with_progress_bar_throw_error() {
+        let mut mock_writer = MockWriter;
+        let len = 9000;
+        let body = "A".repeat(len);
+        let s = format!(
+            "HTTP/1.1 200 OK\r\n\
+                 Content-Length: {}\r\n
+                 \r\n
+                 {}",
+            len, body,
+        );
+        let res = s.parse::<Response>().unwrap();
+        assert!(write_response_with_progress_bar(res, &mut mock_writer, String::new()).is_ok());
     }
 }

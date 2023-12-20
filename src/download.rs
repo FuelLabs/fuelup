@@ -323,6 +323,11 @@ fn write_response_with_progress_bar<W: Write>(
         downloaded_size += bytes_read as u64;
         progress_bar.set_position(downloaded_size);
     }
+    if total_size == 0 {
+        // to be compatible with case total_size is 0
+        // Note: there maybe a bug for ureq that in some case, it return response with empty value of "Content-Length". See `test_agent`
+        progress_bar.set_length(downloaded_size);
+    }
     progress_bar.finish_with_message("Download complete");
     log_progress_bar(&progress_bar);
     Ok(())
@@ -332,7 +337,10 @@ fn log_progress_bar(progress_bar: &ProgressBar) {
     debug!(
         "[{}] [{}] {}/{} ({}) - {}",
         FormattedDuration(progress_bar.elapsed()),
-        "#".repeat((progress_bar.position() * 40 / progress_bar.length().unwrap()) as usize),
+        "#".repeat(
+            (progress_bar.position() * 40
+                / progress_bar.length().unwrap_or(progress_bar.position())) as usize
+        ),
         HumanBytes(progress_bar.position()),
         HumanBytes(progress_bar.length().unwrap_or(progress_bar.position())),
         HumanDuration(progress_bar.eta()),
@@ -520,6 +528,20 @@ fuels = { version = "0.1", features = ["some-feature"] }
             len, body,
         );
         let res = s.parse::<Response>().unwrap();
-        assert!(write_response_with_progress_bar(res, &mut mock_writer, String::new()).is_err());
+        assert_eq!(
+            write_response_with_progress_bar(res, &mut mock_writer, String::new())
+                .unwrap_err()
+                .to_string(),
+            "Something went wrong writing data: Mock Interrupted Error"
+        );
+    }
+
+    #[test]
+    fn test_agent() -> anyhow::Result<()> {
+        // this test case is used to illustrate the bug of ureq that sometimes doesn't return "Content-Length" header
+        let handle = build_agent()?;
+        let response = handle.get("https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/channel-fuel-beta-4.toml").call()?;
+        assert!(response.header("Content-Length").is_none());
+        Ok(())
     }
 }

@@ -171,7 +171,7 @@ pub fn download(url: &str) -> Result<Vec<u8>> {
         match handle.get(url).call() {
             Ok(response) => {
                 let mut data = Vec::new();
-                write_response_with_progress_bar(response, &mut data)?;
+                write_response_with_progress_bar(response, &mut data, String::new())?;
                 return Ok(data);
             }
             Err(ureq::Error::Status(404, r)) => {
@@ -203,7 +203,11 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
     for _ in 1..RETRY_ATTEMPTS {
         match handle.get(url).call() {
             Ok(response) => {
-                if let Err(e) = write_response_with_progress_bar(response, &mut file) {
+                if let Err(e) = write_response_with_progress_bar(
+                    response,
+                    &mut file,
+                    path.display().to_string(),
+                ) {
                     fs::remove_file(path)?;
                     return Err(e);
                 }
@@ -216,8 +220,6 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
                 let retry = retry.unwrap_or(RETRY_DELAY_SECS);
                 info!("Retrying..");
                 thread::sleep(Duration::from_secs(retry));
-                // clean file content every retry
-                file = OpenOptions::new().write(true).truncate(true).open(path)?;
             }
             Err(e) => {
                 fs::remove_file(path)?;
@@ -289,6 +291,7 @@ pub fn unpack_bins(dir: &Path, dst_dir: &Path) -> Result<Vec<PathBuf>> {
 fn write_response_with_progress_bar<W: Write>(
     response: Response,
     writer: &mut W,
+    target: String,
 ) -> Result<()> {
     let total_size = response
         .header("Content-Length")
@@ -311,35 +314,30 @@ fn write_response_with_progress_bar<W: Write>(
             break;
         }
         if let Err(e) = writer.write_all(&buffer[..bytes_read]) {
-            debug!(
-                "[{}] [{}] {}/{} {}/s ({}) - {}",
-                FormattedDuration(progress_bar.elapsed()),
-                "#".repeat(
-                    (progress_bar.position() * 40 / progress_bar.length().unwrap()) as usize
-                ),
-                HumanBytes(progress_bar.position()),
-                HumanBytes(progress_bar.length().unwrap_or(progress_bar.position())),
-                HumanBytes(progress_bar.per_sec() as u64),
-                HumanDuration(progress_bar.eta()),
-                progress_bar.message(),
-            );
-            error!("Something went wrong writing data: {}", e)
+            log_progress_bar(&progress_bar);
+            if target.is_empty() {
+                bail!("Something went wrong writing data: {}", e)
+            }
+            bail!("Something went wrong writing data to {}: {}", target, e)
         };
         downloaded_size += bytes_read as u64;
         progress_bar.set_position(downloaded_size);
     }
     progress_bar.finish_with_message("Download complete");
+    log_progress_bar(&progress_bar);
+    Ok(())
+}
+
+fn log_progress_bar(progress_bar: &ProgressBar) {
     debug!(
-        "[{}] [{}] {}/{} {}/s ({}) - {}",
+        "[{}] [{}] {}/{} ({}) - {}",
         FormattedDuration(progress_bar.elapsed()),
-        "#".repeat(40),
+        "#".repeat((progress_bar.position() * 40 / progress_bar.length().unwrap()) as usize),
         HumanBytes(progress_bar.position()),
         HumanBytes(progress_bar.length().unwrap_or(progress_bar.position())),
-        HumanBytes(progress_bar.per_sec() as u64),
         HumanDuration(progress_bar.eta()),
         progress_bar.message(),
     );
-    Ok(())
 }
 
 /// Read the version (as a plain String) used by the `fuels` dependency, if it exists.
@@ -480,7 +478,7 @@ fuels = { version = "0.1", features = ["some-feature"] }
             body,
         );
         let res = s.parse::<Response>().unwrap();
-        assert!(write_response_with_progress_bar(res, &mut data).is_ok());
+        assert!(write_response_with_progress_bar(res, &mut data, String::new()).is_ok());
         let written_res = String::from_utf8(data)?;
         assert!(written_res.trim().eq(&body));
         Ok(())

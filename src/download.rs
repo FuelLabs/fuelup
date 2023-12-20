@@ -12,7 +12,7 @@ use std::time::Duration;
 use std::{fs, thread};
 use tar::Archive;
 use tracing::warn;
-use tracing::{debug, error, info};
+use tracing::{error, info};
 
 use crate::channel::Channel;
 use crate::channel::Package;

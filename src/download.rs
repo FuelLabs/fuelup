@@ -92,9 +92,14 @@ pub fn build_agent() -> Result<ureq::Agent> {
     let agent_builder = ureq::builder().user_agent("fuelup");
 
     if let Ok(proxy) = env::var("http_proxy") {
-        if !proxy.is_empty() {
-            return Ok(agent_builder.proxy(ureq::Proxy::new(proxy)?).build());
-        }
+        return match ureq::Proxy::new(proxy) {
+            Some(proxy) => Ok(agent_builder.proxy(proxy).build()),
+            Err(err) => {
+                println_error("Failed to build proxy with http_proxy={proxy}");
+                debug!("{:?}", err);
+                Err(err)
+            }
+        };
     }
 
     Ok(agent_builder.build())

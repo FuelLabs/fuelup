@@ -299,7 +299,7 @@ fn write_response_with_progress_bar<W: Write>(
     let progress_bar = ProgressBar::new(total_size);
     progress_bar.set_style(
                 ProgressStyle::default_bar()
-                    .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} {bytes_per_sec} ({eta}) - {msg:.cyan}")
+                    .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({eta}) - {msg:.green}")
                     .unwrap()
                     .progress_chars("##-"),
             );

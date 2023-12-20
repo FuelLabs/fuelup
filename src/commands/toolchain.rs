@@ -1,7 +1,7 @@
 use anyhow::{bail, Ok, Result};
 use clap::Parser;
 use serde::Deserialize;
-use std::io::stdin;
+use std::io::{stdin, BufReader};
 use std::str::FromStr;
 
 use crate::constants::VALID_CHANNEL_STR;
@@ -106,7 +106,7 @@ pub fn exec(command: ToolchainCommand) -> Result<()> {
         ToolchainCommand::New(command) => new(command)?,
         ToolchainCommand::Uninstall(command) => uninstall(command)?,
         ToolchainCommand::ListRevisions(command) => list_revisions(command)?,
-        ToolchainCommand::Export(command) => export(command, stdin().lock())?,
+        ToolchainCommand::Export(command) => export(command, BufReader::new(stdin()))?,
     };
 
     Ok(())

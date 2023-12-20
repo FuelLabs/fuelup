@@ -86,18 +86,18 @@ fn name_allowed(s: &str) -> Result<String> {
     }
 }
 
-fn channel_allowed(s: &str) -> Result<String> {
-    if s.is_empty() {
-        return Ok(s.to_string());
+fn channel_allowed(channel: &str) -> Result<String> {
+    if channel.is_empty() {
+        return Ok(channel.to_string());
     }
-    if toolchain_override::Channel::from_str(s).is_err() {
+    if toolchain_override::Channel::from_str(channel).is_err() {
         bail!(
             "Invalid channel '{}', expected one of {}.",
-            s,
+            channel,
             VALID_CHANNEL_STR,
         );
     }
-    Ok(s.to_string())
+    Ok(channel.to_string())
 }
 
 pub fn exec(command: ToolchainCommand) -> Result<()> {

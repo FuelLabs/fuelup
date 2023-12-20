@@ -520,6 +520,11 @@ fuels = { version = "0.1", features = ["some-feature"] }
             len, body,
         );
         let res = s.parse::<Response>().unwrap();
-        assert!(write_response_with_progress_bar(res, &mut mock_writer, String::new()).is_err());
+        assert_eq!(
+            write_response_with_progress_bar(res, &mut mock_writer, String::new())
+                .unwrap_err()
+                .to_string(),
+            "Something went wrong writing data: Mock Interrupted Error"
+        );
     }
 }

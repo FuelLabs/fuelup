@@ -508,8 +508,7 @@ fuels = { version = "0.1", features = ["some-feature"] }
     }
 
     #[test]
-    #[should_panic]
-    fn test_write_response_with_progress_bar_throw_error() {
+    fn test_write_response_with_progress_bar_fail() {
         let mut mock_writer = MockWriter;
         let len = 9000;
         let body = "A".repeat(len);
@@ -521,6 +520,6 @@ fuels = { version = "0.1", features = ["some-feature"] }
             len, body,
         );
         let res = s.parse::<Response>().unwrap();
-        assert!(write_response_with_progress_bar(res, &mut mock_writer, String::new()).is_ok());
+        assert!(write_response_with_progress_bar(res, &mut mock_writer, String::new()).is_err());
     }
 }

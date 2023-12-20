@@ -5,7 +5,7 @@
 Many `fuelup` commands deal with _toolchains_, a single installation of the
 Fuel toolchain. `fuelup` supports **two** types of toolchains.
 
-1. Distributable toolchains which track the official release [channels] (eg, _latest_, _nightly_);
+1. Distributable toolchains which track the official release [channels] (e.g., _latest_, _nightly_);
 2. Custom toolchains and install individual components in a modular manner.
 <!-- toolchains:example:end -->
 
@@ -36,7 +36,7 @@ For most use cases, using the officially packaged toolchains is good enough.
 For advanced use cases, `fuelup` allows you to build a toolchain in a
 modular manner, and to specify specific versions of components to install.
 
-To init a new, empty toolchain:
+To initialize a new, empty toolchain:
 
 ```sh
 fuelup toolchain new my_toolchain

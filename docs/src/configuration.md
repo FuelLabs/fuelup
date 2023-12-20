@@ -12,7 +12,7 @@ depend on which shell, and which operating system you are using. Your particular
 also determine where these scripts need to be placed.
 
 Here are some common set ups for the supported shells under Unix and similar operating systems
-(such as GNU/Linux). For these settings to take effect, you may have to log out and log back in to
+(such as GNU/Linux). For these settings to take effect, you may have to log out and log back into
 your shell session.
 
 ### BASH
@@ -69,9 +69,9 @@ Now you can install the completions script using the following command:
 fuelup completions --shell=zsh > ~/.zfunc/_fuelup
 ```
 
-### POWERSHELL
+### PowerShell
 
-The powershell completion scripts require PowerShell v5.0+ (which comes with Windows 10, but can be
+The `powershell` completion scripts require PowerShell v5.0+ (which comes with Windows 10, but can be
 downloaded separately for windows 7 or 8.1).
 
 First, check if a profile has already been set

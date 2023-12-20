@@ -11,7 +11,6 @@ on:
 env:
   CARGO_TERM_COLOR: always
   REGISTRY: ghcr.io
-  LATEST_CHANNEL_DIR: ./channel-fuel-latest.toml.d/
 
 jobs:
   cancel-previous-runs:
@@ -109,19 +108,6 @@ jobs:
       - name: Run Cargo.toml linter
         run: git ls-files | grep Cargo.toml$ | xargs --verbose -n 1 cargo-toml-lint
 
-      - name: Notify if Job Fails
-        uses: ravsamhq/notify-slack-action@v1
-        if: always() && github.ref == 'refs/heads/master'
-        with:
-          status: ${{ job.status }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          notification_title: "{workflow} has {status_message}"
-          message_format: "{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}> : <{run_url}|View Run Results>"
-          footer: ""
-          notify_when: "failure"
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_NOTIFY_BUILD }}
-
   publish-check:
     # Only do this job if publishing a release
     needs:
@@ -138,10 +124,8 @@ jobs:
           curl -sSLf "https://github.com/TomWright/dasel/releases/download/v1.24.3/dasel_linux_amd64" -L -o dasel && chmod +x dasel
           mv ./dasel /usr/local/bin/dasel
           ./.github/workflows/scripts/verify_tag.sh ${{ github.ref_name }} Cargo.toml
-
       - name: Notify if Job Fails
         uses: ravsamhq/notify-slack-action@v1
-        if: always()
         with:
           status: ${{ job.status }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -150,7 +134,7 @@ jobs:
           footer: ""
           notify_when: "failure"
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_NOTIFY_BUILD }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_TOOLING }}
 
   build-release:
     name: build fuelup release binaries
@@ -247,49 +231,6 @@ jobs:
           asset_path: ./${{ env.ZIP_FILE_NAME }}
           asset_name: ${{ env.ZIP_FILE_NAME }}
           asset_content_type: application/gzipa
-
-  update-latest-channel:
-    name: Re-publish the latest channel
-    needs: [cancel-previous-runs, build-release]
-    if: github.event_name == 'release' && github.event.action == 'published'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v3
-
-      - name: Install build-channel script
-        run: cargo install --debug --path ./ci/build-channel
-
-      - name: Checkout gh-pages
-        uses: actions/checkout@v3
-        with:
-          ref: gh-pages
-          path: gh-pages
-
-      # Re-generate the channel TOML file
-      - name: Rebuild channel with updated components
-        run: |
-            mkdir -p ${{ env.LATEST_CHANNEL_DIR }}
-            CHANNEL_TOML="channel-fuel-latest.toml"
-
-            FORC_VERSION=$(grep -A1 '\[pkg.forc\]' ./gh-pages/channel-fuel-latest.toml | cut -d "\"" -f2)
-            FUEL_CORE_VERSION=$(grep -A1 '\[pkg.fuel-core\]' ./gh-pages/channel-fuel-latest.toml | cut -d "\"" -f2)
-
-            PUBLISHED_DATE=$(date +'%Y-%m-%d')
-            build-channel $CHANNEL_TOML $PUBLISHED_DATE --github-run-id $GITHUB_RUN_ID forc=$FORC_VERSION fuel-core=$FUEL_CORE_VERSION
-
-            cp $CHANNEL_TOML ${{ env.LATEST_CHANNEL_DIR }}
-
-      - name: Deploy latest channel
-        if: ${{ env.LATEST_COMPATIBLE_FORC && env.LATEST_COMPATIBLE_FUEL_CORE }}
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ env.LATEST_CHANNEL_DIR }}
-          keep_files: true
-          destination_dir: ./
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
 
   post-release-checks:
     name: Do post-release checks

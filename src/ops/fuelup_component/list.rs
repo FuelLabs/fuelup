@@ -4,7 +4,7 @@ use crate::{
 use anyhow::Result;
 use component::Components;
 use semver::Version;
-use std::io::Write;
+use std::fmt::Write;
 use tracing::info;
 
 fn format_installed_component_info(
@@ -13,36 +13,28 @@ fn format_installed_component_info(
     version_info: &str,
 ) -> String {
     if let Some(v) = version {
-        format!("  {name} {v} ({version_info})\n")
+        format!("{:>2}{name} {v} ({version_info})\n", "")
     } else {
-        format!("  {name} : failed getting current version\n")
+        format!("{:>2}{name} : failed getting current version\n", "")
     }
 }
 
 fn format_installable_component_info(name: &str, latest_version: &str) -> String {
-    format!("  {name} (latest: {latest_version})\n")
+    format!("{:>2}{name} (latest: {latest_version})\n", "")
 }
 
 fn format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
-    use std::fmt::Write;
-    format!(
-        "    - {}\n",
-        plugin_executables
-            .iter()
-            .filter(|c| *c != component::FORC)
-            .fold(String::new(), |mut output, b| {
-                let _ = write!(output, "{b}");
-                output
-            })
-    )
+    plugin_executables
+        .iter()
+        .filter(|c| *c != component::FORC)
+        .fold(String::new(), |mut output, b| {
+            let _ = writeln!(output, "{:>4}- {}", "", b);
+            output
+        })
 }
 
 pub fn list(_command: ListCommand) -> Result<()> {
     let toolchain = Toolchain::from_settings()?;
-
-    // use write! instead of writeln! here to prevent this from printing first.
-    bold(|s| write!(s, "{}", toolchain.name));
-
     let mut installed_components_summary = String::from("\nInstalled:\n");
     let mut available_components_summary = String::from("Installable:\n");
 
@@ -95,6 +87,7 @@ pub fn list(_command: ListCommand) -> Result<()> {
             }
         }
     }
+    info!("{}", bold(&toolchain.name));
     info!(
         "{}\n{}",
         installed_components_summary, available_components_summary

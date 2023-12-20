@@ -7,18 +7,17 @@ use crate::{
     target_triple::TargetTriple,
     toolchain::{DistToolchainDescription, Toolchain},
 };
+use ansiterm::Color;
 use anyhow::Result;
 use component::{self, Components};
 use semver::Version;
-use std::io::Write;
 use std::str::FromStr;
 use std::{
     cmp::Ordering::{Equal, Greater, Less},
     path::Path,
 };
 use std::{collections::HashMap, process::Command};
-use termcolor::Color;
-use tracing::error;
+use tracing::{error, info};
 
 fn collect_package_versions(channel: Channel) -> HashMap<String, Version> {
     let mut latest_versions: HashMap<String, Version> = HashMap::new();
@@ -30,24 +29,30 @@ fn collect_package_versions(channel: Channel) -> HashMap<String, Version> {
     latest_versions
 }
 
-fn compare_and_print_versions(current_version: &Version, latest_version: &Version) -> Result<()> {
+fn format_version_comparison(current_version: &Version, latest_version: &Version) -> String {
     match current_version.cmp(latest_version) {
         Less => {
-            colored_bold(Color::Yellow, |s| write!(s, "Update available"));
-            println!(" : {current_version} -> {latest_version}");
+            format!(
+                "{} : {current_version} -> {latest_version}",
+                colored_bold(Color::Yellow, "Update available")
+            )
         }
         Equal => {
-            colored_bold(Color::Green, |s| write!(s, "Up to date"));
-            println!(" : {current_version}");
+            format!(
+                "{} : {current_version}",
+                colored_bold(Color::Green, "Up to date")
+            )
         }
         Greater => {
-            print!(" : {current_version}");
-            colored_bold(Color::Yellow, |s| write!(s, " (unstable)"));
-            print!(" -> {latest_version}");
-            colored_bold(Color::Green, |s| writeln!(s, " (recommended)"));
+            format!(
+                " : {} {} -> {} {}",
+                current_version,
+                colored_bold(Color::Yellow, "(unstable)"),
+                latest_version,
+                colored_bold(Color::Green, "(recommended)")
+            )
         }
     }
-    Ok(())
 }
 
 fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version) -> Result<()> {
@@ -60,25 +65,25 @@ fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version
             match output.split_whitespace().last() {
                 Some(v) => {
                     let version = Version::parse(v)?;
-                    print!("    - ");
-                    bold(|s| write!(s, "{plugin}"));
-                    print!(" - ");
-                    compare_and_print_versions(&version, latest_version)?;
+                    info!(
+                        "{:>4}- {} - {}",
+                        "",
+                        bold(plugin),
+                        format_version_comparison(&version, latest_version)
+                    );
                 }
                 None => {
-                    error!("    - {} - Error getting version string", plugin);
+                    info!("{:>4}- {} - Error getting version string", "", plugin);
                 }
             };
         }
         Err(e) => {
-            print!("    - ");
-            bold(|s| write!(s, "{plugin}"));
-            print!(" - ");
-            if plugin_executable.exists() {
-                println!("execution error - {e}");
+            let error_text = if plugin_executable.exists() {
+                format!("execution error - {e}")
             } else {
-                println!("not found");
-            }
+                "not found".into()
+            };
+            info!("{:>4}- {} - {}", "", bold(plugin), error_text);
         }
     }
     Ok(())
@@ -92,8 +97,11 @@ fn check_fuelup() -> Result<()> {
         TargetTriple::from_component(component::FUELUP)?,
         None,
     ) {
-        bold(|s| write!(s, "{} - ", component::FUELUP));
-        compare_and_print_versions(&fuelup_version, &fuelup_download_cfg.version)?;
+        info!(
+            "{} - {}",
+            bold(component::FUELUP),
+            format_version_comparison(&fuelup_version, &fuelup_download_cfg.version)
+        );
     } else {
         error!("Failed to create DownloadCfg for component 'fuelup'; skipping check for 'fuelup'");
     }
@@ -108,7 +116,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
 
     let toolchain = Toolchain::new(toolchain)?;
 
-    bold(|s| writeln!(s, "{}", &toolchain.name));
+    info!("{}", bold(&toolchain.name));
 
     for component in Components::collect_exclude_plugins()? {
         if let Some(latest_version) = latest_package_versions.get(&component.name) {
@@ -120,21 +128,33 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                     match output.split_whitespace().last() {
                         Some(v) => {
                             let version = Version::parse(v)?;
-                            bold(|s| write!(s, "  {} - ", &component.name));
-                            compare_and_print_versions(&version, latest_version)?;
+                            info!(
+                                "{:>2}{} - {}",
+                                "",
+                                bold(&component.name),
+                                format_version_comparison(&version, latest_version)
+                            );
                         }
                         None => {
-                            error!("  {} - Error getting version string", &component.name);
+                            error!(
+                                "{:>2}{} - Error getting version string",
+                                "",
+                                bold(&component.name)
+                            );
                         }
                     }
                 }
-                Err(_) => error!("  {} - Error getting version string", &component.name),
+                Err(_) => error!(
+                    "{:>2}{} - Error getting version string",
+                    "",
+                    bold(&component.name)
+                ),
             };
 
             if verbose && component.name == component::FORC {
                 for plugin in component::Components::collect_plugins()? {
                     if !plugin.is_main_executable() {
-                        bold(|s| writeln!(s, "    - {}", plugin.name));
+                        info!("{:>4}- {}", "", bold(&plugin.name));
                     }
 
                     for (index, executable) in plugin.executables.iter().enumerate() {
@@ -143,7 +163,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                         let mut plugin_name = &plugin.name;
 
                         if !plugin.is_main_executable() {
-                            print!("  ");
+                            print!("{:>2}", "");
                             plugin_name = &plugin.executables[index];
                         }
 

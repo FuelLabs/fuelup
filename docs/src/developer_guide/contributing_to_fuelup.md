@@ -44,7 +44,7 @@ There are many ways in which you may contribute to `fuelup`, some of which invol
 
 Check out our [Help Wanted](https://github.com/FuelLabs/fuelup/labels/help%20wanted), [Fuelup Book](https://github.com/FuelLabs/fuelup/labels/book) or [Good First Issue](https://github.com/FuelLabs/fuelup/labels/good%20first%20issue) issues to find a suitable task.
 
-If you are planning something big, for example, related to multiple components or changes current behaviors, make sure to open an issue to discuss with us before starting on the implementation.
+If you wish to make a significant change that alters current behavior or touches multiple components, make sure to open an issue for discussion before starting on the implementation.
 
 ## Contribution flow
 
@@ -57,7 +57,7 @@ This is a rough outline of what a contributor's workflow looks like:
 - Run tests and make sure all tests pass.
 - If the PR contains any breaking changes, add the breaking label to your PR.
 - Push your changes to a branch in your fork of the repository and submit a pull request.
-  - Make sure mention the issue, which is created at step 1, in the commit message.
+  - Make sure to mention the issue, which is created in step 1, in the commit message.
 - Your PR will be reviewed and some changes may be requested.
   - Once you've made changes, your PR must be re-reviewed and approved.
   - If the PR becomes out of date, you can use GitHub's 'update branch' button.
@@ -84,7 +84,7 @@ If the pull request links an issue but does not close it, you can use the keywor
 ref #456
 ```
 
-Multiple issues should use full syntax for each issue and separate by a comma, like:
+Multiple issues should use full syntax for each issue and be separated by a comma, like:
 
 ```text
 close #123, ref #456

@@ -5,10 +5,9 @@ use crate::{
     path::warn_existing_fuel_executables,
     toolchain::{DistToolchainDescription, Toolchain},
 };
+use ansiterm::Color;
 use anyhow::{bail, Result};
-use std::io::Write;
 use std::str::FromStr;
-use termcolor::Color;
 use tracing::info;
 
 const UPDATED: &str = "updated";
@@ -51,16 +50,16 @@ pub fn update() -> Result<()> {
         let mut status = String::new();
         if !installed_bins.is_empty() {
             status = UPDATED.to_string();
-            installed_bins = format!("  updated components:\n{installed_bins}");
+            installed_bins = format!("{:>2}updated components:\n{}", "", installed_bins);
         }
 
         if !errored_bins.is_empty() {
             status = PARTIALLY_UPDATED.to_string();
-            errored_bins = format!("  failed to update:\n{errored_bins}");
+            errored_bins = format!("{:>2}failed to update:\n{}", "", errored_bins);
         };
 
         summary.push((
-            format!("{toolchain} {status}\n"),
+            format!("{toolchain} {status}"),
             format!("{installed_bins}{errored_bins}"),
         ));
     }
@@ -72,9 +71,9 @@ pub fn update() -> Result<()> {
             .collect::<String>()
             .is_empty()
         {
-            colored_bold(Color::Green, |s| write!(s, "{toolchain_info}"));
+            info!("{}", colored_bold(Color::Green, &toolchain_info));
         } else {
-            bold(|s| write!(s, "{toolchain_info}"));
+            info!("{}", bold(&toolchain_info));
         }
         info!("{}", components_info);
     }

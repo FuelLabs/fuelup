@@ -1,11 +1,16 @@
 use anyhow::Result;
-use fuelup::{fuelup_cli, proxy_cli};
-use std::panic;
-use std::path::PathBuf;
+use fuelup::{
+    fuelup_cli,
+    logging::{init_tracing, log_command, log_environment},
+    proxy_cli,
+};
+use std::{env, panic, path::PathBuf};
 use tracing::error;
 
 fn run() -> Result<()> {
-    let arg0 = std::env::args().next().map(PathBuf::from);
+    log_command();
+    log_environment();
+    let arg0 = env::args().next().map(PathBuf::from);
 
     let process_name = arg0
         .as_ref()
@@ -30,13 +35,7 @@ fn run() -> Result<()> {
 }
 
 fn main() {
-    let format = tracing_subscriber::fmt::format()
-        .without_time()
-        .with_level(false)
-        .with_target(false);
-
-    tracing_subscriber::fmt().event_format(format).init();
-
+    let _guard = init_tracing();
     if run().is_err() {
         std::process::exit(1);
     }

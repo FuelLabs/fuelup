@@ -12,7 +12,7 @@ use std::time::Duration;
 use std::{fs, thread};
 use tar::Archive;
 use tracing::warn;
-use tracing::{error, info};
+use tracing::{debug, error, info};
 
 use crate::channel::Channel;
 use crate::channel::Package;
@@ -92,12 +92,11 @@ pub fn build_agent() -> Result<ureq::Agent> {
     let agent_builder = ureq::builder().user_agent("fuelup");
 
     if let Ok(proxy) = env::var("http_proxy") {
-        return match ureq::Proxy::new(proxy) {
-            Some(proxy) => Ok(agent_builder.proxy(proxy).build()),
+        return match ureq::Proxy::new(&proxy) {
+            Ok(proxy) => Ok(agent_builder.proxy(proxy).build()),
             Err(err) => {
-                println_error("Failed to build proxy with http_proxy={proxy}");
-                debug!("{:?}", err);
-                Err(err)
+                error!("Failed to build proxy with http_proxy={}, {}", proxy, err);
+                Err(err.into())
             }
         };
     }

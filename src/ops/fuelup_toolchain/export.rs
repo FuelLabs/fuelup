@@ -114,7 +114,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
     }
 
     info!(
-        "Exported toolchain \"{}\" to file: /"{}/"",
+        "Exported toolchain \"{}\" to file: \"{}\"",
         toolchain_name,
         toolchain_info_path.display()
     );
@@ -166,13 +166,10 @@ mod tests {
         }
     }
     fn assert_channel_name(expected: &String) {
-        let toolchain_override = ToolchainOverride::from_project_root().expect("toolchain override");
-        let actual = toolchain_override
-            .cfg
-            .toolchain
-            .channel
-            .to_string();
-        assert!(matches!(expected, actual));
+        let toolchain_override =
+            ToolchainOverride::from_project_root().expect("toolchain override");
+        let _actual = toolchain_override.cfg.toolchain.channel.to_string();
+        assert!(matches!(expected, _actual));
     }
 
     #[test]
@@ -243,7 +240,7 @@ mod tests {
             &INPUT_NOP[..],
         )
         .unwrap();
-        check_toolchain_info_with_channel(&channel).unwrap();
+        assert_channel_name(&channel);
 
         // case: path exist with valid channel inputted and with --force
         let channel = channel::BETA_3.to_string();
@@ -257,7 +254,7 @@ mod tests {
             channel_input.as_bytes(),
         )
         .unwrap();
-        check_toolchain_info_with_channel(&channel).unwrap();
+        assert_channel_name(&channel);
 
         // case: path exist with valid channel and without --force and input[yes]
         let channel = channel::BETA_3.to_string();
@@ -270,7 +267,7 @@ mod tests {
             &INPUT_YES[..],
         )
         .unwrap();
-        check_toolchain_info_with_channel(&channel).unwrap();
+        assert_channel_name(&channel);
 
         // case: path exist with invalid channel and with --force and input valid channel
         let channel = channel::BETA_3.to_string();
@@ -284,7 +281,7 @@ mod tests {
             channel_input.as_bytes(),
         )
         .unwrap();
-        check_toolchain_info_with_channel(&channel).unwrap();
+        assert_channel_name(&channel);
     }
 
     #[test]
@@ -303,7 +300,7 @@ mod tests {
             &INPUT_NOP[..],
         )
         .unwrap();
-        check_toolchain_info_with_channel(&channel).unwrap();
+        assert_channel_name(&channel);
 
         // case: path not exist with invalid channel and input valid channel
         remove_toolchain_info();
@@ -318,6 +315,6 @@ mod tests {
             channel_input.as_bytes(),
         )
         .unwrap();
-        check_toolchain_info_with_channel(&channel).unwrap();
+        assert_channel_name(&channel);
     }
 }

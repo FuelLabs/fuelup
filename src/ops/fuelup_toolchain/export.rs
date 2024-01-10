@@ -110,7 +110,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
     };
     let document = toolchain_override.to_toml();
     if std::fs::write(toolchain_override.path, document.to_string()).is_err() {
-        bail!("failed to write {}", toolchain_info_path.display());
+        bail!("Failed to write {}", toolchain_info_path.display());
     }
 
     info!(

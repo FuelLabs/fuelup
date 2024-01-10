@@ -46,11 +46,8 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
                     bail!("Failed to remove file {}", &toolchain_info_path.display());
                 };
             } else {
-                bail!(
-                    "Failed to export toolchain \
-                    because a toolchain override file already exists at {}.",
-                    &toolchain_info_path.display(),
-                );
+                println_warning("Canceled toolchain export");
+                return Ok(());
             }
         }
     }

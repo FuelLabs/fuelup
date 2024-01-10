@@ -84,7 +84,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
         ));
         let mut input_channel_name = String::new();
         if reader.read_line(&mut input_channel_name).is_err() {
-            bail!("failed to read user input");
+            bail!("Failed to read user input");
         }
         input_channel_name = String::from(input_channel_name.trim());
         if toolchain_override::Channel::from_str(&input_channel_name).is_err() {

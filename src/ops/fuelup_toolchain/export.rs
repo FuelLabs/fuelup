@@ -174,7 +174,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn export_toolchain_with_exists_toolchain_info_throws_err() {
+    fn export_toolchain_with_exists_toolchain_info_with_cancel() {
         create_toolchain_settings_file();
         create_toolchain_info();
         export(

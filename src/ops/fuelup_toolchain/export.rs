@@ -39,7 +39,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
             ));
             let mut need_replace = String::new();
             if reader.read_line(&mut need_replace).is_err() {
-                bail!("failed to read user input");
+                bail!("Failed to read user input");
             }
             if need_replace.trim() == "y" {
                 if fs::remove_file(&toolchain_info_path).is_err() {

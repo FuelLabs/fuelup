@@ -174,7 +174,6 @@ mod tests {
 
     #[test]
     #[serial]
-    #[should_panic]
     fn export_toolchain_with_exists_toolchain_info_throws_err() {
         create_toolchain_settings_file();
         create_toolchain_info();

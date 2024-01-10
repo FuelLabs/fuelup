@@ -114,7 +114,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
     }
 
     info!(
-        "exported '{}' into '{}'",
+        "Exported toolchain \"{}\" to file: /"{}/"",
         toolchain_name,
         toolchain_info_path.display()
     );

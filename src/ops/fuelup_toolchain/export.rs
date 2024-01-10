@@ -43,7 +43,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
             }
             if need_replace.trim() == "y" {
                 if fs::remove_file(&toolchain_info_path).is_err() {
-                    bail!("failed to remove file {}", &toolchain_info_path.display());
+                    bail!("Failed to remove file {}", &toolchain_info_path.display());
                 };
             } else {
                 bail!(

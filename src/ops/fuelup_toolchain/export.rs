@@ -29,7 +29,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
                 &toolchain_info_path.display(),
             ));
             if fs::remove_file(&toolchain_info_path).is_err() {
-                bail!("failed to remove file {}", &toolchain_info_path.display());
+                bail!("Failed to remove file {}", &toolchain_info_path.display());
             }
         } else {
             println_warning(&format!(

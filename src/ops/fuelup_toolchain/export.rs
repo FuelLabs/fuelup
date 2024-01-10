@@ -165,19 +165,14 @@ mod tests {
             file.write_all(b"default_toolchain = \"latest\"").unwrap();
         }
     }
-    fn check_toolchain_info_with_channel(channel_name: &String) -> Result<()> {
-        let toolchain_override = ToolchainOverride::from_project_root().unwrap();
-        if toolchain_override
+    fn assert_channel_name(expected: &String) {
+        let toolchain_override = ToolchainOverride::from_project_root().expect("toolchain override");
+        let actual = toolchain_override
             .cfg
             .toolchain
             .channel
-            .to_string()
-            .eq(channel_name)
-        {
-            Ok(())
-        } else {
-            bail!("unexpected channel");
-        }
+            .to_string();
+        assert!(matches!(expected, actual));
     }
 
     #[test]

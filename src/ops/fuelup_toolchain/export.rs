@@ -82,7 +82,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
     if toolchain_override::Channel::from_str(&export_channel).is_err() {
         println_warning(&format!(
             "Invalid channel '{}', expected one of {}. \
-            Please input a valid channel: ",
+            \nPlease input a valid channel: ",
             export_channel, VALID_CHANNEL_STR,
         ));
         let mut input_channel_name = String::new();

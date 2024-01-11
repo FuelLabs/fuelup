@@ -1,4 +1,4 @@
-use anyhow::{bail, Ok, Result};
+use anyhow::{bail, Result};
 use clap::Parser;
 use serde::Deserialize;
 use std::io::{stdin, BufReader};

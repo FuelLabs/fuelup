@@ -23,31 +23,34 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
     let mut toolchain_info_path = PathBuf::from("./").join(FUEL_TOOLCHAIN_TOML_FILE);
     if let Some(path) = get_fuel_toolchain_toml() {
         toolchain_info_path = path;
-        if force {
-            println_warning(&format!(
-                "Because the `--force` argument was supplied, this file will be overwritten: {}",
-                &toolchain_info_path.display(),
-            ));
-            if fs::remove_file(&toolchain_info_path).is_err() {
-                bail!("Failed to remove file {}", &toolchain_info_path.display());
-            }
-        } else {
-            println_warning(&format!(
-                "There is an existing toolchain override file at {}. \
-                Do you wish to replace it with a new one? (y/N) ",
-                &toolchain_info_path.display(),
-            ));
-            let mut need_replace = String::new();
-            if reader.read_line(&mut need_replace).is_err() {
-                bail!("Failed to read user input");
-            }
-            if need_replace.trim() == "y" {
+        match force {
+            true => {
+                println_warning(&format!(
+                    "Because the `--force` argument was supplied, this file will be overwritten: {}",
+                    &toolchain_info_path.display(),
+                ));
                 if fs::remove_file(&toolchain_info_path).is_err() {
                     bail!("Failed to remove file {}", &toolchain_info_path.display());
-                };
-            } else {
-                println_warning("Canceled toolchain export");
-                return Ok(());
+                }
+            }
+            false => {
+                println_warning(&format!(
+                    "There is an existing toolchain override file at {}. \
+                    Do you wish to replace it with a new one? (y/N) ",
+                    &toolchain_info_path.display(),
+                ));
+                let mut need_replace = String::new();
+                if reader.read_line(&mut need_replace).is_err() {
+                    bail!("Failed to read user input");
+                }
+                if need_replace.trim() == "y" {
+                    if fs::remove_file(&toolchain_info_path).is_err() {
+                        bail!("Failed to remove file {}", &toolchain_info_path.display());
+                    };
+                } else {
+                    println_warning("Canceled toolchain export");
+                    return Ok(());
+                }
             }
         }
     }
@@ -134,8 +137,8 @@ mod tests {
 
     // simulate input
     const INPUT_NOP: &[u8; 1] = b"\n";
-    const INPUT_YES: &[u8; 2] = b"y\n";
-    const INPUT_NO: &[u8; 2] = b"n\n";
+    const INPUT_YES: &[u8; 2] = b"y\r";
+    const INPUT_NO: &[u8; 4] = b"n \r\n";
     const INPUT_INVALID_CHANNEL: &[u8; 11] = b"my-channel\n";
     const INVALID_CHANNEL: &str = "my-channel";
 

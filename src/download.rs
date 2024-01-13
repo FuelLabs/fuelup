@@ -1,6 +1,7 @@
 use anyhow::{anyhow, bail, Result};
 use component::{Component, FUELUP};
 use flate2::read::GzDecoder;
+use indicatif::{FormattedDuration, HumanBytes, HumanDuration, ProgressBar, ProgressStyle};
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::env;
@@ -11,8 +12,8 @@ use std::str::FromStr;
 use std::time::Duration;
 use std::{fs, thread};
 use tar::Archive;
-use tracing::warn;
-use tracing::{error, info};
+use tracing::{debug, error, info, warn};
+use ureq::Response;
 
 use crate::channel::Channel;
 use crate::channel::Package;
@@ -176,8 +177,7 @@ pub fn download(url: &str) -> Result<Vec<u8>> {
         match handle.get(url).call() {
             Ok(response) => {
                 let mut data = Vec::new();
-                response.into_reader().read_to_end(&mut data)?;
-
+                write_response_with_progress_bar(response, &mut data, String::new())?;
                 return Ok(data);
             }
             Err(ureq::Error::Status(404, r)) => {
@@ -209,18 +209,14 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
     for _ in 1..RETRY_ATTEMPTS {
         match handle.get(url).call() {
             Ok(response) => {
-                let mut data = Vec::new();
-                response.into_reader().read_to_end(&mut data)?;
-
-                if let Err(e) = file.write_all(&data) {
+                if let Err(e) = write_response_with_progress_bar(
+                    response,
+                    &mut file,
+                    path.display().to_string(),
+                ) {
                     fs::remove_file(path)?;
-                    bail!(
-                        "Something went wrong writing data to {}: {}",
-                        path.display(),
-                        e
-                    )
-                };
-
+                    return Err(e);
+                }
                 return Ok(());
             }
             Err(ureq::Error::Status(404, r)) => {
@@ -297,6 +293,67 @@ pub fn unpack_bins(dir: &Path, dst_dir: &Path) -> Result<Vec<PathBuf>> {
     Ok(downloaded)
 }
 
+/// write Ok(Response) to provided writer with progress bar displaying writing status
+fn write_response_with_progress_bar<W: Write>(
+    response: Response,
+    writer: &mut W,
+    target: String,
+) -> Result<()> {
+    let total_size = response
+        .header("Content-Length")
+        .and_then(|s| s.parse::<u64>().ok())
+        .unwrap_or(0);
+    let mut downloaded_size = 0;
+    let mut buffer = [0; 8192];
+    let progress_bar = ProgressBar::new(total_size);
+    progress_bar.set_style(
+                ProgressStyle::default_bar()
+                    .template("[{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({eta}) - {msg:.green}")
+                    .unwrap()
+                    .progress_chars("##-"),
+            );
+    let mut reader = progress_bar.wrap_read(response.into_reader());
+
+    loop {
+        let bytes_read = reader.read(&mut buffer)?;
+        if bytes_read == 0 {
+            break;
+        }
+        if let Err(e) = writer.write_all(&buffer[..bytes_read]) {
+            log_progress_bar(&progress_bar);
+            if target.is_empty() {
+                bail!("Something went wrong writing data: {}", e)
+            }
+            bail!("Something went wrong writing data to {}: {}", target, e)
+        };
+        downloaded_size += bytes_read as u64;
+        progress_bar.set_position(downloaded_size);
+    }
+    if total_size == 0 {
+        // to be compatible with case total_size is 0
+        // Note: there maybe a bug for ureq that in some case, it return response with empty value of "Content-Length". See `test_agent`
+        progress_bar.set_length(downloaded_size);
+    }
+    progress_bar.finish_with_message("Download complete");
+    log_progress_bar(&progress_bar);
+    Ok(())
+}
+
+fn log_progress_bar(progress_bar: &ProgressBar) {
+    debug!(
+        "[{}] [{}] {}/{} ({}) - {}",
+        FormattedDuration(progress_bar.elapsed()),
+        "#".repeat(
+            (progress_bar.position() * 40
+                / progress_bar.length().unwrap_or(progress_bar.position())) as usize
+        ),
+        HumanBytes(progress_bar.position()),
+        HumanBytes(progress_bar.length().unwrap_or(progress_bar.position())),
+        HumanDuration(progress_bar.eta()),
+        progress_bar.message(),
+    );
+}
+
 /// Read the version (as a plain String) used by the `fuels` dependency, if it exists.
 fn fuels_version_from_toml(toml: toml_edit::Document) -> Result<String> {
     if let Some(deps) = toml.get("dependencies") {
@@ -357,7 +414,30 @@ pub fn fetch_fuels_version(cfg: &DownloadCfg) -> Result<String> {
 mod tests {
     use super::*;
     use dirs::home_dir;
+    use std::io::{self, Result};
     use tempfile;
+
+    struct MockWriter;
+
+    impl Write for MockWriter {
+        fn write_all(&mut self, _: &[u8]) -> Result<()> {
+            Err(io::Error::new(
+                io::ErrorKind::Interrupted,
+                "Mock Interrupted Error",
+            ))
+        }
+
+        fn write(&mut self, _: &[u8]) -> Result<usize> {
+            Err(io::Error::new(
+                io::ErrorKind::Interrupted,
+                "Mock Interrupted Error",
+            ))
+        }
+
+        fn flush(&mut self) -> Result<()> {
+            Ok(())
+        }
+    }
 
     pub(crate) fn with_toolchain_dir<F>(f: F) -> Result<()>
     where
@@ -421,5 +501,53 @@ fuels = { version = "0.1", features = ["some-feature"] }
             assert!(mock_bin_dir.join("forc-mock-exec-2").metadata().is_ok());
             Ok(())
         })
+    }
+
+    #[test]
+    fn test_write_response_with_progress_bar() -> anyhow::Result<()> {
+        let mut data = Vec::new();
+        let len = 100;
+        let body = "A".repeat(len);
+        let s = format!(
+            "HTTP/1.1 200 OK\r\n\
+                 \r\n
+                 {}",
+            body,
+        );
+        let res = s.parse::<Response>().unwrap();
+        assert!(write_response_with_progress_bar(res, &mut data, String::new()).is_ok());
+        let written_res = String::from_utf8(data)?;
+        assert!(written_res.trim().eq(&body));
+        Ok(())
+    }
+
+    #[test]
+    fn test_write_response_with_progress_bar_fail() {
+        let mut mock_writer = MockWriter;
+        let len = 9000;
+        let body = "A".repeat(len);
+        let s = format!(
+            "HTTP/1.1 200 OK\r\n\
+                 Content-Length: {}\r\n
+                 \r\n
+                 {}",
+            len, body,
+        );
+        let res = s.parse::<Response>().unwrap();
+        assert_eq!(
+            write_response_with_progress_bar(res, &mut mock_writer, String::new())
+                .unwrap_err()
+                .to_string(),
+            "Something went wrong writing data: Mock Interrupted Error"
+        );
+    }
+
+    #[test]
+    fn test_agent() -> anyhow::Result<()> {
+        // this test case is used to illustrate the bug of ureq that sometimes doesn't return "Content-Length" header
+        let handle = build_agent()?;
+        let response = handle.get("https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/channel-fuel-beta-4.toml").call()?;
+        assert!(response.header("Content-Length").is_none());
+        Ok(())
     }
 }

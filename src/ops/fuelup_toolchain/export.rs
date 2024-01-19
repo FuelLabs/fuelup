@@ -48,7 +48,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
                         bail!("Failed to remove file {}", &toolchain_info_path.display());
                     };
                 } else {
-                    println_warning("Canceled toolchain export");
+                    println_warning("Cancelled toolchain export");
                     return Ok(());
                 }
             }
@@ -145,27 +145,50 @@ mod tests {
     fn remove_toolchain_info() {
         if let Some(fuel_toolchain_toml_file) = get_fuel_toolchain_toml() {
             if fuel_toolchain_toml_file.exists() {
-                fs::remove_file(fuel_toolchain_toml_file).unwrap();
+                fs::remove_file(&fuel_toolchain_toml_file).unwrap_or_else(|_| {
+                    panic!(
+                        "should successfully remove file {}",
+                        fuel_toolchain_toml_file.display()
+                    )
+                });
             }
         }
     }
     fn create_toolchain_info() {
         if let Some(fuel_toolchain_toml_file) = get_fuel_toolchain_toml() {
             if !fuel_toolchain_toml_file.exists() {
-                fs::create_dir_all(fuel_toolchain_toml_file.parent().unwrap()).unwrap();
-                fs::File::create(&fuel_toolchain_toml_file).unwrap();
+                fs::create_dir_all(fuel_toolchain_toml_file.parent().unwrap())
+                    .expect("should successfully create parent directory");
+                fs::File::create(&fuel_toolchain_toml_file).unwrap_or_else(|_| {
+                    panic!(
+                        "should successfully create file {}",
+                        fuel_toolchain_toml_file.display()
+                    )
+                });
             }
         } else {
-            fs::File::create(FUEL_TOOLCHAIN_TOML_FILE).unwrap();
+            fs::File::create(FUEL_TOOLCHAIN_TOML_FILE).unwrap_or_else(|_| {
+                panic!(
+                    "should successfully create file {}",
+                    FUEL_TOOLCHAIN_TOML_FILE
+                )
+            });
         }
     }
     // mock setting.toml
     fn create_toolchain_settings_file() {
         let setting_file_path = settings_file();
         if !setting_file_path.exists() {
-            fs::create_dir_all(setting_file_path.parent().unwrap()).unwrap();
-            let mut file = fs::File::create(&setting_file_path).unwrap();
-            file.write_all(b"default_toolchain = \"latest\"").unwrap();
+            fs::create_dir_all(setting_file_path.parent().unwrap())
+                .expect("should successfully create parent directory");
+            let mut file = fs::File::create(&setting_file_path).unwrap_or_else(|_| {
+                panic!(
+                    "should successfully create file {}",
+                    setting_file_path.display()
+                )
+            });
+            file.write_all(b"default_toolchain = \"latest\"")
+                .expect("should successfully write data to file");
         }
     }
     fn assert_channel_name(expected: &String) {
@@ -177,7 +200,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn export_toolchain_with_exists_toolchain_info_with_cancel() {
+    fn export_toolchain_with_existing_toolchain_info_then_cancel() {
         create_toolchain_settings_file();
         create_toolchain_info();
         export(
@@ -194,7 +217,7 @@ mod tests {
     #[test]
     #[serial]
     #[should_panic]
-    fn export_toolchain_with_invalid_channel_provided_throws_err() {
+    fn export_toolchain_with_invalid_channel() {
         create_toolchain_settings_file();
         remove_toolchain_info();
         export(
@@ -211,7 +234,7 @@ mod tests {
     #[test]
     #[serial]
     #[should_panic]
-    fn export_toolchain_with_invalid_channel_inputted_throws_err() {
+    fn export_toolchain_without_channel() {
         create_toolchain_settings_file();
         remove_toolchain_info();
         export(
@@ -227,7 +250,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn export_toolchain_with_exists_toolchain_info() {
+    fn export_toolchain_with_forced_overwrite() {
         create_toolchain_settings_file();
         create_toolchain_info();
 

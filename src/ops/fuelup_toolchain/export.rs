@@ -211,41 +211,7 @@ mod tests {
             },
             &INPUT_NO[..],
         )
-        .unwrap();
-    }
-
-    #[test]
-    #[serial]
-    #[should_panic]
-    fn export_toolchain_with_invalid_channel() {
-        create_toolchain_settings_file();
-        remove_toolchain_info();
-        export(
-            ExportCommand {
-                name: Some(DistToolchainName::Beta3.to_string()),
-                channel: Some(INVALID_CHANNEL.to_string()),
-                force: false,
-            },
-            &INPUT_INVALID_CHANNEL[..],
-        )
-        .unwrap();
-    }
-
-    #[test]
-    #[serial]
-    #[should_panic]
-    fn export_toolchain_without_channel() {
-        create_toolchain_settings_file();
-        remove_toolchain_info();
-        export(
-            ExportCommand {
-                name: Some(DistToolchainName::Latest.to_string()),
-                channel: None,
-                force: false,
-            },
-            &INPUT_INVALID_CHANNEL[..],
-        )
-        .unwrap();
+        .expect("should success");
     }
 
     #[test]
@@ -254,7 +220,6 @@ mod tests {
         create_toolchain_settings_file();
         create_toolchain_info();
 
-        // case: path exist with valid channel provided and with --force
         let channel = channel::BETA_3.to_string();
         export(
             ExportCommand {
@@ -264,10 +229,16 @@ mod tests {
             },
             &INPUT_NOP[..],
         )
-        .unwrap();
+        .expect("should success");
         assert_channel_name(&channel);
+    }
 
-        // case: path exist with valid channel inputted and with --force
+    #[test]
+    #[serial]
+    fn export_toolchain_with_forced_overwrite_and_valid_input() {
+        create_toolchain_settings_file();
+        create_toolchain_info();
+
         let channel = channel::BETA_3.to_string();
         let channel_input = format!("{}\n", channel);
         export(
@@ -278,23 +249,16 @@ mod tests {
             },
             channel_input.as_bytes(),
         )
-        .unwrap();
+        .expect("should success");
         assert_channel_name(&channel);
+    }
 
-        // case: path exist with valid channel and without --force and input[yes]
-        let channel = channel::BETA_3.to_string();
-        export(
-            ExportCommand {
-                name: Some(DistToolchainName::Latest.to_string()),
-                channel: Some(channel.clone()),
-                force: false,
-            },
-            &INPUT_YES[..],
-        )
-        .unwrap();
-        assert_channel_name(&channel);
+    #[test]
+    #[serial]
+    fn export_toolchain_with_forced_overwrite_and_valid_provide() {
+        create_toolchain_settings_file();
+        create_toolchain_info();
 
-        // case: path exist with invalid channel and with --force and input valid channel
         let channel = channel::BETA_3.to_string();
         let channel_input = format!("{}\n", channel);
         export(
@@ -305,13 +269,32 @@ mod tests {
             },
             channel_input.as_bytes(),
         )
-        .unwrap();
+        .expect("should success");
         assert_channel_name(&channel);
     }
 
     #[test]
     #[serial]
-    fn export_toolchain_without_exists_toolchain_info() {
+    fn export_toolchain_without_forced_overwrite() {
+        create_toolchain_settings_file();
+        create_toolchain_info();
+
+        let channel = channel::BETA_3.to_string();
+        export(
+            ExportCommand {
+                name: Some(DistToolchainName::Latest.to_string()),
+                channel: Some(channel.clone()),
+                force: false,
+            },
+            &INPUT_YES[..],
+        )
+        .expect("should success");
+        assert_channel_name(&channel);
+    }
+
+    #[test]
+    #[serial]
+    fn export_toolchain_without_exists_toolchain_info_with_valid_channel() {
         create_toolchain_settings_file();
         // case: path not exist with valid channel
         remove_toolchain_info();
@@ -324,10 +307,14 @@ mod tests {
             },
             &INPUT_NOP[..],
         )
-        .unwrap();
+        .expect("should success");
         assert_channel_name(&channel);
+    }
 
-        // case: path not exist with invalid channel and input valid channel
+    #[test]
+    #[serial]
+    fn export_toolchain_without_exists_toolchain_info_with_invalid_channel() {
+        create_toolchain_settings_file();
         remove_toolchain_info();
         let channel = channel::BETA_3.to_string();
         let channel_input = format!("{}\n", channel);
@@ -339,7 +326,39 @@ mod tests {
             },
             channel_input.as_bytes(),
         )
-        .unwrap();
+        .expect("should success");
         assert_channel_name(&channel);
+    }
+
+    #[test]
+    #[serial]
+    fn export_toolchain_with_invalid_channel() {
+        create_toolchain_settings_file();
+        remove_toolchain_info();
+        export(
+            ExportCommand {
+                name: Some(DistToolchainName::Beta3.to_string()),
+                channel: Some(INVALID_CHANNEL.to_string()),
+                force: false,
+            },
+            &INPUT_INVALID_CHANNEL[..],
+        )
+        .expect_err("should failed");
+    }
+
+    #[test]
+    #[serial]
+    fn export_toolchain_without_channel() {
+        create_toolchain_settings_file();
+        remove_toolchain_info();
+        export(
+            ExportCommand {
+                name: Some(DistToolchainName::Latest.to_string()),
+                channel: None,
+                force: false,
+            },
+            &INPUT_INVALID_CHANNEL[..],
+        )
+        .expect_err("should failed");
     }
 }

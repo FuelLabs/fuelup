@@ -191,11 +191,11 @@ mod tests {
                 .expect("should successfully write data to file");
         }
     }
-    fn assert_channel_name(expected: &String) {
+    fn assert_channel_name(expected: String) {
         let toolchain_override =
             ToolchainOverride::from_project_root().expect("toolchain override");
-        let _actual = toolchain_override.cfg.toolchain.channel.to_string();
-        assert!(matches!(expected, _actual));
+        let actual = toolchain_override.cfg.toolchain.channel.to_string();
+        assert_eq!(expected, actual);
     }
 
     #[test]
@@ -230,7 +230,7 @@ mod tests {
             &INPUT_NOP[..],
         )
         .expect("should success");
-        assert_channel_name(&channel);
+        assert_channel_name(channel);
     }
 
     #[test]
@@ -250,7 +250,7 @@ mod tests {
             channel_input.as_bytes(),
         )
         .expect("should success");
-        assert_channel_name(&channel);
+        assert_channel_name(channel);
     }
 
     #[test]
@@ -270,7 +270,7 @@ mod tests {
             channel_input.as_bytes(),
         )
         .expect("should success");
-        assert_channel_name(&channel);
+        assert_channel_name(channel);
     }
 
     #[test]
@@ -289,7 +289,7 @@ mod tests {
             &INPUT_YES[..],
         )
         .expect("should success");
-        assert_channel_name(&channel);
+        assert_channel_name(channel);
     }
 
     #[test]
@@ -308,7 +308,7 @@ mod tests {
             &INPUT_NOP[..],
         )
         .expect("should success");
-        assert_channel_name(&channel);
+        assert_channel_name(channel);
     }
 
     #[test]
@@ -327,7 +327,7 @@ mod tests {
             channel_input.as_bytes(),
         )
         .expect("should success");
-        assert_channel_name(&channel);
+        assert_channel_name(channel);
     }
 
     #[test]

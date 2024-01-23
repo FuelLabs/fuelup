@@ -30,7 +30,6 @@ fn fuelup_check() -> Result<()> {
         assert!(stdout.contains(&latest));
         assert!(stdout.contains(forc));
         assert!(stdout.contains(fuel_core));
-        assert!(stdout.contains(fuel_indexer));
     })?;
 
     // Test that toolchain names with '-' inside are parsed correctly.

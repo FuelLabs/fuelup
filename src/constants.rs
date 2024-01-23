@@ -6,8 +6,7 @@ pub const FUELS_VERSION_FILE: &str = "fuels_version";
 
 pub const CHANNEL_LATEST_URL: &str =
     "https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/channel-fuel-beta-4.toml";
-// TODO: Make this point to beta-5.
-pub const CHANNEL_LATEST_FILE_NAME: &str = "channel-fuel-beta-4.toml";
+pub const CHANNEL_LATEST_FILE_NAME: &str = "channel-fuel-beta-5.toml";
 pub const CHANNEL_NIGHTLY_FILE_NAME: &str = "channel-fuel-nightly.toml";
 pub const CHANNEL_BETA_1_FILE_NAME: &str = "channel-fuel-beta-1.toml";
 pub const CHANNEL_BETA_2_FILE_NAME: &str = "channel-fuel-beta-2.toml";

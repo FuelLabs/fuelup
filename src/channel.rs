@@ -1,8 +1,8 @@
 use crate::{
     constants::{
         CHANNEL_BETA_1_FILE_NAME, CHANNEL_BETA_2_FILE_NAME, CHANNEL_BETA_3_FILE_NAME,
-        CHANNEL_BETA_4_FILE_NAME, CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME,
-        DATE_FORMAT_URL_FRIENDLY, FUELUP_GH_PAGES,
+        CHANNEL_BETA_4_FILE_NAME, CHANNEL_BETA_5_FILE_NAME, CHANNEL_LATEST_FILE_NAME,
+        CHANNEL_NIGHTLY_FILE_NAME, DATE_FORMAT_URL_FRIENDLY, FUELUP_GH_PAGES,
     },
     download::{download, DownloadCfg},
     toolchain::{DistToolchainDescription, DistToolchainName},
@@ -22,6 +22,7 @@ pub const BETA_1: &str = "beta-1";
 pub const BETA_2: &str = "beta-2";
 pub const BETA_3: &str = "beta-3";
 pub const BETA_4: &str = "beta-4";
+pub const BETA_5: &str = "beta-5";
 pub const NIGHTLY: &str = "nightly";
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -43,7 +44,7 @@ pub struct Package {
 }
 
 pub fn is_beta_toolchain(name: &str) -> bool {
-    name == BETA_1 || name == BETA_2 || name == BETA_3 || name == BETA_4
+    name == BETA_1 || name == BETA_2 || name == BETA_3 || name == BETA_4 || name == BETA_5
 }
 
 fn format_nightly_url(date: &Date) -> Result<String> {
@@ -75,6 +76,7 @@ fn construct_channel_url(desc: &DistToolchainDescription) -> Result<String> {
         DistToolchainName::Beta2 => url.push_str(CHANNEL_BETA_2_FILE_NAME),
         DistToolchainName::Beta3 => url.push_str(CHANNEL_BETA_3_FILE_NAME),
         DistToolchainName::Beta4 => url.push_str(CHANNEL_BETA_4_FILE_NAME),
+        DistToolchainName::Beta5 => url.push_str(CHANNEL_BETA_5_FILE_NAME),
     };
 
     Ok(url)

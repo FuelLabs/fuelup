@@ -188,18 +188,6 @@ get_architecture() {
     _ostype="$(uname -s)"
     _cputype="$(uname -m)"
 
-    case "$_cputype" in
-        x86_64 | x86-64 | x64 | amd64)
-            _cputype="x86_64"
-            ;;
-        aarch64 | arm64)
-            _cputype="aarch64"
-            ;;
-        *)
-            err "unsupported cpu type: $_cputype"
-            ;;
-    esac
-
     _arch="${_cputype}-${_ostype}"
 
     RETVAL="$_arch"

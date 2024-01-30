@@ -1,3 +1,9 @@
+use crate::channel::{is_beta_toolchain, LATEST, NIGHTLY};
+use crate::constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE, VALID_CHANNEL_STR};
+use crate::toolchain::{DistToolchainDescription, DistToolchainName, Toolchain};
+use crate::{
+    download::DownloadCfg, file, path::get_fuel_toolchain_toml, target_triple::TargetTriple,
+};
 use anyhow::{bail, Result};
 use semver::Version;
 use serde::de::Error;
@@ -7,15 +13,8 @@ use std::fmt;
 use std::str::FromStr;
 use std::{collections::HashMap, path::PathBuf};
 use time::Date;
-use toml_edit::{de, ser, value, Document};
+use toml_edit::{de, ser, Document, Key, Table, Value};
 use tracing::{info, warn};
-
-use crate::channel::{is_beta_toolchain, LATEST, NIGHTLY};
-use crate::constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE, VALID_CHANNEL_STR};
-use crate::toolchain::{DistToolchainDescription, DistToolchainName, Toolchain};
-use crate::{
-    download::DownloadCfg, file, path::get_fuel_toolchain_toml, target_triple::TargetTriple,
-};
 
 // For composability with other functionality of fuelup, we want to add
 // additional info to OverrideCfg (representation of 'fuel-toolchain.toml').
@@ -121,11 +120,20 @@ impl ToolchainOverride {
     pub fn to_toml(&self) -> Document {
         let mut document = toml_edit::Document::new();
 
-        document["toolchain"]["channel"] = value(self.cfg.toolchain.channel.to_string());
+        let mut toolchain_table = Table::from_iter(vec![(
+            Key::from("channel"),
+            Value::from(self.cfg.toolchain.channel.to_string()),
+        )]);
+        toolchain_table.sort_values();
+        document.insert("toolchain", toml_edit::Item::Table(toolchain_table));
         if let Some(components) = &self.cfg.components {
-            for (k, v) in components.iter() {
-                document["components"][k] = value(v.to_string());
-            }
+            let mut components_table = Table::from_iter(
+                components
+                    .iter()
+                    .map(|(k, v)| (Key::from(k), Value::from(v.to_string()))),
+            );
+            components_table.sort_values();
+            document.insert("components", toml_edit::Item::Table(components_table));
         }
         document
     }

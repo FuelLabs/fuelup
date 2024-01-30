@@ -189,8 +189,8 @@ get_architecture() {
     _cputype="$(uname -m)"
 
     case "$_ostype" in
-        Linux)
-            _ostype="unknown-linux-gnu"
+        Cygwin)
+            _ostype="CYGWIN_NT-6.1-7601"
             ;;
         Darwin)
             _ostype="apple-darwin"

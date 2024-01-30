@@ -10,7 +10,7 @@ use time::Date;
 use toml_edit::{de, ser, value, Document};
 use tracing::{info, warn};
 
-use crate::channel::{is_beta_toolchain, LATEST, NIGHTLY};
+use crate::channel::{is_beta_channel, is_release_channel};
 use crate::constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE};
 use crate::toolchain::{DistToolchainDescription, Toolchain};
 use crate::{
@@ -88,7 +88,7 @@ impl fmt::Display for Channel {
 impl FromStr for Channel {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
-        if is_beta_toolchain(s) {
+        if is_beta_channel(s) {
             return Ok(Self {
                 name: s.to_string(),
                 date: None,
@@ -101,7 +101,7 @@ impl FromStr for Channel {
                 date: Date::parse(d, DATE_FORMAT).ok(),
             })
         } else {
-            if s == LATEST || s == NIGHTLY {
+            if is_release_channel(s) {
                 bail!("'{s}' without date specifier is forbidden");
             }
             bail!("Invalid str for channel: '{}'", s);
@@ -211,7 +211,7 @@ impl OverrideCfg {
 
 #[cfg(test)]
 mod tests {
-    use crate::channel::{BETA_1, BETA_2, BETA_3, NIGHTLY};
+    use crate::channel::{BETA_CHANNELS, NIGHTLY};
 
     use super::*;
 
@@ -297,9 +297,9 @@ channel = "beta-2"
 
     #[test]
     fn channel_from_str() {
-        assert!(Channel::from_str(BETA_1).is_ok());
-        assert!(Channel::from_str(BETA_2).is_ok());
-        assert!(Channel::from_str(BETA_3).is_ok());
+        BETA_CHANNELS.iter().for_each(|c| {
+            assert!(Channel::from_str(c).is_ok());
+        });
         assert!(Channel::from_str(NIGHTLY).is_err());
         assert!(Channel::from_str(LATEST).is_err());
     }

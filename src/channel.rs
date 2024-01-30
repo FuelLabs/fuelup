@@ -43,8 +43,15 @@ pub struct Package {
     pub fuels_version: Option<String>,
 }
 
-pub fn is_beta_toolchain(name: &str) -> bool {
-    name == BETA_1 || name == BETA_2 || name == BETA_3 || name == BETA_4 || name == BETA_5
+pub const BETA_CHANNELS: [&str; 5] = [BETA_1, BETA_2, BETA_3, BETA_4, BETA_5];
+pub const DIST_CHANNELS: [&str; 2] = [LATEST, NIGHTLY];
+
+pub fn is_beta_channel(name: &str) -> bool {
+    BETA_CHANNELS.contains(&name)
+}
+
+pub fn is_release_channel(name: &str) -> bool {
+    DIST_CHANNELS.contains(&name)
 }
 
 fn format_nightly_url(date: &Date) -> Result<String> {

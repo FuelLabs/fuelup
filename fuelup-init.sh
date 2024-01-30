@@ -188,18 +188,6 @@ get_architecture() {
     _ostype="$(uname -s)"
     _cputype="$(uname -m)"
 
-    case "$_ostype" in
-        Cygwin)
-            _ostype="CYGWIN_NT-6.1-7601"
-            ;;
-        Darwin)
-            _ostype="apple-darwin"
-            ;;
-        *)
-            err "unsupported os type: $_ostype"
-            ;;
-    esac
-
     case "$_cputype" in
         x86_64 | x86-64 | x64 | amd64)
             _cputype="x86_64"

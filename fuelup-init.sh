@@ -188,7 +188,7 @@ get_architecture() {
     _ostype="$(uname -s)"
     _cputype="$(uname -m)"
 
-    _arch="${_cputype}-${linux}"
+    _arch="${_cputype}-${unknown-linux-gnu}"
 
     RETVAL="$_arch"
 }

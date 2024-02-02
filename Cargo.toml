@@ -43,4 +43,5 @@ ureq = "2.4"
 members = ["component", "ci/build-channel", "ci/compare-versions"]
 
 [dev-dependencies]
+chrono = "0.4.33"
 strip-ansi-escapes = "0.2.0"

@@ -1,4 +1,5 @@
 use anyhow::Result;
+use chrono::{Duration, Utc};
 use fuelup::{channel, fmt::format_toolchain_with_target, target_triple::TargetTriple};
 
 pub mod testcfg;
@@ -6,6 +7,12 @@ use testcfg::{FuelupState, ALL_BINS, CUSTOM_TOOLCHAIN_NAME, DATE};
 
 mod expects;
 use expects::expect_files_exist;
+
+fn yesterday() -> String {
+    let current_date = Utc::now();
+    let yesterday = current_date - Duration::days(1);
+    yesterday.format("%Y-%m-%d").to_string()
+}
 
 #[test]
 fn fuelup_toolchain_install_latest() -> Result<()> {
@@ -77,7 +84,7 @@ fn fuelup_toolchain_install_malformed_date() -> Result<()> {
         let toolchain = "nightly-2022-08-31-";
         let output = cfg.fuelup(&["toolchain", "install", toolchain]);
 
-        let expected_stdout = format!("Invalid toolchain metadata within input '{toolchain}' - You specified target '': specifying a target is not supported yet.\n");
+        let expected_stdout = format!("Unknown name for toolchain: {toolchain}\n");
 
         assert!(output.status.success());
         assert_eq!(output.stdout, expected_stdout);
@@ -87,16 +94,11 @@ fn fuelup_toolchain_install_malformed_date() -> Result<()> {
 }
 
 #[test]
-fn fuelup_toolchain_install_date_target_disallowed() -> Result<()> {
+fn fuelup_toolchain_install_date_target_allowed() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let toolchain = "nightly-2022-08-31-x86_64-apple-darwin";
-        let output = cfg.fuelup(&["toolchain", "install", toolchain]);
-
-        let expected_stdout =
-            format!("Invalid toolchain metadata within input '{toolchain}' - You specified target 'x86_64-apple-darwin': specifying a target is not supported yet.\n");
-
+        let toolchain = format!("nightly-{}-x86_64-apple-darwin", yesterday());
+        let output = cfg.fuelup(&["toolchain", "install", &toolchain]);
         assert!(output.status.success());
-        assert_eq!(output.stdout, expected_stdout);
     })?;
 
     Ok(())

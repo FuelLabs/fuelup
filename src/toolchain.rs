@@ -1,14 +1,4 @@
-use anyhow::{bail, Context, Result};
-use component::{self, Components};
-use std::fmt;
-use std::fs::{remove_dir_all, remove_file};
-use std::path::PathBuf;
-use std::process::Command;
-use std::str::FromStr;
-use time::Date;
-use tracing::{error, info};
-
-use crate::channel::{self, is_beta_toolchain, Channel};
+use crate::channel::{self, Channel};
 use crate::constants::DATE_FORMAT;
 use crate::download::DownloadCfg;
 use crate::file::{hard_or_symlink_file, is_executable};
@@ -20,6 +10,16 @@ use crate::path::{
 use crate::settings::SettingsFile;
 use crate::store::Store;
 use crate::target_triple::TargetTriple;
+use anyhow::{bail, Context, Result};
+use component::{self, Components};
+use std::collections::VecDeque;
+use std::fmt;
+use std::fs::{remove_dir_all, remove_file};
+use std::path::PathBuf;
+use std::process::Command;
+use std::str::FromStr;
+use time::Date;
+use tracing::{error, info};
 
 pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
     channel::LATEST,
@@ -80,32 +80,6 @@ pub struct DistToolchainDescription {
     pub target: Option<TargetTriple>,
 }
 
-fn parse_metadata(metadata: String) -> Result<(Option<Date>, Option<TargetTriple>)> {
-    if metadata.is_empty() {
-        return Ok((None, None));
-    }
-
-    let (first, second) = metadata.split_at(std::cmp::min(10, metadata.len()));
-
-    match Date::parse(first, DATE_FORMAT) {
-        Ok(d) => {
-            if second.is_empty() {
-                Ok((Some(d), None))
-            } else {
-                let target = second.trim_start_matches('-');
-                bail!(
-                    "You specified target '{}': specifying a target is not supported yet.",
-                    target
-                );
-            }
-        }
-        Err(_) => match TargetTriple::new(&metadata) {
-            Ok(t) => Ok((None, Some(t))),
-            Err(_) => bail!("Failed to parse date or target"),
-        },
-    }
-}
-
 impl fmt::Display for DistToolchainDescription {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let target = TargetTriple::from_host().unwrap_or_default();
@@ -116,6 +90,75 @@ impl fmt::Display for DistToolchainDescription {
     }
 }
 
+#[inline]
+fn consume_back<T>(parts: &mut VecDeque<T>, number: usize) {
+    for _ in 0..number {
+        parts.pop_back();
+    }
+}
+
+/// Attempts to parse a date from the front of the parts list, returning the date and consuming the date parts if they are available
+fn extract_date(parts: &mut VecDeque<&str>) -> Option<Date> {
+    let len = parts.len();
+    if len < 3 {
+        return None;
+    }
+
+    let date_str = format!("{}-{}-{}", parts[len - 3], parts[len - 2], parts[len - 1]);
+    match Date::parse(&date_str, DATE_FORMAT) {
+        Ok(d) => {
+            consume_back(parts, 3);
+            Some(d)
+        }
+        Err(_) => None,
+    }
+}
+
+/// Attemps to parse the target from a vector of parts, returning the target and consuming the target parts if they are available
+fn extract_target(parts: &mut VecDeque<&str>) -> Option<TargetTriple> {
+    if parts.len() < 3 {
+        return None;
+    }
+
+    let len = parts.len();
+    let target_str = format!("{}-{}-{}", parts[len - 3], parts[len - 2], parts[len - 1]);
+    match TargetTriple::new(&target_str) {
+        Ok(t) => {
+            consume_back(parts, 3);
+            Some(t)
+        }
+        Err(_) => {
+            if parts.len() < 4 {
+                return None;
+            }
+
+            let target_str = format!(
+                "{}-{}-{}-{}",
+                parts[len - 4],
+                parts[len - 3],
+                parts[len - 2],
+                parts[len - 1]
+            );
+            match TargetTriple::new(&target_str) {
+                Ok(t) => {
+                    consume_back(parts, 4);
+                    Some(t)
+                }
+                Err(_) => None,
+            }
+        }
+    }
+}
+
+/// A toolchain that is distributable and how parse it
+///
+/// The supported formats are pretty match
+///     <name>-<date>-<target>
+///     <name>-<target>-<date>
+///     <name>-<target>
+///     <name>-<date>
+///      <name>
+/// The parsing begings from the end of the string, so the target is the last part of the string, then the date and finally the name
 impl FromStr for DistToolchainDescription {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
@@ -123,32 +166,33 @@ impl FromStr for DistToolchainDescription {
             bail!("Invalid distributable toolchain name '{}'", s);
         }
 
-        let (name, metadata) = s.split_once('-').unwrap_or((s, ""));
-
-        if metadata.is_empty() {
-            Ok(Self {
-                name: DistToolchainName::from_str(name)?,
-                date: None,
+        let mut parts = s.split('-').collect::<VecDeque<_>>();
+        match parts.len() {
+            1 => Ok(Self {
+                name: DistToolchainName::from_str(parts[0])?,
                 target: TargetTriple::from_host().ok(),
-            })
-        } else {
-            match parse_metadata(metadata.to_string()) {
-                Ok((date, target)) => Ok(Self {
-                    name: DistToolchainName::from_str(name)?,
+                date: None,
+            }),
+            _ => {
+                let date = extract_date(&mut parts);
+                let target = extract_target(&mut parts);
+                let date = if date.is_none() && target.is_some() {
+                    // if date is not present but target is, then the date is the last part of the name could be date, so we try to parse it
+                    extract_date(&mut parts)
+                } else {
+                    date
+                };
+
+                let name = parts.into_iter().collect::<Vec<_>>().join("-");
+                Ok(Self {
+                    name: DistToolchainName::from_str(&name)?,
                     date,
-                    target,
-                }),
-                Err(e) => {
-                    if is_beta_toolchain(s) {
-                        Ok(Self {
-                            name: DistToolchainName::from_str(s)?,
-                            date: None,
-                            target: TargetTriple::from_host().ok(),
-                        })
+                    target: if target.is_none() {
+                        TargetTriple::from_host().ok()
                     } else {
-                        bail!("Invalid toolchain metadata within input '{}' - {}", s, e)
-                    }
-                }
+                        target
+                    },
+                })
             }
         }
     }
@@ -404,7 +448,6 @@ mod tests {
 
     const DATE: &str = "2022-08-29";
     const DATE_TARGET_APPLE: &str = "2022-08-29-x86_64-apple-darwin";
-
     const TARGET_X86_APPLE: &str = "x86_64-apple-darwin";
     const TARGET_ARM_APPLE: &str = "aarch64-apple-darwin";
     const TARGET_X86_LINUX: &str = "x86_64-unknown-linux-gnu";
@@ -439,7 +482,7 @@ mod tests {
 
         assert_eq!(desc.name, DistToolchainName::from_str("nightly").unwrap());
         assert_eq!(desc.date.unwrap().to_string(), DATE);
-        assert_eq!(desc.target, None);
+        assert!(desc.target.is_some()); // the parser will autopopulate with `from_host`.
 
         Ok(())
     }
@@ -453,15 +496,13 @@ mod tests {
             TARGET_X86_LINUX,
         ] {
             let toolchain = format!("{}-{}-{}", channel::NIGHTLY.to_owned(), DATE, target);
-            assert!(DistToolchainDescription::from_str(&toolchain).is_err());
-            // TODO: Uncomment once target specification is supported
-            // see issue #237: https://github.com/FuelLabs/fuelup/issues/237
-            // assert_eq!(
-            //     desc.name,
-            //     DistToolchainName::from_str(channel::NIGHTLY).unwrap()
-            // );
-            // assert_eq!(desc.date.unwrap().to_string(), DATE);
-            // assert_eq!(desc.target.unwrap().to_string(), target);
+            let desc = DistToolchainDescription::from_str(&toolchain).unwrap();
+            assert_eq!(
+                desc.name,
+                DistToolchainName::from_str(channel::NIGHTLY).unwrap()
+            );
+            assert_eq!(desc.date.unwrap().to_string(), DATE);
+            assert_eq!(desc.target.unwrap().to_string(), target);
         }
 
         Ok(())
@@ -489,28 +530,21 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_metadata_date() -> Result<()> {
-        let (date, _) = parse_metadata(DATE.to_string())?;
-        assert_eq!(DATE, date.unwrap().to_string());
-        Ok(())
-    }
-
-    #[test]
     fn test_parse_metadata_date_target() -> Result<()> {
-        assert!(parse_metadata(DATE_TARGET_APPLE.to_string()).is_err());
-        // TODO: Uncomment once target specification is supported
-        // see issue #237: https://github.com/FuelLabs/fuelup/issues/237
-        //assert_eq!(DATE, date.unwrap().to_string());
-        //assert_eq!(TARGET_X86_APPLE, target.unwrap().to_string());
+        assert!(
+            DistToolchainDescription::from_str(&format!("nightly-{}", DATE_TARGET_APPLE)).is_ok()
+        );
         Ok(())
     }
 
     #[test]
-    fn test_parse_metadata_should_fail() -> Result<()> {
-        const INPUTS: &[&str] = &["2022", "2022-8-1", "2022-8", "2022-8-x86_64-apple-darwin"];
-        for input in INPUTS {
-            assert!(parse_metadata(input.to_string()).is_err());
-        }
-        Ok(())
+    fn test_parse_name_apple() {
+        let desc = DistToolchainDescription::from_str("beta-3-x86_64-apple-darwin").unwrap();
+        assert_eq!(desc.name, DistToolchainName::from_str("beta-3").unwrap());
+        assert_eq!(desc.date, None);
+        assert_eq!(
+            desc.target,
+            Some(TargetTriple::new("x86_64-apple-darwin").unwrap())
+        );
     }
 }

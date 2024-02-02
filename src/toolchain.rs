@@ -29,6 +29,7 @@ pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
     channel::BETA_4,
     channel::BETA_5,
     channel::NIGHTLY,
+    // Stable is reserved, although currently unused.
     channel::STABLE,
 ];
 
@@ -150,14 +151,14 @@ fn extract_target(parts: &mut VecDeque<&str>) -> Option<TargetTriple> {
     }
 }
 
-/// A toolchain that is distributable and how parse it
+/// Parses a distributable toolchain description from a string.
 ///
-/// The supported formats are pretty match
-///     <name>-<date>-<target>
-///     <name>-<target>-<date>
-///     <name>-<target>
-///     <name>-<date>
-///      <name>
+/// The supported formats are:
+///     <channel>
+///     <channel>-<target>
+///     <channel>-<YYYY-MM-DD>
+///     <channel>-<YYYY-MM-DD>-<target>
+///     <channel>-<target>-<YYYY-MM-DD>
 /// The parsing begings from the end of the string, so the target is the last part of the string, then the date and finally the name
 impl FromStr for DistToolchainDescription {
     type Err = anyhow::Error;
@@ -444,107 +445,180 @@ impl Toolchain {
 
 #[cfg(test)]
 mod tests {
+    use crate::channel::{CHANNELS, STABLE, NIGHTLY};
+
     use super::*;
 
     const DATE: &str = "2022-08-29";
-    const DATE_TARGET_APPLE: &str = "2022-08-29-x86_64-apple-darwin";
+    const INVALID_DATES: [&str; 5] = [
+        "2022-08-2",
+        "2022-08-299",
+        "22-08-29",
+        "2022-08",
+        "2022-08-",
+    ];
+    const INVALID_CHANNELS: [&str; 4] = [
+        "latest-",
+        "latest-2",
+        "nightly-toolchain",
+        STABLE,
+    ];
     const TARGET_X86_APPLE: &str = "x86_64-apple-darwin";
     const TARGET_ARM_APPLE: &str = "aarch64-apple-darwin";
     const TARGET_X86_LINUX: &str = "x86_64-unknown-linux-gnu";
     const TARGET_ARM_LINUX: &str = "aarch64-unknown-linux-gnu";
+    const TARGETS: [&str; 4] = [
+        TARGET_ARM_APPLE,
+        TARGET_ARM_LINUX,
+        TARGET_X86_APPLE,
+        TARGET_X86_LINUX,
+    ];
 
     #[test]
-    fn test_parse_name() -> Result<()> {
-        for name in [channel::LATEST, channel::NIGHTLY] {
-            let desc = DistToolchainDescription::from_str(name)?;
-            assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
+    fn test_parse_description_from_channel() {
+        for channel in CHANNELS {
+            let desc = DistToolchainDescription::from_str(channel).expect("desc");
+            assert_eq!(desc.name, DistToolchainName::from_str(channel).unwrap());
             assert_eq!(desc.date, None);
             assert_eq!(desc.target, Some(TargetTriple::from_host().unwrap()));
         }
-
-        Ok(())
     }
 
     #[test]
-    fn test_parse_name_should_fail() -> Result<()> {
-        let inputs = ["latest-2", "nightly-toolchain"];
-        for name in inputs {
-            assert!(DistToolchainDescription::from_str(name).is_err());
+    fn test_parse_description_from_target_error() {
+        for target in TARGETS {
+            DistToolchainDescription::from_str(target).expect_err("target");
         }
-
-        Ok(())
     }
 
     #[test]
-    fn test_parse_nightly_date() -> Result<()> {
-        let toolchain = format!("{}-{}", channel::NIGHTLY.to_owned(), DATE);
-        let desc = DistToolchainDescription::from_str(&toolchain).unwrap();
+    fn test_parse_description_from_date_error() {
+        DistToolchainDescription::from_str(DATE).expect_err("date");
 
-        assert_eq!(desc.name, DistToolchainName::from_str("nightly").unwrap());
-        assert_eq!(desc.date.unwrap().to_string(), DATE);
-        assert!(desc.target.is_some()); // the parser will autopopulate with `from_host`.
-
-        Ok(())
-    }
-
-    #[test]
-    fn test_parse_nightly_date_target() -> Result<()> {
-        for target in [
-            TARGET_ARM_APPLE,
-            TARGET_ARM_LINUX,
-            TARGET_X86_APPLE,
-            TARGET_X86_LINUX,
-        ] {
-            let toolchain = format!("{}-{}-{}", channel::NIGHTLY.to_owned(), DATE, target);
-            let desc = DistToolchainDescription::from_str(&toolchain).unwrap();
-            assert_eq!(
-                desc.name,
-                DistToolchainName::from_str(channel::NIGHTLY).unwrap()
-            );
-            assert_eq!(desc.date.unwrap().to_string(), DATE);
-            assert_eq!(desc.target.unwrap().to_string(), target);
+        for date in INVALID_DATES {
+            DistToolchainDescription::from_str(date).expect_err("invalid date");
         }
-
-        Ok(())
     }
 
     #[test]
-    fn test_parse_name_target() -> Result<()> {
-        for target in [
-            TARGET_ARM_APPLE,
-            TARGET_ARM_LINUX,
-            TARGET_X86_APPLE,
-            TARGET_X86_LINUX,
-        ] {
-            for name in [channel::LATEST, channel::NIGHTLY] {
-                let toolchain = name.to_owned() + "-" + target;
-                let desc = DistToolchainDescription::from_str(&toolchain).unwrap();
-
-                assert_eq!(desc.name, DistToolchainName::from_str(name).unwrap());
-                assert!(desc.date.is_none());
-                assert_eq!(desc.target.unwrap().to_string(), target);
+    fn test_parse_description_channel_target() {
+        for channel in CHANNELS {
+            for target in TARGETS {
+                let desc_string = format!("{}-{}", channel, target);
+                let desc = DistToolchainDescription::from_str(&desc_string).expect("desc");
+                assert_eq!(desc.name, DistToolchainName::from_str(channel).unwrap());
+                assert_eq!(desc.date, None);
+                assert_eq!(desc.target.unwrap().to_string(), target.to_string());
             }
         }
-
-        Ok(())
     }
 
     #[test]
-    fn test_parse_metadata_date_target() -> Result<()> {
-        assert!(
-            DistToolchainDescription::from_str(&format!("nightly-{}", DATE_TARGET_APPLE)).is_ok()
-        );
-        Ok(())
+    fn test_parse_description_channel_date() {
+        let target = TargetTriple::from_host().unwrap();
+        for channel in CHANNELS {
+            let desc_string = format!("{}-{}", channel, DATE);
+            let desc = DistToolchainDescription::from_str(&desc_string).expect("desc");
+            assert_eq!(desc.name, DistToolchainName::from_str(channel).unwrap());
+            assert_eq!(desc.date.unwrap().to_string(), DATE);
+            assert_eq!(desc.target.unwrap(), target);
+        }
     }
 
     #[test]
-    fn test_parse_name_apple() {
-        let desc = DistToolchainDescription::from_str("beta-3-x86_64-apple-darwin").unwrap();
-        assert_eq!(desc.name, DistToolchainName::from_str("beta-3").unwrap());
-        assert_eq!(desc.date, None);
-        assert_eq!(
-            desc.target,
-            Some(TargetTriple::new("x86_64-apple-darwin").unwrap())
-        );
+    fn test_parse_description_channel_invalid_date_error() {
+        for channel in CHANNELS {
+            for date in INVALID_DATES {
+                let desc_string = format!("{}-{}", channel, date);
+                DistToolchainDescription::from_str(&desc_string).expect_err("invalid date");
+            }
+        }
+    }
+
+    #[test]
+    fn test_parse_description_date_channel_error() {
+        for channel in CHANNELS {
+            let desc_string = format!("{}-{}", DATE, channel);
+            DistToolchainDescription::from_str(&desc_string).expect_err("date channel");
+        }
+    }
+
+    #[test]
+    fn test_parse_description_date_target_error() {
+        for target in TARGETS {
+            let desc_string = format!("{}-{}", DATE, target);
+            DistToolchainDescription::from_str(&desc_string).expect_err("date target");
+        }
+    }
+
+    #[test]
+    fn test_parse_description_target_channel_error() {
+        for target in TARGETS {
+            for channel in CHANNELS {
+                let desc_string = format!("{}-{}", target, channel);
+                DistToolchainDescription::from_str(&desc_string).expect_err("target channel");
+            }
+        }
+    }
+
+    #[test]
+    fn test_parse_description_target_date_error() {
+        for target in TARGETS {
+            let desc_string = format!("{}-{}", target, DATE);
+            DistToolchainDescription::from_str(&desc_string).expect_err("target date");
+        }
+    }
+
+    #[test]
+    fn test_parse_description_channel_target_date() {
+        for channel in CHANNELS {
+            for target in TARGETS {
+                let desc_string = format!("{}-{}-{}", channel, target, DATE);
+                let desc = DistToolchainDescription::from_str(&desc_string).expect("desc");
+                assert_eq!(desc.name, DistToolchainName::from_str(channel).unwrap());
+                assert_eq!(desc.date.unwrap().to_string(), DATE);
+                assert_eq!(desc.target.unwrap().to_string(), target.to_string());
+            }
+        }
+    }
+
+    #[test]
+    fn test_parse_description_channel_date_target() {
+        for channel in CHANNELS {
+            for target in TARGETS {
+                let desc_string = format!("{}-{}-{}", channel, DATE, target);
+                let desc =
+                    DistToolchainDescription::from_str(&desc_string).expect("channel date target");
+                assert_eq!(desc.name, DistToolchainName::from_str(channel).unwrap());
+                assert_eq!(desc.date.unwrap().to_string(), DATE);
+                assert_eq!(desc.target.unwrap().to_string(), target.to_string());
+            }
+        }
+    }
+
+    #[test]
+    fn test_parse_description_channel_target_date_error() {
+        for channel in CHANNELS {
+            for target in TARGETS {
+                let desc_string = format!("{}-{}-{}", target, channel, DATE);
+                DistToolchainDescription::from_str(&desc_string).expect_err("target channel date");
+
+                let desc_string = format!("{}-{}-{}", target, DATE, channel);
+                DistToolchainDescription::from_str(&desc_string).expect_err("target date channel");
+
+                let desc_string = format!("{}-{}-{}", DATE, channel, target);
+                DistToolchainDescription::from_str(&desc_string).expect_err("date channel target");
+
+                let desc_string = format!("{}-{}-{}", DATE, target, channel);
+                DistToolchainDescription::from_str(&desc_string).expect_err("date target channel");
+            }
+        }
+    }
+
+    #[test]
+    fn test_parse_description_invalid_channel_error() {
+        for channel in INVALID_CHANNELS {
+            DistToolchainDescription::from_str(channel).expect_err("invalid channel");
+        }
     }
 }

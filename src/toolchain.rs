@@ -445,7 +445,7 @@ impl Toolchain {
 
 #[cfg(test)]
 mod tests {
-    use crate::channel::{CHANNELS, STABLE, NIGHTLY};
+    use crate::channel::{CHANNELS, STABLE};
 
     use super::*;
 
@@ -457,12 +457,7 @@ mod tests {
         "2022-08",
         "2022-08-",
     ];
-    const INVALID_CHANNELS: [&str; 4] = [
-        "latest-",
-        "latest-2",
-        "nightly-toolchain",
-        STABLE,
-    ];
+    const INVALID_CHANNELS: [&str; 4] = ["latest-", "latest-2", "nightly-toolchain", STABLE];
     const TARGET_X86_APPLE: &str = "x86_64-apple-darwin";
     const TARGET_ARM_APPLE: &str = "aarch64-apple-darwin";
     const TARGET_X86_LINUX: &str = "x86_64-unknown-linux-gnu";

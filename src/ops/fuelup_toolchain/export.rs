@@ -78,7 +78,7 @@ pub fn export(command: ExportCommand, mut reader: impl BufRead) -> Result<()> {
             }
         }
     }
-    let mut export_channel = channel.unwrap_or(toolchain_name.clone());
+    let mut export_channel = channel.unwrap_or(export_toolchain.name);
     if toolchain_override::Channel::from_str(&export_channel).is_err() {
         println_warning(&format!(
             "Invalid channel '{}', expected one of {}. \
@@ -169,7 +169,8 @@ fuel-core = "0.17.11"
         };
 
         if toolchain_path.exists() {
-            fs::remove_file(&toolchain_path).expect(&format!("remove file {:?}", toolchain_path));
+            fs::remove_file(&toolchain_path)
+                .unwrap_or_else(|_| panic!("remove file {:?}", toolchain_path));
         }
     }
     fn create_toolchain_info() {
@@ -178,11 +179,9 @@ fuel-core = "0.17.11"
             None => PathBuf::from(FUEL_TOOLCHAIN_TOML_FILE),
         };
 
-        let _ =
-            fs::create_dir_all(toolchain_path.parent().unwrap()).expect("create parent directory");
+        fs::create_dir_all(toolchain_path.parent().unwrap()).expect("create parent directory");
 
-        std::fs::write(toolchain_path, NO_COMPONENTS_FILE_CONTENTS.to_string())
-            .expect("write toolchain file");
+        std::fs::write(toolchain_path, NO_COMPONENTS_FILE_CONTENTS).expect("write toolchain file");
     }
 
     fn assert_toolchain_info(expected_toml: &str) {

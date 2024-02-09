@@ -44,6 +44,7 @@ ureq = "2.4"
 members = ["component", "ci/build-channel", "ci/compare-versions"]
 
 [dev-dependencies]
+chrono = "0.4.33"
 pretty_assertions = "1.4.0"
 serial_test = "3.0.0"
 strip-ansi-escapes = "0.2.0"

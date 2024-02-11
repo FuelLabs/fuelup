@@ -24,6 +24,7 @@ pub const BETA_3: &str = "beta-3";
 pub const BETA_4: &str = "beta-4";
 pub const BETA_5: &str = "beta-5";
 pub const NIGHTLY: &str = "nightly";
+pub const CHANNELS: [&str; 7] = [LATEST, NIGHTLY, BETA_1, BETA_2, BETA_3, BETA_4, BETA_5];
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct HashedBinary {

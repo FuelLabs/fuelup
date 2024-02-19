@@ -2,10 +2,8 @@ use anyhow::Result;
 use component::{self, Components};
 use semver::Version;
 use std::collections::HashMap;
-
 use std::str::FromStr;
 use tracing::info;
-
 use crate::file::get_bin_version;
 use crate::fmt::bold;
 use crate::store::Store;

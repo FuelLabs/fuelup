@@ -29,7 +29,7 @@ pub fn self_update(force: bool) -> Result<()> {
 
     if !force && get_bin_version(&fuelup_bin) == Some(download_cfg.version.clone()) {
         info!(
-            "fuelup is already up to date at version {}",
+            "Already up to date (fuelup v{})",
             download_cfg.version.to_string()
         );
         return Ok(());

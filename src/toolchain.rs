@@ -436,7 +436,7 @@ impl Toolchain {
         Components::collect_publishables()?
             .into_iter()
             .filter(|component| self.has_component(&component.name))
-            .map(|component| {
+            .filter_map(|component| {
                 let exec_path = self.bin_path.join(&component.name);
                 if let Ok(o) = std::process::Command::new(exec_path)
                     .arg("--version")
@@ -450,7 +450,6 @@ impl Toolchain {
                     None
                 }
             })
-            .flatten()
             .for_each(|p| {
                 let _ = remove_dir_all(p);
             });

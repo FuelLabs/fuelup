@@ -12,12 +12,12 @@ use ansiterm::Color;
 use anyhow::Result;
 use component::{self, Components};
 use semver::Version;
+use std::collections::HashMap;
 use std::str::FromStr;
 use std::{
     cmp::Ordering::{Equal, Greater, Less},
     path::Path,
 };
-use std::{collections::HashMap};
 use tracing::{error, info};
 
 fn collect_package_versions(channel: Channel) -> HashMap<String, Version> {

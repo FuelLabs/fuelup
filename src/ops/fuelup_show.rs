@@ -1,4 +1,4 @@
-use anyhow::{Result};
+use anyhow::Result;
 use component::{self, Components};
 use semver::Version;
 use std::collections::HashMap;

@@ -98,7 +98,8 @@ fn consume_back<T>(parts: &mut VecDeque<T>, number: usize) {
     }
 }
 
-/// Attempts to parse a date from the front of the parts list, returning the date and consuming the date parts if they are available
+/// Attempts to parse a date from the front of the parts list, returning the date and consuming the
+/// date parts if they are available
 fn extract_date(parts: &mut VecDeque<&str>) -> Option<Date> {
     let len = parts.len();
     if len < 3 {
@@ -115,7 +116,8 @@ fn extract_date(parts: &mut VecDeque<&str>) -> Option<Date> {
     }
 }
 
-/// Attemps to parse the target from a vector of parts, returning the target and consuming the target parts if they are available
+/// Attemps to parse the target from a vector of parts, returning the target and consuming the
+/// target parts if they are available
 fn extract_target(parts: &mut VecDeque<&str>) -> Option<TargetTriple> {
     if parts.len() < 3 {
         return None;
@@ -159,7 +161,8 @@ fn extract_target(parts: &mut VecDeque<&str>) -> Option<TargetTriple> {
 ///     <channel>-<YYYY-MM-DD>
 ///     <channel>-<YYYY-MM-DD>-<target>
 ///     <channel>-<target>-<YYYY-MM-DD>
-/// The parsing begings from the end of the string, so the target is the last part of the string, then the date and finally the name
+/// The parsing begings from the end of the string, so the target is the last part of the string,
+/// then the date and finally the name
 impl FromStr for DistToolchainDescription {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
@@ -178,7 +181,8 @@ impl FromStr for DistToolchainDescription {
                 let date = extract_date(&mut parts);
                 let target = extract_target(&mut parts);
                 let date = if date.is_none() && target.is_some() {
-                    // if date is not present but target is, then the date is the last part of the name could be date, so we try to parse it
+                    // if date is not present but target is, then the date is the last part of the
+                    // name could be date, so we try to parse it
                     extract_date(&mut parts)
                 } else {
                     date
@@ -312,14 +316,14 @@ impl Toolchain {
 
         let store = Store::from_env()?;
 
-        info!(
-            "\nAdding component {} v{} to '{}'",
-            &download_cfg.name, &download_cfg.version, self.name
-        );
-
         if !store.has_component(&download_cfg.name, &download_cfg.version)
             || !self.has_component(&download_cfg.name)
         {
+            info!(
+                "\nAdding component {} v{} to '{}'",
+                &download_cfg.name, &download_cfg.version, self.name
+            );
+
             match store.install_component(&download_cfg) {
                 Ok(downloaded) => {
                     for bin in downloaded {
@@ -354,6 +358,11 @@ impl Toolchain {
                     e
                 ),
             }
+
+            info!(
+                "Installed {} v{} for toolchain '{}'",
+                download_cfg.name, download_cfg.version, self.name
+            );
         } else {
             // We have to iterate here because `fuelup component add forc` has to account for
             // other built-in plugins as well, eg. forc-fmt
@@ -370,11 +379,6 @@ impl Toolchain {
                 }
             }
         };
-
-        info!(
-            "Installed {} v{} for toolchain '{}'",
-            download_cfg.name, download_cfg.version, self.name
-        );
 
         Ok(download_cfg)
     }

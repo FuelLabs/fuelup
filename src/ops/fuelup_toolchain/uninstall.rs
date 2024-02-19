@@ -36,8 +36,9 @@ pub fn uninstall(command: UninstallCommand) -> Result<()> {
                 }
 
                 error!(
-                "Could not set default toolchain after uninstallation of currently used toolchain. 
-                Please run `fuelup default <toolchain>` to manually switch your current toolchain."
+                    "{}\r\t{}",
+                    "Could not set default toolchain after uninstallation of currently used toolchain",
+                    "Please run `fuelup default <toolchain>` to manually switch your current toolchain."
                 )
             }
         }

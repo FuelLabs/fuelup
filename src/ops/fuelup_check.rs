@@ -3,6 +3,7 @@ use crate::{
     commands::check::CheckCommand,
     config::Config,
     download::DownloadCfg,
+    file::get_bin_version,
     fmt::{bold, colored_bold},
     target_triple::TargetTriple,
     toolchain::{DistToolchainDescription, Toolchain},
@@ -16,7 +17,7 @@ use std::{
     cmp::Ordering::{Equal, Greater, Less},
     path::Path,
 };
-use std::{collections::HashMap, process::Command};
+use std::{collections::HashMap};
 use tracing::{error, info};
 
 fn collect_package_versions(channel: Channel) -> HashMap<String, Version> {
@@ -56,34 +57,17 @@ fn format_version_comparison(current_version: &Version, latest_version: &Version
 }
 
 fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version) -> Result<()> {
-    match std::process::Command::new(plugin_executable)
-        .arg("--version")
-        .output()
-    {
-        Ok(o) => {
-            let output = String::from_utf8_lossy(&o.stdout).into_owned();
-            match output.split_whitespace().last() {
-                Some(v) => {
-                    let version = Version::parse(v)?;
-                    info!(
-                        "{:>4}- {} - {}",
-                        "",
-                        bold(plugin),
-                        format_version_comparison(&version, latest_version)
-                    );
-                }
-                None => {
-                    info!("{:>4}- {} - Error getting version string", "", plugin);
-                }
-            };
+    match get_bin_version(plugin_executable) {
+        Some(version) => {
+            info!(
+                "{:>4}- {} - {}",
+                "",
+                bold(plugin),
+                format_version_comparison(&version, latest_version)
+            );
         }
-        Err(e) => {
-            let error_text = if plugin_executable.exists() {
-                format!("execution error - {e}")
-            } else {
-                "not found".into()
-            };
-            info!("{:>4}- {} - {}", "", bold(plugin), error_text);
+        None => {
+            info!("{:>4}- {} - Error getting version string", "", plugin);
         }
     }
     Ok(())
@@ -121,36 +105,23 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
     for component in Components::collect_exclude_plugins()? {
         if let Some(latest_version) = latest_package_versions.get(&component.name) {
             let component_executable = toolchain.bin_path.join(&component.name);
-            match Command::new(component_executable).arg("--version").output() {
-                Ok(o) => {
-                    let output = String::from_utf8_lossy(&o.stdout).into_owned();
-
-                    match output.split_whitespace().last() {
-                        Some(v) => {
-                            let version = Version::parse(v)?;
-                            info!(
-                                "{:>2}{} - {}",
-                                "",
-                                bold(&component.name),
-                                format_version_comparison(&version, latest_version)
-                            );
-                        }
-                        None => {
-                            error!(
-                                "{:>2}{} - Error getting version string",
-                                "",
-                                bold(&component.name)
-                            );
-                        }
-                    }
+            match get_bin_version(&component_executable) {
+                Some(version) => {
+                    info!(
+                        "{:>2}{} - {}",
+                        "",
+                        bold(&component.name),
+                        format_version_comparison(&version, latest_version)
+                    );
                 }
-                Err(_) => error!(
-                    "{:>2}{} - Error getting version string",
-                    "",
-                    bold(&component.name)
-                ),
-            };
-
+                None => {
+                    error!(
+                        "{:>2}{} - Error getting version string",
+                        "",
+                        bold(&component.name)
+                    );
+                }
+            }
             if verbose && component.name == component::FORC {
                 for plugin in component::Components::collect_plugins()? {
                     if !plugin.is_main_executable() {

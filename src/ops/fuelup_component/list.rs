@@ -1,9 +1,9 @@
 use crate::{
-    commands::component::ListCommand, download::get_latest_version, fmt::bold, toolchain::Toolchain,
+    commands::component::ListCommand, download::get_latest_version, file::get_bin_version,
+    fmt::bold, toolchain::Toolchain,
 };
 use anyhow::Result;
 use component::Components;
-use semver::Version;
 use std::fmt::Write;
 use tracing::info;
 
@@ -46,20 +46,7 @@ pub fn list(_command: ListCommand) -> Result<()> {
         );
         if toolchain.has_component(&component.name) {
             let exec_path = toolchain.bin_path.join(&component.name);
-
-            let current_version = if let Ok(o) = std::process::Command::new(exec_path)
-                .arg("--version")
-                .output()
-            {
-                let output = String::from_utf8_lossy(&o.stdout).into_owned();
-                output.split_whitespace().last().map_or_else(
-                    || None,
-                    |v| Version::parse(v).map_or_else(|_| None, |v| Some(v.to_string())),
-                )
-            } else {
-                None
-            };
-
+            let current_version = get_bin_version(&exec_path).map(|v| v.to_string());
             let version_info = match Some(&latest_version) == current_version.as_ref() {
                 true => "up-to-date".to_string(),
                 false => format!("latest: {}", &latest_version),

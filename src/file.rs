@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use semver::Version;
 use std::fs;
 use std::io;
 use std::os::unix::fs::PermissionsExt;
@@ -7,6 +8,21 @@ use std::path::Path;
 #[cfg(unix)]
 pub(crate) fn is_executable(file: &Path) -> bool {
     file.is_file() && file.metadata().unwrap().permissions().mode() & 0o111 != 0
+}
+
+pub(crate) fn get_bin_version(exec_path: &Path) -> Option<Version> {
+    if let Ok(o) = std::process::Command::new(exec_path)
+        .arg("--version")
+        .output()
+    {
+        let output = String::from_utf8_lossy(&o.stdout).into_owned();
+        output
+            .split_whitespace()
+            .last()
+            .map_or_else(|| None, |v| Version::parse(v).ok())
+    } else {
+        None
+    }
 }
 
 pub(crate) fn hardlink(original: &Path, link: &Path) -> io::Result<()> {

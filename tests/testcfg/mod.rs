@@ -36,19 +36,23 @@ pub enum FuelupState {
     NightlyAndNightlyDateInstalled,
     /// Inits a state with only the `beta-1` toolchain.
     Beta1Installed,
-    /// Inits a state with the `latest` toolchain, with `beta-1` declared within fuel-toolchain.toml.
+    /// Inits a state with the `latest` toolchain, with `beta-1` declared within
+    /// fuel-toolchain.toml.
     LatestWithBetaOverride,
 }
 
 #[derive(Debug)]
 pub struct TestCfg {
-    /// The path to the test environment's fuelup executable. This should usually be <TMP_DIR>/.fuelup/bin/fuelup.
-    /// This should be used to execute fuelup in the test environment.
+    /// The path to the test environment's fuelup executable. This should usually be
+    /// <TMP_DIR>/.fuelup/bin/fuelup. This should be used to execute fuelup in the test
+    /// environment.
     pub fuelup_path: PathBuf,
-    /// The path to the test environment's fuelup/bin directory. This should usually be <TMP_DIR>/.fuelup/bin/.
-    /// This should be used to execute other binaries (eg. forc) in the test environment.
+    /// The path to the test environment's fuelup/bin directory. This should usually be
+    /// <TMP_DIR>/.fuelup/bin/. This should be used to execute other binaries (eg. forc) in the
+    /// test environment.
     pub fuelup_bin_dirpath: PathBuf,
-    /// The path to the test environment's home. This should usually be a created tempfile::tempdir::TempDir.
+    /// The path to the test environment's home. This should usually be a created
+    /// tempfile::tempdir::TempDir.
     pub home: PathBuf,
 }
 

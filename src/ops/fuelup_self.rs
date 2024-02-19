@@ -18,7 +18,7 @@ pub fn attempt_install_self(download_cfg: DownloadCfg, dst: &Path) -> Result<()>
     Ok(())
 }
 
-pub fn self_update() -> Result<()> {
+pub fn self_update(force: bool) -> Result<()> {
     let download_cfg = DownloadCfg::new(
         component::FUELUP,
         TargetTriple::from_component(component::FUELUP)?,
@@ -27,7 +27,7 @@ pub fn self_update() -> Result<()> {
 
     let fuelup_bin = fuelup_bin();
 
-    if get_bin_version(&fuelup_bin) == Some(download_cfg.version.clone()) {
+    if !force && get_bin_version(&fuelup_bin) == Some(download_cfg.version.clone()) {
         info!(
             "fuelup is already up to date at version {}",
             download_cfg.version.to_string()

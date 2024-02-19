@@ -81,7 +81,7 @@ pub fn show() -> Result<()> {
                 version_map.insert(component.name.clone(), version.clone());
                 format!("{}", version)
             }
-            None => "".to_owned(),
+            None => "not found".to_owned(),
         };
 
         info!("{:>2}{} : {}", "", bold(&component.name), version_text);
@@ -98,7 +98,7 @@ pub fn show() -> Result<()> {
                                 version_map.insert(executable.clone(), version.clone());
                                 format!("{}", version)
                             }
-                            None => "".to_owned(),
+                            None => "not found".to_owned(),
                         };
                         info!("{:>6}- {} : {}", "", bold(executable), version_text);
                     }
@@ -109,7 +109,7 @@ pub fn show() -> Result<()> {
                             version_map.insert(plugin.name.clone(), version.clone());
                             format!("{}", version)
                         }
-                        None => "".to_owned(),
+                        None => "not found".to_owned(),
                     };
                     info!("{:>4}- {} : {}", "", bold(&plugin.name), version_text);
                 }

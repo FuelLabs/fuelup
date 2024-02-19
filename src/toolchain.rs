@@ -308,7 +308,7 @@ impl Toolchain {
         let fuelup_bin = fuelup_bin();
         if !fuelup_bin.is_file() {
             info!("fuelup not found - attempting to self update");
-            match self_update() {
+            match self_update(true) {
                 Ok(()) => info!("fuelup installed."),
                 Err(e) => bail!("Could not install fuelup: {}", e),
             };

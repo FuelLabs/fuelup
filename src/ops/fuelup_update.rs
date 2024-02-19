@@ -8,7 +8,7 @@ use crate::{
 use ansiterm::Color;
 use anyhow::{bail, Result};
 use std::str::FromStr;
-use tracing::info;
+use tracing::{error, info};
 
 const UPDATED: &str = "updated";
 const PARTIALLY_UPDATED: &str = "partially updated";
@@ -19,6 +19,13 @@ pub fn update() -> Result<()> {
     let mut summary: Vec<(String, String)> = Vec::with_capacity(toolchains.len());
 
     warn_existing_fuel_executables()?;
+
+    if toolchains.is_empty() {
+        error!(
+            "Could find any toolchain. Please run `fuelup default <toolchain>` to install toolchains first."
+        );
+        return Ok(());
+    }
 
     for toolchain in toolchains {
         let mut installed_bins = String::new();

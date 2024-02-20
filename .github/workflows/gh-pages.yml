@@ -20,6 +20,10 @@ jobs:
                   
       - run: mdbook build docs
 
+      # This lets us install the script directly from https://install.fuel.network/
+      - name: Copy fuelup_init.sh to index.html
+        run: cp fuelup_init.sh docs/book/index.html
+        
       - name: Deploy master
         uses: peaceiris/actions-gh-pages@v3
         with:

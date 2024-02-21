@@ -1,0 +1,97 @@
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/7982514092"
+date = "2024-02-21"
+
+[pkg.forc]
+version = "0.50.0+nightly.20240221.60922103ea"
+
+[pkg.forc.target.darwin_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/forc-binaries-0.50.0%2Bnightly.20240221.60922103ea-darwin_amd64.tar.gz"
+hash = "f83355d25b9bcf36b14c28c16a0174a0ede11cc3b3b3e33776da21338d9cd77c"
+
+[pkg.forc.target.darwin_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/forc-binaries-0.50.0%2Bnightly.20240221.60922103ea-darwin_arm64.tar.gz"
+hash = "d99d31883186b2897a7db56aaf9413f778c0f92fcfb9626927b9f62aefca0143"
+
+[pkg.forc.target.linux_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/forc-binaries-0.50.0%2Bnightly.20240221.60922103ea-linux_amd64.tar.gz"
+hash = "494df4850dfdd4803c8f01c78f02a07a4c98bdbb44c37540767368529e317c31"
+
+[pkg.forc.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/forc-binaries-0.50.0%2Bnightly.20240221.60922103ea-linux_arm64.tar.gz"
+hash = "35f75632783c4c4bb338a9610f83bdac0dfa8e3120ff43fc62e7bce1a8f8d405"
+
+[pkg.forc-explore]
+version = "0.28.1+nightly.20240221.4bb7392eed"
+
+[pkg.forc-explore.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/forc-explore-0.28.1%2Bnightly.20240221.4bb7392eed-aarch64-apple-darwin.tar.gz"
+hash = "bb4bea29e9622bcd0b3d3ebee2124b493c27fb7113ec8611efe038cf2c20a723"
+
+[pkg.forc-explore.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/forc-explore-0.28.1%2Bnightly.20240221.4bb7392eed-aarch64-unknown-linux-gnu.tar.gz"
+hash = "42b266adf81dddbe2323f3311599b3e68a17b3ff8a460f5eea809eb7e46947eb"
+
+[pkg.forc-explore.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/forc-explore-0.28.1%2Bnightly.20240221.4bb7392eed-x86_64-apple-darwin.tar.gz"
+hash = "27933b860a38d75b9e54a49f81a216fce336adee5e19b9fcb8ac40ae54c790df"
+
+[pkg.forc-explore.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/forc-explore-0.28.1%2Bnightly.20240221.4bb7392eed-x86_64-unknown-linux-gnu.tar.gz"
+hash = "c39412dce477d016668efb206b1a0bb9cb58adbbbc4c99f5761f70c5051e16b3"
+
+[pkg.forc-wallet]
+version = "0.4.3+nightly.20240221.4d5fa8b121"
+
+[pkg.forc-wallet.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/forc-wallet-0.4.3%2Bnightly.20240221.4d5fa8b121-aarch64-apple-darwin.tar.gz"
+hash = "c87a70f63bb56109383c766e1c71afd57ccb95645245adfebc8ad444b5cf88ed"
+
+[pkg.forc-wallet.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/forc-wallet-0.4.3%2Bnightly.20240221.4d5fa8b121-aarch64-unknown-linux-gnu.tar.gz"
+hash = "49e0777501f822bd7fa87d48652b1ef0fd6a4417a8c2f7816798a04efb49222f"
+
+[pkg.forc-wallet.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/forc-wallet-0.4.3%2Bnightly.20240221.4d5fa8b121-x86_64-apple-darwin.tar.gz"
+hash = "4e78bd40d87fb6e610880418ea6129decb12fd14d2b51ead2b2ab6cbcb0cdeb7"
+
+[pkg.forc-wallet.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/forc-wallet-0.4.3%2Bnightly.20240221.4d5fa8b121-x86_64-unknown-linux-gnu.tar.gz"
+hash = "6a6b39246eba29cf8ccb4609c0b0fd3b94f2d3df537350872f56e2325fff2ed6"
+
+[pkg.fuel-core]
+version = "0.22.0+nightly.20240221.610385f99a"
+
+[pkg.fuel-core.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/fuel-core-0.22.0%2Bnightly.20240221.610385f99a-aarch64-apple-darwin.tar.gz"
+hash = "79f51e2dd157b050b16dc90dbfbca59e4cc3fedd7b5b1b6761808dfefb6192ac"
+
+[pkg.fuel-core.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/fuel-core-0.22.0%2Bnightly.20240221.610385f99a-aarch64-unknown-linux-gnu.tar.gz"
+hash = "7ae0c02cc87c0eb52cbfcc27bf91681f2eea7b4e728230b1e5cfaa1d3c68d36d"
+
+[pkg.fuel-core.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/fuel-core-0.22.0%2Bnightly.20240221.610385f99a-x86_64-apple-darwin.tar.gz"
+hash = "c802f5c0ce9aa584bff6270139695b1af64a4e1d65e049e93d2ccec4ffd856a2"
+
+[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/fuel-core-0.22.0%2Bnightly.20240221.610385f99a-x86_64-unknown-linux-gnu.tar.gz"
+hash = "91d56f9404d64b0bdf482980b45794c0a0b143dd674749f1f6fc787e13d12d12"
+
+[pkg.fuel-core-keygen]
+version = "0.22.0+nightly.20240221.610385f99a"
+
+[pkg.fuel-core-keygen.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/fuel-core-0.22.0%2Bnightly.20240221.610385f99a-aarch64-apple-darwin.tar.gz"
+hash = "79f51e2dd157b050b16dc90dbfbca59e4cc3fedd7b5b1b6761808dfefb6192ac"
+
+[pkg.fuel-core-keygen.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/fuel-core-0.22.0%2Bnightly.20240221.610385f99a-aarch64-unknown-linux-gnu.tar.gz"
+hash = "7ae0c02cc87c0eb52cbfcc27bf91681f2eea7b4e728230b1e5cfaa1d3c68d36d"
+
+[pkg.fuel-core-keygen.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/fuel-core-0.22.0%2Bnightly.20240221.610385f99a-x86_64-apple-darwin.tar.gz"
+hash = "c802f5c0ce9aa584bff6270139695b1af64a4e1d65e049e93d2ccec4ffd856a2"
+
+[pkg.fuel-core-keygen.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240221/fuel-core-0.22.0%2Bnightly.20240221.610385f99a-x86_64-unknown-linux-gnu.tar.gz"
+hash = "91d56f9404d64b0bdf482980b45794c0a0b143dd674749f1f6fc787e13d12d12"

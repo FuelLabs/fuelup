@@ -21,8 +21,8 @@ pub fn update() -> Result<()> {
     warn_existing_fuel_executables()?;
 
     if toolchains.is_empty() {
-        error!(
-            "Could find any toolchain. Please run `fuelup default <toolchain>` to install toolchains first."
+        println_error(format!(
+            "No toolchains are installed. Use `fuelup default <toolchain>` to install a toolchain."
         );
         return Ok(());
     }

@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir -p ${{ env.FUELUP_INIT_DIR }}
           cp fuelup-init.sh ${{ env.FUELUP_INIT_DIR }}
-          cp fuelup_init.sh ${{ env.FUELUP_INIT_DIR }}/index.html
+          cp fuelup-init.sh ${{ env.FUELUP_INIT_DIR }}/index.html
 
       - name: Deploy latest fuelup init
         uses: peaceiris/actions-gh-pages@v3

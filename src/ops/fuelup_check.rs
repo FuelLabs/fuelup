@@ -56,26 +56,12 @@ fn format_version_comparison(current_version: &Version, latest_version: &Version
     }
 }
 
-fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version) -> Result<()> {
-    match get_bin_version(plugin_executable) {
-        Ok(version) => {
-            info!(
-                "{:>4}- {} - {}",
-                "",
-                bold(plugin),
-                format_version_comparison(&version, latest_version)
-            );
-        }
-        Err(err) => {
-            info!(
-                "{:>4}- {} - Error getting version string: {}",
-                "",
-                plugin,
-                err.to_string()
-            );
-        }
-    }
-    Ok(())
+fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version) {
+    let version_or_err = match get_bin_version(plugin_executable) {
+        Ok(version) => format_version_comparison(&version, latest_version),
+        Err(err) => err.to_string(),
+    };
+    info!("{:>4}- {} - {}", "", plugin, version_or_err);
 }
 
 fn check_fuelup() -> Result<()> {
@@ -110,24 +96,11 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
     for component in Components::collect_exclude_plugins()? {
         if let Some(latest_version) = latest_package_versions.get(&component.name) {
             let component_executable = toolchain.bin_path.join(&component.name);
-            match get_bin_version(&component_executable) {
-                Ok(version) => {
-                    info!(
-                        "{:>2}{} - {}",
-                        "",
-                        bold(&component.name),
-                        format_version_comparison(&version, latest_version)
-                    );
-                }
-                Err(e) => {
-                    error!(
-                        "{:>2}{} - Error getting version string: {}",
-                        "",
-                        bold(&component.name),
-                        e.to_string()
-                    );
-                }
-            }
+            let version_text = match get_bin_version(&component_executable) {
+                Ok(version) => format_version_comparison(&version, latest_version),
+                Err(err) => err.to_string(),
+            };
+            info!("{:>2}{} - {}", "", bold(&component.name), version_text);
             if verbose && component.name == component::FORC {
                 for plugin in component::Components::collect_plugins()? {
                     if !plugin.is_main_executable() {
@@ -150,7 +123,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                         );
 
                         if let Some(latest_version) = maybe_latest_version {
-                            check_plugin(&plugin_executable, plugin_name, latest_version)?;
+                            check_plugin(&plugin_executable, plugin_name, latest_version);
                         }
                     }
                 }

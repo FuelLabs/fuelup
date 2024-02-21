@@ -1,14 +1,14 @@
 use crate::{
     channel::Channel,
     config::Config,
-    fmt::{bold, colored_bold},
+    fmt::{bold, colored_bold, println_error},
     path::warn_existing_fuel_executables,
     toolchain::{DistToolchainDescription, Toolchain},
 };
 use ansiterm::Color;
 use anyhow::{bail, Result};
 use std::str::FromStr;
-use tracing::{error, info};
+use tracing::info;
 
 const UPDATED: &str = "updated";
 const PARTIALLY_UPDATED: &str = "partially updated";
@@ -21,8 +21,8 @@ pub fn update() -> Result<()> {
     warn_existing_fuel_executables()?;
 
     if toolchains.is_empty() {
-        println_error(format!(
-            "No toolchains are installed. Use `fuelup default <toolchain>` to install a toolchain."
+        println_error(
+            "No toolchains are installed. Use `fuelup default <toolchain>` to install a toolchain.",
         );
         return Ok(());
     }

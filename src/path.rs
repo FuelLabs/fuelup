@@ -19,6 +19,17 @@ pub fn fuelup_bin_dir() -> PathBuf {
     fuelup_dir().join("bin")
 }
 
+/// Similar to fuelup_bin() but it never fails. If the fuelup binary is not found in $PATH, it
+/// returns the current executable binary path
+pub fn fuelup_bin_or_current_bin() -> PathBuf {
+    let fuelup_bin = fuelup_bin();
+    if fuelup_bin.exists() {
+        fuelup_bin
+    } else {
+        env::current_exe().unwrap()
+    }
+}
+
 pub fn fuelup_bin() -> PathBuf {
     fuelup_bin_dir().join("fuelup")
 }

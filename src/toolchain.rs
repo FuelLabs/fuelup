@@ -2,9 +2,8 @@ use crate::channel::{self, Channel};
 use crate::constants::DATE_FORMAT;
 use crate::download::DownloadCfg;
 use crate::file::{hard_or_symlink_file, is_executable};
-use crate::ops::fuelup_self::self_update;
 use crate::path::{
-    ensure_dir_exists, fuelup_bin, fuelup_bin_dir, fuelup_tmp_dir, settings_file,
+    ensure_dir_exists, fuelup_bin_dir, fuelup_bin_or_current_bin, fuelup_tmp_dir, settings_file,
     toolchain_bin_dir, toolchain_dir,
 };
 use crate::settings::SettingsFile;
@@ -305,15 +304,7 @@ impl Toolchain {
         let fuelup_bin_dir = fuelup_bin_dir();
         ensure_dir_exists(&fuelup_bin_dir)?;
 
-        let fuelup_bin = fuelup_bin();
-        if !fuelup_bin.is_file() {
-            info!("fuelup not found - attempting to self update");
-            match self_update() {
-                Ok(()) => info!("fuelup installed."),
-                Err(e) => bail!("Could not install fuelup: {}", e),
-            };
-        }
-
+        let fuelup_bin = fuelup_bin_or_current_bin();
         let store = Store::from_env()?;
 
         if !store.has_component(&download_cfg.name, &download_cfg.version)

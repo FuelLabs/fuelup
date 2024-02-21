@@ -58,7 +58,7 @@ fn format_version_comparison(current_version: &Version, latest_version: &Version
 
 fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version) -> Result<()> {
     match get_bin_version(plugin_executable) {
-        Some(version) => {
+        Ok(version) => {
             info!(
                 "{:>4}- {} - {}",
                 "",
@@ -66,8 +66,13 @@ fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version
                 format_version_comparison(&version, latest_version)
             );
         }
-        None => {
-            info!("{:>4}- {} - Error getting version string", "", plugin);
+        Err(err) => {
+            info!(
+                "{:>4}- {} - Error getting version string: {}",
+                "",
+                plugin,
+                err.to_string()
+            );
         }
     }
     Ok(())
@@ -106,7 +111,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
         if let Some(latest_version) = latest_package_versions.get(&component.name) {
             let component_executable = toolchain.bin_path.join(&component.name);
             match get_bin_version(&component_executable) {
-                Some(version) => {
+                Ok(version) => {
                     info!(
                         "{:>2}{} - {}",
                         "",
@@ -114,11 +119,12 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                         format_version_comparison(&version, latest_version)
                     );
                 }
-                None => {
+                Err(e) => {
                     error!(
-                        "{:>2}{} - Error getting version string",
+                        "{:>2}{} - Error getting version string: {}",
                         "",
-                        bold(&component.name)
+                        bold(&component.name),
+                        e.to_string()
                     );
                 }
             }

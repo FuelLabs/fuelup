@@ -1,9 +1,3 @@
-use anyhow::Result;
-use component::{self, Components};
-use semver::Version;
-use std::collections::HashMap;
-use std::str::FromStr;
-use tracing::info;
 use crate::file::get_bin_version;
 use crate::fmt::bold;
 use crate::store::Store;
@@ -15,6 +9,12 @@ use crate::{
     toolchain::{DistToolchainDescription, Toolchain},
     toolchain_override::ToolchainOverride,
 };
+use anyhow::Result;
+use component::{self, Components};
+use semver::Version;
+use std::collections::HashMap;
+use std::str::FromStr;
+use tracing::info;
 
 pub fn show() -> Result<()> {
     info!("{}: {}", bold("Default host"), TargetTriple::from_host()?);
@@ -75,11 +75,11 @@ pub fn show() -> Result<()> {
     for component in Components::collect_exclude_plugins()? {
         let component_executable = active_toolchain.bin_path.join(&component.name);
         let version_text: String = match get_bin_version(component_executable.as_path()) {
-            Some(version) => {
+            Ok(version) => {
                 version_map.insert(component.name.clone(), version.clone());
                 format!("{}", version)
             }
-            None => "not found".to_owned(),
+            Err(e) => e.to_string(),
         };
 
         info!("{:>2}{} : {}", "", bold(&component.name), version_text);
@@ -92,22 +92,22 @@ pub fn show() -> Result<()> {
                     for executable in plugin.executables.iter() {
                         let plugin_executable = active_toolchain.bin_path.join(executable);
                         let version_text = match get_bin_version(plugin_executable.as_path()) {
-                            Some(version) => {
+                            Ok(version) => {
                                 version_map.insert(executable.clone(), version.clone());
                                 format!("{}", version)
                             }
-                            None => "not found".to_owned(),
+                            Err(e) => e.to_string(),
                         };
                         info!("{:>6}- {} : {}", "", bold(executable), version_text);
                     }
                 } else {
                     let plugin_executable = active_toolchain.bin_path.join(&plugin.name);
                     let version_text = match get_bin_version(plugin_executable.as_path()) {
-                        Some(version) => {
+                        Ok(version) => {
                             version_map.insert(plugin.name.clone(), version.clone());
                             format!("{}", version)
                         }
-                        None => "not found".to_owned(),
+                        Err(e) => e.to_string(),
                     };
                     info!("{:>4}- {} : {}", "", bold(&plugin.name), version_text);
                 }

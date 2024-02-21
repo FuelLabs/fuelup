@@ -46,7 +46,7 @@ pub fn list(_command: ListCommand) -> Result<()> {
         );
         if toolchain.has_component(&component.name) {
             let exec_path = toolchain.bin_path.join(&component.name);
-            let current_version = get_bin_version(&exec_path).map(|v| v.to_string());
+            let current_version = get_bin_version(&exec_path).map(|v| v.to_string()).ok();
             let version_info = match Some(&latest_version) == current_version.as_ref() {
                 true => "up-to-date".to_string(),
                 false => format!("latest: {}", &latest_version),

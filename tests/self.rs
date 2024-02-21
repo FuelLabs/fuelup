@@ -18,7 +18,7 @@ fn fuelup_self_update() -> Result<()> {
 fn fuelup_self_update_latest() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["self", "update"]);
-        let expected_stdout_starts_with = "already up to date";
+        let expected_stdout_starts_with = "Already up to date";
         assert!(output.stdout.contains(expected_stdout_starts_with));
     })?;
 

@@ -1,10 +1,10 @@
 use anyhow::{bail, Result};
 use std::str::FromStr;
-use tracing::{error, info};
 
 use crate::{
     commands::toolchain::UninstallCommand,
     config::Config,
+    fmt::{println_error, println_warn},
     ops::fuelup_default,
     toolchain::{DistToolchainDescription, Toolchain},
 };
@@ -20,13 +20,17 @@ pub fn uninstall(command: UninstallCommand) -> Result<()> {
     };
 
     if !toolchain.exists() {
-        info!("toolchain '{}' does not exist", &toolchain.name);
+        println_warn(format!("Toolchain '{}' does not exist", &toolchain.name));
         return Ok(());
+    }
+
+    if config.list_toolchains()?.len() == 1 {
+        bail!("Cannot uninstall the last toolchain");
     }
 
     match toolchain.uninstall_self() {
         Ok(_) => {
-            info!("toolchain '{}' uninstalled", &toolchain.name);
+            println!("Toolchain '{}' uninstalled", &toolchain.name);
             let active_toolchain = Toolchain::from_settings()?;
             if active_toolchain.name == toolchain.name {
                 for toolchain in config.list_toolchains()? {
@@ -35,16 +39,17 @@ pub fn uninstall(command: UninstallCommand) -> Result<()> {
                     }
                 }
 
-                error!(
+                println_error(format!(
                     "{}\r\t{}",
                     "Could not set default toolchain after uninstallation of currently used toolchain",
                     "Please run `fuelup default <toolchain>` to manually switch your current toolchain."
-                )
+                ));
             }
         }
-        Err(e) => {
-            bail!("Failed to uninstall toolchain '{}': {}", &toolchain.name, e)
-        }
+        Err(e) => println_error(format!(
+            "Failed to uninstall toolchain '{}': {}",
+            &toolchain.name, e
+        )),
     };
 
     Ok(())

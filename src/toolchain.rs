@@ -1,7 +1,7 @@
 use crate::channel::{self, Channel};
 use crate::constants::DATE_FORMAT;
 use crate::download::DownloadCfg;
-use crate::file::{hard_or_symlink_file, is_executable};
+use crate::file::{get_bin_version, hard_or_symlink_file, is_executable};
 use crate::path::{
     ensure_dir_exists, fuelup_bin_dir, fuelup_bin_or_current_bin, fuelup_tmp_dir, settings_file,
     toolchain_bin_dir, toolchain_dir,
@@ -11,7 +11,6 @@ use crate::store::Store;
 use crate::target_triple::TargetTriple;
 use anyhow::{bail, Context, Result};
 use component::{self, Components};
-use semver::Version;
 use std::collections::VecDeque;
 use std::fmt;
 use std::fs::{remove_dir_all, remove_file};
@@ -437,18 +436,9 @@ impl Toolchain {
             .into_iter()
             .filter(|component| self.has_component(&component.name))
             .filter_map(|component| {
-                let exec_path = self.bin_path.join(&component.name);
-                if let Ok(o) = std::process::Command::new(exec_path)
-                    .arg("--version")
-                    .output()
-                {
-                    let output = String::from_utf8_lossy(&o.stdout).into_owned();
-                    Version::parse(output.split_whitespace().last().unwrap_or_default())
-                        .ok()
-                        .map(|version| store.component_dir_path(&component.name, &version))
-                } else {
-                    None
-                }
+                get_bin_version(&self.bin_path.join(&component.name))
+                    .ok()
+                    .map(|version| store.component_dir_path(&component.name, &version))
             })
             .for_each(|p| {
                 let _ = remove_dir_all(p);

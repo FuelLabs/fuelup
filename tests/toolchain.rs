@@ -111,21 +111,23 @@ fn fuelup_toolchain_uninstall() -> Result<()> {
         for toolchain in toolchains {
             let toolchain_with_target = format_toolchain_with_target(toolchain);
             let output = cfg.fuelup(&["toolchain", "uninstall", toolchain]);
-            let expected_stdout = format!("toolchain '{toolchain_with_target}' does not exist\n");
-
-            assert_eq!(output.stdout, expected_stdout);
+            let expected_stdout = format!("Toolchain '{toolchain_with_target}' does not exist\n");
+            assert!(output.stdout.contains(&expected_stdout));
         }
     })?;
 
     testcfg::setup(FuelupState::AllInstalled, &|cfg| {
         let toolchains = ["latest", "nightly", &format!("nightly-{DATE}")];
-        for toolchain in toolchains {
+        for toolchain in &toolchains[0..2] {
             let toolchain_with_target = format_toolchain_with_target(toolchain);
             let output = cfg.fuelup(&["toolchain", "uninstall", toolchain]);
-            let expected_stdout = format!("toolchain '{toolchain_with_target}' uninstalled\n");
-
+            let expected_stdout = format!("Toolchain '{toolchain_with_target}' uninstalled\n");
             assert!(output.stdout.contains(&expected_stdout));
         }
+
+        let output = cfg.fuelup(&["toolchain", "uninstall", toolchains[2]]);
+        let expected_stdout = "Cannot uninstall the last toolchain\n".to_string();
+        assert!(output.stdout.contains(&expected_stdout));
     })?;
 
     Ok(())

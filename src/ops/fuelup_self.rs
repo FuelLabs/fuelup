@@ -1,13 +1,17 @@
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 use component::{self, Components};
-use std::{fs, path::Path};
+use std::{
+    fs::{self, remove_dir_all},
+    path::Path,
+};
 use tempfile;
 use tracing::{error, info};
 
 use crate::{
     download::{download_file_and_unpack, unpack_bins, DownloadCfg},
     file::{get_bin_version, hard_or_symlink_file},
-    path::{fuelup_bin, fuelup_bin_dir},
+    fmt::{ask_user_yes_no_question, println_warn},
+    path::{forc_dir, fuel_dir, fuelup_bin, fuelup_bin_dir, fuelup_dir},
     target_triple::TargetTriple,
 };
 
@@ -16,6 +20,38 @@ pub fn attempt_install_self(download_cfg: DownloadCfg, dst: &Path) -> Result<()>
     unpack_bins(dst, dst)?;
 
     Ok(())
+}
+
+const GOODBYE_HEADER: &str = "Thanks for hacking in Sway!";
+const GOODBYE_INFO: &str = "This will uninstall all Sway toolchains and data, and remove, $HOME/.fuelup/bin from your PATH environment variable.";
+
+pub fn self_uninstall(force: bool) -> Result<()> {
+    println!("{}\n\n{}", GOODBYE_HEADER, GOODBYE_INFO);
+    if force || ask_user_yes_no_question("Continue? (y/N)").context("Console I/O")? {
+        let remove = [
+            ("remove forc home", forc_dir()),
+            ("remove fuel home", fuel_dir()),
+            ("removing fuelup binaries", fuelup_bin_dir()),
+            ("removing fuelup home", fuelup_dir()),
+        ];
+
+        for (info, path) in remove.into_iter() {
+            println_warn(info);
+            match remove_dir_all(&path) {
+                Ok(()) => {}
+                Err(e) => {
+                    if e.kind() == std::io::ErrorKind::NotFound {
+                        continue;
+                    }
+                    bail!("Failed to remove {}: {}", path.display(), e.to_string());
+                }
+            }
+        }
+
+        Ok(())
+    } else {
+        Ok(())
+    }
 }
 
 pub fn self_update(force: bool) -> Result<()> {

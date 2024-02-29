@@ -1,3 +1,5 @@
+use std::io::{self, Write};
+
 use crate::target_triple::TargetTriple;
 use ansi_term::Colour;
 use ansiterm::Style;
@@ -32,4 +34,24 @@ pub fn format_toolchain_with_target(toolchain: &str) -> String {
         toolchain,
         TargetTriple::from_host().unwrap_or_default()
     )
+}
+
+pub fn ask_user_yes_no_question(question: &str) -> io::Result<bool> {
+    loop {
+        print!("{question} ");
+        std::io::stdout().flush()?;
+        let mut ans = String::new();
+        std::io::stdin().read_line(&mut ans)?;
+        // Pop trailing \n as users press enter to submit their answers.
+        ans.pop();
+        // Trim the user input as it might have an additional space.
+        let ans = ans.trim();
+        if let Some(result) = match ans {
+            "y" | "Y" => Some(true),
+            "n" | "N" => Some(false),
+            _ => None,
+        } {
+            return Ok(result);
+        }
+    }
 }

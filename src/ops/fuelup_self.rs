@@ -29,8 +29,8 @@ pub fn self_uninstall(force: bool) -> Result<()> {
     println!("{}\n\n{}", GOODBYE_HEADER, GOODBYE_INFO);
     if force || ask_user_yes_no_question("Continue? (y/N)").context("Console I/O")? {
         let remove = [
-            ("remove forc home", forc_dir()),
-            ("remove fuel home", fuel_dir()),
+            ("removing forc home", forc_dir()),
+            ("removing fuel home", fuel_dir()),
             ("removing fuelup binaries", fuelup_bin_dir()),
             ("removing fuelup home", fuelup_dir()),
         ];

@@ -1,7 +1,25 @@
 use anyhow::Result;
+use testcfg::FuelupState;
 
 pub mod testcfg;
-use testcfg::FuelupState;
+
+#[test]
+fn test_self_uninstall() -> Result<()> {
+    testcfg::setup(FuelupState::NightlyDateInstalled, &|cfg| {
+        assert!(cfg.home.exists());
+        assert!(cfg.fuelup_bin_dirpath.exists());
+        assert!(cfg.fuelup_path.exists());
+        let output = cfg.fuelup(&["self", "uninstall", "--force"]);
+        for expected in ["forc", "fuel", "fuelup"] {
+            let expected = format!("removing {}", expected);
+            assert!(output.stdout.find(&expected).is_some());
+        }
+        assert!(cfg.home.exists());
+        assert!(!cfg.fuelup_bin_dirpath.exists());
+        assert!(!cfg.fuelup_path.exists());
+    })?;
+    Ok(())
+}
 
 #[test]
 fn fuelup_self_update() -> Result<()> {

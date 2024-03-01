@@ -72,6 +72,7 @@ const VERSION_2: &Version = &Version::new(0, 2, 0);
 pub static ALL_BINS: &[&str] = &[
     "forc",
     "forc-crypto",
+    "forc-debug",
     "forc-deploy",
     "forc-doc",
     "forc-explore",
@@ -94,20 +95,23 @@ impl TestCfg {
         }
     }
 
+    pub fn fuelup_dir(&self) -> PathBuf {
+        self.home.join(".fuelup")
+    }
+
     pub fn toolchains_dir(&self) -> PathBuf {
-        self.home.join(".fuelup").join("toolchains")
+        self.fuelup_dir().join("toolchains")
     }
 
     pub fn toolchain_bin_dir(&self, toolchain: &str) -> PathBuf {
-        self.home
-            .join(".fuelup")
+        self.fuelup_dir()
             .join("toolchains")
             .join(toolchain)
             .join("bin")
     }
 
     pub fn settings_file(&self) -> SettingsFile {
-        SettingsFile::new(self.home.join(".fuelup").join("settings.toml"))
+        SettingsFile::new(self.fuelup_dir().join("settings.toml"))
     }
 
     pub fn default_toolchain(&self) -> Option<String> {

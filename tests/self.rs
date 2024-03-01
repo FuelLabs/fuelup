@@ -10,9 +10,9 @@ fn test_self_uninstall() -> Result<()> {
         assert!(cfg.fuelup_bin_dirpath.exists());
         assert!(cfg.fuelup_path.exists());
         let output = cfg.fuelup(&["self", "uninstall", "--force"]);
-        for expected in ["forc", "fuel", "fuelup"] {
+        for expected in ["fuelup home", "fuelup bin"] {
             let expected = format!("removing {}", expected);
-            assert!(output.stdout.find(&expected).is_some());
+            assert!(output.stdout.contains(&expected));
         }
         assert!(cfg.home.exists());
         assert!(!cfg.fuelup_bin_dirpath.exists());

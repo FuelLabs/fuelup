@@ -9,20 +9,10 @@ use std::{
 };
 
 pub const FUELUP_DIR: &str = ".fuelup";
-pub const FORC_HOME: &str = ".forc";
-pub const FUEL_HOME: &str = ".fuel";
 pub const FUELUP_HOME: &str = "FUELUP_HOME";
 
 pub fn fuelup_dir() -> PathBuf {
     dirs::home_dir().unwrap().join(FUELUP_DIR)
-}
-
-pub fn forc_dir() -> PathBuf {
-    dirs::home_dir().unwrap().join(FORC_HOME)
-}
-
-pub fn fuel_dir() -> PathBuf {
-    dirs::home_dir().unwrap().join(FUEL_HOME)
 }
 
 pub fn fuelup_bin_dir() -> PathBuf {

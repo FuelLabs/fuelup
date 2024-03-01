@@ -11,7 +11,7 @@ use crate::{
     download::{download_file_and_unpack, unpack_bins, DownloadCfg},
     file::{get_bin_version, hard_or_symlink_file},
     fmt::{ask_user_yes_no_question, println_warn},
-    path::{forc_dir, fuel_dir, fuelup_bin, fuelup_bin_dir, fuelup_dir},
+    path::{fuelup_bin, fuelup_bin_dir, fuelup_dir},
     target_triple::TargetTriple,
 };
 
@@ -29,8 +29,6 @@ pub fn self_uninstall(force: bool) -> Result<()> {
     println!("{}\n\n{}", GOODBYE_HEADER, GOODBYE_INFO);
     if force || ask_user_yes_no_question("Continue? (y/N)").context("Console I/O")? {
         let remove = [
-            ("removing forc home", forc_dir()),
-            ("removing fuel home", fuel_dir()),
             ("removing fuelup binaries", fuelup_bin_dir()),
             ("removing fuelup home", fuelup_dir()),
         ];

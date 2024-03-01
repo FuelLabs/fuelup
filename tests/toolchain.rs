@@ -122,7 +122,7 @@ fn fuelup_toolchain_uninstall() -> Result<()> {
         // Cannot remove the active, even if there are others to switch to
         let output = cfg.fuelup(&["toolchain", "uninstall", toolchains[0]]);
         let expected_stdout = "as it is currently the default toolchain. Run `fuelup default <toolchain>` to update the default toolchain.";
-        assert!(output.stdout.contains(&expected_stdout));
+        assert!(output.stdout.contains(expected_stdout));
 
         for toolchain in &toolchains[1..2] {
             let toolchain_with_target = format_toolchain_with_target(toolchain);
@@ -138,7 +138,7 @@ fn fuelup_toolchain_uninstall() -> Result<()> {
         // Cannot remove the active, if it is the only one
         let output = cfg.fuelup(&["toolchain", "uninstall", toolchains[0]]);
         let expected_stdout = "as it is currently the default toolchain. Run `fuelup default <toolchain>` to update the default toolchain.";
-        assert!(output.stdout.contains(&expected_stdout));
+        assert!(output.stdout.contains(expected_stdout));
     })?;
 
     Ok(())

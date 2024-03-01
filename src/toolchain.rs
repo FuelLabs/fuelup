@@ -11,7 +11,7 @@ use crate::store::Store;
 use crate::target_triple::TargetTriple;
 use anyhow::{bail, Context, Result};
 use component::{self, Components};
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 use std::fmt;
 use std::fs::{read_dir, remove_dir_all, remove_file};
 use std::path::PathBuf;
@@ -478,15 +478,14 @@ impl Toolchain {
         Ok(self
             .list_components_paths()?
             .into_iter()
-            .filter(|x| other_components.binary_search(&x).is_err())
+            .filter(|x| other_components.binary_search(x).is_err())
             .collect::<Vec<_>>())
     }
 
     pub fn uninstall_self(&self) -> Result<()> {
         self.list_unique_components_paths()?
             .into_iter()
-            .map(|x| remove_dir_all(x))
-            .collect::<std::io::Result<()>>()?;
+            .try_for_each(remove_dir_all)?;
 
         if self.exists() {
             remove_dir_all(self.path.clone())?

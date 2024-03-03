@@ -36,19 +36,23 @@ pub enum FuelupState {
     NightlyAndNightlyDateInstalled,
     /// Inits a state with only the `beta-1` toolchain.
     Beta1Installed,
-    /// Inits a state with the `latest` toolchain, with `beta-1` declared within fuel-toolchain.toml.
+    /// Inits a state with the `latest` toolchain, with `beta-1` declared within
+    /// fuel-toolchain.toml.
     LatestWithBetaOverride,
 }
 
 #[derive(Debug)]
 pub struct TestCfg {
-    /// The path to the test environment's fuelup executable. This should usually be <TMP_DIR>/.fuelup/bin/fuelup.
-    /// This should be used to execute fuelup in the test environment.
+    /// The path to the test environment's fuelup executable. This should usually be
+    /// <TMP_DIR>/.fuelup/bin/fuelup. This should be used to execute fuelup in the test
+    /// environment.
     pub fuelup_path: PathBuf,
-    /// The path to the test environment's fuelup/bin directory. This should usually be <TMP_DIR>/.fuelup/bin/.
-    /// This should be used to execute other binaries (eg. forc) in the test environment.
+    /// The path to the test environment's fuelup/bin directory. This should usually be
+    /// <TMP_DIR>/.fuelup/bin/. This should be used to execute other binaries (eg. forc) in the
+    /// test environment.
     pub fuelup_bin_dirpath: PathBuf,
-    /// The path to the test environment's home. This should usually be a created tempfile::tempdir::TempDir.
+    /// The path to the test environment's home. This should usually be a created
+    /// tempfile::tempdir::TempDir.
     pub home: PathBuf,
 }
 
@@ -68,6 +72,7 @@ const VERSION_2: &Version = &Version::new(0, 2, 0);
 pub static ALL_BINS: &[&str] = &[
     "forc",
     "forc-crypto",
+    "forc-debug",
     "forc-deploy",
     "forc-doc",
     "forc-explore",
@@ -90,20 +95,23 @@ impl TestCfg {
         }
     }
 
+    pub fn fuelup_dir(&self) -> PathBuf {
+        self.home.join(".fuelup")
+    }
+
     pub fn toolchains_dir(&self) -> PathBuf {
-        self.home.join(".fuelup").join("toolchains")
+        self.fuelup_dir().join("toolchains")
     }
 
     pub fn toolchain_bin_dir(&self, toolchain: &str) -> PathBuf {
-        self.home
-            .join(".fuelup")
+        self.fuelup_dir()
             .join("toolchains")
             .join(toolchain)
             .join("bin")
     }
 
     pub fn settings_file(&self) -> SettingsFile {
-        SettingsFile::new(self.home.join(".fuelup").join("settings.toml"))
+        SettingsFile::new(self.fuelup_dir().join("settings.toml"))
     }
 
     pub fn default_toolchain(&self) -> Option<String> {

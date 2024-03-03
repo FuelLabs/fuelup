@@ -1,7 +1,7 @@
 use crate::{
     channel::Channel,
     config::Config,
-    fmt::{bold, colored_bold},
+    fmt::{bold, colored_bold, println_error},
     path::warn_existing_fuel_executables,
     toolchain::{DistToolchainDescription, Toolchain},
 };
@@ -19,6 +19,13 @@ pub fn update() -> Result<()> {
     let mut summary: Vec<(String, String)> = Vec::with_capacity(toolchains.len());
 
     warn_existing_fuel_executables()?;
+
+    if toolchains.is_empty() {
+        println_error(
+            "No toolchains are installed. Use `fuelup default <toolchain>` to install a toolchain.",
+        );
+        return Ok(());
+    }
 
     for toolchain in toolchains {
         let mut installed_bins = String::new();

@@ -450,7 +450,6 @@ impl Toolchain {
             .into_iter()
             .filter(|component| self.has_component(&component.name))
             .filter_map(|component| {
-                println!("{}", self.bin_path.display());
                 get_bin_version(&self.bin_path.join(&component.name))
                     .ok()
                     .map(|version| store.component_dir_path(&component.name, &version))

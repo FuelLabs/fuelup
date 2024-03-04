@@ -9,9 +9,10 @@ use tracing::{error, info};
 
 use crate::{
     download::{download_file_and_unpack, unpack_bins, DownloadCfg},
-    file::{get_bin_version, hard_or_symlink_file},
+    file::{get_bin_version, hard_or_symlink_file, read_file, write_file},
     fmt::{ask_user_yes_no_question, println_warn},
-    path::{fuelup_bin, fuelup_bin_dir, fuelup_dir},
+    path::{canonical_fuelup_dir, fuelup_bin, fuelup_bin_dir, fuelup_dir, FUELUP_DIR},
+    shell::Shell,
     target_triple::TargetTriple,
 };
 
@@ -22,16 +23,48 @@ pub fn attempt_install_self(download_cfg: DownloadCfg, dst: &Path) -> Result<()>
     Ok(())
 }
 
-const GOODBYE_HEADER: &str = "Thanks for hacking in Sway!";
-const GOODBYE_INFO: &str = "This will uninstall all Sway toolchains and data, and remove, $HOME/.fuelup/bin from your PATH environment variable.";
+/// Removes the fuelup directory from $PATH
+fn remove_fuelup_from_path() -> Result<()> {
+    for shell in Shell::all() {
+        for rc in shell.rc_files().into_iter().filter(|c| c.is_file()) {
+            let file = read_file("rcfile", &rc)?;
+            let mut is_modified = false;
+            let new_content = file
+                .lines()
+                .filter(|line| {
+                    if line.contains("PATH") && line.contains(FUELUP_DIR) {
+                        is_modified = true;
+                        false
+                    } else {
+                        true
+                    }
+                })
+                .collect::<Vec<_>>()
+                .join("\n");
+            if is_modified {
+                println_warn(format!(
+                    "{} has been updated to remove fuelup from $PATH",
+                    rc.display()
+                ));
+                write_file(rc, &new_content)?;
+            }
+        }
+    }
+    Ok(())
+}
 
 pub fn self_uninstall(force: bool) -> Result<()> {
-    println!("{}\n\n{}", GOODBYE_HEADER, GOODBYE_INFO);
+    println!(
+        r#"Thanks for hacking in Sway!
+This will uninstall all Sway toolchains and data, and remove, {}/bin from your PATH environment variable."#,
+        canonical_fuelup_dir()?,
+    );
     if force || ask_user_yes_no_question("Continue? (y/N)").context("Console I/O")? {
         let remove = [
             ("removing fuelup binaries", fuelup_bin_dir()),
             ("removing fuelup home", fuelup_dir()),
         ];
+        remove_fuelup_from_path()?;
 
         for (info, path) in remove.into_iter() {
             println_warn(info);

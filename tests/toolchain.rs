@@ -126,8 +126,10 @@ fn fuelup_toolchain_uninstall() -> Result<()> {
 
         for toolchain in &toolchains[1..2] {
             let toolchain_with_target = format_toolchain_with_target(toolchain);
+            assert!(cfg.toolchains_dir().join(&toolchain_with_target).is_dir());
             let output = cfg.fuelup(&["toolchain", "uninstall", toolchain]);
             let expected_stdout = format!("Toolchain '{toolchain_with_target}' uninstalled\n");
+            assert!(!cfg.toolchains_dir().join(toolchain_with_target).is_dir());
             assert!(
                 output.stdout.contains(&expected_stdout),
                 "toolchain: {}",

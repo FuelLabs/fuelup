@@ -91,8 +91,14 @@ impl DownloadCfg {
 
 pub fn build_agent() -> Result<ureq::Agent> {
     let agent_builder = ureq::builder().user_agent("fuelup");
+    let proxy_result = env::var("http_proxy")
+        .or(env::var("HTTP_PROXY"))
+        .or(env::var("https_proxy"))
+        .or(env::var("HTTPS_PROXY"))
+        .or(env::var("all_proxy"))
+        .or(env::var("ALL_PROXY"));
 
-    if let Ok(proxy) = env::var("http_proxy") {
+    if let Ok(proxy) = proxy_result {
         return match ureq::Proxy::new(&proxy) {
             Ok(proxy) => Ok(agent_builder.proxy(proxy).build()),
             Err(err) => {

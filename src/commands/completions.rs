@@ -8,8 +8,6 @@ use crate::ops::fuelup_completions;
 #[derive(Debug, Parser)]
 pub struct CompletionsCommand {
     /// Specify shell to enable tab-completion for
-    ///
-    /// [possible values: zsh, bash, fish, powershell, elvish]
     #[clap(short = 'S', long)]
     pub shell: Shell,
 }

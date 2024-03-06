@@ -1,15 +1,12 @@
+use crate::{constants::FUEL_TOOLCHAIN_TOML_FILE, fmt::println_warn};
 use anyhow::{bail, Result};
 use component::Components;
+use dirs;
 use std::env;
 use std::{
     fs,
     path::{Path, PathBuf},
 };
-use tracing::warn;
-
-use dirs;
-
-use crate::constants::FUEL_TOOLCHAIN_TOML_FILE;
 
 pub const FUELUP_DIR: &str = ".fuelup";
 pub const FUELUP_HOME: &str = "FUELUP_HOME";
@@ -20,6 +17,17 @@ pub fn fuelup_dir() -> PathBuf {
 
 pub fn fuelup_bin_dir() -> PathBuf {
     fuelup_dir().join("bin")
+}
+
+/// Similar to fuelup_bin() but it never fails. If the fuelup binary is not found in $PATH, it
+/// returns the current executable binary path
+pub fn fuelup_bin_or_current_bin() -> PathBuf {
+    let fuelup_bin = fuelup_bin();
+    if fuelup_bin.exists() {
+        fuelup_bin
+    } else {
+        env::current_exe().unwrap()
+    }
 }
 
 pub fn fuelup_bin() -> PathBuf {
@@ -76,8 +84,6 @@ pub fn warn_existing_fuel_executables() -> Result<()> {
         vec![]
     }
 
-    let mut summary = String::new();
-
     for c in components {
         for e in c.executables {
             if let Some(path) = search_directories()
@@ -119,14 +125,11 @@ pub fn warn_existing_fuel_executables() -> Result<()> {
                 }
 
                 if !message.is_empty() {
-                    summary.push_str(&message);
-                    summary.push('\n');
+                    println_warn(message);
                 }
             }
         }
     }
-
-    warn!("{}", summary);
 
     Ok(())
 }

@@ -16,13 +16,12 @@ fn fuelup_show_latest() -> Result<()> {
         let stripped = strip_ansi_escapes::strip(cfg.fuelup(&["show"]).stdout);
         let stdout = String::from_utf8_lossy(&stripped);
         let target = TargetTriple::from_host().unwrap();
+        let fuelup_home = cfg.fuelup_dir();
+        let fuelup_home_str = fuelup_home.to_string_lossy();
+        let expected_stdout = format!(
+            r#"Default host: {target}
+fuelup home: {fuelup_home_str}
 
-        let mut lines = stdout.lines();
-        assert_eq!(lines.next().unwrap(), &format!("Default host: {target}"));
-        assert!(lines.next().unwrap().contains("fuelup home: "));
-
-        let expected_stdout = &format!(
-            r#"
 installed toolchains
 --------------------
 latest-{target} (default)
@@ -37,6 +36,7 @@ latest-{target} (default)
       - forc-deploy : 0.1.0
       - forc-run : 0.1.0
     - forc-crypto : 0.1.0
+    - forc-debug : 0.1.0
     - forc-doc : 0.1.0
     - forc-explore : 0.1.0
     - forc-fmt : 0.1.0
@@ -48,8 +48,7 @@ latest-{target} (default)
 "#
         );
 
-        assert!(stdout.contains(expected_stdout));
-        assert!(!stdout.contains("fuels versions"));
+        assert_eq!(stdout.to_string(), expected_stdout);
     })?;
     Ok(())
 }
@@ -60,14 +59,13 @@ fn fuelup_show_and_switch() -> Result<()> {
         cfg.fuelup(&["show"]);
         let mut stripped = strip_ansi_escapes::strip(cfg.fuelup(&["show"]).stdout);
         let mut stdout = String::from_utf8_lossy(&stripped);
-        let mut target = TargetTriple::from_host().unwrap();
+        let target = TargetTriple::from_host().unwrap();
+        let fuelup_home = cfg.fuelup_dir();
+        let fuelup_home_str = fuelup_home.to_string_lossy();
+        let expected_stdout = format!(
+            r#"Default host: {target}
+fuelup home: {fuelup_home_str}
 
-        let mut lines = stdout.lines();
-        assert_eq!(lines.next().unwrap(), &format!("Default host: {target}"));
-        assert!(lines.next().unwrap().contains("fuelup home: "));
-
-        let expected_stdout = &format!(
-            r#"
 installed toolchains
 --------------------
 latest-{target} (default)
@@ -82,6 +80,7 @@ latest-{target} (default)
       - forc-deploy : 0.1.0
       - forc-run : 0.1.0
     - forc-crypto : 0.1.0
+    - forc-debug : 0.1.0
     - forc-doc : 0.1.0
     - forc-explore : 0.1.0
     - forc-fmt : 0.1.0
@@ -92,16 +91,17 @@ latest-{target} (default)
   fuel-core-keygen : not found
 "#
         );
-        assert!(stdout.contains(expected_stdout));
-        assert!(!stdout.contains("fuels versions"));
+        assert_eq!(stdout, expected_stdout);
 
         cfg.fuelup(&["default", "nightly"]);
         stripped = strip_ansi_escapes::strip(cfg.fuelup(&["show"]).stdout);
         stdout = String::from_utf8_lossy(&stripped);
-        target = TargetTriple::from_host().unwrap();
+        let fuelup_home = cfg.fuelup_dir();
+        let fuelup_home_str = fuelup_home.to_string_lossy();
+        let expected_stdout = format!(
+            r#"Default host: {target}
+fuelup home: {fuelup_home_str}
 
-        let expected_stdout = &format!(
-            r#"
 installed toolchains
 --------------------
 latest-{target}
@@ -116,6 +116,7 @@ nightly-{target} (default)
       - forc-deploy : 0.2.0
       - forc-run : 0.2.0
     - forc-crypto : 0.2.0
+    - forc-debug : 0.2.0
     - forc-doc : 0.2.0
     - forc-explore : 0.2.0
     - forc-fmt : 0.2.0
@@ -126,8 +127,7 @@ nightly-{target} (default)
   fuel-core-keygen : not found
 "#
         );
-        assert!(stdout.contains(expected_stdout));
-        assert!(!stdout.contains("fuels versions"));
+        assert_eq!(stdout, expected_stdout);
     })?;
 
     Ok(())
@@ -139,15 +139,13 @@ fn fuelup_show_custom() -> Result<()> {
         cfg.fuelup(&["toolchain", "new", "my_toolchain"]);
         let stripped = strip_ansi_escapes::strip(cfg.fuelup(&["show"]).stdout);
         let stdout = String::from_utf8_lossy(&stripped);
+        let target = TargetTriple::from_host().unwrap();
+        let fuelup_home = cfg.fuelup_dir();
+        let fuelup_home_str = fuelup_home.to_string_lossy();
+        let expected_stdout = format!(
+            r#"Default host: {target}
+fuelup home: {fuelup_home_str}
 
-        let mut lines = stdout.lines();
-        assert_eq!(
-            lines.next().unwrap(),
-            &format!("Default host: {}", TargetTriple::from_host().unwrap())
-        );
-        assert!(lines.next().unwrap().contains("fuelup home: "));
-
-        let expected_stdout = r#"
 installed toolchains
 --------------------
 my_toolchain (default)
@@ -160,6 +158,7 @@ my_toolchain (default)
       - forc-deploy : not found
       - forc-run : not found
     - forc-crypto : not found
+    - forc-debug : not found
     - forc-doc : not found
     - forc-explore : not found
     - forc-fmt : not found
@@ -168,10 +167,10 @@ my_toolchain (default)
     - forc-wallet : not found
   fuel-core : not found
   fuel-core-keygen : not found
-"#;
+"#
+        );
 
-        assert!(stdout.contains(expected_stdout));
-        assert!(!stdout.contains("fuels versions"));
+        assert_eq!(stdout, expected_stdout);
     })?;
     Ok(())
 }
@@ -181,17 +180,13 @@ fn fuelup_show_override() -> Result<()> {
     testcfg::setup(FuelupState::LatestWithBetaOverride, &|cfg| {
         let stripped = strip_ansi_escapes::strip(cfg.fuelup(&["show"]).stdout);
         let stdout = String::from_utf8_lossy(&stripped);
-
-        let mut lines = stdout.lines();
-        assert_eq!(
-            lines.next().unwrap(),
-            &format!("Default host: {}", TargetTriple::from_host().unwrap())
-        );
-        assert!(lines.next().unwrap().contains("fuelup home: "));
-
         let target = TargetTriple::from_host().unwrap();
-        let expected_stdout = &format!(
-            r#"
+        let fuelup_home = cfg.fuelup_dir();
+        let fuelup_home_str = fuelup_home.to_string_lossy();
+        let expected_stdout = format!(
+            r#"Default host: {target}
+fuelup home: {fuelup_home_str}
+
 installed toolchains
 --------------------
 latest-{target} (default)
@@ -204,6 +199,7 @@ beta-1-{target} (override), path: {}
       - forc-deploy : not found
       - forc-run : not found
     - forc-crypto : not found
+    - forc-debug : not found
     - forc-doc : not found
     - forc-explore : not found
     - forc-fmt : not found
@@ -215,8 +211,7 @@ beta-1-{target} (override), path: {}
 "#,
             cfg.home.join(FUEL_TOOLCHAIN_TOML_FILE).display()
         );
-        assert!(stdout.contains(expected_stdout));
-        assert!(!stdout.contains("fuels versions"));
+        assert_eq!(stdout, expected_stdout);
     })?;
     Ok(())
 }
@@ -227,16 +222,14 @@ fn fuelup_show_latest_then_override() -> Result<()> {
         let mut stripped = strip_ansi_escapes::strip(cfg.fuelup(&["show"]).stdout);
         let mut stdout = String::from_utf8_lossy(&stripped);
 
-        let mut lines = stdout.lines();
-        assert_eq!(
-            lines.next().unwrap(),
-            &format!("Default host: {}", TargetTriple::from_host().unwrap())
-        );
-        assert!(lines.next().unwrap().contains("fuelup home: "));
-
         let target = TargetTriple::from_host().unwrap();
-        let expected_stdout = &format!(
-            r#"installed toolchains
+        let fuelup_home = cfg.fuelup_dir();
+        let fuelup_home_str = fuelup_home.to_string_lossy();
+        let expected_stdout = format!(
+            r#"Default host: {target}
+fuelup home: {fuelup_home_str}
+
+installed toolchains
 --------------------
 latest-{target} (default)
 nightly-{target}
@@ -250,6 +243,7 @@ latest-{target} (default)
       - forc-deploy : 0.1.0
       - forc-run : 0.1.0
     - forc-crypto : 0.1.0
+    - forc-debug : 0.1.0
     - forc-doc : 0.1.0
     - forc-explore : 0.1.0
     - forc-fmt : 0.1.0
@@ -260,9 +254,10 @@ latest-{target} (default)
   fuel-core-keygen : not found
 "#,
         );
-        assert!(stdout.contains(expected_stdout));
-        assert!(!stdout.contains("fuels versions"));
+        assert_eq!(stdout, expected_stdout);
 
+        let override_path = cfg.home.join(FUEL_TOOLCHAIN_TOML_FILE);
+        let ovveride_path_str = override_path.to_string_lossy();
         let toolchain_override = ToolchainOverride {
             cfg: OverrideCfg::new(
                 ToolchainCfg {
@@ -279,25 +274,25 @@ latest-{target} (default)
         stripped = strip_ansi_escapes::strip(cfg.fuelup(&["show"]).stdout);
         stdout = String::from_utf8_lossy(&stripped);
 
-        let mut lines = stdout.lines();
-        while let Some(line) = lines.next() {
-            if line.contains("active toolchain") {
-                // Skip the header line, '-----------------'
-                lines.next();
-                break;
-            }
-        }
+        let expected_stdout = format!(
+            r#"Default host: {target}
+fuelup home: {fuelup_home_str}
 
-        // Check that active toolchain is the override and that versions changed.
-        assert!(lines
-            .next()
-            .unwrap()
-            .starts_with(&format!("nightly-2022-08-30-{target} (override), path:")));
-        let expected_stdout = &r#"forc : 0.2.0
+installed toolchains
+--------------------
+latest-{target} (default)
+nightly-{target}
+nightly-2022-08-30-{target} (override)
+
+active toolchain
+----------------
+nightly-2022-08-30-{target} (override), path: {ovveride_path_str}
+  forc : 0.2.0
     - forc-client
       - forc-deploy : 0.2.0
       - forc-run : 0.2.0
     - forc-crypto : 0.2.0
+    - forc-debug : 0.2.0
     - forc-doc : 0.2.0
     - forc-explore : 0.2.0
     - forc-fmt : 0.2.0
@@ -306,9 +301,9 @@ latest-{target} (default)
     - forc-wallet : 0.2.0
   fuel-core : 0.2.0
   fuel-core-keygen : not found
-"#;
-        assert!(stdout.contains(expected_stdout));
-        assert!(!stdout.contains("fuels versions"));
+"#,
+        );
+        assert_eq!(stdout, expected_stdout);
     })?;
     Ok(())
 }

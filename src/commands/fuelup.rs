@@ -6,14 +6,17 @@ use crate::ops::fuelup_self::self_update;
 #[derive(Debug, Parser)]
 pub enum FuelupCommand {
     /// Updates fuelup
-    Update,
+    Update(UpdateCommand),
 }
 
 #[derive(Debug, Parser)]
-struct UpdateCommand {}
+pub struct UpdateCommand {
+    #[clap(long, short)]
+    pub force: bool,
+}
 
-pub fn exec() -> Result<()> {
-    if let Err(e) = self_update() {
+pub fn exec(force: bool) -> Result<()> {
+    if let Err(e) = self_update(force) {
         bail!("fuelup failed to update itself: {}", e)
     };
 

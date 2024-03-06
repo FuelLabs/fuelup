@@ -19,16 +19,16 @@ Run the following command:
 <!-- This section should have the default command to install fuelup -->
 <!-- install:example:start -->
 ```sh
-curl --proto '=https' --tlsv1.2 -sSf https://install.fuel.network/fuelup-init.sh | sh
+curl -fsSL https://install.fuel.network/ | sh
 ```
 <!-- install:example:end -->
 
-This will install `forc`, `forc-client`, `forc-fmt`, `forc-crypto`, `forc-lsp`, `forc-wallet` as well as `fuel-core` in `~/.fuelup/bin`. The script will ask for permission to add `~/.fuelup/bin` to your `PATH`.
+This will install `forc`, `forc-client`, `forc-fmt`, `forc-crypto`, `forc-debug`, `forc-lsp`, `forc-wallet` as well as `fuel-core` in `~/.fuelup/bin`. The script will ask for permission to add `~/.fuelup/bin` to your `PATH`.
 
 Otherwise, you can also pass `--no-modify-path` so that `fuelup-init` does not modify your `PATH` and will not ask for permission to do so:
 
 ```sh
-curl --proto '=https' --tlsv1.2 -sSf https://install.fuel.network/fuelup-init.sh | sh -s -- --no-modify-path
+curl -fsSL https://install.fuel.network/ | sh -s -- --no-modify-path
 ```
 
 Ensure that all components are downloaded and works:
@@ -40,6 +40,7 @@ fuel-core --version
 forc-deploy --version
 forc-fmt --version
 forc-crypto --version
+forc-debug --version
 forc-lsp --version
 forc-run --version
 ```

@@ -6,7 +6,7 @@ use tracing::{error, info};
 
 use crate::{
     download::{download_file_and_unpack, unpack_bins, DownloadCfg},
-    file::hard_or_symlink_file,
+    file::{get_bin_version, hard_or_symlink_file},
     path::{fuelup_bin, fuelup_bin_dir},
     target_triple::TargetTriple,
 };
@@ -18,7 +18,7 @@ pub fn attempt_install_self(download_cfg: DownloadCfg, dst: &Path) -> Result<()>
     Ok(())
 }
 
-pub fn self_update() -> Result<()> {
+pub fn self_update(force: bool) -> Result<()> {
     let download_cfg = DownloadCfg::new(
         component::FUELUP,
         TargetTriple::from_component(component::FUELUP)?,
@@ -26,6 +26,14 @@ pub fn self_update() -> Result<()> {
     )?;
 
     let fuelup_bin = fuelup_bin();
+
+    if !force && get_bin_version(&fuelup_bin).ok() == Some(download_cfg.version.clone()) {
+        info!(
+            "Already up to date (fuelup v{})",
+            download_cfg.version.to_string()
+        );
+        return Ok(());
+    }
 
     let fuelup_new_dir = tempfile::tempdir()?;
     let fuelup_new_dir_path = fuelup_new_dir.path();
@@ -67,7 +75,8 @@ pub fn self_update() -> Result<()> {
             "Failed to replace old fuelup with new fuelup: {}. Attempting to restore backup fuelup.",
         e);
         // If we have failed to replace the old fuelup for whatever reason, we want the backup.
-        // Although unlikely, should this last step fail, we will recommend to re-install fuelup using fuelup-init.
+        // Although unlikely, should this last step fail, we will recommend to re-install fuelup
+        // using fuelup-init.
         if let Err(e) = fs::copy(&fuelup_backup, &fuelup_bin) {
             bail!(
                 "Could not restore backup fuelup. {}

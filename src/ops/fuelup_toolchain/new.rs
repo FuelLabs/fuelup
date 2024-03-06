@@ -1,10 +1,9 @@
 use crate::commands::toolchain::NewCommand;
 use crate::path::{ensure_dir_exists, settings_file, toolchain_bin_dir, toolchains_dir};
 use crate::settings::SettingsFile;
+use crate::toolchain::Toolchain;
 use anyhow::bail;
 use anyhow::Result;
-use std::fs;
-use std::io;
 use tracing::info;
 
 pub fn new(command: NewCommand) -> Result<()> {
@@ -12,12 +11,7 @@ pub fn new(command: NewCommand) -> Result<()> {
 
     let toolchains_dir = toolchains_dir();
 
-    let toolchain_exists = toolchains_dir.is_dir()
-        && fs::read_dir(&toolchains_dir)?
-            .filter_map(io::Result::ok)
-            .filter(|e| e.path().is_dir())
-            .map(|e| e.file_name().into_string().ok().unwrap_or_default())
-            .any(|x| x == name);
+    let toolchain_exists = Toolchain::all()?.into_iter().any(|x| x == name);
 
     if toolchain_exists {
         bail!("Toolchain with name '{}' already exists", &name)

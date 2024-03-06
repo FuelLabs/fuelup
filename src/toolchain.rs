@@ -1,10 +1,10 @@
 use crate::channel::{self, Channel};
 use crate::constants::DATE_FORMAT;
 use crate::download::DownloadCfg;
-use crate::file::{hard_or_symlink_file, is_executable};
+use crate::file::{get_bin_version, hard_or_symlink_file, is_executable};
 use crate::path::{
     ensure_dir_exists, fuelup_bin_dir, fuelup_bin_or_current_bin, fuelup_tmp_dir, settings_file,
-    toolchain_bin_dir, toolchain_dir,
+    toolchain_bin_dir, toolchain_dir, toolchains_dir,
 };
 use crate::settings::SettingsFile;
 use crate::store::Store;
@@ -13,7 +13,7 @@ use anyhow::{bail, Context, Result};
 use component::{self, Components};
 use std::collections::VecDeque;
 use std::fmt;
-use std::fs::{remove_dir_all, remove_file};
+use std::fs::{read_dir, remove_dir_all, remove_file};
 use std::path::PathBuf;
 use std::process::Command;
 use std::str::FromStr;
@@ -245,6 +245,19 @@ impl Toolchain {
         })
     }
 
+    pub fn all() -> Result<Vec<String>> {
+        let toolchains_dir = toolchains_dir();
+        Ok(if !toolchains_dir.is_dir() {
+            vec![]
+        } else {
+            read_dir(&toolchains_dir)?
+                .filter_map(std::io::Result::ok)
+                .filter(|e| e.path().is_dir())
+                .map(|e| e.file_name().into_string().ok().unwrap_or_default())
+                .collect()
+        })
+    }
+
     pub fn from_path(toolchain: &str) -> Self {
         Self {
             name: toolchain.to_string(),
@@ -430,7 +443,49 @@ impl Toolchain {
         Ok(())
     }
 
+    /// Returns a list of all components that are installed in the toolchain
+    pub(crate) fn list_components_paths(&self) -> Result<Vec<PathBuf>> {
+        let store = Store::from_env()?;
+        let mut paths = Components::collect_publishables()?
+            .into_iter()
+            .filter(|component| self.has_component(&component.name))
+            .filter_map(|component| {
+                get_bin_version(&self.bin_path.join(&component.name))
+                    .ok()
+                    .map(|version| store.component_dir_path(&component.name, &version))
+            })
+            .collect::<Vec<_>>();
+        paths.sort();
+        paths.dedup();
+
+        Ok(paths)
+    }
+
+    /// Returns a list of all components that are unique to the toolchain (i.e not installed in
+    /// other toolchains)
+    pub fn list_unique_components_paths(&self) -> Result<Vec<PathBuf>> {
+        let mut other_components = Self::all()?
+            .into_iter()
+            .filter(|n| n != self.name.as_str())
+            .map(|y| Self::from_path(&y).list_components_paths())
+            .flat_map(|x| x.unwrap_or_default().into_iter())
+            .collect::<Vec<_>>();
+
+        other_components.sort();
+        other_components.dedup();
+
+        Ok(self
+            .list_components_paths()?
+            .into_iter()
+            .filter(|x| other_components.binary_search(x).is_err())
+            .collect::<Vec<_>>())
+    }
+
     pub fn uninstall_self(&self) -> Result<()> {
+        self.list_unique_components_paths()?
+            .into_iter()
+            .try_for_each(remove_dir_all)?;
+
         if self.exists() {
             remove_dir_all(self.path.clone())?
         }

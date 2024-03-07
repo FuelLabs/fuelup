@@ -9,6 +9,10 @@ pub fn println_error<X: Into<String>>(txt: X) {
     tracing::warn!("{}: {}", Colour::Red.paint("error"), txt.into());
 }
 
+pub fn println_info<X: Into<String>>(txt: X) {
+    tracing::info!("info: {}", txt.into());
+}
+
 pub fn println_warn<X: Into<String>>(txt: X) {
     tracing::warn!("{}: {}", Colour::Yellow.paint("warning"), txt.into());
 }

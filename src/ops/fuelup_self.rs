@@ -10,7 +10,7 @@ use tracing::{error, info};
 use crate::{
     download::{download_file_and_unpack, unpack_bins, DownloadCfg},
     file::{get_bin_version, hard_or_symlink_file, read_file, write_file},
-    fmt::{ask_user_yes_no_question, println_warn},
+    fmt::{ask_user_yes_no_question, println_info},
     path::{canonical_fuelup_dir, fuelup_bin, fuelup_bin_dir, fuelup_dir, FUELUP_DIR},
     shell::Shell,
     target_triple::TargetTriple,
@@ -42,7 +42,7 @@ fn remove_fuelup_from_path() -> Result<()> {
                 .collect::<Vec<_>>()
                 .join("\n");
             if is_modified {
-                println_warn(format!(
+                println_info(format!(
                     "{} has been updated to remove fuelup from $PATH",
                     rc.display()
                 ));
@@ -67,7 +67,7 @@ This will uninstall all Sway toolchains and data, and remove, {}/bin from your P
         remove_fuelup_from_path()?;
 
         for (info, path) in remove.into_iter() {
-            println_warn(info);
+            println_info(info);
             match remove_dir_all(&path) {
                 Ok(()) => {}
                 Err(e) => {

@@ -131,7 +131,7 @@ mod tests {
         let channel_path = std::env::current_dir()
             .unwrap()
             .join("tests/channel-fuel-latest-example.toml");
-        let channel_file = read_file("channel-fuel-latest-example", &channel_path).unwrap();
+        let channel_file = read_file("channel-fuel-latest-example", channel_path).unwrap();
         let channel = Channel::from_toml(&channel_file).unwrap();
 
         assert_eq!(channel.pkg.keys().len(), 2);
@@ -178,7 +178,7 @@ mod tests {
         let channel_path = std::env::current_dir()
             .unwrap()
             .join("tests/channel-fuel-nightly-example.toml");
-        let channel_file = read_file("channel-fuel-nightly-example", &channel_path).unwrap();
+        let channel_file = read_file("channel-fuel-nightly-example", channel_path).unwrap();
         let channel = Channel::from_toml(&channel_file).unwrap();
 
         assert_eq!(channel.pkg.keys().len(), 2);
@@ -223,7 +223,7 @@ mod tests {
         let channel_path = std::env::current_dir()
             .unwrap()
             .join("tests/channel-fuel-latest-example.toml");
-        let channel_file = read_file("channel-fuel-latest-example", &channel_path).unwrap();
+        let channel_file = read_file("channel-fuel-latest-example", channel_path).unwrap();
         let channel = Channel::from_toml(&channel_file).unwrap();
 
         let cfgs: Vec<DownloadCfg> = channel.build_download_configs();

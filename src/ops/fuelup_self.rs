@@ -23,25 +23,45 @@ pub fn attempt_install_self(download_cfg: DownloadCfg, dst: &Path) -> Result<()>
     Ok(())
 }
 
+#[inline]
+fn remove_path_from_content(file_content: &str) -> (bool, String) {
+    let mut is_modified = false;
+    let whole_definition = format!("PATH={}", FUELUP_DIR);
+    let suffix = format!("{}:", FUELUP_DIR);
+    let prefix = format!("{}:", FUELUP_DIR);
+    let lines = file_content
+        .trim_end_matches('\n')
+        .trim_end_matches('\r')
+        .lines()
+        .collect::<Vec<_>>();
+    let total_lines = lines.len();
+    let new_lines = lines
+        .into_iter()
+        .filter(|line| !line.trim_end().ends_with(&whole_definition))
+        .map(|line| {
+            if line.contains("PATH") && line.contains(FUELUP_DIR) {
+                is_modified = true;
+                line.trim()
+                    .replace(&suffix, "")
+                    .replace(&prefix, "")
+                    .replace(FUELUP_DIR, "")
+            } else {
+                line.to_owned()
+            }
+        })
+        .collect::<Vec<_>>();
+    (
+        is_modified || total_lines != new_lines.len(),
+        new_lines.join("\n"),
+    )
+}
+
 /// Removes the fuelup directory from $PATH
 fn remove_fuelup_from_path() -> Result<()> {
     for shell in Shell::all() {
         for rc in shell.rc_files().into_iter().filter(|c| c.is_file()) {
-            let file = read_file("rcfile", &rc)?;
-            let mut is_modified = false;
-            let new_content = file
-                .lines()
-                .filter(|line| {
-                    if line.contains("PATH") && line.contains(FUELUP_DIR) {
-                        is_modified = true;
-                        false
-                    } else {
-                        true
-                    }
-                })
-                .collect::<Vec<_>>()
-                .join("\n");
-            if is_modified {
+            let (was_modified, new_content) = remove_path_from_content(&read_file("rcfile", &rc)?);
+            if was_modified {
                 println_info(format!(
                     "{} has been updated to remove fuelup from $PATH",
                     rc.display()
@@ -173,4 +193,33 @@ You should re-install fuelup using fuelup-init:
     let _ = fs::remove_file(&fuelup_backup);
 
     Ok(())
+}
+
+#[cfg(test)]
+mod test {
+    use super::remove_path_from_content;
+    use crate::path::FUELUP_DIR;
+
+    #[test]
+    fn dont_modify() {
+        let content = "test\n\nbar\n";
+        let (was_modified, _) = remove_path_from_content(content);
+        assert!(!was_modified);
+    }
+
+    #[test]
+    fn remove_only_path() {
+        let content = format!("test\nPATH={}\nbar\n", FUELUP_DIR);
+        let (was_modified, content) = remove_path_from_content(&content);
+        assert!(was_modified);
+        assert_eq!("test\nbar", content);
+    }
+
+    #[test]
+    fn remove_subparts() {
+        let content = format!("test\nPATH={}:foo\nbar\n", FUELUP_DIR);
+        let (was_modified, content) = remove_path_from_content(&content);
+        assert!(was_modified);
+        assert_eq!("test\nPATH=foo\nbar", content);
+    }
 }

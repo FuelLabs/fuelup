@@ -202,7 +202,7 @@ allowed in the installation step (explained below), which means you can run them
 <pre><code class="language-sh">curl -fsSL https://install.fuel.network/ | sh
 </code></pre>
 <!-- install:example:end -->
-<p>This will install <code>forc</code>, <code>forc-client</code>, <code>forc-fmt</code>, <code>forc-crypto</code>, <code>forc-lsp</code>, <code>forc-wallet</code> as well as <code>fuel-core</code> in <code>~/.fuelup/bin</code>. The script will ask for permission to add <code>~/.fuelup/bin</code> to your <code>PATH</code>.</p>
+<p>This will install <code>forc</code>, <code>forc-client</code>, <code>forc-fmt</code>, <code>forc-crypto</code>, <code>forc-debug</code>, <code>forc-lsp</code>, <code>forc-wallet</code> as well as <code>fuel-core</code> in <code>~/.fuelup/bin</code>. The script will ask for permission to add <code>~/.fuelup/bin</code> to your <code>PATH</code>.</p>
 <p>Otherwise, you can also pass <code>--no-modify-path</code> so that <code>fuelup-init</code> does not modify your <code>PATH</code> and will not ask for permission to do so:</p>
 <pre><code class="language-sh">curl -fsSL https://install.fuel.network/ | sh -s -- --no-modify-path
 </code></pre>
@@ -213,6 +213,7 @@ fuel-core --version
 forc-deploy --version
 forc-fmt --version
 forc-crypto --version
+forc-debug --version
 forc-lsp --version
 forc-run --version
 </code></pre>
@@ -404,7 +405,8 @@ modular manner, and to specify specific versions of components to install.</p>
 with some built-in plugin executables, including but not limited to: <a href="https://fuellabs.github.io/sway/master/book/forc/plugins/forc_client/index.html"><code>forc-client</code></a>, <a href="https://fuellabs.github.io/sway/master/book/forc/plugins/forc_fmt.html"><code>forc-fmt</code></a> and <a href="https://fuellabs.github.io/sway/master/book/forc/plugins/forc_lsp.html"><code>forc-lsp</code></a>.</li>
 <li><a href="https://github.com/FuelLabs/fuel-core"><code>fuel-core</code></a> — Full node implementation of the Fuel v2 protocol, written in Rust.</li>
 <li><a href="https://fuellabs.github.io/sway/master/book/forc/plugins/forc_explore.html"><code>forc-explore</code></a> — A Forc plugin for running the Fuel Block Explorer.</li>
-<li><a href="https://fuellabs.github.io/sway/master/book/forc/plugins/forc_crypto.html"><code>forc-crypto</code></a> — Forc plugin for hashing arbitrary data.</li>
+<li><a href="https://fuellabs.github.io/sway/master/book/forc/plugins/forc_crypto.html"><code>forc-crypto</code></a> — A Forc plugin for hashing arbitrary data.</li>
+<li><a href="https://fuellabs.github.io/sway/master/book/forc/plugins/forc_debug.html"><code>forc-debug</code></a> — A Forc plugin for debugging via CLI and IDE.</li>
 <li><a href="https://github.com/FuelLabs/forc-wallet"><code>forc-wallet</code></a> - A Forc plugin for managing Fuel wallets.</li>
 <li><a href="https://github.com/FuelLabs/fuel-indexer"><code>fuel-indexer</code></a> - A standalone service that can be used to index various components of the Fuel blockchain.</li>
 <li><a href="https://github.com/FuelLabs/fuel-indexer"><code>forc-index</code></a> - A Forc plugin used to interact with a Fuel Indexer service.</li>

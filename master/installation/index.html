@@ -186,7 +186,7 @@ allowed in the installation step (explained below), which means you can run them
 <pre><code class="language-sh">curl -fsSL https://install.fuel.network/ | sh
 </code></pre>
 <!-- install:example:end -->
-<p>This will install <code>forc</code>, <code>forc-client</code>, <code>forc-fmt</code>, <code>forc-crypto</code>, <code>forc-lsp</code>, <code>forc-wallet</code> as well as <code>fuel-core</code> in <code>~/.fuelup/bin</code>. The script will ask for permission to add <code>~/.fuelup/bin</code> to your <code>PATH</code>.</p>
+<p>This will install <code>forc</code>, <code>forc-client</code>, <code>forc-fmt</code>, <code>forc-crypto</code>, <code>forc-debug</code>, <code>forc-lsp</code>, <code>forc-wallet</code> as well as <code>fuel-core</code> in <code>~/.fuelup/bin</code>. The script will ask for permission to add <code>~/.fuelup/bin</code> to your <code>PATH</code>.</p>
 <p>Otherwise, you can also pass <code>--no-modify-path</code> so that <code>fuelup-init</code> does not modify your <code>PATH</code> and will not ask for permission to do so:</p>
 <pre><code class="language-sh">curl -fsSL https://install.fuel.network/ | sh -s -- --no-modify-path
 </code></pre>
@@ -197,6 +197,7 @@ fuel-core --version
 forc-deploy --version
 forc-fmt --version
 forc-crypto --version
+forc-debug --version
 forc-lsp --version
 forc-run --version
 </code></pre>

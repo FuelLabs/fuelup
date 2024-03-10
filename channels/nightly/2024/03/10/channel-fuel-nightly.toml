@@ -1,0 +1,35 @@
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/8218587754"
+date = "2024-03-10"
+
+[pkg.forc]
+version = "0.51.1+nightly.20240310.13731d98b3"
+
+[pkg.forc.target.linux_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240310/forc-binaries-0.51.1%2Bnightly.20240310.13731d98b3-linux_amd64.tar.gz"
+hash = "adc554efa993e3836df5d19ee992698ce1040171ed37537762e4b65299ec1b8a"
+
+[pkg.forc.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240310/forc-binaries-0.51.1%2Bnightly.20240310.13731d98b3-linux_arm64.tar.gz"
+hash = "f4f3fa260ad45f1ed54466b9f1bd730d819d2b00b76598c1bf96863f551c3752"
+
+[pkg.fuel-core]
+version = "0.23.0+nightly.20240310.4110889668"
+
+[pkg.fuel-core.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240310/fuel-core-0.23.0%2Bnightly.20240310.4110889668-aarch64-unknown-linux-gnu.tar.gz"
+hash = "e5dca4ec2a5d1d595eec0e33d8c11405972533e60c71b9cfc89bf6782270c3f6"
+
+[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240310/fuel-core-0.23.0%2Bnightly.20240310.4110889668-x86_64-unknown-linux-gnu.tar.gz"
+hash = "d0596a66c5d6e34c3793380217424331c388f21590e1f6d2fbe502b1f428623e"
+
+[pkg.fuel-core-keygen]
+version = "0.23.0+nightly.20240310.4110889668"
+
+[pkg.fuel-core-keygen.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240310/fuel-core-0.23.0%2Bnightly.20240310.4110889668-aarch64-unknown-linux-gnu.tar.gz"
+hash = "e5dca4ec2a5d1d595eec0e33d8c11405972533e60c71b9cfc89bf6782270c3f6"
+
+[pkg.fuel-core-keygen.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20240310/fuel-core-0.23.0%2Bnightly.20240310.4110889668-x86_64-unknown-linux-gnu.tar.gz"
+hash = "d0596a66c5d6e34c3793380217424331c388f21590e1f6d2fbe502b1f428623e"

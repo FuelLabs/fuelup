@@ -1,13 +1,18 @@
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 use component::{self, Components};
-use std::{fs, path::Path};
+use std::{
+    fs::{self, remove_dir_all},
+    path::Path,
+};
 use tempfile;
 use tracing::{error, info};
 
 use crate::{
     download::{download_file_and_unpack, unpack_bins, DownloadCfg},
-    file::{get_bin_version, hard_or_symlink_file},
-    path::{fuelup_bin, fuelup_bin_dir},
+    file::{get_bin_version, hard_or_symlink_file, read_file, write_file},
+    fmt::{ask_user_yes_no_question, println_info},
+    path::{canonical_fuelup_dir, fuelup_bin, fuelup_bin_dir, fuelup_dir, FUELUP_DIR},
+    shell::Shell,
     target_triple::TargetTriple,
 };
 
@@ -16,6 +21,88 @@ pub fn attempt_install_self(download_cfg: DownloadCfg, dst: &Path) -> Result<()>
     unpack_bins(dst, dst)?;
 
     Ok(())
+}
+
+#[inline]
+fn remove_path_from_content(file_content: &str) -> (bool, String) {
+    let mut is_modified = false;
+    let whole_definition = format!("PATH={}", FUELUP_DIR);
+    let suffix = format!("{}:", FUELUP_DIR);
+    let prefix = format!("{}:", FUELUP_DIR);
+    let lines = file_content
+        .trim_end_matches('\n')
+        .trim_end_matches('\r')
+        .lines()
+        .collect::<Vec<_>>();
+    let total_lines = lines.len();
+    let new_lines = lines
+        .into_iter()
+        .filter(|line| !line.trim_end().ends_with(&whole_definition))
+        .map(|line| {
+            if line.contains("PATH") && line.contains(FUELUP_DIR) {
+                is_modified = true;
+                line.trim()
+                    .replace(&suffix, "")
+                    .replace(&prefix, "")
+                    .replace(FUELUP_DIR, "")
+            } else {
+                line.to_owned()
+            }
+        })
+        .collect::<Vec<_>>();
+    (
+        is_modified || total_lines != new_lines.len(),
+        new_lines.join("\n"),
+    )
+}
+
+/// Removes the fuelup directory from $PATH
+fn remove_fuelup_from_path() -> Result<()> {
+    for shell in Shell::all() {
+        for rc in shell.rc_files().into_iter().filter(|c| c.is_file()) {
+            let (was_modified, new_content) = remove_path_from_content(&read_file("rcfile", &rc)?);
+            if was_modified {
+                println_info(format!(
+                    "{} has been updated to remove fuelup from $PATH",
+                    rc.display()
+                ));
+                write_file(rc, &new_content)?;
+            }
+        }
+    }
+    Ok(())
+}
+
+pub fn self_uninstall(force: bool) -> Result<()> {
+    println!(
+        r#"Thanks for hacking in Sway!
+This will uninstall all Sway toolchains and data, and remove, {}/bin from your PATH environment variable."#,
+        canonical_fuelup_dir()?,
+    );
+    if force || ask_user_yes_no_question("Continue? (y/N)").context("Console I/O")? {
+        let remove = [
+            ("removing fuelup binaries", fuelup_bin_dir()),
+            ("removing fuelup home", fuelup_dir()),
+        ];
+        remove_fuelup_from_path()?;
+
+        for (info, path) in remove.into_iter() {
+            println_info(info);
+            match remove_dir_all(&path) {
+                Ok(()) => {}
+                Err(e) => {
+                    if e.kind() == std::io::ErrorKind::NotFound {
+                        continue;
+                    }
+                    bail!("Failed to remove {}: {}", path.display(), e.to_string());
+                }
+            }
+        }
+
+        Ok(())
+    } else {
+        Ok(())
+    }
 }
 
 pub fn self_update(force: bool) -> Result<()> {
@@ -106,4 +193,33 @@ You should re-install fuelup using fuelup-init:
     let _ = fs::remove_file(&fuelup_backup);
 
     Ok(())
+}
+
+#[cfg(test)]
+mod test {
+    use super::remove_path_from_content;
+    use crate::path::FUELUP_DIR;
+
+    #[test]
+    fn dont_modify() {
+        let content = "test\n\nbar\n";
+        let (was_modified, _) = remove_path_from_content(content);
+        assert!(!was_modified);
+    }
+
+    #[test]
+    fn remove_only_path() {
+        let content = format!("test\nPATH={}\nbar\n", FUELUP_DIR);
+        let (was_modified, content) = remove_path_from_content(&content);
+        assert!(was_modified);
+        assert_eq!("test\nbar", content);
+    }
+
+    #[test]
+    fn remove_subparts() {
+        let content = format!("test\nPATH={}:foo\nbar\n", FUELUP_DIR);
+        let (was_modified, content) = remove_path_from_content(&content);
+        assert!(was_modified);
+        assert_eq!("test\nPATH=foo\nbar", content);
+    }
 }

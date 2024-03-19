@@ -106,7 +106,7 @@ mod tests {
             .unwrap()
             .join("tests/settings-example.toml");
 
-        let settings_file = read_file("settings-example", &settings_path).unwrap();
+        let settings_file = read_file("settings-example", settings_path).unwrap();
         let settings = Settings::parse(&settings_file).unwrap();
 
         assert_eq!(

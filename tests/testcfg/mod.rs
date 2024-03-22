@@ -171,6 +171,7 @@ fn create_fuel_executable(exe_name: &str, path: &Path, version: &Version) -> std
 
     let mut exe = fs::OpenOptions::new()
         .create(true)
+        .truncate(true)
         .write(true)
         .mode(0o770)
         .open(path)?;

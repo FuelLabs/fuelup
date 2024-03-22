@@ -49,9 +49,8 @@ impl Component {
         components
             .component
             .get(name)
-            .ok_or_else(|| anyhow!("component with name '{}' does not exist", name))
-            .map(|c| c.clone())
-    }
+            .ok_or_else(|| anyhow!("component with name '{}' does not exist", name)).cloned()
+        }
 
     pub fn is_default_forc_plugin(name: &str) -> bool {
         (Self::from_name(FORC)

@@ -16,3 +16,5 @@ pub const CHANNEL_BETA_5_FILE_NAME: &str = "channel-fuel-beta-5.toml";
 
 pub const DATE_FORMAT: &[FormatItem] = format_description!("[year]-[month]-[day]");
 pub const DATE_FORMAT_URL_FRIENDLY: &[FormatItem] = format_description!("[year]/[month]/[day]");
+pub const VALID_CHANNEL_STR: &str =
+    "<latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4>";

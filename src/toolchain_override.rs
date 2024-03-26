@@ -1,3 +1,9 @@
+use crate::channel::{is_beta_toolchain, LATEST, NIGHTLY};
+use crate::constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE, VALID_CHANNEL_STR};
+use crate::toolchain::{DistToolchainDescription, DistToolchainName, Toolchain};
+use crate::{
+    download::DownloadCfg, file, path::get_fuel_toolchain_toml, target_triple::TargetTriple,
+};
 use anyhow::{bail, Result};
 use semver::Version;
 use serde::de::Error;
@@ -7,15 +13,8 @@ use std::fmt;
 use std::str::FromStr;
 use std::{collections::HashMap, path::PathBuf};
 use time::Date;
-use toml_edit::{de, ser, value, Document};
+use toml_edit::{de, ser, Document, Key, Table, Value};
 use tracing::{info, warn};
-
-use crate::channel::{is_beta_toolchain, LATEST, NIGHTLY};
-use crate::constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE};
-use crate::toolchain::{DistToolchainDescription, Toolchain};
-use crate::{
-    download::DownloadCfg, file, path::get_fuel_toolchain_toml, target_triple::TargetTriple,
-};
 
 // For composability with other functionality of fuelup, we want to add
 // additional info to OverrideCfg (representation of 'fuel-toolchain.toml').
@@ -69,7 +68,7 @@ where
         |_| {
             Err(Error::invalid_value(
                 serde::de::Unexpected::Str(&channel_str),
-                &"one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4>",
+                &format!("one of {}", VALID_CHANNEL_STR).as_str(),
             ))
         },
         Result::Ok,
@@ -97,8 +96,8 @@ impl FromStr for Channel {
 
         if let Some((name, d)) = s.split_once('-') {
             Ok(Self {
-                name: name.to_string(),
-                date: Date::parse(d, DATE_FORMAT).ok(),
+                name: DistToolchainName::from_str(name)?.to_string(),
+                date: Some(Date::parse(d, DATE_FORMAT)?),
             })
         } else {
             if s == LATEST || s == NIGHTLY {
@@ -121,11 +120,20 @@ impl ToolchainOverride {
     pub fn to_toml(&self) -> Document {
         let mut document = toml_edit::Document::new();
 
-        document["toolchain"]["channel"] = value(self.cfg.toolchain.channel.to_string());
+        let mut toolchain_table = Table::from_iter(vec![(
+            Key::from("channel"),
+            Value::from(self.cfg.toolchain.channel.to_string()),
+        )]);
+        toolchain_table.sort_values();
+        document.insert("toolchain", toml_edit::Item::Table(toolchain_table));
         if let Some(components) = &self.cfg.components {
-            for (k, v) in components.iter() {
-                document["components"][k] = value(v.to_string());
-            }
+            let mut components_table = Table::from_iter(
+                components
+                    .iter()
+                    .map(|(k, v)| (Key::from(k), Value::from(v.to_string()))),
+            );
+            components_table.sort_values();
+            document.insert("components", toml_edit::Item::Table(components_table));
         }
         document
     }
@@ -258,17 +266,25 @@ channel = "nightly"
         let result = OverrideCfg::from_toml(LATEST);
         assert!(result.is_err());
         let e = result.unwrap_err();
-        assert_eq!(e
-            .to_string(),
-            "invalid value: string \"latest\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4> for key `toolchain.channel`".to_string());
+        assert_eq!(
+            e.to_string(),
+            format!(
+                "invalid value: string \"latest\", expected one of {} for key `toolchain.channel`",
+                VALID_CHANNEL_STR
+            )
+        );
 
         let result = OverrideCfg::from_toml(NIGHTLY);
         assert!(result.is_err());
         let e = result.unwrap_err();
 
-        assert_eq!(e
-            .to_string(),
-            "invalid value: string \"nightly\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4> for key `toolchain.channel`".to_string());
+        assert_eq!(
+            e.to_string(),
+            format!(
+                "invalid value: string \"nightly\", expected one of {} for key `toolchain.channel`",
+                VALID_CHANNEL_STR
+            )
+        );
     }
 
     #[test]

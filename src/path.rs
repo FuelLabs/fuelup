@@ -2,6 +2,7 @@ use crate::{constants::FUEL_TOOLCHAIN_TOML_FILE, fmt::println_warn};
 use anyhow::{bail, Result};
 use component::Components;
 use dirs;
+use std::borrow::Cow;
 use std::env;
 use std::{
     fs,
@@ -10,6 +11,26 @@ use std::{
 
 pub const FUELUP_DIR: &str = ".fuelup";
 pub const FUELUP_HOME: &str = "FUELUP_HOME";
+
+#[cfg(windows)]
+const CANONICAL_FUEL_HOME: &str = r"%USERPROFILE%\.fuelup";
+#[cfg(not(windows))]
+const CANONICAL_FUEL_HOME: &str = "$HOME/.fuelup";
+
+/// `FUEL_HOME` suitable for display, possibly with $HOME
+/// substituted for the directory prefix
+pub fn canonical_fuelup_dir() -> Result<Cow<'static, str>> {
+    let path = fuelup_dir();
+
+    let default_fuelup_home = dirs::home_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join(".fuelup");
+    Ok(if default_fuelup_home == path {
+        CANONICAL_FUEL_HOME.into()
+    } else {
+        path.to_string_lossy().into_owned().into()
+    })
+}
 
 pub fn fuelup_dir() -> PathBuf {
     dirs::home_dir().unwrap().join(FUELUP_DIR)

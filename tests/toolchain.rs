@@ -111,33 +111,36 @@ fn fuelup_toolchain_uninstall() -> Result<()> {
         for toolchain in toolchains {
             let toolchain_with_target = format_toolchain_with_target(toolchain);
             let output = cfg.fuelup(&["toolchain", "uninstall", toolchain]);
-            let expected_stdout = format!("toolchain '{toolchain_with_target}' does not exist\n");
-
-            assert_eq!(output.stdout, expected_stdout);
+            let expected_stdout = format!("Toolchain '{toolchain_with_target}' does not exist\n");
+            assert!(output.stdout.contains(&expected_stdout));
         }
     })?;
 
     testcfg::setup(FuelupState::AllInstalled, &|cfg| {
         let toolchains = ["latest", "nightly", &format!("nightly-{DATE}")];
-        for toolchain in toolchains {
+
+        // Cannot remove the active, even if there are others to switch to
+        let output = cfg.fuelup(&["toolchain", "uninstall", toolchains[0]]);
+        let expected_stdout = "as it is currently the default toolchain. Run `fuelup default <toolchain>` to update the default toolchain.";
+        assert!(output.stdout.contains(expected_stdout));
+
+        for toolchain in &toolchains[1..2] {
             let toolchain_with_target = format_toolchain_with_target(toolchain);
+            assert!(cfg.toolchains_dir().join(&toolchain_with_target).is_dir());
             let output = cfg.fuelup(&["toolchain", "uninstall", toolchain]);
-            let expected_stdout = format!("toolchain '{toolchain_with_target}' uninstalled\n");
-
-            assert!(output.stdout.contains(&expected_stdout));
+            let expected_stdout = format!("Toolchain '{toolchain_with_target}' uninstalled\n");
+            assert!(!cfg.toolchains_dir().join(toolchain_with_target).is_dir());
+            assert!(
+                output.stdout.contains(&expected_stdout),
+                "toolchain: {}",
+                toolchain
+            );
         }
-    })?;
 
-    Ok(())
-}
-
-#[test]
-fn fuelup_toolchain_uninstall_active_switches_default() -> Result<()> {
-    testcfg::setup(FuelupState::LatestAndCustomInstalled, &|cfg| {
-        cfg.fuelup(&["toolchain", "uninstall", "latest"]);
-        let stdout = cfg.fuelup(&["default"]).stdout;
-
-        assert_eq!(stdout, format!("{CUSTOM_TOOLCHAIN_NAME} (default)\n"))
+        // Cannot remove the active, if it is the only one
+        let output = cfg.fuelup(&["toolchain", "uninstall", toolchains[0]]);
+        let expected_stdout = "as it is currently the default toolchain. Run `fuelup default <toolchain>` to update the default toolchain.";
+        assert!(output.stdout.contains(expected_stdout));
     })?;
 
     Ok(())

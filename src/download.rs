@@ -210,7 +210,11 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
 
     let handle = build_agent()?;
 
-    let mut file = OpenOptions::new().write(true).create(true).open(path)?;
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .open(path)?;
 
     for _ in 1..RETRY_ATTEMPTS {
         match handle.get(url).call() {

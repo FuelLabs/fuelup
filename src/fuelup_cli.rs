@@ -51,7 +51,8 @@ pub fn fuelup_cli() -> Result<()> {
         Commands::Component(command) => component::exec(command),
         Commands::Default_(command) => default::exec(command),
         Commands::Fuelup(command) => match command {
-            FuelupCommand::Update(update) => fuelup::exec(update.force),
+            FuelupCommand::Update(update) => fuelup::update_exec(update.force),
+            FuelupCommand::Uninstall(remove) => fuelup::remove_exec(remove.force),
         },
         Commands::Show(_command) => show::exec(),
         Commands::Toolchain(command) => toolchain::exec(command),

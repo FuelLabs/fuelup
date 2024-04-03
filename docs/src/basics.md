@@ -36,9 +36,17 @@ fuelup self update
 
 ## Using Http Proxy
 
-To configure `fuelup` to use your proxy setting you can change `http_proxy` environment value. The value format is in [libcurl format](https://everything.curl.dev/libcurl/proxies#proxy-types) as in `[protocol://]host[:port]`.
+To configure `fuelup` to use your proxy setting you can change `http_proxy`(***other optional enviroments see below***) environment value. The value format is in [libcurl format](https://everything.curl.dev/usingcurl/proxies/type.html) as in `[protocol://]host[:port]`.
 
-***Warning: don't leave `http_proxy` environment with empty string or other invalid format***
+### Supported proxy enviroment variables
+- http_proxy
+- HTTP_PROXY
+- https_proxy
+- HTTPS_PROXY
+- all_proxy
+- ALL_PROXY
+
+***Warning: don't leave all proxy environment with empty string or other invalid format***
 
 ## Help system
 

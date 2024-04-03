@@ -192,6 +192,18 @@ by running:</p>
 <pre><code class="language-sh">fuelup self update
 </code></pre>
 <!-- update_fuelup:example:end -->
+<h2 id="using-http-proxy"><a class="header" href="#using-http-proxy">Using Http Proxy</a></h2>
+<p>To configure <code>fuelup</code> to use your proxy setting you can change <code>http_proxy</code>(<em><strong>other optional enviroments see below</strong></em>) environment value. The value format is in <a href="https://everything.curl.dev/usingcurl/proxies/type.html">libcurl format</a> as in <code>[protocol://]host[:port]</code>.</p>
+<h3 id="supported-proxy-enviroment-variables"><a class="header" href="#supported-proxy-enviroment-variables">Supported proxy enviroment variables</a></h3>
+<ul>
+<li>http_proxy</li>
+<li>HTTP_PROXY</li>
+<li>https_proxy</li>
+<li>HTTPS_PROXY</li>
+<li>all_proxy</li>
+<li>ALL_PROXY</li>
+</ul>
+<p><em><strong>Warning: don't leave all proxy environment with empty string or other invalid format</strong></em></p>
 <h2 id="help-system"><a class="header" href="#help-system">Help system</a></h2>
 <p>The <code>fuelup</code> command-line is built with <a href="https://github.com/clap-rs/clap">clap</a>, which serves a nice, built-in help system
 that provides more information about each command. Run <code>fuelup help</code> for an overview. Detailed

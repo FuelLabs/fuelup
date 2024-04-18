@@ -28,6 +28,7 @@ pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
     channel::BETA_4,
     channel::BETA_5,
     channel::NIGHTLY,
+    channel::PREVIEW,
     // Stable is reserved, although currently unused.
     channel::STABLE,
 ];
@@ -41,6 +42,7 @@ pub enum DistToolchainName {
     Beta5,
     Latest,
     Nightly,
+    Preview,
 }
 
 impl fmt::Display for DistToolchainName {
@@ -53,6 +55,7 @@ impl fmt::Display for DistToolchainName {
             DistToolchainName::Beta3 => write!(f, "{}", channel::BETA_3),
             DistToolchainName::Beta4 => write!(f, "{}", channel::BETA_4),
             DistToolchainName::Beta5 => write!(f, "{}", channel::BETA_5),
+            DistToolchainName::Preview => write!(f, "{}", channel::PREVIEW),
         }
     }
 }
@@ -68,6 +71,7 @@ impl FromStr for DistToolchainName {
             channel::BETA_3 => Ok(Self::Beta3),
             channel::BETA_4 => Ok(Self::Beta4),
             channel::BETA_5 => Ok(Self::Beta5),
+            channel::PREVIEW => Ok(Self::Preview),
             _ => bail!("Unknown name for toolchain: {}", s),
         }
     }

@@ -1,12 +1,18 @@
 use anyhow::{bail, Result};
 use clap::Parser;
+use serde::Deserialize;
+use std::io::{stdin, BufReader};
+use std::str::FromStr;
 
+use crate::constants::VALID_CHANNEL_STR;
+use crate::ops::fuelup_toolchain::export::export;
 use crate::ops::fuelup_toolchain::install::install;
 use crate::ops::fuelup_toolchain::list_revisions::list_revisions;
 use crate::ops::fuelup_toolchain::new::new;
 use crate::ops::fuelup_toolchain::uninstall::uninstall;
 use crate::target_triple::TargetTriple;
 use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
+use crate::toolchain_override;
 
 #[derive(Debug, Parser)]
 pub enum ToolchainCommand {
@@ -18,6 +24,8 @@ pub enum ToolchainCommand {
     Uninstall(UninstallCommand),
     /// Fetch the list of published `latest` toolchains, starting from the most recent
     ListRevisions(ListRevisionsCommand),
+    /// Export the toolchain info into fuel-toolchain.toml
+    Export(ExportCommand),
 }
 
 #[derive(Debug, Parser)]
@@ -42,6 +50,20 @@ pub struct UninstallCommand {
 #[derive(Debug, Parser)]
 pub struct ListRevisionsCommand {}
 
+#[derive(Debug, Deserialize, Parser)]
+pub struct ExportCommand {
+    /// Toolchain to export, [possible values: latest, beta-1, beta-2, beta-3, beta-4, nightly].
+    /// The default toolchain will be exported if name isn't specified
+    pub name: Option<String>,
+    /// Channel to export, [possible values: latest-YYYY-MM-DD, nightly-YYYY-MM-DD, beta-1, beta-2, beta-3, beta-4].
+    #[clap(value_parser = channel_allowed)]
+    #[arg(short, long)]
+    pub channel: Option<String>,
+    /// Forces exporting the toolchain, replacing any existing toolchain override file
+    #[arg(short, long)]
+    pub force: bool,
+}
+
 fn name_allowed(s: &str) -> Result<String> {
     let name = match s.split_once('-') {
         Some((prefix, target_triple)) => {
@@ -64,12 +86,27 @@ fn name_allowed(s: &str) -> Result<String> {
     }
 }
 
+fn channel_allowed(channel: &str) -> Result<String> {
+    if channel.is_empty() {
+        return Ok(channel.to_string());
+    }
+    if toolchain_override::Channel::from_str(channel).is_err() {
+        bail!(
+            "Invalid channel '{}', expected one of {}.",
+            channel,
+            VALID_CHANNEL_STR,
+        );
+    }
+    Ok(channel.to_string())
+}
+
 pub fn exec(command: ToolchainCommand) -> Result<()> {
     match command {
         ToolchainCommand::Install(command) => install(command)?,
         ToolchainCommand::New(command) => new(command)?,
         ToolchainCommand::Uninstall(command) => uninstall(command)?,
         ToolchainCommand::ListRevisions(command) => list_revisions(command)?,
+        ToolchainCommand::Export(command) => export(command, BufReader::new(stdin()))?,
     };
 
     Ok(())

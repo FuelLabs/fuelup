@@ -113,8 +113,9 @@ pub fn self_update(force: bool) -> Result<()> {
     )?;
 
     let fuelup_bin = fuelup_bin();
+    let fuelup_version = get_bin_version(&fuelup_bin).ok();
 
-    if !force && get_bin_version(&fuelup_bin).ok() == Some(download_cfg.version.clone()) {
+    if !force && fuelup_version >= Some(download_cfg.version.clone()) {
         info!(
             "Already up to date (fuelup v{})",
             download_cfg.version.to_string()

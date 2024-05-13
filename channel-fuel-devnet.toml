@@ -1,0 +1,96 @@
+date = "2024-04-17"
+
+[pkg.forc]
+version = "0.54.0"
+
+[pkg.forc.target.linux_amd64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.54.0/forc-binaries-linux_amd64.tar.gz"
+hash = "31cb7e90ca7785c5e7ed88278dd7fc71ce0e8b0d97cda45d65aefae0ef179815"
+
+[pkg.forc.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.54.0/forc-binaries-linux_arm64.tar.gz"
+hash = "65ea13675c5ced8b26e89d0a04e1b7253b059a1982ba76648d9493876f6bc99e"
+
+[pkg.forc.target.darwin_amd64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.54.0/forc-binaries-darwin_amd64.tar.gz"
+hash = "30e6b340635f62fe7153f191f1df2417528d3e60b0199fa7703407433de92ec9"
+
+[pkg.forc.target.darwin_arm64]
+url = "https://github.com/FuelLabs/sway/releases/download/v0.54.0/forc-binaries-darwin_arm64.tar.gz"
+hash = "06492099453e486fcbd6abbdd31d966eebe80f34747e9f013f8bba50c43f33f3"
+
+[pkg.forc-explore]
+version = "0.28.1"
+
+[pkg.forc-explore.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-aarch64-unknown-linux-gnu.tar.gz"
+hash = "8f7ade34ff611eb8ffaea2ec0bd33f5bbf6de6b05aad2bcd39a3a62309ef3a41"
+
+[pkg.forc-explore.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-x86_64-unknown-linux-gnu.tar.gz"
+hash = "b0bfe8ddb4b0a962bc2ce956385392c7dae3f19f3ca97a90aba88f8d5b5f183c"
+
+[pkg.forc-explore.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-aarch64-apple-darwin.tar.gz"
+hash = "4c437e84b4f95e55c97d32595a4d529b3dcb78ebec06f07babccde74e1827566"
+
+[pkg.forc-explore.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-x86_64-apple-darwin.tar.gz"
+hash = "9ef1d8af2c5a611d33f8966881197bd4958da05e4b325eb0dc847b84ea1eac96"
+
+[pkg.forc-wallet]
+version = "0.6.0"
+
+[pkg.forc-wallet.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.6.0/forc-wallet-0.6.0-aarch64-unknown-linux-gnu.tar.gz"
+hash = "9f55aec8529172570a710a121ecedae53503fc7a60fba3a724e0fadc4671d41f"
+
+[pkg.forc-wallet.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.6.0/forc-wallet-0.6.0-x86_64-unknown-linux-gnu.tar.gz"
+hash = "9248ae7f3a27c884bda9e71d9bdfa0602d286fbaee24b7cf28f19443de88ac4f"
+
+[pkg.forc-wallet.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.6.0/forc-wallet-0.6.0-aarch64-apple-darwin.tar.gz"
+hash = "30be1d31bee6208faf1f5a0b67625b330c61997f7b54396d15636adb61620a37"
+
+[pkg.forc-wallet.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.6.0/forc-wallet-0.6.0-x86_64-apple-darwin.tar.gz"
+hash = "c4fa0cf99b28f17b5a4f999d66cc88f77b9a28c8329411342efd927361d7741b"
+
+[pkg.fuel-core]
+version = "0.24.2"
+
+[pkg.fuel-core.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.24.2/fuel-core-0.24.2-aarch64-unknown-linux-gnu.tar.gz"
+hash = "0b68f1f0696fa43b9f5d6916be2a033312d530dec6ccf19f72c199fccc6b6cf6"
+
+[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.24.2/fuel-core-0.24.2-x86_64-unknown-linux-gnu.tar.gz"
+hash = "13fe22bfe070afd14c31ff6c8f49824074e121c657c865906699f0437d1f713d"
+
+[pkg.fuel-core.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.24.2/fuel-core-0.24.2-aarch64-apple-darwin.tar.gz"
+hash = "7298df1a4729bb0c0ae95dffa182fab06fddcc1b09df90e7892270b95dd141ff"
+
+[pkg.fuel-core.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.24.2/fuel-core-0.24.2-x86_64-apple-darwin.tar.gz"
+hash = "323ef28c6338a1a67cac2c7d515db57b70460da0327090766e915caf7c232060"
+
+[pkg.fuel-core-keygen]
+version = "0.24.2"
+
+[pkg.fuel-core-keygen.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.24.2/fuel-core-0.24.2-aarch64-unknown-linux-gnu.tar.gz"
+hash = "0b68f1f0696fa43b9f5d6916be2a033312d530dec6ccf19f72c199fccc6b6cf6"
+
+[pkg.fuel-core-keygen.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.24.2/fuel-core-0.24.2-x86_64-unknown-linux-gnu.tar.gz"
+hash = "13fe22bfe070afd14c31ff6c8f49824074e121c657c865906699f0437d1f713d"
+
+[pkg.fuel-core-keygen.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.24.2/fuel-core-0.24.2-aarch64-apple-darwin.tar.gz"
+hash = "7298df1a4729bb0c0ae95dffa182fab06fddcc1b09df90e7892270b95dd141ff"
+
+[pkg.fuel-core-keygen.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/fuel-core/releases/download/v0.24.2/fuel-core-0.24.2-x86_64-apple-darwin.tar.gz"
+hash = "323ef28c6338a1a67cac2c7d515db57b70460da0327090766e915caf7c232060"

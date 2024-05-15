@@ -43,6 +43,7 @@ pub enum DistToolchainName {
     Latest,
     Nightly,
     Devnet,
+    Testnet,
 }
 
 impl fmt::Display for DistToolchainName {
@@ -56,6 +57,7 @@ impl fmt::Display for DistToolchainName {
             DistToolchainName::Beta4 => write!(f, "{}", channel::BETA_4),
             DistToolchainName::Beta5 => write!(f, "{}", channel::BETA_5),
             DistToolchainName::Devnet => write!(f, "{}", channel::DEVNET),
+            DistToolchainName::Testnet => write!(f, "{}", channel::TESTNET),
         }
     }
 }
@@ -72,6 +74,7 @@ impl FromStr for DistToolchainName {
             channel::BETA_4 => Ok(Self::Beta4),
             channel::BETA_5 => Ok(Self::Beta5),
             channel::DEVNET => Ok(Self::Devnet),
+            channel::TESTNET => Ok(Self::Testnet),
             _ => bail!("Unknown name for toolchain: {}", s),
         }
     }

@@ -14,6 +14,7 @@ pub const CHANNEL_BETA_3_FILE_NAME: &str = "channel-fuel-beta-3.toml";
 pub const CHANNEL_BETA_4_FILE_NAME: &str = "channel-fuel-beta-4.toml";
 pub const CHANNEL_BETA_5_FILE_NAME: &str = "channel-fuel-beta-5.toml";
 pub const CHANNEL_DEVNET_FILE_NAME: &str = "channel-fuel-devnet.toml";
+pub const CHANNEL_TESTNET_FILE_NAME: &str = "channel-fuel-testnet.toml";
 
 pub const DATE_FORMAT: &[FormatItem] = format_description!("[year]-[month]-[day]");
 pub const DATE_FORMAT_URL_FRIENDLY: &[FormatItem] = format_description!("[year]/[month]/[day]");

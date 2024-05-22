@@ -23,12 +23,10 @@ jobs:
       - name: Deploy master
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.REPO_TOKEN }}
           publish_dir: ./docs/book
           destination_dir: master
           cname: install.fuel.network
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
         if: github.ref == 'refs/heads/master'
 
       - name: Get tag
@@ -40,12 +38,10 @@ jobs:
       - name: Deploy tag
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.REPO_TOKEN }}
           publish_dir: ./docs/book
           destination_dir: ${{ steps.branch_name.outputs.BRANCH_NAME }}
           cname: install.fuel.network
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
         if: startsWith(github.ref, 'refs/tags')
 
       - name: Create latest HTML redirect file
@@ -62,10 +58,8 @@ jobs:
       - name: Set latest to point to tag
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.REPO_TOKEN }}
           publish_dir: ./latest/
           destination_dir: ./latest/
           cname: install.fuel.network
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
         if: startsWith(github.ref, 'refs/tags')

@@ -49,7 +49,7 @@ jobs:
       - name: Deploy latest fuelup version
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.REPO_TOKEN }}
           keep_files: true
           publish_dir: ${{ env.FUELUP_VERSION_DIR }}
           destination_dir: ./

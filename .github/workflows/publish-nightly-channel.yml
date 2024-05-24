@@ -45,6 +45,8 @@ jobs:
           publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
           keep_files: true
           destination_dir: ./
+          user_name: 'fuel-service-user'
+          user_email: 'fuel-service-user@users.noreply.github.com'
 
       - name: Deploy nightly channel (archive)
         uses: peaceiris/actions-gh-pages@v3
@@ -53,6 +55,8 @@ jobs:
           publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
           keep_files: true
           destination_dir: ${{ steps.setup.outputs.archive_dir }}
+          user_name: 'fuel-service-user'
+          user_email: 'fuel-service-user@users.noreply.github.com'
 
       - name: Notify if Job Fails
         uses: ravsamhq/notify-slack-action@v1

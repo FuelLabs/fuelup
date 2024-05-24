@@ -36,6 +36,8 @@ jobs:
           keep_files: true
           publish_dir: ${{ env.FUELUP_INIT_DIR }}
           destination_dir: ./
+          user_name: 'fuel-service-user'
+          user_email: 'fuel-service-user@users.noreply.github.com'
 
       - name: Get latest tag and copy into fuelup-version
         run: |
@@ -53,3 +55,5 @@ jobs:
           keep_files: true
           publish_dir: ${{ env.FUELUP_VERSION_DIR }}
           destination_dir: ./
+          user_name: 'fuel-service-user'
+          user_email: 'fuel-service-user@users.noreply.github.com'

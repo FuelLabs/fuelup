@@ -43,7 +43,7 @@ enum Commands {
     Show(ShowCommand),
     /// Updates the distributable toolchains, if already installed
     Update(UpdateCommand),
-    /// Update fuelup itself to latest, switches to latest channel and checks for updates for the components.
+    /// Updates fuelup itself, switches to the `latest` channel and updates components in all channels.
     Upgrade(UpgradeCommand),
 }
 

@@ -7,7 +7,7 @@ pub fn upgrade(force: bool) -> Result<()> {
     fuelup_self::self_update(force)?;
     // switch to 'latest' channel.
     fuelup_default::default(Some(LATEST.to_owned()))?;
-    // update channel
+    // update channels
     fuelup_update::update()?;
     Ok(())
 }

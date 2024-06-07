@@ -2,7 +2,9 @@ use anyhow::Result;
 use clap::Parser;
 
 use crate::commands::show::ShowCommand;
-use crate::commands::{check, completions, component, default, fuelup, show, toolchain, update};
+use crate::commands::{
+    check, completions, component, default, fuelup, show, toolchain, update, upgrade,
+};
 
 use crate::commands::check::CheckCommand;
 use crate::commands::completions::CompletionsCommand;
@@ -11,6 +13,7 @@ use crate::commands::default::DefaultCommand;
 use crate::commands::fuelup::FuelupCommand;
 use crate::commands::toolchain::ToolchainCommand;
 use crate::commands::update::UpdateCommand;
+use crate::commands::upgrade::UpgradeCommand;
 
 #[derive(Debug, Parser)]
 #[clap(name = "fuelup", about = "Fuel Toolchain Manager", version)]
@@ -40,6 +43,8 @@ enum Commands {
     Show(ShowCommand),
     /// Updates the distributable toolchains, if already installed
     Update(UpdateCommand),
+    /// Updates fuelup itself, switches to the `latest` channel and updates components in all channels.
+    Upgrade(UpgradeCommand),
 }
 
 pub fn fuelup_cli() -> Result<()> {
@@ -57,5 +62,6 @@ pub fn fuelup_cli() -> Result<()> {
         Commands::Show(_command) => show::exec(),
         Commands::Toolchain(command) => toolchain::exec(command),
         Commands::Update(_command) => update::exec(),
+        Commands::Upgrade(command) => upgrade::exec(command.force),
     }
 }

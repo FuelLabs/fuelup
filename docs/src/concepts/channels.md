@@ -2,25 +2,28 @@
 
 <!-- This section should give an overview of fuelup channels -->
 <!-- channels:example:start -->
-`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, the `latest`, `nightly`, and `beta` channels are published and serve as a source of distribution of Fuel toolchain binaries.
+`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, the `latest`, `nightly`, `testnet`, and `beta` channels are published and serve as a source of distribution of Fuel toolchain binaries.
 
 | Channel       | Source          | Integration Tested   | Update Frequency         | Available |
 | ------------- | --------------- | -------------------- | ------------------------ | --------- |
 | **[latest]**  | published bins  | ✔️                    | only when necessary      | ✔️         |
 | **[nightly]** | `master` branch | ➖                   | nightly (1:00 AM UTC)    | ✔️         |
-| **[beta-3]**  | published bins  | ➖                   | only when necessary      | ✔️         |
+| **[testnet]** | published bins  | ➖                   | only when necessary       | ✔️         |
+| **[beta-5]**  | published bins  | ➖                   | only when necessary       | ✔️         |
 | **[beta-4]**  | published bins  | ➖                   | only when necessary       | ✔️         |
+| **[beta-3]**  | published bins  | ➖                   | only when necessary      | ✔️         |
 <!-- channels:example:end -->
 
-## The `beta-3` channel
+## The `latest` channel
 
-The `beta-3` channel is a published TOML file describing the toolchain that is compatible with our [beta-3 testnet](https://fuel-labs.ghost.io/announcing-beta-3-testnet/). This toolchain should be used to interact with and build on the testnet. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-3.toml).
+<!-- This section should give an overview of the latest channel -->
+<!-- latest:example:start -->
+The `latest` channel is pointing to our latest beta network. This toolchain should be used to interact with and build on the latest testnet. This is also the default channel for `fuelup`.
+<!-- latest:example:end -->
 
-## The `beta-4` channel
-
-<!-- markdown-link-check-disable -->
-The `beta-4` channel is a published TOML file describing the toolchain that is compatible with our [beta-4 testnet](https://fuel-labs.ghost.io/announcing-beta-4-testnet/). This toolchain should be used to interact with and build on the testnet. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-4.toml).
-<!-- markdown-link-check-enable -->
+> **Note**
+>
+> The `latest` channel used to point latest compatible versions of `forc` and `fuel-core`, after version v0.20.0 latest is changed to point to the latest network. This is a breaking change and should be taken into account for existing workflows.
 
 ## The `nightly` channel
 
@@ -36,16 +39,23 @@ You should use `nightly` if you want the latest changes to `master` that have no
 Keep in mind that compatibility between `forc` and `fuel-core` is not guaranteed here, and you should expect unstable features to break.
 <!-- nightly:example:end -->
 
-## The `latest` channel
+## The `testnet` channel
 
-<!-- This section should give an overview of the latest channel -->
-<!-- latest:example:start -->
-The `latest` channel is pointing to our latest beta network. This toolchain should be used to interact with and build on the latest testnet. This is also the default channel for `fuelup`.
-<!-- latest:example:end -->
+The `testnet` channel is a published TOML file describing the toolchain that is compatible with our final public [testnet](https://fuel.mirror.xyz/fztu8P_NJz6k7qLXhaGHX3ArctlQpxsUp87pgRpJ4bE) on the Sepolia network. This toolchain should be used to interact with and build on the testnet. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-testnet.toml).
 
-> **Note**
->
-> The `latest` channel used to point latest compatible versions of `forc` and `fuel-core`, after version v0.20.0 latest is changed to point to the latest network. This is a breaking change and should be taken into account for existing workflows.
+## The `beta-5` channel
+
+The `beta-5` channel is a published TOML file describing the toolchain that is compatible with our [beta-5 testnet](https://fuel.mirror.xyz/5JCTjM3jSG84QYLKqQ4idHf6X_zVtwTInQvg7kWhaMA). The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-5.toml).
+
+## The `beta-4` channel
+
+<!-- markdown-link-check-disable -->
+The `beta-4` channel is a published TOML file describing the toolchain that is compatible with our [beta-4 testnet](https://fuel-labs.ghost.io/announcing-beta-4-testnet/). The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-4.toml).
+<!-- markdown-link-check-enable -->
+
+## The `beta-3` channel
+
+The `beta-3` channel is a published TOML file describing the toolchain that is compatible with our [beta-3 testnet](https://fuel-labs.ghost.io/announcing-beta-3-testnet/). The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-3.toml).
 
 ## Developer Guide
 
@@ -84,5 +94,7 @@ You may also use [`nektos/act`](https://github.com/nektos/act) to run the workfl
 [sway-nightly-binaries]: https://github.com/FuelLabs/sway-nightly-binaries/releases
 [latest]: #the-latest-channel
 [nightly]: #the-nightly-channel
-[beta-3]: #the-beta-3-channel
+[testnet]: #the-testnet-channel
+[beta-5]: #the-beta-5-channel
 [beta-4]: #the-beta-4-channel
+[beta-3]: #the-beta-3-channel

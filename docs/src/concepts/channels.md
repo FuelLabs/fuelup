@@ -49,9 +49,7 @@ The `beta-5` channel is a published TOML file describing the toolchain that is c
 
 ## The `beta-4` channel
 
-<!-- markdown-link-check-disable -->
 The `beta-4` channel is a published TOML file describing the toolchain that is compatible with our [beta-4 testnet](https://fuel-labs.ghost.io/announcing-beta-4-testnet/). The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-4.toml).
-<!-- markdown-link-check-enable -->
 
 ## The `beta-3` channel
 

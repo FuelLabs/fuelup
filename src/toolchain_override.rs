@@ -69,7 +69,7 @@ where
         |_| {
             Err(Error::invalid_value(
                 serde::de::Unexpected::Str(&channel_str),
-                &"one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4>",
+                &"one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|beta-1|beta-2|beta-3|beta-4|beta-5|testnet|devnet>",
             ))
         },
         Result::Ok,

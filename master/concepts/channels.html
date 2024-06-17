@@ -172,20 +172,25 @@
                         <h1 id="channels"><a class="header" href="#channels">Channels</a></h1>
 <!-- This section should give an overview of fuelup channels -->
 <!-- channels:example:start -->
-<p><code>fuelup</code> adopts a simplified version of <code>rustup</code> <a href="https://rust-lang.github.io/rustup/concepts/channels.html">channels</a>. Currently, the <code>latest</code>, <code>nightly</code>, and <code>beta</code> channels are published and serve as a source of distribution of Fuel toolchain binaries.</p>
+<p><code>fuelup</code> adopts a simplified version of <code>rustup</code> <a href="https://rust-lang.github.io/rustup/concepts/channels.html">channels</a>. Currently, the <code>latest</code>, <code>nightly</code>, <code>testnet</code>, and <code>beta</code> channels are published and serve as a source of distribution of Fuel toolchain binaries.</p>
 <table><thead><tr><th>Channel</th><th>Source</th><th>Integration Tested</th><th>Update Frequency</th><th>Available</th></tr></thead><tbody>
 <tr><td><strong><a href="#the-latest-channel">latest</a></strong></td><td>published bins</td><td>✔️</td><td>only when necessary</td><td>✔️</td></tr>
 <tr><td><strong><a href="#the-nightly-channel">nightly</a></strong></td><td><code>master</code> branch</td><td>➖</td><td>nightly (1:00 AM UTC)</td><td>✔️</td></tr>
-<tr><td><strong><a href="#the-beta-3-channel">beta-3</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
+<tr><td><strong><a href="#the-testnet-channel">testnet</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
+<tr><td><strong><a href="#the-beta-5-channel">beta-5</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
 <tr><td><strong><a href="#the-beta-4-channel">beta-4</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
+<tr><td><strong><a href="#the-beta-3-channel">beta-3</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
 </tbody></table>
 <!-- channels:example:end -->
-<h2 id="the-beta-3-channel"><a class="header" href="#the-beta-3-channel">The <code>beta-3</code> channel</a></h2>
-<p>The <code>beta-3</code> channel is a published TOML file describing the toolchain that is compatible with our <a href="https://fuel-labs.ghost.io/announcing-beta-3-testnet/">beta-3 testnet</a>. This toolchain should be used to interact with and build on the testnet. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-3.toml">here</a>.</p>
-<h2 id="the-beta-4-channel"><a class="header" href="#the-beta-4-channel">The <code>beta-4</code> channel</a></h2>
-<!-- markdown-link-check-disable -->
-<p>The <code>beta-4</code> channel is a published TOML file describing the toolchain that is compatible with our <a href="https://fuel-labs.ghost.io/announcing-beta-4-testnet/">beta-4 testnet</a>. This toolchain should be used to interact with and build on the testnet. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-4.toml">here</a>.</p>
-<!-- markdown-link-check-enable -->
+<h2 id="the-latest-channel"><a class="header" href="#the-latest-channel">The <code>latest</code> channel</a></h2>
+<!-- This section should give an overview of the latest channel -->
+<!-- latest:example:start -->
+<p>The <code>latest</code> channel is pointing to our latest beta network. This toolchain should be used to interact with and build on the latest testnet. This is also the default channel for <code>fuelup</code>.</p>
+<!-- latest:example:end -->
+<blockquote>
+<p><strong>Note</strong></p>
+<p>The <code>latest</code> channel used to point latest compatible versions of <code>forc</code> and <code>fuel-core</code>, after version v0.20.0 latest is changed to point to the latest network. This is a breaking change and should be taken into account for existing workflows.</p>
+</blockquote>
 <h2 id="the-nightly-channel"><a class="header" href="#the-nightly-channel">The <code>nightly</code> channel</a></h2>
 <!-- This section should give an overview of the nightly channel -->
 <!-- nightly:example:start -->
@@ -196,15 +201,16 @@ Note that the <code>nightly</code> channel might fail to build, in which case it
 <p>You should use <code>nightly</code> if you want the latest changes to <code>master</code> that have not been officially released yet.
 Keep in mind that compatibility between <code>forc</code> and <code>fuel-core</code> is not guaranteed here, and you should expect unstable features to break.</p>
 <!-- nightly:example:end -->
-<h2 id="the-latest-channel"><a class="header" href="#the-latest-channel">The <code>latest</code> channel</a></h2>
-<!-- This section should give an overview of the latest channel -->
-<!-- latest:example:start -->
-<p>The <code>latest</code> channel is pointing to our latest beta network. This toolchain should be used to interact with and build on the latest testnet. This is also the default channel for <code>fuelup</code>.</p>
-<!-- latest:example:end -->
-<blockquote>
-<p><strong>Note</strong></p>
-<p>The <code>latest</code> channel used to point latest compatible versions of <code>forc</code> and <code>fuel-core</code>, after version v0.20.0 latest is changed to point to the latest network. This is a breaking change and should be taken into account for existing workflows.</p>
-</blockquote>
+<h2 id="the-testnet-channel"><a class="header" href="#the-testnet-channel">The <code>testnet</code> channel</a></h2>
+<p>The <code>testnet</code> channel is a published TOML file describing the toolchain that is compatible with our final public <a href="https://fuel.mirror.xyz/fztu8P_NJz6k7qLXhaGHX3ArctlQpxsUp87pgRpJ4bE">testnet</a> on the Sepolia network. This toolchain should be used to interact with and build on the testnet. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-testnet.toml">here</a>.</p>
+<h2 id="the-beta-5-channel"><a class="header" href="#the-beta-5-channel">The <code>beta-5</code> channel</a></h2>
+<p>The <code>beta-5</code> channel is a published TOML file describing the toolchain that is compatible with our <a href="https://fuel.mirror.xyz/5JCTjM3jSG84QYLKqQ4idHf6X_zVtwTInQvg7kWhaMA">beta-5 testnet</a>. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-5.toml">here</a>.</p>
+<h2 id="the-beta-4-channel"><a class="header" href="#the-beta-4-channel">The <code>beta-4</code> channel</a></h2>
+<!-- markdown-link-check-disable -->
+<p>The <code>beta-4</code> channel is a published TOML file describing the toolchain that is compatible with our <a href="https://fuel-labs.ghost.io/announcing-beta-4-testnet/">beta-4 testnet</a>. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-4.toml">here</a>.</p>
+<!-- markdown-link-check-enable -->
+<h2 id="the-beta-3-channel"><a class="header" href="#the-beta-3-channel">The <code>beta-3</code> channel</a></h2>
+<p>The <code>beta-3</code> channel is a published TOML file describing the toolchain that is compatible with our <a href="https://fuel-labs.ghost.io/announcing-beta-3-testnet/">beta-3 testnet</a>. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-3.toml">here</a>.</p>
 <h2 id="developer-guide"><a class="header" href="#developer-guide">Developer Guide</a></h2>
 <h3 id="understanding-the-latest-workflow"><a class="header" href="#understanding-the-latest-workflow">Understanding the <code>latest</code> workflow</a></h3>
 <blockquote>

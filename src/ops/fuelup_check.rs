@@ -1,6 +1,5 @@
 use crate::{
     channel::Channel,
-    commands::check::CheckCommand,
     config::Config,
     download::DownloadCfg,
     file::get_bin_version,
@@ -12,21 +11,19 @@ use ansiterm::Color;
 use anyhow::{anyhow, Result};
 use component::{self, Components};
 use semver::Version;
-use std::collections::HashMap;
-use std::str::FromStr;
 use std::{
     cmp::Ordering::{Equal, Greater, Less},
+    collections::HashMap,
     path::Path,
+    str::FromStr,
 };
 use tracing::{error, info};
 
 fn collect_package_versions(channel: Channel) -> HashMap<String, Version> {
     let mut latest_versions: HashMap<String, Version> = HashMap::new();
-
     for (name, package) in channel.pkg.into_iter() {
         latest_versions.insert(name, package.version);
     }
-
     latest_versions
 }
 
@@ -83,7 +80,7 @@ fn check_fuelup() -> Result<()> {
     Ok(())
 }
 
-fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
+fn check_toolchain(toolchain: &str) -> Result<()> {
     let description = DistToolchainDescription::from_str(toolchain)?;
 
     let dist_channel = Channel::from_dist_channel(&description)?;
@@ -101,7 +98,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                 Err(err) => err.to_string(),
             };
             info!("{:>2}{} - {}", "", bold(&component.name), version_text);
-            if verbose && component.name == component::FORC {
+            if component.name == component::FORC {
                 for plugin in component::Components::collect_plugins()? {
                     if !plugin.is_main_executable() {
                         info!("{:>4}- {}", "", bold(&plugin.name));
@@ -136,15 +133,11 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
     Ok(())
 }
 
-pub fn check(command: CheckCommand) -> Result<()> {
-    let CheckCommand { verbose } = command;
-
+pub fn check() -> Result<()> {
     let cfg = Config::from_env()?;
-
     for toolchain in cfg.list_dist_toolchains()? {
-        check_toolchain(&toolchain, verbose)?;
+        check_toolchain(&toolchain)?;
     }
-
     check_fuelup()?;
     Ok(())
 }

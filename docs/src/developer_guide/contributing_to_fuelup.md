@@ -51,7 +51,7 @@ If you wish to make a significant change that alters current behavior or touches
 This is a rough outline of what a contributor's workflow looks like:
 
 - Make sure what you want to contribute is already tracked as an issue.
-  - We may discuss the problem and solution to the issue.
+  - We may discuss the problem and solution in the issue.
 - Create a Git branch from where you want to base your work. This is usually master.
 - Write code, add test cases, and commit your work.
 - Run tests and make sure all tests pass.

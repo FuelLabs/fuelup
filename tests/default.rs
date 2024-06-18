@@ -36,14 +36,14 @@ fn fuelup_default_latest_and_custom() -> Result<()> {
     testcfg::setup(FuelupState::LatestAndCustomInstalled, &|cfg| {
         let output = cfg.fuelup(&["default", "latest"]);
         let expected_stdout = format!(
-            "default toolchain set to 'latest-{}'\n",
+            "Default toolchain set to 'latest-{}'\n",
             TargetTriple::from_host().unwrap()
         );
 
         assert_eq!(output.stdout, expected_stdout);
 
         let output = cfg.fuelup(&["default", CUSTOM_TOOLCHAIN_NAME]);
-        let expected_stdout = format!("default toolchain set to '{CUSTOM_TOOLCHAIN_NAME}'\n");
+        let expected_stdout = format!("Default toolchain set to '{CUSTOM_TOOLCHAIN_NAME}'\n");
 
         assert_eq!(output.stdout, expected_stdout);
     })?;
@@ -71,7 +71,7 @@ fn fuelup_default_nightly() -> Result<()> {
     testcfg::setup(FuelupState::AllInstalled, &|cfg| {
         let output = cfg.fuelup(&["default", "nightly"]);
         let expected_stdout = format!(
-            "default toolchain set to 'nightly-{}'\n",
+            "Default toolchain set to 'nightly-{}'\n",
             TargetTriple::from_host().unwrap()
         );
 
@@ -88,7 +88,7 @@ fn fuelup_default_nightly_and_nightly_date() -> Result<()> {
         let stdout = String::from_utf8_lossy(&stripped);
 
         let expected_stdout = format!(
-            "default toolchain set to 'nightly-{}'\n",
+            "Default toolchain set to 'nightly-{}'\n",
             TargetTriple::from_host().unwrap()
         );
         assert_eq!(stdout, expected_stdout);
@@ -97,7 +97,7 @@ fn fuelup_default_nightly_and_nightly_date() -> Result<()> {
             strip_ansi_escapes::strip(cfg.fuelup(&["default", &format!("nightly-{DATE}")]).stdout);
         let stdout = String::from_utf8_lossy(&stripped);
         let expected_stdout = format!(
-            "default toolchain set to 'nightly-{}-{}'\n",
+            "Default toolchain set to 'nightly-{}-{}'\n",
             DATE,
             TargetTriple::from_host().unwrap()
         );

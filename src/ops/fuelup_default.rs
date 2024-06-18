@@ -44,7 +44,7 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
         let toolchains = cfg.list_toolchains()?;
 
         info!("Toolchain with name '{}' does not exist", &new_default.name);
-        print_header("installed toolchains");
+        print_header("Installed toolchains");
         for toolchain in toolchains {
             info!("{}", toolchain);
         }
@@ -58,7 +58,7 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
         s.default_toolchain = Some(new_default.name.clone());
         Ok(())
     })?;
-    info!("default toolchain set to '{}'", new_default.name);
+    info!("Default toolchain set to '{}'", new_default.name);
 
     Ok(())
 }

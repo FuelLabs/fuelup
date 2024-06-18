@@ -20,7 +20,7 @@ pub fn show() -> Result<()> {
     info!("{}: {}", bold("Default host"), TargetTriple::from_host()?);
     info!("{}: {}", bold("fuelup home"), fuelup_dir().display());
 
-    print_header("installed toolchains");
+    print_header("Installed toolchains");
     let cfg = Config::from_env()?;
     let mut active_toolchain = Toolchain::from_settings()?;
 

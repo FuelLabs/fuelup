@@ -30,7 +30,7 @@ pub fn new(command: NewCommand) -> Result<()> {
     ensure_dir_exists(&toolchains_dir.join(toolchain_bin_dir))?;
     info!(
         "New toolchain initialized: {name}
-default toolchain set to '{name}'"
+Default toolchain set to '{name}'"
     );
 
     Ok(())

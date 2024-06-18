@@ -51,7 +51,7 @@ pub struct TestCfg {
     /// <TMP_DIR>/.fuelup/bin/. This should be used to execute other binaries (eg. forc) in the
     /// test environment.
     pub fuelup_bin_dirpath: PathBuf,
-    /// The path to the test environment's home. This should usually be created
+    /// The path to the test environment's home. This should usually be a created
     /// tempfile::tempdir::TempDir.
     pub home: PathBuf,
 }

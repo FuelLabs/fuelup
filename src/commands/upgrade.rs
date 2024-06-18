@@ -1,7 +1,6 @@
+use crate::ops::fuelup_upgrade;
 use anyhow::Result;
 use clap::Parser;
-
-use crate::ops::fuelup_upgrade;
 
 #[derive(Debug, Parser)]
 pub struct UpgradeCommand {
@@ -11,6 +10,5 @@ pub struct UpgradeCommand {
 
 pub fn exec(force: bool) -> Result<()> {
     fuelup_upgrade::upgrade(force)?;
-
     Ok(())
 }

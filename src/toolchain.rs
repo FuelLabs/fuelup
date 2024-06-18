@@ -1,22 +1,26 @@
-use crate::channel::{self, Channel};
-use crate::constants::DATE_FORMAT;
-use crate::download::DownloadCfg;
-use crate::file::{get_bin_version, hard_or_symlink_file, is_executable};
-use crate::path::{
-    ensure_dir_exists, fuelup_bin_dir, fuelup_bin_or_current_bin, fuelup_tmp_dir, settings_file,
-    toolchain_bin_dir, toolchain_dir, toolchains_dir,
+use crate::{
+    channel::{self, Channel},
+    constants::DATE_FORMAT,
+    download::DownloadCfg,
+    file::{get_bin_version, hard_or_symlink_file, is_executable},
+    path::{
+        ensure_dir_exists, fuelup_bin_dir, fuelup_bin_or_current_bin, fuelup_tmp_dir,
+        settings_file, toolchain_bin_dir, toolchain_dir, toolchains_dir,
+    },
+    settings::SettingsFile,
+    store::Store,
+    target_triple::TargetTriple,
 };
-use crate::settings::SettingsFile;
-use crate::store::Store;
-use crate::target_triple::TargetTriple;
 use anyhow::{bail, Context, Result};
 use component::{self, Components};
-use std::collections::VecDeque;
-use std::fmt;
-use std::fs::{read_dir, remove_dir_all, remove_file};
-use std::path::PathBuf;
-use std::process::Command;
-use std::str::FromStr;
+use std::{
+    collections::VecDeque,
+    fmt,
+    fs::{read_dir, remove_dir_all, remove_file},
+    path::PathBuf,
+    process::Command,
+    str::FromStr,
+};
 use time::Date;
 use tracing::{error, info};
 

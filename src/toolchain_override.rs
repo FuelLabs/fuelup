@@ -1,21 +1,21 @@
+use crate::{
+    channel::{is_beta_toolchain, LATEST, NIGHTLY},
+    constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE},
+    download::DownloadCfg,
+    file,
+    path::get_fuel_toolchain_toml,
+    target_triple::TargetTriple,
+    toolchain::{DistToolchainDescription, Toolchain},
+};
 use anyhow::{bail, Result};
 use semver::Version;
 use serde::de::Error;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize};
-use std::fmt;
-use std::str::FromStr;
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, fmt, path::PathBuf, str::FromStr};
 use time::Date;
 use toml_edit::{de, ser, value, Document};
 use tracing::{info, warn};
-
-use crate::channel::{is_beta_toolchain, LATEST, NIGHTLY};
-use crate::constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE};
-use crate::toolchain::{DistToolchainDescription, Toolchain};
-use crate::{
-    download::DownloadCfg, file, path::get_fuel_toolchain_toml, target_triple::TargetTriple,
-};
 
 // For composability with other functionality of fuelup, we want to add
 // additional info to OverrideCfg (representation of 'fuel-toolchain.toml').

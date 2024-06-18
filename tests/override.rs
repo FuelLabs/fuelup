@@ -1,11 +1,11 @@
-use anyhow::Result;
-use std::str::FromStr;
-
 pub mod testcfg;
+
+use anyhow::Result;
 use fuelup::{
     constants::FUEL_TOOLCHAIN_TOML_FILE,
     toolchain_override::{self, OverrideCfg, ToolchainCfg, ToolchainOverride},
 };
+use std::str::FromStr;
 use testcfg::FuelupState;
 
 #[test]
@@ -37,6 +37,5 @@ fn check_correct_forc_plugin_called() -> Result<()> {
         stdout = cfg.exec("forc-wallet", &["--version"]).stdout;
         assert_eq!(stdout, "forc-wallet 0.2.0\n");
     })?;
-
     Ok(())
 }

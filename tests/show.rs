@@ -1,3 +1,5 @@
+pub mod testcfg;
+
 use anyhow::Result;
 use fuelup::{
     constants::FUEL_TOOLCHAIN_TOML_FILE,
@@ -6,8 +8,6 @@ use fuelup::{
 };
 use indoc::formatdoc;
 use std::str::FromStr;
-
-pub mod testcfg;
 use testcfg::FuelupState;
 
 #[test]

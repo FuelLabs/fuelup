@@ -3,8 +3,7 @@ use crate::settings::SettingsFile;
 use crate::toolchain::{DistToolchainDescription, Toolchain};
 use crate::{channel::Channel, commands::toolchain::InstallCommand};
 use anyhow::{bail, Result};
-use std::fmt::Write;
-use std::str::FromStr;
+use std::{fmt::Write, str::FromStr};
 use tracing::{error, info};
 
 pub fn install(command: InstallCommand) -> Result<()> {

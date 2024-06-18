@@ -1,6 +1,3 @@
-use anyhow::Result;
-use clap::Parser;
-
 use crate::commands::{
     completions::{self, CompletionsCommand},
     component::{self, ComponentCommand},
@@ -10,6 +7,8 @@ use crate::commands::{
     upgrade::{self, UpgradeCommand},
 };
 use crate::ops::{fuelup_check, fuelup_show, fuelup_update};
+use anyhow::Result;
+use clap::Parser;
 
 #[derive(Debug, Parser)]
 #[clap(name = "fuelup", about = "Fuel Toolchain Manager", version)]

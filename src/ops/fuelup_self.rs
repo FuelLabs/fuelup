@@ -1,12 +1,3 @@
-use anyhow::{bail, Context, Result};
-use component::{self, Components};
-use std::{
-    fs::{self, remove_dir_all},
-    path::Path,
-};
-use tempfile;
-use tracing::{error, info};
-
 use crate::{
     download::{download_file_and_unpack, unpack_bins, DownloadCfg},
     file::{get_bin_version, hard_or_symlink_file, read_file, write_file},
@@ -15,6 +6,14 @@ use crate::{
     shell::Shell,
     target_triple::TargetTriple,
 };
+use anyhow::{bail, Context, Result};
+use component::{self, Components};
+use std::{
+    fs::{self, remove_dir_all},
+    path::Path,
+};
+use tempfile;
+use tracing::{error, info};
 
 pub fn attempt_install_self(download_cfg: DownloadCfg, dst: &Path) -> Result<()> {
     download_file_and_unpack(&download_cfg, dst)?;
@@ -98,7 +97,6 @@ This will uninstall all Sway toolchains and data, and remove, {}/bin from your P
                 }
             }
         }
-
         Ok(())
     } else {
         Ok(())

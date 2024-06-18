@@ -1,7 +1,6 @@
+use crate::ops::fuelup_default;
 use anyhow::Result;
 use clap::Parser;
-
-use crate::ops::fuelup_default;
 
 #[derive(Debug, Parser)]
 pub struct DefaultCommand {
@@ -11,6 +10,5 @@ pub struct DefaultCommand {
 
 pub fn exec(command: DefaultCommand) -> Result<()> {
     let DefaultCommand { toolchain } = command;
-
     fuelup_default::default(toolchain)
 }

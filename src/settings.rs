@@ -1,10 +1,8 @@
+use crate::file;
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, path::PathBuf};
 use toml_edit::{de, ser, Document};
-
-use anyhow::Result;
-
-use crate::file;
 
 pub struct SettingsFile {
     path: PathBuf,

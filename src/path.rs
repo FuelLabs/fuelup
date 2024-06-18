@@ -2,10 +2,9 @@ use crate::{constants::FUEL_TOOLCHAIN_TOML_FILE, fmt::println_warn};
 use anyhow::{bail, Result};
 use component::Components;
 use dirs;
-use std::borrow::Cow;
-use std::env;
 use std::{
-    fs,
+    borrow::Cow,
+    env, fs,
     path::{Path, PathBuf},
 };
 

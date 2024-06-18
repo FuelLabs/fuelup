@@ -1,7 +1,6 @@
+use crate::ops::fuelup_component::{add::add, list::list, remove::remove};
 use anyhow::Result;
 use clap::Parser;
-
-use crate::ops::fuelup_component::{add::add, list::list, remove::remove};
 
 #[derive(Debug, Parser)]
 pub enum ComponentCommand {
@@ -34,6 +33,5 @@ pub fn exec(command: ComponentCommand) -> Result<()> {
         ComponentCommand::Remove(command) => remove(command)?,
         ComponentCommand::List(command) => list(command)?,
     };
-
     Ok(())
 }

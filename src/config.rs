@@ -1,12 +1,8 @@
-use std::fs;
-use std::path::PathBuf;
-
-use anyhow::Result;
-use std::io;
-
 use crate::fmt::format_toolchain_with_target;
 use crate::path::toolchains_dir;
 use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
+use anyhow::Result;
+use std::{fs, io, path::PathBuf};
 
 pub struct Config {
     toolchains_dir: PathBuf,
@@ -64,7 +60,6 @@ impl Config {
                     dist_toolchains.push(name.to_string())
                 }
             }
-
             Ok(dist_toolchains)
         } else {
             Ok(Vec::new())

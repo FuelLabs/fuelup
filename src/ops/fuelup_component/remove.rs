@@ -1,10 +1,8 @@
-use anyhow::{bail, Result};
-
 use crate::{commands::component::RemoveCommand, toolchain::Toolchain};
+use anyhow::{bail, Result};
 
 pub fn remove(command: RemoveCommand) -> Result<()> {
     let RemoveCommand { component } = command;
-
     let toolchain = Toolchain::from_settings()?;
 
     if toolchain.is_distributed() {

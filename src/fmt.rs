@@ -1,8 +1,7 @@
-use std::io::{self, Write};
-
 use crate::target_triple::TargetTriple;
 use ansi_term::Colour;
 use ansiterm::Style;
+use std::io::{self, Write};
 use tracing::info;
 
 pub fn println_error<X: Into<String>>(txt: X) {

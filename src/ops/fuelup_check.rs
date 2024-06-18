@@ -21,7 +21,7 @@ use tracing::{error, info};
 
 fn collect_package_versions(channel: Channel) -> HashMap<String, Version> {
     let mut latest_versions: HashMap<String, Version> = HashMap::new();
-    for (name, package) in channel.pkg.into_iter() {
+    for (name, package) in channel.pkg {
         latest_versions.insert(name, package.version);
     }
     latest_versions

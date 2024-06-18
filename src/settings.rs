@@ -19,8 +19,7 @@ impl SettingsFile {
 
     fn write_settings(&self) -> Result<()> {
         let s = self.cache.borrow().as_ref().unwrap().clone();
-
-        let parent_exists = self.path.parent().map(|dir| dir.exists()).unwrap_or(true);
+        let parent_exists = self.path.parent().map_or(true, |dir| dir.exists());
         if !parent_exists {
             std::fs::create_dir_all(self.path.parent().unwrap())?;
         }
@@ -38,7 +37,7 @@ impl SettingsFile {
                     Settings::parse(&content)?
                 } else {
                     needs_save = true;
-                    Default::default()
+                    Settings::default()
                 });
             }
         }

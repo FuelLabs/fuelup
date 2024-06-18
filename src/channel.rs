@@ -72,9 +72,9 @@ fn construct_channel_url(desc: &DistToolchainDescription) -> Result<String> {
     match desc.name {
         DistToolchainName::Latest => {
             if let Some(date) = desc.date {
-                url.push_str(&format!("channels/latest/channel-fuel-latest-{date}.toml"))
+                url.push_str(&format!("channels/latest/channel-fuel-latest-{date}.toml"));
             } else {
-                url.push_str(CHANNEL_LATEST_FILE_NAME)
+                url.push_str(CHANNEL_LATEST_FILE_NAME);
             }
         }
 
@@ -83,7 +83,7 @@ fn construct_channel_url(desc: &DistToolchainDescription) -> Result<String> {
                 url.push_str(&format_nightly_url(&date)?);
                 url.push('/');
             }
-            url.push_str(CHANNEL_NIGHTLY_FILE_NAME)
+            url.push_str(CHANNEL_NIGHTLY_FILE_NAME);
         }
         DistToolchainName::Beta1 => url.push_str(CHANNEL_BETA_1_FILE_NAME),
         DistToolchainName::Beta2 => url.push_str(CHANNEL_BETA_2_FILE_NAME),

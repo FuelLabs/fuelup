@@ -78,10 +78,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
                 (toolchain.bin_path.join(proc_name), description.to_string())
             }
         }
-        None => (
-            toolchain.bin_path.join(proc_name),
-            toolchain.name.to_owned(),
-        ),
+        None => (toolchain.bin_path.join(proc_name), toolchain.name.clone()),
     };
 
     let mut cmd = Command::new(bin_path);

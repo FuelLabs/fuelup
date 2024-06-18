@@ -183,8 +183,8 @@ impl Components {
         let plugins = Self::collect_plugins()?;
         let mut executables = vec![];
 
-        for plugin in plugins.iter() {
-            executables.extend(plugin.executables.clone().into_iter())
+        for plugin in plugins {
+            executables.extend(plugin.executables.clone().into_iter());
         }
 
         Ok(executables)

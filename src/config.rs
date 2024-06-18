@@ -29,9 +29,9 @@ impl Config {
                     .iter()
                     .any(|t| toolchain == format_toolchain_with_target(t))
                 {
-                    toolchains.push(toolchain)
+                    toolchains.push(toolchain);
                 } else {
-                    custom_toolchains.push(toolchain)
+                    custom_toolchains.push(toolchain);
                 }
             }
 
@@ -57,7 +57,7 @@ impl Config {
             for name in RESERVED_TOOLCHAIN_NAMES {
                 let dist_toolchain = format_toolchain_with_target(name);
                 if installed_toolchains.contains(&dist_toolchain) {
-                    dist_toolchains.push(name.to_string())
+                    dist_toolchains.push(name.to_string());
                 }
             }
             Ok(dist_toolchains)

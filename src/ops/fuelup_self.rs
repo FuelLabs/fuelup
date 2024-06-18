@@ -25,9 +25,9 @@ pub fn attempt_install_self(download_cfg: DownloadCfg, dst: &Path) -> Result<()>
 #[inline]
 fn remove_path_from_content(file_content: &str) -> (bool, String) {
     let mut is_modified = false;
-    let whole_definition = format!("PATH={}", FUELUP_DIR);
-    let suffix = format!("{}:", FUELUP_DIR);
-    let prefix = format!("{}:", FUELUP_DIR);
+    let whole_definition = format!("PATH={FUELUP_DIR}");
+    let suffix = format!("{FUELUP_DIR}:");
+    let prefix = format!("{FUELUP_DIR}:");
     let lines = file_content
         .trim_end_matches('\n')
         .trim_end_matches('\r')
@@ -85,7 +85,7 @@ This will uninstall all Sway toolchains and data, and remove, {}/bin from your P
         ];
         remove_fuelup_from_path()?;
 
-        for (info, path) in remove.into_iter() {
+        for (info, path) in remove {
             println_info(info);
             match remove_dir_all(&path) {
                 Ok(()) => {}

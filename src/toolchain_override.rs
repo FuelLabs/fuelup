@@ -124,7 +124,7 @@ impl ToolchainOverride {
 
         document["toolchain"]["channel"] = value(self.cfg.toolchain.channel.to_string());
         if let Some(components) = &self.cfg.components {
-            for (k, v) in components.iter() {
+            for (k, v) in components {
                 document["components"][k] = value(v.to_string());
             }
         }

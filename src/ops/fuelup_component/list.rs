@@ -1,7 +1,4 @@
-use crate::{
-    commands::component::ListCommand, download::get_latest_version, file::get_bin_version,
-    fmt::bold, toolchain::Toolchain,
-};
+use crate::{download::get_latest_version, file::get_bin_version, fmt::bold, toolchain::Toolchain};
 use anyhow::Result;
 use component::Components;
 use std::fmt::Write;
@@ -23,7 +20,7 @@ fn format_installable_component_info(name: &str, latest_version: &str) -> String
     format!("{:>2}{name} (latest: {latest_version})\n", "")
 }
 
-fn format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
+fn format_forc_default_plugins(plugin_executables: &[String]) -> String {
     plugin_executables
         .iter()
         .filter(|c| *c != component::FORC)
@@ -33,7 +30,7 @@ fn format_forc_default_plugins(plugin_executables: Vec<String>) -> String {
         })
 }
 
-pub fn list(_command: ListCommand) -> Result<()> {
+pub fn list() -> Result<()> {
     let toolchain = Toolchain::from_settings()?;
     let mut installed_components_summary = String::from("\nInstalled:\n");
     let mut available_components_summary = String::from("Installable:\n");
@@ -60,7 +57,7 @@ pub fn list(_command: ListCommand) -> Result<()> {
 
             if component.name == component::FORC {
                 installed_components_summary
-                    .push_str(&format_forc_default_plugins(component.executables))
+                    .push_str(&format_forc_default_plugins(&component.executables));
             }
         } else {
             available_components_summary.push_str(&format_installable_component_info(
@@ -70,7 +67,7 @@ pub fn list(_command: ListCommand) -> Result<()> {
 
             if component.name == component::FORC {
                 available_components_summary
-                    .push_str(&format_forc_default_plugins(component.executables))
+                    .push_str(&format_forc_default_plugins(&component.executables));
             }
         }
     }

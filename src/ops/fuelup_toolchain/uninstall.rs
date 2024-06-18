@@ -23,7 +23,7 @@ pub fn uninstall(command: UninstallCommand) -> Result<()> {
     }
 
     match toolchain.uninstall_self() {
-        Ok(_) => println!("Toolchain '{}' uninstalled", &toolchain.name),
+        Ok(()) => println!("Toolchain '{}' uninstalled", &toolchain.name),
         Err(e) => println_error(format!(
             "Failed to uninstall toolchain '{}': {}",
             &toolchain.name, e

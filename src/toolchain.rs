@@ -167,7 +167,7 @@ fn extract_target(parts: &mut VecDeque<&str>) -> Option<TargetTriple> {
 ///     <channel>-<YYYY-MM-DD>
 ///     <channel>-<YYYY-MM-DD>-<target>
 ///     <channel>-<target>-<YYYY-MM-DD>
-/// The parsing begings from the end of the string, so the target is the last part of the string,
+/// The parsing begins from the end of the string, so the target is the last part of the string,
 /// then the date and finally the name
 impl FromStr for DistToolchainDescription {
     type Err = anyhow::Error;

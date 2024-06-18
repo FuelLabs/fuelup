@@ -3,7 +3,12 @@ use std::str::FromStr;
 use tracing::info;
 
 use crate::{
-    config, fmt::print_header, path::settings_file, settings::SettingsFile, toolchain::{DistToolchainDescription, Toolchain}, toolchain_override::ToolchainOverride
+    config,
+    fmt::print_header,
+    path::settings_file,
+    settings::SettingsFile,
+    toolchain::{DistToolchainDescription, Toolchain},
+    toolchain_override::ToolchainOverride,
 };
 
 pub fn default(toolchain: Option<String>) -> Result<()> {

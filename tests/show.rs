@@ -45,7 +45,7 @@ fn fuelup_show_latest() -> Result<()> {
                 - forc-tx : 0.1.0
                 - forc-wallet : 0.1.0
               fuel-core : 0.1.0
-              fuel-core-keygen : not found
+              fuel-core-keygen : 0.1.0
             "#
         };
         assert_eq!(stdout.to_string(), expected_stdout);
@@ -88,7 +88,7 @@ fn fuelup_show_and_switch() -> Result<()> {
                 - forc-tx : 0.1.0
                 - forc-wallet : 0.1.0
               fuel-core : 0.1.0
-              fuel-core-keygen : not found
+              fuel-core-keygen : 0.1.0
             "#
         };
         assert_eq!(stdout, expected_stdout);
@@ -124,7 +124,7 @@ fn fuelup_show_and_switch() -> Result<()> {
                 - forc-tx : 0.2.0
                 - forc-wallet : 0.2.0
               fuel-core : 0.2.0
-              fuel-core-keygen : not found
+              fuel-core-keygen : 0.2.0
             "#
         };
         assert_eq!(stdout, expected_stdout);
@@ -249,7 +249,7 @@ fn fuelup_show_latest_then_override() -> Result<()> {
                 - forc-tx : 0.1.0
                 - forc-wallet : 0.1.0
               fuel-core : 0.1.0
-              fuel-core-keygen : not found
+              fuel-core-keygen : 0.1.0
             "#
         };
         assert_eq!(stdout, expected_stdout);
@@ -298,7 +298,7 @@ fn fuelup_show_latest_then_override() -> Result<()> {
                 - forc-tx : 0.2.0
                 - forc-wallet : 0.2.0
               fuel-core : 0.2.0
-              fuel-core-keygen : not found
+              fuel-core-keygen : 0.2.0
             "#
         };
         assert_eq!(stdout, expected_stdout);

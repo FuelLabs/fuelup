@@ -1,6 +1,6 @@
 # Developer Guide
 
-This section serves as a guide for people who are interested on working on and contributing to `fuelup`.
+This section serves as a guide for people who are interested in working on and contributing to `fuelup`.
 
 If you simply wish to use `fuelup`, you may ignore this section.
 

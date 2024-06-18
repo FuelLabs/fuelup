@@ -12,7 +12,7 @@ fuelup toolchain install latest
 The Fuel toolchain is distributed on one [release channel]: latest (with nightly being a WIP).
 `fuelup` uses the `latest` channel by default, which represents the latest stable release of the Fuel toolchain.
 
-When new versions of the components within an distributable Fuel toolchain (`latest` or `nightly`)
+When new versions of the components within a distributable Fuel toolchain (`latest` or `nightly`)
 are released, simply type `fuelup update` to update:
 
 <!-- This section should show the command to update distributable toolchains -->

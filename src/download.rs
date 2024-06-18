@@ -187,7 +187,7 @@ pub fn download(url: &str) -> Result<Vec<u8>> {
                 return Ok(data);
             }
             Err(ureq::Error::Status(404, r)) => {
-                // We've reached download_file stage, which means the tag must be correct.
+                // We've reached the download_file stage, which means the tag must be correct.
                 error!("Failed to download from {}", &url);
                 let retry: Option<u64> = r.header("retry-after").and_then(|h| h.parse().ok());
                 let retry = retry.unwrap_or(RETRY_DELAY_SECS);

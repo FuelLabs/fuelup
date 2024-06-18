@@ -3,10 +3,7 @@ use std::str::FromStr;
 use tracing::info;
 
 use crate::{
-    path::settings_file,
-    settings::SettingsFile,
-    toolchain::{DistToolchainDescription, Toolchain},
-    toolchain_override::ToolchainOverride,
+    config, fmt::print_header, path::settings_file, settings::SettingsFile, toolchain::{DistToolchainDescription, Toolchain}, toolchain_override::ToolchainOverride
 };
 
 pub fn default(toolchain: Option<String>) -> Result<()> {
@@ -43,7 +40,17 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
     };
 
     if !new_default.exists() {
-        bail!("Toolchain with name '{}' does not exist", &new_default.name);
+        let cfg = config::Config::from_env()?;
+        let toolchains = cfg.list_toolchains()?;
+        
+        info!("Toolchain with name '{}' does not exist", &new_default.name);
+        print_header("installed toolchains");
+        for toolchain in toolchains {
+            info!("{}", toolchain);
+        }
+        // TODO: we should use thiserror to return a custom error here
+        // so we can match on it and prompt the user for another attempt.
+        bail!("");
     };
 
     let settings = SettingsFile::new(settings_file());

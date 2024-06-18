@@ -120,3 +120,23 @@ fn fuelup_default_override() -> Result<()> {
 
     Ok(())
 }
+
+#[test]
+fn fuelup_default_missing_toolchain() -> Result<()> {
+    testcfg::setup(FuelupState::AllInstalled, &|cfg| {
+        let triple = TargetTriple::from_host().unwrap();
+        let output = cfg.fuelup(&["default", "abcd"]);
+        let expected_stdout = format!(
+            "Toolchain with name 'abcd' does not exist\n\n\
+            \u{1b}[1minstalled toolchains\u{1b}[0m\n\
+            --------------------\n\
+            latest-{triple}\n\
+            nightly-{triple}\n\
+            nightly-2022-08-30-{triple}\n\n"
+        );
+
+        println!("\n{}", output.stdout);
+        assert_eq!(output.stdout, expected_stdout);
+    })?;
+    Ok(())
+}

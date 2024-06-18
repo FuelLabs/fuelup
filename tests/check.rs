@@ -27,6 +27,7 @@ fn fuelup_check() -> Result<()> {
         let output = cfg.fuelup(&["check"]);
         let stripped = strip_ansi_escapes::strip(output.stdout);
         let stdout = String::from_utf8_lossy(&stripped);
+        println!("\n{}", &stdout);
         assert!(stdout.contains(&latest));
         assert!(stdout.contains(forc));
         assert!(stdout.contains(fuel_core));

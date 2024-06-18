@@ -54,12 +54,15 @@ fn fuelup_default_latest_and_custom() -> Result<()> {
 #[test]
 fn fuelup_default_uninstalled_toolchain() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+        let triple = TargetTriple::from_host().unwrap();
         let output = cfg.fuelup(&["default", "nightly"]);
         let expected_stdout = format!(
-            "Toolchain with name 'nightly-{}' does not exist\n",
-            TargetTriple::from_host().unwrap()
+            "Toolchain with name 'nightly-{}' does not exist\n\n\
+            \u{1b}[1mInstalled toolchains\u{1b}[0m\n\
+            --------------------\n\
+            latest-{}\n\n",
+            triple, triple
         );
-
         assert_eq!(output.stdout, expected_stdout);
     })?;
 
@@ -128,7 +131,7 @@ fn fuelup_default_missing_toolchain() -> Result<()> {
         let output = cfg.fuelup(&["default", "abcd"]);
         let expected_stdout = format!(
             "Toolchain with name 'abcd' does not exist\n\n\
-            \u{1b}[1minstalled toolchains\u{1b}[0m\n\
+            \u{1b}[1mInstalled toolchains\u{1b}[0m\n\
             --------------------\n\
             latest-{triple}\n\
             nightly-{triple}\n\

@@ -22,7 +22,7 @@ fn fuelup_show_latest() -> Result<()> {
             r#"Default host: {target}
 fuelup home: {fuelup_home_str}
 
-installed toolchains
+Installed toolchains
 --------------------
 latest-{target} (default)
 nightly-{target}
@@ -66,7 +66,7 @@ fn fuelup_show_and_switch() -> Result<()> {
             r#"Default host: {target}
 fuelup home: {fuelup_home_str}
 
-installed toolchains
+Installed toolchains
 --------------------
 latest-{target} (default)
 nightly-{target}
@@ -102,7 +102,7 @@ latest-{target} (default)
             r#"Default host: {target}
 fuelup home: {fuelup_home_str}
 
-installed toolchains
+Installed toolchains
 --------------------
 latest-{target}
 nightly-{target} (default)
@@ -146,7 +146,7 @@ fn fuelup_show_custom() -> Result<()> {
             r#"Default host: {target}
 fuelup home: {fuelup_home_str}
 
-installed toolchains
+Installed toolchains
 --------------------
 my_toolchain (default)
 
@@ -187,7 +187,7 @@ fn fuelup_show_override() -> Result<()> {
             r#"Default host: {target}
 fuelup home: {fuelup_home_str}
 
-installed toolchains
+Installed toolchains
 --------------------
 latest-{target} (default)
 
@@ -229,7 +229,7 @@ fn fuelup_show_latest_then_override() -> Result<()> {
             r#"Default host: {target}
 fuelup home: {fuelup_home_str}
 
-installed toolchains
+Installed toolchains
 --------------------
 latest-{target} (default)
 nightly-{target}
@@ -278,7 +278,7 @@ latest-{target} (default)
             r#"Default host: {target}
 fuelup home: {fuelup_home_str}
 
-installed toolchains
+Installed toolchains
 --------------------
 latest-{target} (default)
 nightly-{target}

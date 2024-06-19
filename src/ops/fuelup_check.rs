@@ -1,15 +1,15 @@
 use crate::{
     channel::Channel,
     config::Config,
-    download::DownloadCfg,
+    download::get_latest_version,
     file::get_bin_version,
     fmt::{bold, colored_bold},
-    target_triple::TargetTriple,
     toolchain::{DistToolchainDescription, Toolchain},
 };
 use ansiterm::Color;
 use anyhow::{anyhow, Result};
 use component::{self, Components};
+use rayon::prelude::*;
 use semver::Version;
 use std::{
     cmp::Ordering::{Equal, Greater, Less},
@@ -63,34 +63,29 @@ fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version
 
 fn check_fuelup() -> Result<()> {
     let fuelup_version: Version = Version::parse(clap::crate_version!())?;
-
-    if let Ok(fuelup_download_cfg) = DownloadCfg::new(
-        component::FUELUP,
-        TargetTriple::from_component(component::FUELUP)?,
-        None,
-    ) {
+    if let Ok(latest) = get_latest_version(component::FUELUP) {
         info!(
             "{} - {}",
             bold(component::FUELUP),
-            format_version_comparison(&fuelup_version, &fuelup_download_cfg.version)
+            format_version_comparison(&fuelup_version, &latest)
         );
     } else {
-        error!("Failed to create DownloadCfg for component 'fuelup'; skipping check for 'fuelup'");
+        error!("Failed to get latest version for component 'fuelup'; skipping check for 'fuelup'");
     }
     Ok(())
 }
 
 fn check_toolchain(toolchain: &str) -> Result<()> {
     let description = DistToolchainDescription::from_str(toolchain)?;
-
     let dist_channel = Channel::from_dist_channel(&description)?;
     let latest_package_versions = collect_package_versions(dist_channel);
-
     let toolchain = Toolchain::new(toolchain)?;
 
     info!("{}", bold(&toolchain.name));
 
-    for component in Components::collect_exclude_plugins()? {
+    let components = Components::collect_exclude_plugins()?;
+    let plugins = component::Components::collect_plugins()?;
+    components.par_iter().for_each(|component| {
         if let Some(latest_version) = latest_package_versions.get(&component.name) {
             let component_executable = toolchain.bin_path.join(&component.name);
             let version_text = match get_bin_version(&component_executable) {
@@ -99,16 +94,13 @@ fn check_toolchain(toolchain: &str) -> Result<()> {
             };
             info!("{:>2}{} - {}", "", bold(&component.name), version_text);
             if component.name == component::FORC {
-                for plugin in component::Components::collect_plugins()? {
+                plugins.par_iter().for_each(|plugin| {
                     if !plugin.is_main_executable() {
                         info!("{:>4}- {}", "", bold(&plugin.name));
                     }
-
                     for (index, executable) in plugin.executables.iter().enumerate() {
                         let plugin_executable = toolchain.bin_path.join(executable);
-
                         let mut plugin_name = &plugin.name;
-
                         if !plugin.is_main_executable() {
                             print!("{:>2}", "");
                             plugin_name = plugin
@@ -116,20 +108,18 @@ fn check_toolchain(toolchain: &str) -> Result<()> {
                                 .get(index)
                                 .ok_or_else(|| anyhow!("Plugin name not found"))?;
                         }
-
                         let maybe_latest_version = plugin.publish.map_or_else(
                             || latest_package_versions.get(component::FORC),
                             |_| latest_package_versions.get(plugin_name),
                         );
-
                         if let Some(latest_version) = maybe_latest_version {
                             check_plugin(&plugin_executable, plugin_name, latest_version);
                         }
                     }
-                }
+                });
             }
         }
-    }
+    });
     Ok(())
 }
 

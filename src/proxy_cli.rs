@@ -18,10 +18,10 @@ pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
     let cmd_args: Vec<_> = env::args_os().skip(1).collect();
     let toolchain = Toolchain::from_settings()?;
 
-    if !cmd_args.is_empty() {
-        let plugin = format!("{}-{}", arg0, &cmd_args[0].to_string_lossy());
+    if let Some(first_arg) = cmd_args.first() {
+        let plugin = format!("{}-{}", arg0, first_arg.to_string_lossy());
         if Components::collect_plugin_executables()?.contains(&plugin) {
-            direct_proxy(&plugin, &cmd_args[1..], &toolchain)?;
+            direct_proxy(&plugin, cmd_args.get(1..).unwrap_or_default(), &toolchain)?;
         }
     }
 

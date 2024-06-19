@@ -1,5 +1,6 @@
 use crate::{
     channel::Channel,
+    commands::check::CheckCommand,
     config::Config,
     download::get_latest_version,
     file::get_bin_version,
@@ -27,18 +28,17 @@ fn collect_package_versions(channel: Channel) -> HashMap<String, Version> {
     latest_versions
 }
 
-fn format_version_comparison(current_version: &Version, latest_version: &Version) -> String {
-    match current_version.cmp(latest_version) {
+fn format_version_comparison(
+    current_version: &Version,
+    latest_version: &Version,
+    verbose: bool,
+) -> Option<String> {
+    let order = current_version.cmp(latest_version);
+    let s = match order {
         Less => {
             format!(
                 "{} : {current_version} -> {latest_version}",
                 colored_bold(Color::Yellow, "Update available")
-            )
-        }
-        Equal => {
-            format!(
-                "{} : {current_version}",
-                colored_bold(Color::Green, "Up to date")
             )
         }
         Greater => {
@@ -50,32 +50,43 @@ fn format_version_comparison(current_version: &Version, latest_version: &Version
                 colored_bold(Color::Green, "(recommended)")
             )
         }
+        Equal => {
+            // Only show up-to-date message if verbose is true
+            if verbose {
+                format!(
+                    "{} : {current_version}",
+                    colored_bold(Color::Green, "Up to date")
+                )
+            } else {
+                return None;
+            }
+        }
+    };
+    Some(s)
+}
+
+fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version, verbose: bool) {
+    if let Some(version_or_err) = match get_bin_version(plugin_executable) {
+        Ok(version) => format_version_comparison(&version, latest_version, verbose),
+        Err(err) => Some(err.to_string()),
+    } {
+        info!("{:>4}- {} - {}", "", plugin, version_or_err);
     }
 }
 
-fn check_plugin(plugin_executable: &Path, plugin: &str, latest_version: &Version) {
-    let version_or_err = match get_bin_version(plugin_executable) {
-        Ok(version) => format_version_comparison(&version, latest_version),
-        Err(err) => err.to_string(),
-    };
-    info!("{:>4}- {} - {}", "", plugin, version_or_err);
-}
-
-fn check_fuelup() -> Result<()> {
+fn check_fuelup(verbose: bool) -> Result<()> {
     let fuelup_version: Version = Version::parse(clap::crate_version!())?;
     if let Ok(latest) = get_latest_version(component::FUELUP) {
-        info!(
-            "{} - {}",
-            bold(component::FUELUP),
-            format_version_comparison(&fuelup_version, &latest)
-        );
+        if let Some(text) = format_version_comparison(&fuelup_version, &latest, verbose) {
+            info!("{} - {}", bold(component::FUELUP), text);
+        }
     } else {
         error!("Failed to get latest version for component 'fuelup'; skipping check for 'fuelup'");
     }
     Ok(())
 }
 
-fn check_toolchain(toolchain: &str) -> Result<()> {
+fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
     let description = DistToolchainDescription::from_str(toolchain)?;
     let dist_channel = Channel::from_dist_channel(&description)?;
     let latest_package_versions = collect_package_versions(dist_channel);
@@ -88,10 +99,12 @@ fn check_toolchain(toolchain: &str) -> Result<()> {
         if let Some(latest_version) = latest_package_versions.get(&component.name) {
             let component_executable = toolchain.bin_path.join(&component.name);
             let version_text = match get_bin_version(&component_executable) {
-                Ok(version) => format_version_comparison(&version, latest_version),
-                Err(err) => err.to_string(),
+                Ok(version) => format_version_comparison(&version, latest_version, verbose),
+                Err(err) => Some(err.to_string()),
             };
-            info!("{:>2}{} - {}", "", bold(&component.name), version_text);
+            if let Some(version_text) = version_text {
+                info!("{:>2}{} - {}", "", bold(&component.name), version_text);
+            }
             if component.name == component::FORC {
                 plugins.par_iter().for_each(|plugin| {
                     if !plugin.is_main_executable() {
@@ -112,7 +125,7 @@ fn check_toolchain(toolchain: &str) -> Result<()> {
                             |_| latest_package_versions.get(plugin_name),
                         );
                         if let Some(latest_version) = maybe_latest_version {
-                            check_plugin(&plugin_executable, plugin_name, latest_version);
+                            check_plugin(&plugin_executable, plugin_name, latest_version, verbose);
                         }
                     }
                 });
@@ -122,11 +135,12 @@ fn check_toolchain(toolchain: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn check() -> Result<()> {
+pub fn check(command: CheckCommand) -> Result<()> {
+    let CheckCommand { verbose } = command;
     let cfg = Config::from_env()?;
     for toolchain in cfg.list_dist_toolchains()? {
-        check_toolchain(&toolchain)?;
+        check_toolchain(&toolchain, verbose)?;
     }
-    check_fuelup()?;
+    check_fuelup(verbose)?;
     Ok(())
 }

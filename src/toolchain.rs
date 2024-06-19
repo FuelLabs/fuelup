@@ -104,15 +104,23 @@ fn consume_back<T>(parts: &mut VecDeque<T>, number: usize) {
     }
 }
 
-/// Attempts to parse a date from the front of the parts list, returning the date and consuming the
-/// date parts if they are available
+/// Attempts to parse a date from the end of the parts list, returning the date and consuming the
+/// date parts if they are available.
 fn extract_date(parts: &mut VecDeque<&str>) -> Option<Date> {
     let len = parts.len();
     if len < 3 {
         return None;
     }
 
-    let date_str = format!("{}-{}-{}", parts[len - 3], parts[len - 2], parts[len - 1]);
+    let date_str = parts
+        .iter()
+        .rev()
+        .take(3)
+        .cloned()
+        .rev()
+        .collect::<Vec<&str>>()
+        .join("-");
+
     match Date::parse(&date_str, DATE_FORMAT) {
         Ok(d) => {
             consume_back(parts, 3);
@@ -122,41 +130,33 @@ fn extract_date(parts: &mut VecDeque<&str>) -> Option<Date> {
     }
 }
 
-/// Attemps to parse the target from a vector of parts, returning the target and consuming the
-/// target parts if they are available
+/// Attempts to parse the target from the end of the parts list, returning the target and consuming the
+/// target parts if they are available.
 fn extract_target(parts: &mut VecDeque<&str>) -> Option<TargetTriple> {
-    if parts.len() < 3 {
-        return None;
-    }
-
-    let len = parts.len();
-    let target_str = format!("{}-{}-{}", parts[len - 3], parts[len - 2], parts[len - 1]);
-    match TargetTriple::new(&target_str) {
-        Ok(t) => {
-            consume_back(parts, 3);
-            Some(t)
+    fn try_extract(parts: &mut VecDeque<&str>, count: usize) -> Option<TargetTriple> {
+        if parts.len() < count {
+            return None;
         }
-        Err(_) => {
-            if parts.len() < 4 {
-                return None;
-            }
 
-            let target_str = format!(
-                "{}-{}-{}-{}",
-                parts[len - 4],
-                parts[len - 3],
-                parts[len - 2],
-                parts[len - 1]
-            );
-            match TargetTriple::new(&target_str) {
-                Ok(t) => {
-                    consume_back(parts, 4);
-                    Some(t)
-                }
-                Err(_) => None,
+        let target_str: String = parts
+            .iter()
+            .rev()
+            .take(count)
+            .cloned()
+            .rev()
+            .collect::<Vec<&str>>()
+            .join("-");
+
+        match TargetTriple::new(&target_str) {
+            Ok(t) => {
+                consume_back(parts, count);
+                Some(t)
             }
+            Err(_) => None,
         }
     }
+
+    try_extract(parts, 3).or_else(|| try_extract(parts, 4))
 }
 
 /// Parses a distributable toolchain description from a string.
@@ -177,12 +177,16 @@ impl FromStr for DistToolchainDescription {
         }
 
         let mut parts = s.split('-').collect::<VecDeque<_>>();
+
         match parts.len() {
-            1 => Ok(Self {
-                name: DistToolchainName::from_str(parts[0])?,
-                target: TargetTriple::from_host().ok(),
-                date: None,
-            }),
+            1 => {
+                let first_part = *parts.front().unwrap_or(&"");
+                Ok(Self {
+                    name: DistToolchainName::from_str(first_part)?,
+                    target: TargetTriple::from_host().ok(),
+                    date: None,
+                })
+            }
             _ => {
                 let date = extract_date(&mut parts);
                 let target = extract_target(&mut parts);
@@ -420,11 +424,13 @@ impl Toolchain {
 
         Ok(())
     }
-    fn remove_executables(&self, component: &str) -> Result<()> {
-        let executables = &Components::collect().unwrap().component[component].executables;
-        for executable in executables {
-            remove_file(self.bin_path.join(executable))
-                .with_context(|| format!("failed to remove executable '{executable}'"))?;
+    fn remove_executables(&self, component_name: &str) -> Result<()> {
+        let components = Components::collect()?;
+        if let Some(component) = components.component.get(component_name) {
+            for executable in &component.executables {
+                remove_file(self.bin_path.join(executable))
+                    .with_context(|| format!("failed to remove executable '{executable}'"))?;
+            }
         }
         Ok(())
     }
@@ -672,5 +678,79 @@ mod tests {
         for channel in INVALID_CHANNELS {
             DistToolchainDescription::from_str(channel).expect_err("invalid channel");
         }
+    }
+
+    #[test]
+    fn test_extract_target_with_three_parts() {
+        let mut parts: VecDeque<&str> = VecDeque::from(vec!["aarch64", "apple", "darwin"]);
+        let target = extract_target(&mut parts).expect("target triple");
+        assert_eq!(target.to_string(), "aarch64-apple-darwin");
+        assert!(parts.is_empty()); // Ensure parts are consumed
+    }
+
+    #[test]
+    fn test_extract_target_with_four_parts() {
+        let mut parts: VecDeque<&str> = VecDeque::from(vec!["x86_64", "unknown", "linux", "gnu"]);
+        let target = extract_target(&mut parts).expect("target triple");
+        assert_eq!(target.to_string(), "x86_64-unknown-linux-gnu");
+        assert!(parts.is_empty()); // Ensure parts are consumed
+    }
+
+    #[test]
+    fn test_extract_target_with_five_parts() {
+        let mut parts: VecDeque<&str> =
+            VecDeque::from(vec!["my", "custom", "aarch64", "apple", "darwin"]);
+        let target = extract_target(&mut parts).expect("target triple");
+        assert_eq!(target.to_string(), "aarch64-apple-darwin");
+        assert_eq!(parts.len(), 2); // Ensure 3 parts were consumed
+    }
+
+    #[test]
+    fn test_extract_target_with_insufficient_parts() {
+        let mut parts: VecDeque<&str> = VecDeque::from(vec!["apple", "darwin"]);
+        assert!(extract_target(&mut parts).is_none());
+        assert_eq!(parts.len(), 2); // Ensure parts are not consumed
+    }
+
+    #[test]
+    fn test_extract_target_with_invalid_target() {
+        let mut parts: VecDeque<&str> = VecDeque::from(vec!["invalid", "target", "string"]);
+        assert!(extract_target(&mut parts).is_none());
+        assert_eq!(parts.len(), 3); // Ensure parts are not consumed
+
+        let mut parts: VecDeque<&str> =
+            VecDeque::from(vec!["still", "invalid", "target", "string"]);
+        assert!(extract_target(&mut parts).is_none());
+        assert_eq!(parts.len(), 4); // Ensure parts are not consumed
+    }
+
+    #[test]
+    fn test_extract_date_with_valid_date() {
+        let mut parts: VecDeque<&str> = VecDeque::from(vec!["2022", "12", "25"]);
+        let date = extract_date(&mut parts).expect("date");
+        assert_eq!(date.to_string(), "2022-12-25");
+        assert!(parts.is_empty()); // Ensure all parts are consumed
+    }
+
+    #[test]
+    fn test_extract_date_with_insufficient_parts() {
+        let mut parts: VecDeque<&str> = VecDeque::from(vec!["2022", "12"]);
+        assert!(extract_date(&mut parts).is_none());
+        assert_eq!(parts.len(), 2); // Ensure parts are not consumed
+    }
+
+    #[test]
+    fn test_extract_date_with_invalid_date() {
+        let mut parts: VecDeque<&str> = VecDeque::from(vec!["12", "25", "2022"]);
+        assert!(extract_date(&mut parts).is_none());
+        assert_eq!(parts.len(), 3); // Ensure parts are not consumed
+    }
+
+    #[test]
+    fn test_extract_date_with_extra_parts() {
+        let mut parts: VecDeque<&str> = VecDeque::from(vec!["extra", "2022", "12", "25"]);
+        let date = extract_date(&mut parts).expect("date");
+        assert_eq!(date.to_string(), "2022-12-25");
+        assert_eq!(parts.len(), 1); // Ensure only the date parts are consumed
     }
 }

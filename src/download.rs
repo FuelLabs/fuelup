@@ -135,7 +135,7 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
         let response: LatestReleaseApiResponse =
             serde_json::from_str(&String::from_utf8_lossy(&data))?;
 
-        let version_str = &response.tag_name["v".len()..];
+        let version_str = response.tag_name.trim_start_matches('v');
         let version = Version::parse(version_str)?;
         Ok(version)
     } else {
@@ -333,7 +333,10 @@ fn write_response_with_progress_bar<W: Write>(
         if bytes_read == 0 {
             break;
         }
-        if let Err(e) = writer.write_all(&buffer[..bytes_read]) {
+        let buf = buffer
+            .get(..bytes_read)
+            .ok_or_else(|| anyhow!("Failed to read buffer"))?;
+        if let Err(e) = writer.write_all(buf) {
             log_progress_bar(&progress_bar);
             if target.is_empty() {
                 bail!("Something went wrong writing data: {}", e)

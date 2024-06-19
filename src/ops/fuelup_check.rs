@@ -80,7 +80,6 @@ fn check_toolchain(toolchain: &str) -> Result<()> {
     let dist_channel = Channel::from_dist_channel(&description)?;
     let latest_package_versions = collect_package_versions(dist_channel);
     let toolchain = Toolchain::new(toolchain)?;
-
     info!("{}", bold(&toolchain.name));
 
     let components = Components::collect_exclude_plugins()?;

@@ -100,12 +100,10 @@ fn construct_channel_url(desc: &DistToolchainDescription) -> Result<String> {
 impl Channel {
     pub fn from_dist_channel(desc: &DistToolchainDescription) -> Result<Self> {
         let channel_url = construct_channel_url(desc)?;
-
         let toml = match download(&channel_url) {
             Ok(t) => String::from_utf8(t)?,
             Err(_) => bail!("Could not read {}", &channel_url),
         };
-
         Self::from_toml(&toml)
     }
 

@@ -180,13 +180,10 @@ impl Components {
     }
 
     pub fn collect_plugin_executables() -> Result<Vec<String>> {
-        let plugins = Self::collect_plugins()?;
-        let mut executables = vec![];
-
-        for plugin in plugins {
-            executables.extend(plugin.executables.clone().into_iter());
-        }
-
+        let executables = Self::collect_plugins()?
+            .iter()
+            .flat_map(|p| p.executables.clone())
+            .collect();
         Ok(executables)
     }
 
@@ -195,7 +192,6 @@ impl Components {
         if let Some(forc) = components.component.get(FORC) {
             return forc.executables.contains(&plugin_name.to_string());
         };
-
         false
     }
 }

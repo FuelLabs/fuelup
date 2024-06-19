@@ -1,3 +1,5 @@
+#![cfg_attr(test, allow(clippy::indexing_slicing))]
+
 pub mod channel;
 pub mod commands;
 pub mod config;

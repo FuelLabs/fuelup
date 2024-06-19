@@ -1,25 +1,27 @@
+use crate::{
+    channel::{Channel, Package},
+    constants::CHANNEL_LATEST_URL,
+    target_triple::TargetTriple,
+    toolchain::DistToolchainDescription,
+};
 use anyhow::{anyhow, bail, Result};
 use component::{Component, FUELUP};
 use flate2::read::GzDecoder;
 use indicatif::{FormattedDuration, HumanBytes, HumanDuration, ProgressBar, ProgressStyle};
 use semver::Version;
 use serde::{Deserialize, Serialize};
-use std::env;
-use std::fs::{File, OpenOptions};
-use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
-use std::str::FromStr;
-use std::time::Duration;
-use std::{fs, thread};
+use std::{
+    env,
+    fs::{self, File, OpenOptions},
+    io::{Read, Write},
+    path::{Path, PathBuf},
+    str::FromStr,
+    thread,
+    time::Duration,
+};
 use tar::Archive;
 use tracing::{debug, error, info, warn};
 use ureq::Response;
-
-use crate::channel::Channel;
-use crate::channel::Package;
-use crate::constants::CHANNEL_LATEST_URL;
-use crate::target_triple::TargetTriple;
-use crate::toolchain::DistToolchainDescription;
 
 fn github_releases_download_url(repo: &str, tag: &Version, tarball: &str) -> String {
     format!("https://github.com/FuelLabs/{repo}/releases/download/v{tag}/{tarball}")
@@ -76,15 +78,18 @@ impl DownloadCfg {
     pub fn from_package(name: &str, package: &Package) -> Result<Self> {
         let target = TargetTriple::from_component(name)?;
         let tarball_name = tarball_name(name, &package.version, &target);
-        let tarball_url = package.target[&target.to_string()].url.clone();
-        let hash = Some(package.target[&target.to_string()].hash.clone());
+        let hashed_binary = package
+            .target
+            .get(&target.to_string())
+            .ok_or_else(|| anyhow!("No binary for target: {}", target))?;
+
         Ok(Self {
             name: name.to_string(),
             target,
             version: package.version.clone(),
             tarball_name,
-            tarball_url,
-            hash,
+            tarball_url: hashed_binary.url.clone(),
+            hash: Some(hashed_binary.hash.clone()),
         })
     }
 }
@@ -121,7 +126,6 @@ pub fn tarball_name(tarball_prefix: &str, version: &Version, target: &TargetTrip
 
 pub fn get_latest_version(name: &str) -> Result<Version> {
     let handle = build_agent()?;
-
     let mut data = Vec::new();
     if name == FUELUP {
         const FUELUP_RELEASES_API_URL: &str =
@@ -131,7 +135,7 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
         let response: LatestReleaseApiResponse =
             serde_json::from_str(&String::from_utf8_lossy(&data))?;
 
-        let version_str = &response.tag_name["v".len()..];
+        let version_str = response.tag_name.trim_start_matches('v');
         let version = Version::parse(version_str)?;
         Ok(version)
     } else {
@@ -183,7 +187,7 @@ pub fn download(url: &str) -> Result<Vec<u8>> {
         match handle.get(url).call() {
             Ok(response) => {
                 let mut data = Vec::new();
-                write_response_with_progress_bar(response, &mut data, String::new())?;
+                response.into_reader().read_to_end(&mut data)?;
                 return Ok(data);
             }
             Err(ureq::Error::Status(404, r)) => {
@@ -222,7 +226,7 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
                 if let Err(e) = write_response_with_progress_bar(
                     response,
                     &mut file,
-                    path.display().to_string(),
+                    &path.display().to_string(),
                 ) {
                     fs::remove_file(path)?;
                     return Err(e);
@@ -307,7 +311,7 @@ pub fn unpack_bins(dir: &Path, dst_dir: &Path) -> Result<Vec<PathBuf>> {
 fn write_response_with_progress_bar<W: Write>(
     response: Response,
     writer: &mut W,
-    target: String,
+    target: &str,
 ) -> Result<()> {
     let total_size = response
         .header("Content-Length")
@@ -329,7 +333,10 @@ fn write_response_with_progress_bar<W: Write>(
         if bytes_read == 0 {
             break;
         }
-        if let Err(e) = writer.write_all(&buffer[..bytes_read]) {
+        let buf = buffer
+            .get(..bytes_read)
+            .ok_or_else(|| anyhow!("Failed to read buffer"))?;
+        if let Err(e) = writer.write_all(buf) {
             log_progress_bar(&progress_bar);
             if target.is_empty() {
                 bail!("Something went wrong writing data: {}", e)
@@ -370,10 +377,9 @@ fn fuels_version_from_toml(toml: toml_edit::Document) -> Result<String> {
         if let Some(fuels) = deps.get("fuels") {
             let version = match fuels.as_value() {
                 Some(toml_edit::Value::String(s)) => s.value().to_string(),
-                Some(toml_edit::Value::InlineTable(t)) => t.get("version").map_or_else(
-                    || "".to_string(),
-                    |v| v.as_str().unwrap_or_default().to_string(),
-                ),
+                Some(toml_edit::Value::InlineTable(t)) => t
+                    .get("version")
+                    .map_or_else(String::new, |v| v.as_str().unwrap_or_default().to_string()),
                 _ => String::default(),
             };
 
@@ -525,7 +531,7 @@ fuels = { version = "0.1", features = ["some-feature"] }
             body,
         );
         let res = s.parse::<Response>().unwrap();
-        assert!(write_response_with_progress_bar(res, &mut data, String::new()).is_ok());
+        assert!(write_response_with_progress_bar(res, &mut data, "").is_ok());
         let written_res = String::from_utf8(data)?;
         assert!(written_res.trim().eq(&body));
         Ok(())
@@ -545,7 +551,7 @@ fuels = { version = "0.1", features = ["some-feature"] }
         );
         let res = s.parse::<Response>().unwrap();
         assert_eq!(
-            write_response_with_progress_bar(res, &mut mock_writer, String::new())
+            write_response_with_progress_bar(res, &mut mock_writer, "")
                 .unwrap_err()
                 .to_string(),
             "Something went wrong writing data: Mock Interrupted Error"
@@ -559,5 +565,33 @@ fuels = { version = "0.1", features = ["some-feature"] }
         let response = handle.get("https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/channel-fuel-beta-4.toml").call()?;
         assert!(response.header("Content-Length").is_none());
         Ok(())
+    }
+
+    #[test]
+    fn test_download_cfg_from_package_missing_target() {
+        let package = Package {
+            version: Version::parse("0.1.0").unwrap(),
+            target: {
+                let mut map = std::collections::BTreeMap::new();
+                map.insert(
+                    "dummy-target-triple".to_string(),
+                    crate::channel::HashedBinary {
+                        url: "https://example.com/forc-0.1.0-x86_64-unknown-linux-gnu.tar.gz"
+                            .to_string(),
+                        hash: "hash".to_string(),
+                    },
+                );
+                map
+            },
+            fuels_version: None,
+        };
+        let error = DownloadCfg::from_package("forc", &package)
+            .expect_err("Expected error due to missing target");
+
+        let expected_target = TargetTriple::from_component("forc").expect("target triple");
+        assert_eq!(
+            error.to_string(),
+            format!("No binary for target: {}", expected_target)
+        );
     }
 }

@@ -118,6 +118,7 @@ impl ToolchainOverride {
         Ok(Self { cfg, path })
     }
 
+    #[allow(clippy::indexing_slicing)]
     pub fn to_toml(&self) -> Document {
         let mut document = toml_edit::Document::new();
 

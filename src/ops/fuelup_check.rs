@@ -10,7 +10,6 @@ use crate::{
 use ansiterm::Color;
 use anyhow::{anyhow, Result};
 use component::{self, Components};
-use rayon::prelude::*;
 use semver::Version;
 use std::{
     cmp::Ordering::{Equal, Greater, Less},
@@ -91,11 +90,11 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
     let dist_channel = Channel::from_dist_channel(&description)?;
     let latest_package_versions = collect_package_versions(dist_channel);
     let toolchain = Toolchain::new(toolchain)?;
-    info!("{}", bold(&toolchain.name));
+    info!("{}: {}", bold("Toolchain: "), &toolchain.name);
 
     let components = Components::collect_exclude_plugins()?;
     let plugins = component::Components::collect_plugins()?;
-    components.par_iter().for_each(|component| {
+    components.iter().for_each(|component| {
         if let Some(latest_version) = latest_package_versions.get(&component.name) {
             let component_executable = toolchain.bin_path.join(&component.name);
             let version_text = match get_bin_version(&component_executable) {
@@ -106,7 +105,7 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                 info!("{:>2}{} - {}", "", bold(&component.name), version_text);
             }
             if component.name == component::FORC {
-                plugins.par_iter().for_each(|plugin| {
+                plugins.iter().for_each(|plugin| {
                     if !plugin.is_main_executable() {
                         info!("{:>4}- {}", "", bold(&plugin.name));
                     }

@@ -2,7 +2,6 @@ use anyhow::{bail, Result};
 use clap::Parser;
 
 use crate::ops::fuelup_toolchain::install::install;
-use crate::ops::fuelup_toolchain::list_revisions::list_revisions;
 use crate::ops::fuelup_toolchain::new::new;
 use crate::ops::fuelup_toolchain::uninstall::uninstall;
 use crate::target_triple::TargetTriple;
@@ -16,8 +15,6 @@ pub enum ToolchainCommand {
     New(NewCommand),
     /// Uninstall a toolchain
     Uninstall(UninstallCommand),
-    /// Fetch the list of published `latest` toolchains, starting from the most recent
-    ListRevisions(ListRevisionsCommand),
 }
 
 #[derive(Debug, Parser)]
@@ -38,9 +35,6 @@ pub struct UninstallCommand {
     /// Toolchain to uninstall
     pub name: String,
 }
-
-#[derive(Debug, Parser)]
-pub struct ListRevisionsCommand {}
 
 fn name_allowed(s: &str) -> Result<String> {
     let name = match s.split_once('-') {
@@ -69,7 +63,6 @@ pub fn exec(command: ToolchainCommand) -> Result<()> {
         ToolchainCommand::Install(command) => install(command)?,
         ToolchainCommand::New(command) => new(command)?,
         ToolchainCommand::Uninstall(command) => uninstall(command)?,
-        ToolchainCommand::ListRevisions(command) => list_revisions(command)?,
     };
 
     Ok(())

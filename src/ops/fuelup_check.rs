@@ -8,7 +8,7 @@ use crate::{
     toolchain::{DistToolchainDescription, Toolchain},
 };
 use ansiterm::Color;
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use component::{self, Components};
 use semver::Version;
 use std::{
@@ -114,10 +114,11 @@ fn check_toolchain(toolchain: &str, verbose: bool) -> Result<()> {
                         let mut plugin_name = &plugin.name;
                         if !plugin.is_main_executable() {
                             print!("{:>2}", "");
-                            plugin_name = plugin
-                                .executables
-                                .get(index)
-                                .ok_or_else(|| anyhow!("Plugin name not found"))?;
+                            if let Some(exe_name) = plugin.executables.get(index) {
+                                plugin_name = exe_name;
+                            } else {
+                                error!("Plugin name not found");
+                            }
                         }
                         let maybe_latest_version = plugin.publish.map_or_else(
                             || latest_package_versions.get(component::FORC),

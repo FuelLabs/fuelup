@@ -152,7 +152,7 @@ fn fuelup_toolchain_new() -> Result<()> {
         let output = cfg.fuelup(&["toolchain", "new", CUSTOM_TOOLCHAIN_NAME]);
         let expected_stdout = format!(
             "New toolchain initialized: {CUSTOM_TOOLCHAIN_NAME}
-default toolchain set to '{CUSTOM_TOOLCHAIN_NAME}'\n"
+Default toolchain set to '{CUSTOM_TOOLCHAIN_NAME}'\n"
         );
 
         assert_eq!(output.stdout, expected_stdout);

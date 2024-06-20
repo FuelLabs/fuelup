@@ -36,14 +36,14 @@ fn fuelup_default_latest_and_custom() -> Result<()> {
     testcfg::setup(FuelupState::LatestAndCustomInstalled, &|cfg| {
         let output = cfg.fuelup(&["default", "latest"]);
         let expected_stdout = format!(
-            "default toolchain set to 'latest-{}'\n",
+            "Default toolchain set to 'latest-{}'\n",
             TargetTriple::from_host().unwrap()
         );
 
         assert_eq!(output.stdout, expected_stdout);
 
         let output = cfg.fuelup(&["default", CUSTOM_TOOLCHAIN_NAME]);
-        let expected_stdout = format!("default toolchain set to '{CUSTOM_TOOLCHAIN_NAME}'\n");
+        let expected_stdout = format!("Default toolchain set to '{CUSTOM_TOOLCHAIN_NAME}'\n");
 
         assert_eq!(output.stdout, expected_stdout);
     })?;
@@ -54,12 +54,15 @@ fn fuelup_default_latest_and_custom() -> Result<()> {
 #[test]
 fn fuelup_default_uninstalled_toolchain() -> Result<()> {
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+        let triple = TargetTriple::from_host().unwrap();
         let output = cfg.fuelup(&["default", "nightly"]);
         let expected_stdout = format!(
-            "Toolchain with name 'nightly-{}' does not exist\n",
-            TargetTriple::from_host().unwrap()
+            "Toolchain with name 'nightly-{}' does not exist\n\n\
+            \u{1b}[1mInstalled toolchains\u{1b}[0m\n\
+            --------------------\n\
+            latest-{}\n\n",
+            triple, triple
         );
-
         assert_eq!(output.stdout, expected_stdout);
     })?;
 
@@ -71,7 +74,7 @@ fn fuelup_default_nightly() -> Result<()> {
     testcfg::setup(FuelupState::AllInstalled, &|cfg| {
         let output = cfg.fuelup(&["default", "nightly"]);
         let expected_stdout = format!(
-            "default toolchain set to 'nightly-{}'\n",
+            "Default toolchain set to 'nightly-{}'\n",
             TargetTriple::from_host().unwrap()
         );
 
@@ -88,7 +91,7 @@ fn fuelup_default_nightly_and_nightly_date() -> Result<()> {
         let stdout = String::from_utf8_lossy(&stripped);
 
         let expected_stdout = format!(
-            "default toolchain set to 'nightly-{}'\n",
+            "Default toolchain set to 'nightly-{}'\n",
             TargetTriple::from_host().unwrap()
         );
         assert_eq!(stdout, expected_stdout);
@@ -97,7 +100,7 @@ fn fuelup_default_nightly_and_nightly_date() -> Result<()> {
             strip_ansi_escapes::strip(cfg.fuelup(&["default", &format!("nightly-{DATE}")]).stdout);
         let stdout = String::from_utf8_lossy(&stripped);
         let expected_stdout = format!(
-            "default toolchain set to 'nightly-{}-{}'\n",
+            "Default toolchain set to 'nightly-{}-{}'\n",
             DATE,
             TargetTriple::from_host().unwrap()
         );
@@ -118,5 +121,25 @@ fn fuelup_default_override() -> Result<()> {
         assert_eq!(output.stdout, expected_stdout);
     })?;
 
+    Ok(())
+}
+
+#[test]
+fn fuelup_default_missing_toolchain() -> Result<()> {
+    testcfg::setup(FuelupState::AllInstalled, &|cfg| {
+        let triple = TargetTriple::from_host().unwrap();
+        let output = cfg.fuelup(&["default", "abcd"]);
+        let expected_stdout = format!(
+            "Toolchain with name 'abcd' does not exist\n\n\
+            \u{1b}[1mInstalled toolchains\u{1b}[0m\n\
+            --------------------\n\
+            latest-{triple}\n\
+            nightly-{triple}\n\
+            nightly-2022-08-30-{triple}\n\n"
+        );
+
+        println!("\n{}", output.stdout);
+        assert_eq!(output.stdout, expected_stdout);
+    })?;
     Ok(())
 }

@@ -3,6 +3,8 @@ use std::str::FromStr;
 use tracing::info;
 
 use crate::{
+    config,
+    fmt::print_header,
     path::settings_file,
     settings::SettingsFile,
     toolchain::{DistToolchainDescription, Toolchain},
@@ -43,7 +45,17 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
     };
 
     if !new_default.exists() {
-        bail!("Toolchain with name '{}' does not exist", &new_default.name);
+        let cfg = config::Config::from_env()?;
+        let toolchains = cfg.list_toolchains()?;
+
+        info!("Toolchain with name '{}' does not exist", &new_default.name);
+        print_header("Installed toolchains");
+        for toolchain in toolchains {
+            info!("{}", toolchain);
+        }
+        // TODO: we should consider migrating to use thiserror in order to return a custom error here
+        // so we can match on it and prompt the user for another attempt.
+        bail!("");
     };
 
     let settings = SettingsFile::new(settings_file());
@@ -51,7 +63,7 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
         s.default_toolchain = Some(new_default.name.clone());
         Ok(())
     })?;
-    info!("default toolchain set to '{}'", new_default.name);
+    info!("Default toolchain set to '{}'", new_default.name);
 
     Ok(())
 }

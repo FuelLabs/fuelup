@@ -1,6 +1,6 @@
 use anyhow::Result;
 use fuelup::{fmt::format_toolchain_with_target, target_triple::TargetTriple};
-
+use indoc::formatdoc;
 pub mod testcfg;
 use testcfg::{FuelupState, ALL_BINS, DATE};
 
@@ -49,12 +49,12 @@ fn fuelup_component_add_disallowed() -> Result<()> {
 
     testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
         let output = cfg.fuelup(&["component", "add", "forc@0.19.1"]);
-        let expected_stdout = format!(
+        let expected_stdout = formatdoc!(
             r#"Installing specific components is reserved for custom toolchains.
-You are currently using '{latest}'.
+                You are currently using '{latest}'.
 
-You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#
+                You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
+            "#
         );
         assert_eq!(output.stdout, expected_stdout);
 
@@ -64,12 +64,12 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
 
     testcfg::setup(FuelupState::NightlyInstalled, &|cfg| {
         let output = cfg.fuelup(&["component", "add", "forc@.19.1"]);
-        let expected_stdout = format!(
+        let expected_stdout = formatdoc!(
             r#"Installing specific components is reserved for custom toolchains.
-You are currently using '{nightly}'.
+                You are currently using '{nightly}'.
 
-You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#
+                You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
+            "#
         );
         assert_eq!(output.stdout, expected_stdout);
 
@@ -79,12 +79,12 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
 
     testcfg::setup(FuelupState::NightlyDateInstalled, &|cfg| {
         let output = cfg.fuelup(&["component", "add", "forc@.19.1"]);
-        let expected_stdout = format!(
+        let expected_stdout = formatdoc!(
             r#"Installing specific components is reserved for custom toolchains.
-You are currently using '{nightly_date}'.
+                You are currently using '{nightly_date}'.
 
-You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#
+                You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
+            "#
         );
         assert_eq!(output.stdout, expected_stdout);
 
@@ -104,13 +104,12 @@ fn fuelup_component_remove_disallowed() -> Result<()> {
 
         expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
         let output = cfg.fuelup(&["component", "remove", "forc"]);
-
-        let expected_stdout = format!(
+        let expected_stdout = formatdoc!(
             r#"Removing specific components is reserved for custom toolchains.
-You are currently using '{latest}'.
+            You are currently using '{latest}'.
 
-You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#,
+            You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
+            "#
         );
         assert_eq!(output.stdout, expected_stdout);
         expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
@@ -121,13 +120,12 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
 
         expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);
         let output = cfg.fuelup(&["component", "remove", "forc"]);
-
-        let expected_stdout = format!(
+        let expected_stdout = formatdoc!(
             r#"Removing specific components is reserved for custom toolchains.
-You are currently using '{nightly_date}'.
+            You are currently using '{nightly_date}'.
 
-You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
-"#
+            You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.
+            "#
         );
         assert_eq!(output.stdout, expected_stdout);
         expect_files_exist(&latest_toolchain_bin_dir, ALL_BINS);

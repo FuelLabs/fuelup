@@ -326,6 +326,7 @@ name = "component"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "indoc",
  "serde",
  "toml_edit 0.13.4",
 ]
@@ -505,6 +506,7 @@ dependencies = [
  "dirs",
  "flate2",
  "indicatif",
+ "indoc",
  "semver",
  "serde",
  "serde_json",
@@ -624,6 +626,12 @@ dependencies = [
  "portable-atomic",
  "unicode-width",
 ]
+
+[[package]]
+name = "indoc"
+version = "2.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b248f5224d1d606005e02c97f5aa4e88eeb230488bcc03bc9ca4d7991399f2b5"
 
 [[package]]
 name = "instant"

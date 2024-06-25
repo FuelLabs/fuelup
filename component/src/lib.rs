@@ -203,17 +203,18 @@ impl Components {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use indoc::indoc;
     #[test]
     fn test_toml() -> Result<()> {
-        const TOML: &str = r#"
-[component.forc-fmt]
-name = "forc-fmt"
-is_plugin = true
-tarball_prefix = "forc-binaries"
-executables = ["forc-fmt"]
-repository_name = "sway"
-targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
-"#;
+        const TOML: &str = indoc! {r#"
+            [component.forc-fmt]
+            name = "forc-fmt"
+            is_plugin = true
+            tarball_prefix = "forc-binaries"
+            executables = ["forc-fmt"]
+            repository_name = "sway"
+            targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
+        "#};
 
         let components = Components::from_toml(TOML)?;
 

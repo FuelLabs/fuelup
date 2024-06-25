@@ -212,33 +212,32 @@ impl OverrideCfg {
 
 #[cfg(test)]
 mod tests {
-    use crate::channel::{BETA_1, BETA_2, BETA_3, NIGHTLY};
-
     use super::*;
+    use crate::channel::{BETA_1, BETA_2, BETA_3, NIGHTLY};
+    use indoc::indoc;
 
     #[test]
     fn parse_toolchain_override_latest_with_date() {
-        const TOML: &str = r#"[toolchain]
-channel = "latest-2023-01-09"
-"#;
+        const TOML: &str = indoc! {r#"
+            [toolchain]
+            channel = "latest-2023-01-09"
+        "#};
         let cfg = OverrideCfg::from_toml(TOML).unwrap();
-
         assert_eq!(cfg.toolchain.channel.to_string(), "latest-2023-01-09");
-
         assert!(cfg.components.is_none());
         assert_eq!(TOML, cfg.to_string_pretty().unwrap());
     }
 
     #[test]
     fn parse_toolchain_override_nightly_with_date() {
-        const TOML: &str = r#"[toolchain]
-channel = "nightly-2023-01-09"
+        const TOML: &str = indoc! {r#"
+            [toolchain]
+            channel = "nightly-2023-01-09"
 
-[components]
-forc = "0.33.0"
-"#;
+            [components]
+            forc = "0.33.0"
+        "#};
         let cfg = OverrideCfg::from_toml(TOML).unwrap();
-
         assert_eq!(cfg.toolchain.channel.to_string(), "nightly-2023-01-09");
         assert_eq!(
             cfg.components.as_ref().unwrap().get("forc").unwrap(),
@@ -249,12 +248,14 @@ forc = "0.33.0"
 
     #[test]
     fn parse_toolchain_override_channel_without_date_error() {
-        const LATEST: &str = r#"[toolchain]
-channel = "latest"
-"#;
-        const NIGHTLY: &str = r#"[toolchain]
-channel = "nightly"
-"#;
+        const LATEST: &str = indoc! {r#"
+            [toolchain]
+            channel = "latest"
+        "#};
+        const NIGHTLY: &str = indoc! {r#"
+            [toolchain]
+            channel = "nightly"
+        "#};
 
         let result = OverrideCfg::from_toml(LATEST);
         assert!(result.is_err());
@@ -275,16 +276,19 @@ channel = "nightly"
     #[test]
     fn parse_toolchain_override_invalid_tomls() {
         const EMPTY_STR: &str = "";
-        const EMPTY_TOOLCHAIN: &str = r#"[toolchain]
-"#;
-        const INVALID_CHANNEL: &str = r#"[toolchain]
-channel = "invalid-channel"
-"#;
-        const EMPTY_COMPONENTS: &str = r#"[toolchain]
-channel = "beta-2"
+        const EMPTY_TOOLCHAIN: &str = indoc! {r#"
+            [toolchain]
+        "#};
+        const INVALID_CHANNEL: &str = indoc! {r#"
+            [toolchain]
+            channel = "invalid-channel"
+        "#};
+        const EMPTY_COMPONENTS: &str = indoc! {r#"
+            [toolchain]
+            channel = "beta-2"
 
-[components]
-"#;
+            [components]
+        "#};
 
         for toml in [
             EMPTY_STR,

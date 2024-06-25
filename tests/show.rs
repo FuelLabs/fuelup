@@ -4,6 +4,7 @@ use fuelup::{
     target_triple::TargetTriple,
     toolchain_override::{self, OverrideCfg, ToolchainCfg, ToolchainOverride},
 };
+use indoc::formatdoc;
 use std::str::FromStr;
 
 pub mod testcfg;
@@ -18,36 +19,35 @@ fn fuelup_show_latest() -> Result<()> {
         let target = TargetTriple::from_host().unwrap();
         let fuelup_home = cfg.fuelup_dir();
         let fuelup_home_str = fuelup_home.to_string_lossy();
-        let expected_stdout = format!(
+        let expected_stdout = formatdoc! {
             r#"Default host: {target}
-fuelup home: {fuelup_home_str}
+            fuelup home: {fuelup_home_str}
 
-Installed toolchains
---------------------
-latest-{target} (default)
-nightly-{target}
-nightly-2022-08-30-{target}
+            Installed toolchains
+            --------------------
+            latest-{target} (default)
+            nightly-{target}
+            nightly-2022-08-30-{target}
 
-active toolchain
-----------------
-latest-{target} (default)
-  forc : 0.1.0
-    - forc-client
-      - forc-deploy : 0.1.0
-      - forc-run : 0.1.0
-    - forc-crypto : 0.1.0
-    - forc-debug : 0.1.0
-    - forc-doc : 0.1.0
-    - forc-explore : 0.1.0
-    - forc-fmt : 0.1.0
-    - forc-lsp : 0.1.0
-    - forc-tx : 0.1.0
-    - forc-wallet : 0.1.0
-  fuel-core : 0.1.0
-  fuel-core-keygen : not found
-"#
-        );
-
+            active toolchain
+            ----------------
+            latest-{target} (default)
+              forc : 0.1.0
+                - forc-client
+                  - forc-deploy : 0.1.0
+                  - forc-run : 0.1.0
+                - forc-crypto : 0.1.0
+                - forc-debug : 0.1.0
+                - forc-doc : 0.1.0
+                - forc-explore : 0.1.0
+                - forc-fmt : 0.1.0
+                - forc-lsp : 0.1.0
+                - forc-tx : 0.1.0
+                - forc-wallet : 0.1.0
+              fuel-core : 0.1.0
+              fuel-core-keygen : not found
+            "#
+        };
         assert_eq!(stdout.to_string(), expected_stdout);
     })?;
     Ok(())
@@ -62,35 +62,35 @@ fn fuelup_show_and_switch() -> Result<()> {
         let target = TargetTriple::from_host().unwrap();
         let fuelup_home = cfg.fuelup_dir();
         let fuelup_home_str = fuelup_home.to_string_lossy();
-        let expected_stdout = format!(
+        let expected_stdout = formatdoc! {
             r#"Default host: {target}
-fuelup home: {fuelup_home_str}
+            fuelup home: {fuelup_home_str}
 
-Installed toolchains
---------------------
-latest-{target} (default)
-nightly-{target}
-nightly-2022-08-30-{target}
+            Installed toolchains
+            --------------------
+            latest-{target} (default)
+            nightly-{target}
+            nightly-2022-08-30-{target}
 
-active toolchain
-----------------
-latest-{target} (default)
-  forc : 0.1.0
-    - forc-client
-      - forc-deploy : 0.1.0
-      - forc-run : 0.1.0
-    - forc-crypto : 0.1.0
-    - forc-debug : 0.1.0
-    - forc-doc : 0.1.0
-    - forc-explore : 0.1.0
-    - forc-fmt : 0.1.0
-    - forc-lsp : 0.1.0
-    - forc-tx : 0.1.0
-    - forc-wallet : 0.1.0
-  fuel-core : 0.1.0
-  fuel-core-keygen : not found
-"#
-        );
+            active toolchain
+            ----------------
+            latest-{target} (default)
+              forc : 0.1.0
+                - forc-client
+                  - forc-deploy : 0.1.0
+                  - forc-run : 0.1.0
+                - forc-crypto : 0.1.0
+                - forc-debug : 0.1.0
+                - forc-doc : 0.1.0
+                - forc-explore : 0.1.0
+                - forc-fmt : 0.1.0
+                - forc-lsp : 0.1.0
+                - forc-tx : 0.1.0
+                - forc-wallet : 0.1.0
+              fuel-core : 0.1.0
+              fuel-core-keygen : not found
+            "#
+        };
         assert_eq!(stdout, expected_stdout);
 
         cfg.fuelup(&["default", "nightly"]);
@@ -98,35 +98,35 @@ latest-{target} (default)
         stdout = String::from_utf8_lossy(&stripped);
         let fuelup_home = cfg.fuelup_dir();
         let fuelup_home_str = fuelup_home.to_string_lossy();
-        let expected_stdout = format!(
+        let expected_stdout = formatdoc! {
             r#"Default host: {target}
-fuelup home: {fuelup_home_str}
+            fuelup home: {fuelup_home_str}
 
-Installed toolchains
---------------------
-latest-{target}
-nightly-{target} (default)
-nightly-2022-08-30-{target}
+            Installed toolchains
+            --------------------
+            latest-{target}
+            nightly-{target} (default)
+            nightly-2022-08-30-{target}
 
-active toolchain
-----------------
-nightly-{target} (default)
-  forc : 0.2.0
-    - forc-client
-      - forc-deploy : 0.2.0
-      - forc-run : 0.2.0
-    - forc-crypto : 0.2.0
-    - forc-debug : 0.2.0
-    - forc-doc : 0.2.0
-    - forc-explore : 0.2.0
-    - forc-fmt : 0.2.0
-    - forc-lsp : 0.2.0
-    - forc-tx : 0.2.0
-    - forc-wallet : 0.2.0
-  fuel-core : 0.2.0
-  fuel-core-keygen : not found
-"#
-        );
+            active toolchain
+            ----------------
+            nightly-{target} (default)
+              forc : 0.2.0
+                - forc-client
+                  - forc-deploy : 0.2.0
+                  - forc-run : 0.2.0
+                - forc-crypto : 0.2.0
+                - forc-debug : 0.2.0
+                - forc-doc : 0.2.0
+                - forc-explore : 0.2.0
+                - forc-fmt : 0.2.0
+                - forc-lsp : 0.2.0
+                - forc-tx : 0.2.0
+                - forc-wallet : 0.2.0
+              fuel-core : 0.2.0
+              fuel-core-keygen : not found
+            "#
+        };
         assert_eq!(stdout, expected_stdout);
     })?;
 
@@ -142,34 +142,33 @@ fn fuelup_show_custom() -> Result<()> {
         let target = TargetTriple::from_host().unwrap();
         let fuelup_home = cfg.fuelup_dir();
         let fuelup_home_str = fuelup_home.to_string_lossy();
-        let expected_stdout = format!(
+        let expected_stdout = formatdoc! {
             r#"Default host: {target}
-fuelup home: {fuelup_home_str}
+            fuelup home: {fuelup_home_str}
 
-Installed toolchains
---------------------
-my_toolchain (default)
+            Installed toolchains
+            --------------------
+            my_toolchain (default)
 
-active toolchain
-----------------
-my_toolchain (default)
-  forc : not found
-    - forc-client
-      - forc-deploy : not found
-      - forc-run : not found
-    - forc-crypto : not found
-    - forc-debug : not found
-    - forc-doc : not found
-    - forc-explore : not found
-    - forc-fmt : not found
-    - forc-lsp : not found
-    - forc-tx : not found
-    - forc-wallet : not found
-  fuel-core : not found
-  fuel-core-keygen : not found
-"#
-        );
-
+            active toolchain
+            ----------------
+            my_toolchain (default)
+              forc : not found
+                - forc-client
+                  - forc-deploy : not found
+                  - forc-run : not found
+                - forc-crypto : not found
+                - forc-debug : not found
+                - forc-doc : not found
+                - forc-explore : not found
+                - forc-fmt : not found
+                - forc-lsp : not found
+                - forc-tx : not found
+                - forc-wallet : not found
+              fuel-core : not found
+              fuel-core-keygen : not found
+            "#
+        };
         assert_eq!(stdout, expected_stdout);
     })?;
     Ok(())
@@ -183,34 +182,33 @@ fn fuelup_show_override() -> Result<()> {
         let target = TargetTriple::from_host().unwrap();
         let fuelup_home = cfg.fuelup_dir();
         let fuelup_home_str = fuelup_home.to_string_lossy();
-        let expected_stdout = format!(
+        let expected_stdout = formatdoc! {
             r#"Default host: {target}
-fuelup home: {fuelup_home_str}
+            fuelup home: {fuelup_home_str}
 
-Installed toolchains
---------------------
-latest-{target} (default)
+            Installed toolchains
+            --------------------
+            latest-{target} (default)
 
-active toolchain
-----------------
-beta-1-{target} (override), path: {}
-  forc : not found
-    - forc-client
-      - forc-deploy : not found
-      - forc-run : not found
-    - forc-crypto : not found
-    - forc-debug : not found
-    - forc-doc : not found
-    - forc-explore : not found
-    - forc-fmt : not found
-    - forc-lsp : not found
-    - forc-tx : not found
-    - forc-wallet : not found
-  fuel-core : not found
-  fuel-core-keygen : not found
-"#,
-            cfg.home.join(FUEL_TOOLCHAIN_TOML_FILE).display()
-        );
+            active toolchain
+            ----------------
+            beta-1-{target} (override), path: {}
+              forc : not found
+                - forc-client
+                  - forc-deploy : not found
+                  - forc-run : not found
+                - forc-crypto : not found
+                - forc-debug : not found
+                - forc-doc : not found
+                - forc-explore : not found
+                - forc-fmt : not found
+                - forc-lsp : not found
+                - forc-tx : not found
+                - forc-wallet : not found
+              fuel-core : not found
+              fuel-core-keygen : not found
+            "#, cfg.home.join(FUEL_TOOLCHAIN_TOML_FILE).display()
+        };
         assert_eq!(stdout, expected_stdout);
     })?;
     Ok(())
@@ -225,35 +223,35 @@ fn fuelup_show_latest_then_override() -> Result<()> {
         let target = TargetTriple::from_host().unwrap();
         let fuelup_home = cfg.fuelup_dir();
         let fuelup_home_str = fuelup_home.to_string_lossy();
-        let expected_stdout = format!(
+        let expected_stdout = formatdoc! {
             r#"Default host: {target}
-fuelup home: {fuelup_home_str}
+            fuelup home: {fuelup_home_str}
 
-Installed toolchains
---------------------
-latest-{target} (default)
-nightly-{target}
-nightly-2022-08-30-{target}
+            Installed toolchains
+            --------------------
+            latest-{target} (default)
+            nightly-{target}
+            nightly-2022-08-30-{target}
 
-active toolchain
-----------------
-latest-{target} (default)
-  forc : 0.1.0
-    - forc-client
-      - forc-deploy : 0.1.0
-      - forc-run : 0.1.0
-    - forc-crypto : 0.1.0
-    - forc-debug : 0.1.0
-    - forc-doc : 0.1.0
-    - forc-explore : 0.1.0
-    - forc-fmt : 0.1.0
-    - forc-lsp : 0.1.0
-    - forc-tx : 0.1.0
-    - forc-wallet : 0.1.0
-  fuel-core : 0.1.0
-  fuel-core-keygen : not found
-"#,
-        );
+            active toolchain
+            ----------------
+            latest-{target} (default)
+              forc : 0.1.0
+                - forc-client
+                  - forc-deploy : 0.1.0
+                  - forc-run : 0.1.0
+                - forc-crypto : 0.1.0
+                - forc-debug : 0.1.0
+                - forc-doc : 0.1.0
+                - forc-explore : 0.1.0
+                - forc-fmt : 0.1.0
+                - forc-lsp : 0.1.0
+                - forc-tx : 0.1.0
+                - forc-wallet : 0.1.0
+              fuel-core : 0.1.0
+              fuel-core-keygen : not found
+            "#
+        };
         assert_eq!(stdout, expected_stdout);
 
         let override_path = cfg.home.join(FUEL_TOOLCHAIN_TOML_FILE);
@@ -274,35 +272,35 @@ latest-{target} (default)
         stripped = strip_ansi_escapes::strip(cfg.fuelup(&["show"]).stdout);
         stdout = String::from_utf8_lossy(&stripped);
 
-        let expected_stdout = format!(
+        let expected_stdout = formatdoc! {
             r#"Default host: {target}
-fuelup home: {fuelup_home_str}
+            fuelup home: {fuelup_home_str}
 
-Installed toolchains
---------------------
-latest-{target} (default)
-nightly-{target}
-nightly-2022-08-30-{target} (override)
+            Installed toolchains
+            --------------------
+            latest-{target} (default)
+            nightly-{target}
+            nightly-2022-08-30-{target} (override)
 
-active toolchain
-----------------
-nightly-2022-08-30-{target} (override), path: {ovveride_path_str}
-  forc : 0.2.0
-    - forc-client
-      - forc-deploy : 0.2.0
-      - forc-run : 0.2.0
-    - forc-crypto : 0.2.0
-    - forc-debug : 0.2.0
-    - forc-doc : 0.2.0
-    - forc-explore : 0.2.0
-    - forc-fmt : 0.2.0
-    - forc-lsp : 0.2.0
-    - forc-tx : 0.2.0
-    - forc-wallet : 0.2.0
-  fuel-core : 0.2.0
-  fuel-core-keygen : not found
-"#,
-        );
+            active toolchain
+            ----------------
+            nightly-2022-08-30-{target} (override), path: {ovveride_path_str}
+              forc : 0.2.0
+                - forc-client
+                  - forc-deploy : 0.2.0
+                  - forc-run : 0.2.0
+                - forc-crypto : 0.2.0
+                - forc-debug : 0.2.0
+                - forc-doc : 0.2.0
+                - forc-explore : 0.2.0
+                - forc-fmt : 0.2.0
+                - forc-lsp : 0.2.0
+                - forc-tx : 0.2.0
+                - forc-wallet : 0.2.0
+              fuel-core : 0.2.0
+              fuel-core-keygen : not found
+            "#
+        };
         assert_eq!(stdout, expected_stdout);
     })?;
     Ok(())

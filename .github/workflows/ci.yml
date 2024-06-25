@@ -10,6 +10,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  RUST_VERSION_COV: nightly-2024-06-05
   REGISTRY: ghcr.io
 
 jobs:
@@ -34,6 +35,36 @@ jobs:
         with:
           sh_checker_comment: false
           sh_checker_exclude: "src"
+
+  publish-codecov:
+    name: Check code coverage (branch)
+    runs-on: ubuntu-latest
+    permissions: # Write access to push changes to pages
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install latest Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_VERSION_COV }}
+
+      - name: Install cargo-llvm-codecov
+        uses: taiki-e/install-action@cargo-llvm-cov
+
+      - name: Code coverage report
+        run: cargo  +${{ env.RUST_VERSION_COV }} llvm-cov --all-features --lcov --branch --output-path lcov.info
+ 
+      - name: Setup LCOV
+        uses: hrishikesh-kadam/setup-lcov@v1
+
+      - name: Report code coverage
+        uses: zgosalvez/github-actions-report-lcov@v3
+        with:
+          coverage-files: lcov.info
+          minimum-coverage: 0 # for now we are not enforcing any minimum coverage.
+          artifact-name: code-coverage-report
+          github-token: ${{ secrets.REPO_TOKEN }}
+          update-comment: true
 
   try-run-fuelup-init:
     needs: cancel-previous-runs

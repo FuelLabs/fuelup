@@ -1,11 +1,8 @@
-use anyhow::{bail, Result};
-use clap::Parser;
-
-use crate::ops::fuelup_toolchain::install::install;
-use crate::ops::fuelup_toolchain::new::new;
-use crate::ops::fuelup_toolchain::uninstall::uninstall;
+use crate::ops::fuelup_toolchain::{install::install, new::new, uninstall::uninstall};
 use crate::target_triple::TargetTriple;
 use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
+use anyhow::{bail, Result};
+use clap::Parser;
 
 #[derive(Debug, Parser)]
 pub enum ToolchainCommand {

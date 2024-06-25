@@ -1,19 +1,15 @@
+use crate::commands::{
+    check::{self, CheckCommand},
+    completions::{self, CompletionsCommand},
+    component::{self, ComponentCommand},
+    default::{self, DefaultCommand},
+    fuelup::{self, FuelupCommand},
+    toolchain::{self, ToolchainCommand},
+    upgrade::{self, UpgradeCommand},
+};
+use crate::ops::{fuelup_show, fuelup_update};
 use anyhow::Result;
 use clap::Parser;
-
-use crate::commands::show::ShowCommand;
-use crate::commands::{
-    check, completions, component, default, fuelup, show, toolchain, update, upgrade,
-};
-
-use crate::commands::check::CheckCommand;
-use crate::commands::completions::CompletionsCommand;
-use crate::commands::component::ComponentCommand;
-use crate::commands::default::DefaultCommand;
-use crate::commands::fuelup::FuelupCommand;
-use crate::commands::toolchain::ToolchainCommand;
-use crate::commands::update::UpdateCommand;
-use crate::commands::upgrade::UpgradeCommand;
 
 #[derive(Debug, Parser)]
 #[clap(name = "fuelup", about = "Fuel Toolchain Manager", version)]
@@ -40,9 +36,9 @@ enum Commands {
     #[clap(subcommand)]
     Toolchain(ToolchainCommand),
     /// Show the active and installed toolchains, as well as the host and fuelup home
-    Show(ShowCommand),
+    Show,
     /// Updates the distributable toolchains, if already installed
-    Update(UpdateCommand),
+    Update,
     /// Updates fuelup itself, switches to the `latest` channel and updates components in all channels.
     Upgrade(UpgradeCommand),
 }
@@ -59,9 +55,9 @@ pub fn fuelup_cli() -> Result<()> {
             FuelupCommand::Update(update) => fuelup::update_exec(update.force),
             FuelupCommand::Uninstall(remove) => fuelup::remove_exec(remove.force),
         },
-        Commands::Show(_command) => show::exec(),
+        Commands::Show => fuelup_show::show(),
         Commands::Toolchain(command) => toolchain::exec(command),
-        Commands::Update(_command) => update::exec(),
+        Commands::Update => fuelup_update::update(),
         Commands::Upgrade(command) => upgrade::exec(command.force),
     }
 }

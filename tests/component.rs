@@ -1,11 +1,11 @@
+mod expects;
+pub mod testcfg;
+
 use anyhow::Result;
+use expects::expect_files_exist;
 use fuelup::{fmt::format_toolchain_with_target, target_triple::TargetTriple};
 use indoc::formatdoc;
-pub mod testcfg;
 use testcfg::{FuelupState, ALL_BINS, DATE};
-
-mod expects;
-use expects::expect_files_exist;
 
 #[test]
 fn fuelup_component_add() -> Result<()> {

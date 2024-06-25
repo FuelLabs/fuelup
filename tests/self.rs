@@ -1,7 +1,6 @@
+pub mod testcfg;
 use anyhow::Result;
 use testcfg::FuelupState;
-
-pub mod testcfg;
 
 #[test]
 fn test_self_uninstall() -> Result<()> {
@@ -28,7 +27,6 @@ fn fuelup_self_update() -> Result<()> {
         let expected_stdout_starts_with = "Fetching binary from";
         assert!(output.stdout.starts_with(expected_stdout_starts_with));
     })?;
-
     Ok(())
 }
 
@@ -39,6 +37,5 @@ fn fuelup_self_update_latest() -> Result<()> {
         let expected_stdout_starts_with = "Already up to date";
         assert!(output.stdout.contains(expected_stdout_starts_with));
     })?;
-
     Ok(())
 }

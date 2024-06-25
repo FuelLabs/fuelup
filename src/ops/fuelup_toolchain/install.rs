@@ -3,8 +3,7 @@ use crate::settings::SettingsFile;
 use crate::toolchain::{DistToolchainDescription, Toolchain};
 use crate::{channel::Channel, commands::toolchain::InstallCommand};
 use anyhow::{bail, Result};
-use std::fmt::Write;
-use std::str::FromStr;
+use std::{fmt::Write, str::FromStr};
 use tracing::{error, info};
 
 pub fn install(command: InstallCommand) -> Result<()> {
@@ -51,7 +50,7 @@ pub fn install(command: InstallCommand) -> Result<()> {
         info!("\nInstalled:\n{}", installed_bins);
         info!("\nThe Fuel toolchain is installed and up to date");
     } else if installed_bins.is_empty() {
-        error!("\nfuelup failed to install:\n{}", errored_bins)
+        error!("\nfuelup failed to install:\n{}", errored_bins);
     } else {
         info!(
             "\nThe Fuel toolchain is partially installed.\nfuelup failed to install: {}",

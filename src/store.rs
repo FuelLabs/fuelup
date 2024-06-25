@@ -1,10 +1,11 @@
-use std::fs;
-use std::io::Write;
-use std::path::{Path, PathBuf};
-
 use anyhow::Result;
 use component::Component;
 use semver::Version;
+use std::{
+    fs,
+    io::Write,
+    path::{Path, PathBuf},
+};
 use tracing::{info, warn};
 
 use crate::{
@@ -90,7 +91,6 @@ impl Store {
         version: &Version,
     ) -> std::io::Result<String> {
         let dirname = component_dirname(name, version);
-
         fs::read_to_string(self.path().join(dirname).join(FUELS_VERSION_FILE))
     }
 }

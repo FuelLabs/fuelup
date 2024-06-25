@@ -15,10 +15,7 @@ impl Shell {
 
     pub fn does_exists(&self) -> bool {
         match self {
-            Shell::Posix => true,
-            Shell::Bash => true,
-            Shell::Zsh => true,
-            Shell::Fish => true,
+            Shell::Posix | Shell::Bash | Shell::Zsh | Shell::Fish => true,
         }
     }
 

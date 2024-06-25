@@ -1,12 +1,8 @@
-use std::fs;
-use std::path::PathBuf;
-
-use anyhow::Result;
-use std::io;
-
 use crate::fmt::format_toolchain_with_target;
 use crate::path::toolchains_dir;
 use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
+use anyhow::Result;
+use std::{fs, io, path::PathBuf};
 
 pub struct Config {
     toolchains_dir: PathBuf,
@@ -33,9 +29,9 @@ impl Config {
                     .iter()
                     .any(|t| toolchain == format_toolchain_with_target(t))
                 {
-                    toolchains.push(toolchain)
+                    toolchains.push(toolchain);
                 } else {
-                    custom_toolchains.push(toolchain)
+                    custom_toolchains.push(toolchain);
                 }
             }
 
@@ -61,10 +57,9 @@ impl Config {
             for name in RESERVED_TOOLCHAIN_NAMES {
                 let dist_toolchain = format_toolchain_with_target(name);
                 if installed_toolchains.contains(&dist_toolchain) {
-                    dist_toolchains.push(name.to_string())
+                    dist_toolchains.push(name.to_string());
                 }
             }
-
             Ok(dist_toolchains)
         } else {
             Ok(Vec::new())

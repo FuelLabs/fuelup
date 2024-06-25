@@ -1,17 +1,20 @@
+use crate::{
+    download::DownloadCfg,
+    store::Store,
+    target_triple::TargetTriple,
+    toolchain::{DistToolchainDescription, Toolchain},
+    toolchain_override::ToolchainOverride,
+};
 use anyhow::Result;
-use std::ffi::OsString;
-use std::io::{Error, ErrorKind};
-use std::os::unix::prelude::CommandExt;
-use std::process::{Command, ExitCode, Stdio};
-use std::str::FromStr;
-use std::{env, io};
-
-use crate::download::DownloadCfg;
-use crate::store::Store;
-use crate::target_triple::TargetTriple;
-use crate::toolchain::{DistToolchainDescription, Toolchain};
-use crate::toolchain_override::ToolchainOverride;
 use component::Components;
+use std::{
+    env,
+    ffi::OsString,
+    io::{self, Error, ErrorKind},
+    os::unix::prelude::CommandExt,
+    process::{Command, ExitCode, Stdio},
+    str::FromStr,
+};
 
 /// Runs forc or fuel-core in proxy mode
 pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
@@ -75,10 +78,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
                 (toolchain.bin_path.join(proc_name), description.to_string())
             }
         }
-        None => (
-            toolchain.bin_path.join(proc_name),
-            toolchain.name.to_owned(),
-        ),
+        None => (toolchain.bin_path.join(proc_name), toolchain.name.clone()),
     };
 
     let mut cmd = Command::new(bin_path);

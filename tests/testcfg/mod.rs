@@ -83,6 +83,7 @@ pub static ALL_BINS: &[&str] = &[
     "forc-tx",
     "forc-wallet",
     "fuel-core",
+    "fuel-core-keygen",
     "fuel-indexer",
 ];
 

@@ -1,14 +1,12 @@
-use std::str::FromStr;
-
-use anyhow::{bail, Result};
-use component::Component;
-use semver::Version;
-use tracing::info;
-
 use crate::{
     commands::component::AddCommand, download::DownloadCfg, target_triple::TargetTriple,
     toolchain::Toolchain,
 };
+use anyhow::{bail, Result};
+use component::Component;
+use semver::Version;
+use std::str::FromStr;
+use tracing::info;
 
 pub fn add(command: AddCommand) -> Result<()> {
     let AddCommand {

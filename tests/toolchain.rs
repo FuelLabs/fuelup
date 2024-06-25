@@ -1,12 +1,11 @@
+mod expects;
+pub mod testcfg;
+
 use anyhow::Result;
 use chrono::{Duration, Utc};
-use fuelup::{channel, fmt::format_toolchain_with_target, target_triple::TargetTriple};
-
-pub mod testcfg;
-use testcfg::{FuelupState, ALL_BINS, CUSTOM_TOOLCHAIN_NAME, DATE};
-
-mod expects;
 use expects::expect_files_exist;
+use fuelup::{channel, fmt::format_toolchain_with_target, target_triple::TargetTriple};
+use testcfg::{FuelupState, ALL_BINS, CUSTOM_TOOLCHAIN_NAME, DATE};
 
 fn yesterday() -> String {
     let current_date = Utc::now();
@@ -19,7 +18,6 @@ fn fuelup_toolchain_install_latest() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let output = cfg.fuelup(&["toolchain", "install", "latest"]);
         assert!(output.status.success());
-
         for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
             let toolchain_dir = entry.unwrap();
             let expected_toolchain_name =
@@ -31,7 +29,6 @@ fn fuelup_toolchain_install_latest() -> Result<()> {
             assert!(toolchain_dir.file_type().unwrap().is_dir());
         }
     })?;
-
     Ok(())
 }
 
@@ -40,7 +37,6 @@ fn fuelup_toolchain_install_nightly() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let output = cfg.fuelup(&["toolchain", "install", "nightly"]);
         assert!(output.status.success());
-
         for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
             let toolchain_dir = entry.unwrap();
             let expected_toolchain_name =
@@ -52,7 +48,6 @@ fn fuelup_toolchain_install_nightly() -> Result<()> {
             assert!(toolchain_dir.file_type().unwrap().is_dir());
         }
     })?;
-
     Ok(())
 }
 
@@ -60,7 +55,6 @@ fn fuelup_toolchain_install_nightly() -> Result<()> {
 fn fuelup_toolchain_install_nightly_date() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         cfg.fuelup(&["toolchain", "install", "nightly-2022-08-31"]);
-
         for entry in cfg.toolchains_dir().read_dir().expect("Could not read dir") {
             let toolchain_dir = entry.unwrap();
             let expected_toolchain_name =
@@ -74,7 +68,6 @@ fn fuelup_toolchain_install_nightly_date() -> Result<()> {
             expect_files_exist(&toolchain_dir.path().join("bin"), ALL_BINS);
         }
     })?;
-
     Ok(())
 }
 
@@ -83,9 +76,7 @@ fn fuelup_toolchain_install_malformed_date() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let toolchain = "nightly-2022-08-31-";
         let output = cfg.fuelup(&["toolchain", "install", toolchain]);
-
         let expected_stdout = format!("Unknown name for toolchain: {toolchain}\n");
-
         assert!(output.status.success());
         assert_eq!(output.stdout, expected_stdout);
     })?;
@@ -100,7 +91,6 @@ fn fuelup_toolchain_install_date_target_allowed() -> Result<()> {
         let output = cfg.fuelup(&["toolchain", "install", &toolchain]);
         assert!(output.status.success());
     })?;
-
     Ok(())
 }
 
@@ -154,13 +144,11 @@ fn fuelup_toolchain_new() -> Result<()> {
             "New toolchain initialized: {CUSTOM_TOOLCHAIN_NAME}
 Default toolchain set to '{CUSTOM_TOOLCHAIN_NAME}'\n"
         );
-
         assert_eq!(output.stdout, expected_stdout);
         assert!(cfg.toolchain_bin_dir(CUSTOM_TOOLCHAIN_NAME).is_dir());
         let default = cfg.default_toolchain();
         assert_eq!(default, Some(CUSTOM_TOOLCHAIN_NAME.to_string()));
     })?;
-
     Ok(())
 }
 
@@ -173,7 +161,6 @@ fn fuelup_toolchain_new_disallowed() -> Result<()> {
             assert_eq!(output.stderr, expected_stderr);
         }
     })?;
-
     Ok(())
 }
 
@@ -186,6 +173,5 @@ fn fuelup_toolchain_new_disallowed_with_target() -> Result<()> {
         let expected_stderr = format!("error: invalid value '{toolchain_name}' for '<NAME>': Cannot use distributable toolchain name '{toolchain_name}' as a custom toolchain name\n\nFor more information, try '--help'.\n");
         assert_eq!(output.stderr, expected_stderr);
     })?;
-
     Ok(())
 }

@@ -1,6 +1,6 @@
-use anyhow::Result;
-
 pub mod testcfg;
+
+use anyhow::Result;
 use testcfg::FuelupState;
 
 #[test]
@@ -9,10 +9,8 @@ fn fuelup_completions() -> Result<()> {
         let shells = ["zsh", "bash", "fish", "powershell", "elvish"];
         for shell in shells {
             let output = cfg.fuelup(&["completions", "--shell", shell]);
-
             assert!(output.status.success());
         }
     })?;
-
     Ok(())
 }

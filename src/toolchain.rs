@@ -1,22 +1,26 @@
-use crate::channel::{self, Channel};
-use crate::constants::DATE_FORMAT;
-use crate::download::DownloadCfg;
-use crate::file::{get_bin_version, hard_or_symlink_file, is_executable};
-use crate::path::{
-    ensure_dir_exists, fuelup_bin_dir, fuelup_bin_or_current_bin, fuelup_tmp_dir, settings_file,
-    toolchain_bin_dir, toolchain_dir, toolchains_dir,
+use crate::{
+    channel::{self, Channel},
+    constants::DATE_FORMAT,
+    download::DownloadCfg,
+    file::{get_bin_version, hard_or_symlink_file, is_executable},
+    path::{
+        ensure_dir_exists, fuelup_bin_dir, fuelup_bin_or_current_bin, fuelup_tmp_dir,
+        settings_file, toolchain_bin_dir, toolchain_dir, toolchains_dir,
+    },
+    settings::SettingsFile,
+    store::Store,
+    target_triple::TargetTriple,
 };
-use crate::settings::SettingsFile;
-use crate::store::Store;
-use crate::target_triple::TargetTriple;
 use anyhow::{bail, Context, Result};
 use component::{self, Components};
-use std::collections::VecDeque;
-use std::fmt;
-use std::fs::{read_dir, remove_dir_all, remove_file};
-use std::path::PathBuf;
-use std::process::Command;
-use std::str::FromStr;
+use std::{
+    collections::VecDeque,
+    fmt,
+    fs::{read_dir, remove_dir_all, remove_file},
+    path::PathBuf,
+    process::Command,
+    str::FromStr,
+};
 use time::Date;
 use tracing::{error, info};
 
@@ -234,7 +238,6 @@ fn cache_sway_std_libs(forc_bin_path: PathBuf) -> Result<()> {
             error!("Failed to fetch core forc dependencies");
         };
     };
-
     Ok(())
 }
 
@@ -258,14 +261,14 @@ impl Toolchain {
 
     pub fn all() -> Result<Vec<String>> {
         let toolchains_dir = toolchains_dir();
-        Ok(if !toolchains_dir.is_dir() {
-            vec![]
-        } else {
+        Ok(if toolchains_dir.is_dir() {
             read_dir(&toolchains_dir)?
                 .filter_map(std::io::Result::ok)
                 .filter(|e| e.path().is_dir())
                 .map(|e| e.file_name().into_string().ok().unwrap_or_default())
                 .collect()
+        } else {
+            vec![]
         })
     }
 
@@ -314,11 +317,6 @@ impl Toolchain {
         } else {
             false
         }
-    }
-
-    fn can_remove(&self, component: &str) -> bool {
-        // Published components are the ones downloadable, and hence removable.
-        Components::contains_published(component)
     }
 
     pub fn add_component(&self, download_cfg: DownloadCfg) -> Result<DownloadCfg> {
@@ -436,11 +434,11 @@ impl Toolchain {
     }
 
     pub fn remove_component(&self, component: &str) -> Result<()> {
-        if self.can_remove(component) {
+        if Toolchain::can_remove(component) {
             if self.has_component(component) {
                 info!("Removing '{}' from toolchain '{}'", component, self.name);
                 match self.remove_executables(component) {
-                    Ok(_) => info!("'{}' removed from toolchain '{}'", component, self.name),
+                    Ok(()) => info!("'{}' removed from toolchain '{}'", component, self.name),
                     Err(e) => error!(
                         "Failed to remove '{}' from toolchain '{}': {}",
                         component, self.name, e
@@ -452,7 +450,6 @@ impl Toolchain {
         } else {
             info!("'{}' is not a removable component", component);
         }
-
         Ok(())
     }
 
@@ -500,9 +497,14 @@ impl Toolchain {
             .try_for_each(remove_dir_all)?;
 
         if self.exists() {
-            remove_dir_all(self.path.clone())?
+            remove_dir_all(self.path.clone())?;
         }
         Ok(())
+    }
+
+    fn can_remove(component: &str) -> bool {
+        // Published components are the ones downloadable, and hence removable.
+        Components::contains_published(component)
     }
 }
 

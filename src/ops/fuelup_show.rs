@@ -40,13 +40,13 @@ pub fn show() -> Result<()> {
     for toolchain in cfg.list_toolchains()? {
         let mut message = toolchain.clone();
         if toolchain == active_toolchain.name {
-            message.push_str(" (default)")
+            message.push_str(" (default)");
         }
 
         if Some(toolchain) == override_name {
             message.push_str(" (override)");
         }
-        info!("{}", message)
+        info!("{message}");
     }
 
     let mut active_toolchain_message = String::new();
@@ -69,7 +69,7 @@ pub fn show() -> Result<()> {
     };
 
     print_header("active toolchain");
-    info!("{}", active_toolchain_message);
+    info!("{active_toolchain_message}");
 
     let mut version_map: HashMap<String, Version> = HashMap::new();
     for component in Components::collect_exclude_plugins()? {
@@ -77,7 +77,7 @@ pub fn show() -> Result<()> {
         let version_text: String = match get_bin_version(component_executable.as_path()) {
             Ok(version) => {
                 version_map.insert(component.name.clone(), version.clone());
-                format!("{}", version)
+                format!("{version}")
             }
             Err(e) => e.to_string(),
         };
@@ -94,7 +94,7 @@ pub fn show() -> Result<()> {
                         let version_text = match get_bin_version(plugin_executable.as_path()) {
                             Ok(version) => {
                                 version_map.insert(executable.clone(), version.clone());
-                                format!("{}", version)
+                                format!("{version}")
                             }
                             Err(e) => e.to_string(),
                         };
@@ -105,7 +105,7 @@ pub fn show() -> Result<()> {
                     let version_text = match get_bin_version(plugin_executable.as_path()) {
                         Ok(version) => {
                             version_map.insert(plugin.name.clone(), version.clone());
-                            format!("{}", version)
+                            format!("{version}")
                         }
                         Err(e) => e.to_string(),
                     };

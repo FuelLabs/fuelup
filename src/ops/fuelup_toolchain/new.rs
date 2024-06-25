@@ -8,19 +8,13 @@ use tracing::info;
 
 pub fn new(command: NewCommand) -> Result<()> {
     let NewCommand { name } = command;
-
     let toolchains_dir = toolchains_dir();
-
     let toolchain_exists = Toolchain::all()?.into_iter().any(|x| x == name);
-
     if toolchain_exists {
         bail!("Toolchain with name '{}' already exists", &name)
     }
-
     let toolchain_bin_dir = toolchain_bin_dir(&name);
-
     let settings_file = settings_file();
-
     let settings = SettingsFile::new(settings_file);
     settings.with_mut(|s| {
         s.default_toolchain = Some(name.clone());
@@ -32,6 +26,5 @@ pub fn new(command: NewCommand) -> Result<()> {
         "New toolchain initialized: {name}
 Default toolchain set to '{name}'"
     );
-
     Ok(())
 }

@@ -3,8 +3,8 @@ pub mod testcfg;
 
 use anyhow::Result;
 use expects::expect_files_exist;
-use indoc::formatdoc;
 use fuelup::{fmt::format_toolchain_with_target, target_triple::TargetTriple};
+use indoc::formatdoc;
 use testcfg::{FuelupState, ALL_BINS, DATE};
 
 #[test]

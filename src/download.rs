@@ -430,6 +430,7 @@ pub fn fetch_fuels_version(cfg: &DownloadCfg) -> Result<String> {
 mod tests {
     use super::*;
     use dirs::home_dir;
+    use indoc::indoc;
     use std::io::{self, Result};
     use tempfile;
 
@@ -465,26 +466,25 @@ mod tests {
 
     #[test]
     fn test_fuels_version_from_toml() {
-        let toml = r#"
-[package]        
-name = "forc"
+        let toml = indoc! {r#"
+            [package]
+            name = "forc"
 
-[dependencies]
-fuels = "0.1"
-"#;
+            [dependencies]
+            fuels = "0.1"
+        "#};
         assert_eq!(
             "0.1",
             fuels_version_from_toml(toml_edit::Document::from_str(toml).unwrap()).unwrap()
         );
 
-        let toml = r#"
-[package]        
-name = "forc"
+        let toml = indoc! {r#"
+            [package]
+            name = "forc"
 
-[dependencies]
-fuels = { version = "0.1", features = ["some-feature"] }
-"#;
-
+            [dependencies]
+            fuels = { version = "0.1", features = ["some-feature"] }
+        "#};
         assert_eq!(
             "0.1",
             fuels_version_from_toml(toml_edit::Document::from_str(toml).unwrap()).unwrap()

@@ -12,7 +12,7 @@ fn fuelup_check() -> Result<()> {
     let fuel_core = "fuel-core -";
     let fuel_indexer = "fuel-indexer -";
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        let output = cfg.fuelup(&["check"]);
+        let output = cfg.fuelup(&["check", "--verbose"]);
         let stripped = strip_ansi_escapes::strip(output.stdout);
         let stdout = String::from_utf8_lossy(&stripped);
         assert!(!stdout.contains(&latest));
@@ -23,7 +23,7 @@ fn fuelup_check() -> Result<()> {
 
     // Test that only the 'latest' toolchain shows.
     testcfg::setup(FuelupState::LatestAndCustomInstalled, &|cfg| {
-        let output = cfg.fuelup(&["check"]);
+        let output = cfg.fuelup(&["check", "--verbose"]);
         let stripped = strip_ansi_escapes::strip(output.stdout);
         let stdout = String::from_utf8_lossy(&stripped);
         assert!(stdout.contains(&latest));
@@ -33,7 +33,7 @@ fn fuelup_check() -> Result<()> {
 
     // Test that toolchain names with '-' inside are parsed correctly.
     testcfg::setup(FuelupState::Beta1Installed, &|cfg| {
-        let output = cfg.fuelup(&["check"]);
+        let output = cfg.fuelup(&["check", "--verbose"]);
         let stripped = strip_ansi_escapes::strip(output.stdout);
         let stdout = String::from_utf8_lossy(&stripped);
         assert!(stdout.contains(&beta_1));

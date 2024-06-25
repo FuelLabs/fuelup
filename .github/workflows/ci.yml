@@ -9,6 +9,7 @@ on:
     types: [published]
 
 env:
+  GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
   CARGO_TERM_COLOR: always
   RUST_VERSION_COV: nightly-2024-06-05
   REGISTRY: ghcr.io

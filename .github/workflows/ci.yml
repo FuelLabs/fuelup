@@ -37,7 +37,7 @@ jobs:
           sh_checker_exclude: "src"
 
   publish-codecov:
-    name: Publish code coverage report on GitHub pages branch
+    name: Check code coverage (branch)
     runs-on: ubuntu-latest
     permissions: # Write access to push changes to pages
       contents: write

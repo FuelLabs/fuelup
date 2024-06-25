@@ -63,7 +63,7 @@ jobs:
           coverage-files: lcov.info
           minimum-coverage: 0 # for now we are not enforcing any minimum coverage.
           artifact-name: code-coverage-report
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.REPO_TOKEN }}
           update-comment: true
 
   try-run-fuelup-init:

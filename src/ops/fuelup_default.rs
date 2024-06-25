@@ -55,6 +55,6 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
         s.default_toolchain = Some(new_default.name.clone());
         Ok(())
     })?;
-    info!("default toolchain set to '{}'", new_default.name);
+    info!("Default toolchain set to '{}'", new_default.name);
     Ok(())
 }

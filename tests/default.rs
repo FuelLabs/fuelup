@@ -39,7 +39,7 @@ fn fuelup_default_latest_and_custom() -> Result<()> {
         assert_eq!(output.stdout, expected_stdout);
 
         let output = cfg.fuelup(&["default", CUSTOM_TOOLCHAIN_NAME]);
-        let expected_stdout = format!("default toolchain set to '{CUSTOM_TOOLCHAIN_NAME}'\n");
+        let expected_stdout = format!("Default toolchain set to '{CUSTOM_TOOLCHAIN_NAME}'\n");
         assert_eq!(output.stdout, expected_stdout);
     })?;
     Ok(())

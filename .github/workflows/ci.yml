@@ -9,7 +9,6 @@ on:
     types: [published]
 
 env:
-  GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
   CARGO_TERM_COLOR: always
   RUST_VERSION_COV: nightly-2024-06-05
   REGISTRY: ghcr.io
@@ -53,28 +52,19 @@ jobs:
         uses: taiki-e/install-action@cargo-llvm-cov
 
       - name: Code coverage report
-        run: cargo  +${{ env.RUST_VERSION_COV }} llvm-cov --all-features --html --branch
+        run: cargo  +${{ env.RUST_VERSION_COV }} llvm-cov --all-features --lcov --branch --output-path lcov.info
+ 
+      - name: Setup LCOV
+        uses: hrishikesh-kadam/setup-lcov@v1
 
-      - name: Checkout the repo again for pushing pages revision
-        uses: actions/checkout@v3
+      - name: Report code coverage
+        uses: zgosalvez/github-actions-report-lcov@v3
         with:
-          ref: 'codecov-pages'
-          path: 'pages-branch'
-
-      - name: Push codecov report to pages branch
-        working-directory: ./pages-branch
-        run: |
-          export BRANCH_B64=$(echo -n "${{ env.GIT_BRANCH }}" | basenc --base64url)
-          git config user.email "fuel-tooling@users.noreply.github.com"
-          git config user.name "tooling"
-          cp -r ../target/llvm-cov/html "$BRANCH_B64"
-          python3 ../.github/workflows/scripts/generate_pages_index.py > index.html
-          git add .
-          git commit -m "Update codecov for ${{ env.GIT_BRANCH }}"
-          git push
-          export PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/$BRANCH_B64/index.html"
-          echo "$PAGES_URL"
-          echo "Codecov report $PAGES_URL" >> $GITHUB_STEP_SUMMARY         
+          coverage-files: lcov.info
+          minimum-coverage: 0 # for now we are not enforcing any minimum coverage.
+          artifact-name: code-coverage-report
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          update-comment: true
 
   try-run-fuelup-init:
     needs: cancel-previous-runs

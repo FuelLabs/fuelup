@@ -1,42 +1,23 @@
-date = "2024-07-02"
+date = "2024-07-03"
 
 [pkg.forc]
-version = "0.61.1"
+version = "0.61.2"
 
 [pkg.forc.target.linux_amd64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.61.1/forc-binaries-linux_amd64.tar.gz"
-hash = "7ff7a0cf8656a4aef3ee47ae305de0a6654a6781133f1645e69031475a605e0d"
+url = "https://github.com/FuelLabs/sway/releases/download/v0.61.2/forc-binaries-linux_amd64.tar.gz"
+hash = "a9e461a93315f1ce3a2c7d82df9eebfa956ec2ec11969a180070dab08ac77b5a"
 
 [pkg.forc.target.linux_arm64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.61.1/forc-binaries-linux_arm64.tar.gz"
-hash = "aa40a142d95be8f2a9a8663e176a1061bb5f19d15584bebc5e3f3c5f254df48d"
+url = "https://github.com/FuelLabs/sway/releases/download/v0.61.2/forc-binaries-linux_arm64.tar.gz"
+hash = "17cdcd70b67772aa5942c163195f58e1f27e5047871ae35b34e90b8593f889f1"
 
 [pkg.forc.target.darwin_amd64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.61.1/forc-binaries-darwin_amd64.tar.gz"
-hash = "29386d63ec9926ed0e88eb2c7e56571814187d2f1c24d48977db4ffbc4df95f9"
+url = "https://github.com/FuelLabs/sway/releases/download/v0.61.2/forc-binaries-darwin_amd64.tar.gz"
+hash = "b2628a56fee08d55bc41402f16546dbcff15cb0fdd5e1d8c7a825a5c1facc511"
 
 [pkg.forc.target.darwin_arm64]
-url = "https://github.com/FuelLabs/sway/releases/download/v0.61.1/forc-binaries-darwin_arm64.tar.gz"
-hash = "a32e0429b68f47d8fd7c50034daa451b0a88bbd0ba8d9e78301cc50c4ef1556c"
-
-[pkg.forc-explore]
-version = "0.28.1"
-
-[pkg.forc-explore.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-aarch64-unknown-linux-gnu.tar.gz"
-hash = "8f7ade34ff611eb8ffaea2ec0bd33f5bbf6de6b05aad2bcd39a3a62309ef3a41"
-
-[pkg.forc-explore.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-x86_64-unknown-linux-gnu.tar.gz"
-hash = "b0bfe8ddb4b0a962bc2ce956385392c7dae3f19f3ca97a90aba88f8d5b5f183c"
-
-[pkg.forc-explore.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-aarch64-apple-darwin.tar.gz"
-hash = "4c437e84b4f95e55c97d32595a4d529b3dcb78ebec06f07babccde74e1827566"
-
-[pkg.forc-explore.target.x86_64-apple-darwin]
-url = "https://github.com/FuelLabs/forc-explorer/releases/download/v0.28.1/forc-explore-0.28.1-x86_64-apple-darwin.tar.gz"
-hash = "9ef1d8af2c5a611d33f8966881197bd4958da05e4b325eb0dc847b84ea1eac96"
+url = "https://github.com/FuelLabs/sway/releases/download/v0.61.2/forc-binaries-darwin_arm64.tar.gz"
+hash = "c44ae505731324aa4c135c05ddbba0057490011115fcf8b106af396a6b59bd17"
 
 [pkg.forc-wallet]
 version = "0.8.1"

@@ -23,7 +23,6 @@ The following is an overview of components installable through `fuelup`:
 - [`forc`] — The Fuel Orchestrator, a suite of tools to work with the Fuel ecosystem. This comes
 with some built-in plugin executables, including but not limited to: [`forc-client`], [`forc-fmt`] and [`forc-lsp`].
 - [`fuel-core`] — Full node implementation of the Fuel v2 protocol, written in Rust.
-- [`forc-explore`] — A Forc plugin for running the Fuel Block Explorer.
 - [`forc-crypto`] — A Forc plugin for hashing arbitrary data.
 - [`forc-debug`] — A Forc plugin for debugging via CLI and IDE.
 - [`forc-wallet`] - A Forc plugin for managing Fuel wallets.
@@ -33,7 +32,6 @@ with some built-in plugin executables, including but not limited to: [`forc-clie
 [toolchain]: toolchains.md
 [`forc`]: https://fuellabs.github.io/sway/master/book/forc/index.html
 [`fuel-core`]: https://github.com/FuelLabs/fuel-core
-[`forc-explore`]: https://fuellabs.github.io/sway/master/book/forc/plugins/forc_explore.html
 [`forc-fmt`]: https://fuellabs.github.io/sway/master/book/forc/plugins/forc_fmt.html
 [`forc-crypto`]: https://fuellabs.github.io/sway/master/book/forc/plugins/forc_crypto.html
 [`forc-debug`]: https://fuellabs.github.io/sway/master/book/forc/plugins/forc_debug.html

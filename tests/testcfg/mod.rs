@@ -75,7 +75,6 @@ pub static ALL_BINS: &[&str] = &[
     "forc-debug",
     "forc-deploy",
     "forc-doc",
-    "forc-explore",
     "forc-fmt",
     "forc-index",
     "forc-lsp",
@@ -286,11 +285,6 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             )?;
             fs::create_dir_all(tmp_home.join(".cargo/bin"))?;
 
-            create_fuel_executable(
-                "forc-explore",
-                &tmp_home.join(".cargo/bin/forc-explore"),
-                VERSION,
-            )?;
             create_fuel_executable("fuel-core", &tmp_home.join(".cargo/bin/fuel-core"), VERSION)?;
 
             // Here we intentionally remove some of the 'binaries' that were linked in the

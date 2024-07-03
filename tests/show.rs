@@ -39,7 +39,6 @@ fn fuelup_show_latest() -> Result<()> {
                 - forc-crypto : 0.1.0
                 - forc-debug : 0.1.0
                 - forc-doc : 0.1.0
-                - forc-explore : 0.1.0
                 - forc-fmt : 0.1.0
                 - forc-lsp : 0.1.0
                 - forc-tx : 0.1.0
@@ -82,7 +81,6 @@ fn fuelup_show_and_switch() -> Result<()> {
                 - forc-crypto : 0.1.0
                 - forc-debug : 0.1.0
                 - forc-doc : 0.1.0
-                - forc-explore : 0.1.0
                 - forc-fmt : 0.1.0
                 - forc-lsp : 0.1.0
                 - forc-tx : 0.1.0
@@ -118,7 +116,6 @@ fn fuelup_show_and_switch() -> Result<()> {
                 - forc-crypto : 0.2.0
                 - forc-debug : 0.2.0
                 - forc-doc : 0.2.0
-                - forc-explore : 0.2.0
                 - forc-fmt : 0.2.0
                 - forc-lsp : 0.2.0
                 - forc-tx : 0.2.0
@@ -160,7 +157,6 @@ fn fuelup_show_custom() -> Result<()> {
                 - forc-crypto : not found
                 - forc-debug : not found
                 - forc-doc : not found
-                - forc-explore : not found
                 - forc-fmt : not found
                 - forc-lsp : not found
                 - forc-tx : not found
@@ -200,7 +196,6 @@ fn fuelup_show_override() -> Result<()> {
                 - forc-crypto : not found
                 - forc-debug : not found
                 - forc-doc : not found
-                - forc-explore : not found
                 - forc-fmt : not found
                 - forc-lsp : not found
                 - forc-tx : not found
@@ -243,7 +238,6 @@ fn fuelup_show_latest_then_override() -> Result<()> {
                 - forc-crypto : 0.1.0
                 - forc-debug : 0.1.0
                 - forc-doc : 0.1.0
-                - forc-explore : 0.1.0
                 - forc-fmt : 0.1.0
                 - forc-lsp : 0.1.0
                 - forc-tx : 0.1.0
@@ -292,7 +286,6 @@ fn fuelup_show_latest_then_override() -> Result<()> {
                 - forc-crypto : 0.2.0
                 - forc-debug : 0.2.0
                 - forc-doc : 0.2.0
-                - forc-explore : 0.2.0
                 - forc-fmt : 0.2.0
                 - forc-lsp : 0.2.0
                 - forc-tx : 0.2.0

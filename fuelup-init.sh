@@ -13,7 +13,6 @@ main() {
 
     check_cargo_bin forc
     check_cargo_bin forc-fmt
-    check_cargo_bin forc-explore
     check_cargo_bin forc-lsp
     check_cargo_bin fuel-core
 

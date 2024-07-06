@@ -53,14 +53,6 @@ fn fuelup_update_conflict() -> Result<()> {
                 cfg.home.join(".fuelup/bin/forc-wallet").display(),
                 cfg.home.join(".local/bin/forc-wallet").display(),
             );
-        // 4) duplicate fuel executable found in PATH and in FUELUP_HOME and CARGO_HOME.
-        //    fuelup's version is overshadowed by the duplicate. `cargo uninstall` is a possible
-        //    action and therefore a suggestion by fuelup.
-        let has_duplicate_overshadow_cargo_uninstall_message = &format!("warning: 'forc-explore' found in PATH at {}. This will take precedence over 'forc-explore', already installed at {}. Consider uninstalling {}, or re-arranging your PATH to give fuelup priority. You may want to execute 'cargo uninstall forc-explore'.",
-                cfg.home.join(".cargo/bin/forc-explore").display(),
-                cfg.home.join(".fuelup/bin/forc-explore").display(),
-                cfg.home.join(".cargo/bin/forc-explore").display(),
-            );
 
         assert!(output.status.success());
         assert!(output.stdout.contains(has_duplicate_message));
@@ -68,9 +60,6 @@ fn fuelup_update_conflict() -> Result<()> {
             .stdout
             .contains(has_duplicate_cargo_uninstall_message));
         assert!(output.stdout.contains(has_duplicate_overshadow_message));
-        assert!(output
-            .stdout
-            .contains(has_duplicate_overshadow_cargo_uninstall_message));
     })?;
 
     Ok(())

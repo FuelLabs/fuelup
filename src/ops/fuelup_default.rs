@@ -46,7 +46,7 @@ pub fn default(toolchain: Option<String>) -> Result<()> {
         for toolchain in toolchains {
             info!("{}", toolchain);
         }
-        // TODO: we should consider migrating to use this error in order to return a custom error here
+        // TODO: we should consider migrating to use thiserror in order to return a custom error here
         // so we can match on it and prompt the user for another attempt.
         bail!("");
     };

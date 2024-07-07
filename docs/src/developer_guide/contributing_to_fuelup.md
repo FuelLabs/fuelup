@@ -29,7 +29,7 @@ while integration tests involve directly invoking the `fuelup` binary in a sandb
 temporary filesystem.
 
 Note that some integration tests involve installing a toolchain and adding components, which means they
-will fail without internet connection.
+will fail without an internet connection.
 
 Congratulations! You've now got everything setup and are ready to start making contributions.
 

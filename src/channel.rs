@@ -35,14 +35,11 @@ pub struct Package {
     pub fuels_version: Option<String>,
 }
 
-pub fn is_beta_toolchain(name: &str) -> bool {
-    name == BETA_1
-        || name == BETA_2
-        || name == BETA_3
-        || name == BETA_4
-        || name == BETA_5
-        || name == DEVNET
-        || name == TESTNET
+pub fn is_beta_toolchain(name: &str) -> Option<&str> {
+    BETA_CHANNELS
+        .iter()
+        .find(|&beta_channel| name.starts_with(beta_channel))
+        .copied()
 }
 
 fn format_nightly_url(date: &Date) -> Result<String> {
@@ -230,5 +227,15 @@ mod tests {
         assert_eq!(cfgs[0].version, Version::parse("0.17.0").unwrap());
         assert_eq!(cfgs[1].name, "fuel-core");
         assert_eq!(cfgs[1].version, Version::parse("0.9.4").unwrap());
+    }
+
+    #[test]
+    fn test_all_channels_for_beta() {
+        for channel in CHANNELS.iter() {
+            assert_eq!(
+                is_beta_toolchain(channel).is_some(),
+                BETA_CHANNELS.contains(channel)
+            );
+        }
     }
 }

@@ -88,9 +88,9 @@ impl fmt::Display for Channel {
 impl FromStr for Channel {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
-        if is_beta_toolchain(s) {
+        if let Some(beta_channel) = is_beta_toolchain(s) {
             return Ok(Self {
-                name: s.to_string(),
+                name: beta_channel.to_string(),
                 date: None,
             });
         };

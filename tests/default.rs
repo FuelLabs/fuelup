@@ -100,12 +100,49 @@ fn fuelup_default_nightly_and_nightly_date() -> Result<()> {
 }
 
 #[test]
+fn fuelup_default_override_skip_install() -> Result<()> {
+    testcfg::setup(FuelupState::LatestWithBetaOverride, &|cfg| {
+        let output = cfg.fuelup_with_input(&["default"], b"N\n");
+        let triple = TargetTriple::from_host().unwrap();
+
+        assert!(output
+            .stdout
+            .starts_with(&format!("Using override toolchain 'beta-1-{triple}'")));
+
+        assert!(output
+            .stdout
+            .contains("Override toolchain is not installed. Do you want to install it now?"));
+
+        assert!(output
+            .stdout
+            .contains(&format!("Override toolchain is not installed. Please run: 'fuelup toolchain install beta-1-{triple}'")));
+    })?;
+    Ok(())
+}
+
+#[test]
 fn fuelup_default_override() -> Result<()> {
     testcfg::setup(FuelupState::LatestWithBetaOverride, &|cfg| {
-        let output = cfg.fuelup(&["default"]);
+        let output = cfg.fuelup_with_input(&["default"], b"Y\n");
         let triple = TargetTriple::from_host().unwrap();
-        let expected_stdout = format!("beta-1-{triple} (override), latest-{triple} (default)\n");
-        assert_eq!(output.stdout, expected_stdout);
+
+        assert!(output
+            .stdout
+            .starts_with(&format!("Using override toolchain 'beta-1-{triple}'")));
+
+        assert!(output
+            .stdout
+            .contains("Override toolchain is not installed. Do you want to install it now?"));
+
+        assert!(output.stdout.contains("Downloading:"));
+
+        assert!(output
+            .stdout
+            .contains("The Fuel toolchain is installed and up to date"));
+
+        assert!(output
+            .stdout
+            .contains(&format!("beta-1-{triple} (override)")));
     })?;
     Ok(())
 }

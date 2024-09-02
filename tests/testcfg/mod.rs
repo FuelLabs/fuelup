@@ -1,17 +1,17 @@
 use anyhow::Result;
-use fuelup::channel::{BETA_1, LATEST, NIGHTLY};
-use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;
+use fuelup::constants::{BETA_1, FUEL_TOOLCHAIN_TOML_FILE, LATEST, NIGHTLY};
 use fuelup::file::hard_or_symlink_file;
 use fuelup::settings::SettingsFile;
 use fuelup::target_triple::TargetTriple;
 use fuelup::toolchain_override::{self, OverrideCfg, ToolchainCfg, ToolchainOverride};
 use semver::Version;
+use std::io::Write;
 use std::os::unix::fs::OpenOptionsExt;
 use std::str::FromStr;
 use std::{
     env, fs,
     path::{Path, PathBuf},
-    process::{Command, ExitStatus},
+    process::{Command, ExitStatus, Stdio},
 };
 use tempfile::tempdir;
 
@@ -130,7 +130,7 @@ impl TestCfg {
             .args(args)
             .current_dir(&self.home)
             .env("HOME", &self.home)
-            .env("CARGO_HOME", &self.home.join(".cargo"))
+            .env("CARGO_HOME", self.home.join(".cargo"))
             .env(
                 "PATH",
                 format!(
@@ -162,6 +162,47 @@ impl TestCfg {
     /// This is just a testcfg::exec() call with "fuelup" as its first argument.
     pub fn fuelup(&mut self, args: &[&str]) -> TestOutput {
         self.exec("fuelup", args)
+    }
+
+    /// A convenience wrapper for executing 'fuelup' within the fuelup test configuration.
+    /// It takes an array ref of bytes to write into stdin.
+    pub fn fuelup_with_input(&mut self, args: &[&str], input: &[u8]) -> TestOutput {
+        let path = self.fuelup_bin_dirpath.join("fuelup");
+        let mut child = Command::new(path)
+            .args(args)
+            .current_dir(&self.home)
+            .env("HOME", &self.home)
+            .env("CARGO_HOME", self.home.join(".cargo"))
+            .env(
+                "PATH",
+                format!(
+                    "{}:{}:{}",
+                    &self.home.join(".local/bin").display(),
+                    &self.home.join(".cargo/bin").display(),
+                    &self.home.join(".fuelup/bin").display(),
+                ),
+            )
+            .env("TERM", "dumb")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped()) // Inherit so we can see it install
+            .spawn()
+            .expect("Failed to execute command");
+
+        let stdin = child.stdin.as_mut().expect("Failed to open stdin");
+
+        for byte in input {
+            stdin.write_all(&[*byte]).expect("Failed to write to stdin");
+        }
+
+        let output = child.wait_with_output().expect("Failed to read output");
+        let stdout = String::from_utf8(output.stdout).unwrap();
+        let stderr = String::from_utf8(output.stderr).unwrap();
+
+        TestOutput {
+            stdout,
+            stderr,
+            status: output.status,
+        }
     }
 }
 

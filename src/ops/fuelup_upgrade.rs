@@ -1,5 +1,5 @@
 use super::{fuelup_default, fuelup_self, fuelup_update};
-use crate::channel::LATEST;
+use crate::constants::LATEST;
 use anyhow::Result;
 
 pub fn upgrade(force: bool) -> Result<()> {

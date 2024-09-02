@@ -1,6 +1,6 @@
 use crate::{
-    channel::{is_beta_toolchain, LATEST, NIGHTLY},
-    constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE},
+    channel::is_beta_toolchain,
+    constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE, LATEST, NIGHTLY},
     download::DownloadCfg,
     file,
     path::get_fuel_toolchain_toml,
@@ -88,9 +88,9 @@ impl fmt::Display for Channel {
 impl FromStr for Channel {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
-        if is_beta_toolchain(s) {
+        if let Some(beta_channel) = is_beta_toolchain(s) {
             return Ok(Self {
-                name: s.to_string(),
+                name: beta_channel.to_string(),
                 date: None,
             });
         };
@@ -213,7 +213,7 @@ impl OverrideCfg {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::channel::{BETA_1, BETA_2, BETA_3, NIGHTLY};
+    use crate::constants::{BETA_1, BETA_2, BETA_3, NIGHTLY};
     use indoc::indoc;
 
     #[test]

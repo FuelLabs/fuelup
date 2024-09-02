@@ -57,4 +57,14 @@ pub fn ask_user_yes_no_question(question: &str) -> io::Result<bool> {
             return Ok(result);
         }
     }
+
+    // This is the dialoguer version of the prompter, but it's not testable
+    // as dialoguer requires an interactive terminal to work without failing.
+    //
+    // use dialoguer::{theme::ColorfulTheme, Confirm};
+    //
+    // Confirm::with_theme(&ColorfulTheme::default())
+    //     .with_prompt(question)
+    //     .interact()
+    //     .map_err(|err| io::Error::new(io::ErrorKind::Other, err.to_string()))
 }

@@ -1,6 +1,6 @@
 use crate::{
     channel::{Channel, Package},
-    constants::CHANNEL_LATEST_URL,
+    constants::{CHANNEL_LATEST_URL, GITHUB_API_ORG_URL, GITHUB_USER_CONTENT_URL},
     target_triple::TargetTriple,
     toolchain::DistToolchainDescription,
 };
@@ -128,9 +128,8 @@ pub fn get_latest_version(name: &str) -> Result<Version> {
     let handle = build_agent()?;
     let mut data = Vec::new();
     if name == FUELUP {
-        const FUELUP_RELEASES_API_URL: &str =
-            "https://api.github.com/repos/FuelLabs/fuelup/releases/latest";
-        let resp = handle.get(FUELUP_RELEASES_API_URL).call()?;
+        let fuelup_latest_url = format!("{}{}/releases/latest", GITHUB_API_ORG_URL, FUELUP);
+        let resp = handle.get(&fuelup_latest_url).call()?;
         resp.into_reader().read_to_end(&mut data)?;
         let response: LatestReleaseApiResponse =
             serde_json::from_str(&String::from_utf8_lossy(&data))?;
@@ -397,13 +396,13 @@ fn fuels_version_from_toml(toml: toml_edit::Document) -> Result<String> {
 pub fn fetch_fuels_version(cfg: &DownloadCfg) -> Result<String> {
     let url = match cfg.name.as_str() {
         "forc" => format!(
-            "https://raw.githubusercontent.com/FuelLabs/sway/v{}/test/src/sdk-harness/Cargo.toml",
-            cfg.version
+            "{}{}/v{}/test/src/sdk-harness/Cargo.toml",
+            GITHUB_USER_CONTENT_URL, "sway", cfg.version
         ),
         "forc-wallet" => {
             format!(
-                "https://raw.githubusercontent.com/FuelLabs/forc-wallet/v{}/Cargo.toml",
-                cfg.version
+                "{}{}/v{}/Cargo.toml",
+                GITHUB_USER_CONTENT_URL, "forc-wallet", cfg.version
             )
         }
         _ => bail!("invalid component to fetch fuels version for"),
@@ -562,7 +561,11 @@ mod tests {
     fn test_agent() -> anyhow::Result<()> {
         // this test case is used to illustrate the bug of ureq that sometimes doesn't return "Content-Length" header
         let handle = build_agent()?;
-        let response = handle.get("https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/channel-fuel-beta-4.toml").call()?;
+        let url = format!(
+            "{}{}/gh-pages/channel-fuel-beta-4.toml",
+            GITHUB_USER_CONTENT_URL, "fuelup"
+        );
+        let response = handle.get(&url).call()?;
         assert!(response.header("Content-Length").is_none());
         Ok(())
     }

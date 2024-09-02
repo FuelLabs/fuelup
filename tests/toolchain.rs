@@ -4,7 +4,8 @@ pub mod testcfg;
 use anyhow::Result;
 use chrono::{Duration, Utc};
 use expects::expect_files_exist;
-use fuelup::{channel, fmt::format_toolchain_with_target, target_triple::TargetTriple};
+use fuelup::{constants, fmt::format_toolchain_with_target, target_triple::TargetTriple};
+use indoc::indoc;
 use testcfg::{FuelupState, ALL_BINS, CUSTOM_TOOLCHAIN_NAME, DATE};
 
 fn yesterday() -> String {
@@ -140,10 +141,10 @@ fn fuelup_toolchain_uninstall() -> Result<()> {
 fn fuelup_toolchain_new() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
         let output = cfg.fuelup(&["toolchain", "new", CUSTOM_TOOLCHAIN_NAME]);
-        let expected_stdout = format!(
-            "New toolchain initialized: {CUSTOM_TOOLCHAIN_NAME}
-Default toolchain set to '{CUSTOM_TOOLCHAIN_NAME}'\n"
-        );
+        let expected_stdout = format!(indoc! {"
+            New toolchain initialized: {}
+            Default toolchain set to '{}'
+        "}, CUSTOM_TOOLCHAIN_NAME, CUSTOM_TOOLCHAIN_NAME);
         assert_eq!(output.stdout, expected_stdout);
         assert!(cfg.toolchain_bin_dir(CUSTOM_TOOLCHAIN_NAME).is_dir());
         let default = cfg.default_toolchain();
@@ -155,7 +156,7 @@ Default toolchain set to '{CUSTOM_TOOLCHAIN_NAME}'\n"
 #[test]
 fn fuelup_toolchain_new_disallowed() -> Result<()> {
     testcfg::setup(FuelupState::Empty, &|cfg| {
-        for toolchain in [channel::LATEST, channel::NIGHTLY] {
+        for toolchain in [constants::LATEST, constants::NIGHTLY] {
             let output = cfg.fuelup(&["toolchain", "new", toolchain]);
             let expected_stderr = format!("error: invalid value '{toolchain}' for '<NAME>': Cannot use distributable toolchain name '{toolchain}' as a custom toolchain name\n\nFor more information, try '--help'.\n");
             assert_eq!(output.stderr, expected_stderr);

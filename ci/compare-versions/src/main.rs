@@ -16,17 +16,14 @@
 
 use anyhow::{bail, Result};
 use component::Components;
+use fuelup::constants::{CHANNEL_LATEST_URL_ACTUAL, GITHUB_API_ORG_URL};
 use semver::Version;
 use serde::{Deserialize, Serialize};
 use std::{io::Read, os::unix::process::CommandExt, process::Command, str::FromStr};
 use toml_edit::Document;
 
-const GITHUB_API_REPOS_BASE_URL: &str = "https://api.github.com/repos/FuelLabs/";
-const ACTIONS_RUNS: &str = "actions/runs";
 const SWAY_REPO: &str = "sway";
 const FUEL_CORE_REPO: &str = "fuel-core";
-const CHANNEL_FUEL_LATEST_TOML_URL: &str =
-    "https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/channel-fuel-latest.toml";
 
 #[derive(Debug, Serialize, Deserialize)]
 struct WorkflowRunApiResponse {
@@ -61,8 +58,8 @@ const MAX_VERSIONS: usize = 3;
 
 fn get_workflow_runs(repo: &str) -> Result<WorkflowRunApiResponse> {
     let github_actions_runs_api_url = format!(
-        "{}{}/{}?event=release&status=success",
-        GITHUB_API_REPOS_BASE_URL, repo, ACTIONS_RUNS
+        "{}{}/actions/runs?event=release&status=success",
+        GITHUB_API_ORG_URL, repo
     );
     let handle = ureq::builder().user_agent("fuelup").build();
     let resp = handle
@@ -78,11 +75,7 @@ fn get_workflow_runs(repo: &str) -> Result<WorkflowRunApiResponse> {
 }
 
 fn get_latest_release_version(repo: &str) -> Result<Version> {
-    let url = format!(
-        "https://api.github.com/repos/FuelLabs/{}/releases/latest",
-        repo
-    );
-
+    let url = format!("{}{}/releases/latest", GITHUB_API_ORG_URL, repo);
     let handle = ureq::builder().user_agent("fuelup").build();
     let response: LatestReleaseApiResponse = match handle.get(&url).call() {
         Ok(r) => serde_json::from_reader(r.into_reader())?,
@@ -159,7 +152,7 @@ fn print_selected_versions(forc_versions: &[Version], fuel_core_versions: &[Vers
 fn compare_rest() -> Result<()> {
     let handle = ureq::builder().user_agent("fuelup").build();
 
-    let toml_resp = match handle.get(CHANNEL_FUEL_LATEST_TOML_URL).call() {
+    let toml_resp = match handle.get(CHANNEL_LATEST_URL_ACTUAL).call() {
         Ok(r) => r
             .into_string()
             .expect("Could not convert channel to string"),
@@ -231,7 +224,7 @@ fn get_latest_version(repo: &str) -> Result<Version> {
 fn compare_compatibility() -> Result<()> {
     let handle = ureq::builder().user_agent("fuelup").build();
 
-    let toml_resp = match handle.get(CHANNEL_FUEL_LATEST_TOML_URL).call() {
+    let toml_resp = match handle.get(CHANNEL_LATEST_URL_ACTUAL).call() {
         Ok(r) => r
             .into_string()
             .expect("Could not convert channel to string"),
@@ -239,7 +232,7 @@ fn compare_compatibility() -> Result<()> {
             eprintln!(
                 "Error {}: Could not download channel-fuel-latest.toml from {}; re-generating channel.",
                 r.status(),
-                &CHANNEL_FUEL_LATEST_TOML_URL
+                &CHANNEL_LATEST_URL_ACTUAL
             );
 
             let sway_runs = get_workflow_runs(SWAY_REPO)?;

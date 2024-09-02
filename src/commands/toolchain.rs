@@ -1,6 +1,6 @@
+use crate::constants::CHANNELS;
 use crate::ops::fuelup_toolchain::{install::install, new::new, uninstall::uninstall};
 use crate::target_triple::TargetTriple;
-use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 use anyhow::{bail, Result};
 use clap::Parser;
 
@@ -45,7 +45,7 @@ fn name_allowed(s: &str) -> Result<String> {
         None => s,
     };
 
-    if RESERVED_TOOLCHAIN_NAMES.contains(&name) {
+    if CHANNELS.contains(&name) {
         bail!(
             "Cannot use distributable toolchain name '{}' as a custom toolchain name",
             s

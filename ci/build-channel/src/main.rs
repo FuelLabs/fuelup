@@ -33,6 +33,7 @@
 use anyhow::{bail, Result};
 use clap::Parser;
 use component::{Component, Components};
+use fuelup::constants::GITHUB_API_ORG_URL;
 use once_cell::sync::Lazy;
 use semver::Version;
 use serde::{Deserialize, Serialize};
@@ -113,8 +114,8 @@ fn get_version(component: &Component) -> Result<Version> {
     let mut data = Vec::new();
 
     let url = format!(
-        "https://api.github.com/repos/FuelLabs/{}/releases/latest",
-        component.repository_name
+        "{}{}/releases/latest",
+        GITHUB_API_ORG_URL, component.repository_name
     );
 
     let resp = handle.get(&url).call()?;
@@ -152,8 +153,8 @@ This could result in incompatibility between forc and fuel-core."
 fn write_nightly_document(document: &mut Document, components: Vec<Component>) -> Result<()> {
     let mut data = Vec::new();
     let nightly_release_url = format!(
-        "https://api.github.com/repos/FuelLabs/sway-nightly-binaries/releases/tags/nightly-{}",
-        *TODAY
+        "{}{}/releases/tags/nightly-{}",
+        GITHUB_API_ORG_URL, "sway-nightly-binaries", *TODAY
     );
 
     let resp = ureq::get(&nightly_release_url).call()?;

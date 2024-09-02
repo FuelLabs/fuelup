@@ -1,6 +1,6 @@
+use crate::constants::CHANNELS;
 use crate::fmt::format_toolchain_with_target;
 use crate::path::toolchains_dir;
-use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 use anyhow::Result;
 use std::{fs, io, path::PathBuf};
 
@@ -25,7 +25,7 @@ impl Config {
                 .filter(|e| e.file_type().map(|f| f.is_dir()).unwrap_or(false))
             {
                 let toolchain = dir_entry.file_name().to_string_lossy().to_string();
-                if RESERVED_TOOLCHAIN_NAMES
+                if CHANNELS
                     .iter()
                     .any(|t| toolchain == format_toolchain_with_target(t))
                 {
@@ -54,7 +54,7 @@ impl Config {
                 .map(|e| e.file_name().into_string().ok().unwrap_or_default())
                 .collect();
 
-            for name in RESERVED_TOOLCHAIN_NAMES {
+            for name in CHANNELS {
                 let dist_toolchain = format_toolchain_with_target(name);
                 if installed_toolchains.contains(&dist_toolchain) {
                     dist_toolchains.push(name.to_string());

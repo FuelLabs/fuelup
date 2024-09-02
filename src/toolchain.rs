@@ -1,6 +1,6 @@
 use crate::{
-    channel::{self, Channel},
-    constants::DATE_FORMAT,
+    channel::Channel,
+    constants::{self, CHANNELS, DATE_FORMAT},
     download::DownloadCfg,
     file::{get_bin_version, hard_or_symlink_file, is_executable},
     path::{
@@ -24,19 +24,6 @@ use std::{
 use time::Date;
 use tracing::{error, info};
 
-pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
-    channel::LATEST,
-    channel::BETA_1,
-    channel::BETA_2,
-    channel::BETA_3,
-    channel::BETA_4,
-    channel::BETA_5,
-    channel::NIGHTLY,
-    channel::DEVNET,
-    // Stable is reserved, although currently unused.
-    channel::STABLE,
-];
-
 #[derive(Debug, Eq, PartialEq)]
 pub enum DistToolchainName {
     Beta1,
@@ -53,15 +40,15 @@ pub enum DistToolchainName {
 impl fmt::Display for DistToolchainName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            DistToolchainName::Latest => write!(f, "{}", channel::LATEST),
-            DistToolchainName::Nightly => write!(f, "{}", channel::NIGHTLY),
-            DistToolchainName::Beta1 => write!(f, "{}", channel::BETA_1),
-            DistToolchainName::Beta2 => write!(f, "{}", channel::BETA_2),
-            DistToolchainName::Beta3 => write!(f, "{}", channel::BETA_3),
-            DistToolchainName::Beta4 => write!(f, "{}", channel::BETA_4),
-            DistToolchainName::Beta5 => write!(f, "{}", channel::BETA_5),
-            DistToolchainName::Devnet => write!(f, "{}", channel::DEVNET),
-            DistToolchainName::Testnet => write!(f, "{}", channel::TESTNET),
+            DistToolchainName::Latest => write!(f, "{}", constants::LATEST),
+            DistToolchainName::Nightly => write!(f, "{}", constants::NIGHTLY),
+            DistToolchainName::Beta1 => write!(f, "{}", constants::BETA_1),
+            DistToolchainName::Beta2 => write!(f, "{}", constants::BETA_2),
+            DistToolchainName::Beta3 => write!(f, "{}", constants::BETA_3),
+            DistToolchainName::Beta4 => write!(f, "{}", constants::BETA_4),
+            DistToolchainName::Beta5 => write!(f, "{}", constants::BETA_5),
+            DistToolchainName::Devnet => write!(f, "{}", constants::DEVNET),
+            DistToolchainName::Testnet => write!(f, "{}", constants::TESTNET),
         }
     }
 }
@@ -70,15 +57,15 @@ impl FromStr for DistToolchainName {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
         match s {
-            channel::LATEST => Ok(Self::Latest),
-            channel::NIGHTLY => Ok(Self::Nightly),
-            channel::BETA_1 => Ok(Self::Beta1),
-            channel::BETA_2 => Ok(Self::Beta2),
-            channel::BETA_3 => Ok(Self::Beta3),
-            channel::BETA_4 => Ok(Self::Beta4),
-            channel::BETA_5 => Ok(Self::Beta5),
-            channel::DEVNET => Ok(Self::Devnet),
-            channel::TESTNET => Ok(Self::Testnet),
+            constants::LATEST => Ok(Self::Latest),
+            constants::NIGHTLY => Ok(Self::Nightly),
+            constants::BETA_1 => Ok(Self::Beta1),
+            constants::BETA_2 => Ok(Self::Beta2),
+            constants::BETA_3 => Ok(Self::Beta3),
+            constants::BETA_4 => Ok(Self::Beta4),
+            constants::BETA_5 => Ok(Self::Beta5),
+            constants::DEVNET => Ok(Self::Devnet),
+            constants::TESTNET => Ok(Self::Testnet),
             _ => bail!("Unknown name for toolchain: {}", s),
         }
     }
@@ -297,7 +284,7 @@ impl Toolchain {
     }
 
     pub fn is_distributed(&self) -> bool {
-        RESERVED_TOOLCHAIN_NAMES.contains(&self.name.split_once('-').unwrap_or((&self.name, "")).0)
+        CHANNELS.contains(&self.name.split_once('-').unwrap_or((&self.name, "")).0)
     }
 
     pub fn exists(&self) -> bool {
@@ -510,7 +497,7 @@ impl Toolchain {
 
 #[cfg(test)]
 mod tests {
-    use crate::channel::{CHANNELS, STABLE};
+    use crate::constants::{CHANNELS, STABLE};
 
     use super::*;
 

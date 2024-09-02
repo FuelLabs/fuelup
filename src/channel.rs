@@ -1,9 +1,9 @@
 use crate::{
     constants::{
-        CHANNEL_BETA_1_FILE_NAME, CHANNEL_BETA_2_FILE_NAME, CHANNEL_BETA_3_FILE_NAME,
-        CHANNEL_BETA_4_FILE_NAME, CHANNEL_BETA_5_FILE_NAME, CHANNEL_DEVNET_FILE_NAME,
-        CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME, CHANNEL_TESTNET_FILE_NAME,
-        DATE_FORMAT_URL_FRIENDLY, FUELUP_GH_PAGES,
+        BETA_CHANNELS, CHANNEL_BETA_1_FILE_NAME, CHANNEL_BETA_2_FILE_NAME,
+        CHANNEL_BETA_3_FILE_NAME, CHANNEL_BETA_4_FILE_NAME, CHANNEL_BETA_5_FILE_NAME,
+        CHANNEL_DEVNET_FILE_NAME, CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME,
+        CHANNEL_TESTNET_FILE_NAME, DATE_FORMAT_URL_FRIENDLY, GITHUB_USER_CONTENT_URL,
     },
     download::{download, DownloadCfg},
     toolchain::{DistToolchainDescription, DistToolchainName},
@@ -16,21 +16,6 @@ use std::{collections::BTreeMap, fmt::Debug};
 use time::Date;
 use toml_edit::de;
 use tracing::warn;
-
-pub const LATEST: &str = "latest";
-pub const STABLE: &str = "stable";
-pub const BETA_1: &str = "beta-1";
-pub const BETA_2: &str = "beta-2";
-pub const BETA_3: &str = "beta-3";
-pub const BETA_4: &str = "beta-4";
-pub const BETA_5: &str = "beta-5";
-pub const DEVNET: &str = "devnet";
-pub const TESTNET: &str = "testnet";
-pub const NIGHTLY: &str = "nightly";
-
-pub const CHANNELS: [&str; 9] = [
-    LATEST, NIGHTLY, BETA_1, BETA_2, BETA_3, BETA_4, BETA_5, DEVNET, TESTNET,
-];
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct HashedBinary {
@@ -68,7 +53,7 @@ fn format_nightly_url(date: &Date) -> Result<String> {
 }
 
 fn construct_channel_url(desc: &DistToolchainDescription) -> Result<String> {
-    let mut url = FUELUP_GH_PAGES.to_owned();
+    let mut url = format!("{}{}/gh-pages/", GITHUB_USER_CONTENT_URL, "fuelup");
     match desc.name {
         DistToolchainName::Latest => {
             if let Some(date) = desc.date {
@@ -136,7 +121,7 @@ If this component should be downloadable, try running `fuelup self update` and r
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{download::DownloadCfg, file::read_file};
+    use crate::{constants::CHANNELS, download::DownloadCfg, file::read_file};
 
     #[test]
     fn channel_from_toml() {

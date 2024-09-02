@@ -1,6 +1,6 @@
 use crate::{
-    channel::{is_beta_toolchain, LATEST, NIGHTLY},
-    constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE},
+    channel::is_beta_toolchain,
+    constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE, LATEST, NIGHTLY},
     download::DownloadCfg,
     file,
     path::get_fuel_toolchain_toml,
@@ -213,7 +213,7 @@ impl OverrideCfg {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::channel::{BETA_1, BETA_2, BETA_3, NIGHTLY};
+    use crate::constants::{BETA_1, BETA_2, BETA_3, NIGHTLY};
     use indoc::indoc;
 
     #[test]

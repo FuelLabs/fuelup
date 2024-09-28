@@ -1,5 +1,5 @@
 use anyhow::{bail, Result};
-use component::{self, Component};
+use component::{self, Components};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
@@ -53,40 +53,37 @@ impl TargetTriple {
     }
 
     pub fn from_component(component: &str) -> Result<Self> {
-        match Component::from_name(component).map(|c| c.name)?.as_str() {
-            component::FORC => {
-                let os = match std::env::consts::OS {
-                    "macos" => "darwin",
-                    "linux" => "linux",
-                    unsupported_os => bail!("Unsupported os: {}", unsupported_os),
-                };
-                let architecture = match std::env::consts::ARCH {
-                    "aarch64" => "arm64",
-                    "x86_64" => "amd64",
-                    unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
-                };
+        if Components::is_distributed_by_forc(component) {
+            let os = match std::env::consts::OS {
+                "macos" => "darwin",
+                "linux" => "linux",
+                unsupported_os => bail!("Unsupported os: {}", unsupported_os),
+            };
+            let architecture = match std::env::consts::ARCH {
+                "aarch64" => "arm64",
+                "x86_64" => "amd64",
+                unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
+            };
 
-                Ok(Self(format!("{os}_{architecture}")))
-            }
-            _ => {
-                let architecture = match std::env::consts::ARCH {
-                    "aarch64" | "x86_64" => std::env::consts::ARCH,
-                    unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
-                };
+            Ok(Self(format!("{os}_{architecture}")))
+        } else {
+            let architecture = match std::env::consts::ARCH {
+                "aarch64" | "x86_64" => std::env::consts::ARCH,
+                unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
+            };
 
-                let vendor = match std::env::consts::OS {
-                    "macos" => "apple",
-                    _ => "unknown",
-                };
+            let vendor = match std::env::consts::OS {
+                "macos" => "apple",
+                _ => "unknown",
+            };
 
-                let os = match std::env::consts::OS {
-                    "macos" => "darwin",
-                    "linux" => "linux-gnu",
-                    unsupported_os => bail!("Unsupported os: {}", unsupported_os),
-                };
+            let os = match std::env::consts::OS {
+                "macos" => "darwin",
+                "linux" => "linux-gnu",
+                unsupported_os => bail!("Unsupported os: {}", unsupported_os),
+            };
 
-                Ok(Self(format!("{architecture}-{vendor}-{os}")))
-            }
+            Ok(Self(format!("{architecture}-{vendor}-{os}")))
         }
     }
 }

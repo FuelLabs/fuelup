@@ -52,7 +52,7 @@ impl DownloadCfg {
                 .map_err(|e| anyhow!("Error getting latest tag for '{}': {}", name, e))?,
         };
 
-        let (tarball_name, tarball_url) = if name == FUELUP {
+        let (tarball_name, tarball_url) = if component::Components::is_distributed_by_forc(name) {
             let tarball_name = tarball_name(FUELUP, &version, &target);
             let tarball_url = github_releases_download_url(FUELUP, &version, &tarball_name);
             (tarball_name, tarball_url)

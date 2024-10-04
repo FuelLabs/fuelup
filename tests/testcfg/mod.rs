@@ -130,7 +130,7 @@ impl TestCfg {
             .args(args)
             .current_dir(&self.home)
             .env("HOME", &self.home)
-            .env("CARGO_HOME", &self.home.join(".cargo"))
+            .env("CARGO_HOME", self.home.join(".cargo"))
             .env(
                 "PATH",
                 format!(

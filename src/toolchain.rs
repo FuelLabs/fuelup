@@ -413,7 +413,12 @@ impl Toolchain {
                     } else {
                         let downloaded = store.install_component(&cfg)?;
                         for bin in downloaded {
-                            hard_or_symlink_file(&bin, &self.bin_path.join(&cfg.name))?;
+                            match bin.file_name() {
+                                None => bail!("Failed to read file '{bin:?}' from download"),
+                                Some(executable) => {
+                                    hard_or_symlink_file(&bin, &self.bin_path.join(executable))?
+                                }
+                            }
                         }
                     }
                 }

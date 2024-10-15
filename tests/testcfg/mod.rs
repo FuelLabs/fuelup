@@ -1,5 +1,5 @@
 use anyhow::Result;
-use fuelup::channel::{LATEST, NIGHTLY};
+use fuelup::channel::{LATEST, NIGHTLY, TESTNET};
 use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;
 use fuelup::file::hard_or_symlink_file;
 use fuelup::settings::SettingsFile;

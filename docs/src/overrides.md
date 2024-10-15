@@ -38,23 +38,23 @@ $ tree -L 1 # 'tree -L 1' shows the project structure up to the depth of 1
 
 ### Examples
 
-An application using the [`beta-3`] toolchain:
+An application using the [`testnet`] toolchain:
 
 ```toml
 [toolchain]
-channel = "beta-3"
+channel = "testnet"
 ```
 
-Let's say we have a project on the `beta-3` testnet, and we want to try using a different version forc to develop on it:
+Let's say we have a project on the Fuel testnet network, and we want to try using a different version forc to develop on it:
 
 ```toml
 [toolchain]
-channel = "beta-3"
+channel = "testnet"
 
 [components]
-forc = "0.36.0" # in beta-3, forc is pinned to v0.37.3
+forc = "0.65.0" # in testnet, forc is pinned to v0.66.1
 ```
 
 [toolchain]: concepts/toolchains.md
 [distributed toolchains]: concepts/toolchains.md#toolchains
-[`beta-3`]: concepts/channels.md#the-beta-3-channel
+[`testnet`]: concepts/channels.md#the-testnet-channel

@@ -2,16 +2,14 @@
 
 <!-- This section should give an overview of fuelup channels -->
 <!-- channels:example:start -->
-`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, the `latest`, `nightly`, `testnet`, and `beta` channels are published and serve as a source of distribution of Fuel toolchain binaries.
+`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, the `latest`, `nightly`, `testnet`, and `mainnet` channels are published and serve as a source of distribution of Fuel toolchain binaries.
 
 | Channel       | Source          | Integration Tested   | Update Frequency         | Available |
 | ------------- | --------------- | -------------------- | ------------------------ | --------- |
 | **[latest]**  | published bins  | ✔️                    | only when necessary      | ✔️         |
 | **[nightly]** | `master` branch | ➖                   | nightly (1:00 AM UTC)    | ✔️         |
-| **[testnet]** | published bins  | ➖                   | only when necessary       | ✔️         |
-| **[beta-5]**  | published bins  | ➖                   | only when necessary       | ✔️         |
-| **[beta-4]**  | published bins  | ➖                   | only when necessary       | ✔️         |
-| **[beta-3]**  | published bins  | ➖                   | only when necessary      | ✔️         |
+| **[mainnet]** | published bins  | ➖                   | only when necessary      | ✔️         |
+| **[testnet]** | published bins  | ➖                   | only when necessary      | ✔️         |
 <!-- channels:example:end -->
 
 ## The `latest` channel
@@ -39,21 +37,13 @@ You should use `nightly` if you want the latest changes to `master` that have no
 Keep in mind that compatibility between `forc` and `fuel-core` is not guaranteed here, and you should expect unstable features to break.
 <!-- nightly:example:end -->
 
+## The `mainnet` channel
+
+The `mainnet` channel is a published TOML file describing the toolchain that is compatible with our final public mainnet on the Sepolia network. This toolchain should be used to interact with and build on the mainnet. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-mainnet.toml).
+
 ## The `testnet` channel
 
 The `testnet` channel is a published TOML file describing the toolchain that is compatible with our final public [testnet](https://fuel.mirror.xyz/fztu8P_NJz6k7qLXhaGHX3ArctlQpxsUp87pgRpJ4bE) on the Sepolia network. This toolchain should be used to interact with and build on the testnet. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-testnet.toml).
-
-## The `beta-5` channel
-
-The `beta-5` channel is a published TOML file describing the toolchain that is compatible with our [beta-5 testnet](https://fuel.mirror.xyz/5JCTjM3jSG84QYLKqQ4idHf6X_zVtwTInQvg7kWhaMA). The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-5.toml).
-
-## The `beta-4` channel
-
-The `beta-4` channel is a published TOML file describing the toolchain that is compatible with our [beta-4 testnet](https://fuel-labs.ghost.io/announcing-beta-4-testnet/). The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-4.toml).
-
-## The `beta-3` channel
-
-The `beta-3` channel is a published TOML file describing the toolchain that is compatible with our [beta-3 testnet](https://fuel-labs.ghost.io/announcing-beta-3-testnet/). The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-3.toml).
 
 ## Developer Guide
 
@@ -93,6 +83,3 @@ You may also use [`nektos/act`](https://github.com/nektos/act) to run the workfl
 [latest]: #the-latest-channel
 [nightly]: #the-nightly-channel
 [testnet]: #the-testnet-channel
-[beta-5]: #the-beta-5-channel
-[beta-4]: #the-beta-4-channel
-[beta-3]: #the-beta-3-channel

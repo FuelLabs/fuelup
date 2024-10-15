@@ -562,7 +562,7 @@ mod tests {
     fn test_agent() -> anyhow::Result<()> {
         // this test case is used to illustrate the bug of ureq that sometimes doesn't return "Content-Length" header
         let handle = build_agent()?;
-        let response = handle.get("https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/channel-fuel-beta-4.toml").call()?;
+        let response = handle.get("https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/channel-fuel-testnet.toml").call()?;
         assert!(response.header("Content-Length").is_none());
         Ok(())
     }

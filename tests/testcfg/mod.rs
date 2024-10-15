@@ -34,11 +34,11 @@ pub enum FuelupState {
     FuelupUpdateConflict,
     /// Inits a state with the `nightly` and `nightly-2022-08-30` toolchains.
     NightlyAndNightlyDateInstalled,
-    /// Inits a state with only the `beta-1` toolchain.
-    Beta1Installed,
-    /// Inits a state with the `latest` toolchain, with `beta-1` declared within
+    /// Inits a state with only the `testnet` toolchain.
+    TestnetInstalled,
+    /// Inits a state with the `latest` toolchain, with `testnet` declared within
     /// fuel-toolchain.toml.
-    LatestWithBetaOverride,
+    LatestWithTestnetOverride,
 }
 
 #[derive(Debug)]
@@ -310,18 +310,18 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, &format!("nightly-{DATE}-{target}"))?;
             setup_settings_file(&tmp_fuelup_root_path, &nightly)?;
         }
-        FuelupState::Beta1Installed => {
+        FuelupState::TestnetInstalled => {
             setup_toolchain(&tmp_fuelup_root_path, &beta_1)?;
-            setup_toolchain(&tmp_fuelup_root_path, &format!("beta-1-{DATE}-{target}"))?;
+            setup_toolchain(&tmp_fuelup_root_path, &format!("testnet-{DATE}-{target}"))?;
             setup_settings_file(&tmp_fuelup_root_path, &beta_1)?;
         }
-        FuelupState::LatestWithBetaOverride => {
+        FuelupState::LatestWithTestnetOverride => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
             setup_override_file(ToolchainOverride {
                 cfg: OverrideCfg::new(
                     ToolchainCfg {
-                        channel: toolchain_override::Channel::from_str("beta-1").unwrap(),
+                        channel: toolchain_override::Channel::from_str("testnet").unwrap(),
                     },
                     None,
                 ),

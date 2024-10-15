@@ -1,9 +1,7 @@
 use crate::{
     constants::{
-        CHANNEL_BETA_1_FILE_NAME, CHANNEL_BETA_2_FILE_NAME, CHANNEL_BETA_3_FILE_NAME,
-        CHANNEL_BETA_4_FILE_NAME, CHANNEL_BETA_5_FILE_NAME, CHANNEL_DEVNET_FILE_NAME,
-        CHANNEL_LATEST_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME, CHANNEL_TESTNET_FILE_NAME,
-        DATE_FORMAT_URL_FRIENDLY, FUELUP_GH_PAGES,
+        CHANNEL_LATEST_FILE_NAME, CHANNEL_MAINNET_FILE_NAME, CHANNEL_NIGHTLY_FILE_NAME,
+        CHANNEL_TESTNET_FILE_NAME, DATE_FORMAT_URL_FRIENDLY, FUELUP_GH_PAGES,
     },
     download::{download, DownloadCfg},
     toolchain::{DistToolchainDescription, DistToolchainName},
@@ -19,18 +17,12 @@ use tracing::warn;
 
 pub const LATEST: &str = "latest";
 pub const STABLE: &str = "stable";
-pub const BETA_1: &str = "beta-1";
-pub const BETA_2: &str = "beta-2";
-pub const BETA_3: &str = "beta-3";
-pub const BETA_4: &str = "beta-4";
-pub const BETA_5: &str = "beta-5";
-pub const DEVNET: &str = "devnet";
+pub const IGNITION: &str = "ignition";
 pub const TESTNET: &str = "testnet";
+pub const MAINNET: &str = "mainnet";
 pub const NIGHTLY: &str = "nightly";
 
-pub const CHANNELS: [&str; 9] = [
-    LATEST, NIGHTLY, BETA_1, BETA_2, BETA_3, BETA_4, BETA_5, DEVNET, TESTNET,
-];
+pub const CHANNELS: [&str; 4] = [LATEST, NIGHTLY, TESTNET, MAINNET];
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct HashedBinary {
@@ -51,13 +43,7 @@ pub struct Package {
 }
 
 pub fn is_beta_toolchain(name: &str) -> bool {
-    name == BETA_1
-        || name == BETA_2
-        || name == BETA_3
-        || name == BETA_4
-        || name == BETA_5
-        || name == DEVNET
-        || name == TESTNET
+    name == TESTNET || name == MAINNET
 }
 
 fn format_nightly_url(date: &Date) -> Result<String> {
@@ -85,13 +71,8 @@ fn construct_channel_url(desc: &DistToolchainDescription) -> Result<String> {
             }
             url.push_str(CHANNEL_NIGHTLY_FILE_NAME);
         }
-        DistToolchainName::Beta1 => url.push_str(CHANNEL_BETA_1_FILE_NAME),
-        DistToolchainName::Beta2 => url.push_str(CHANNEL_BETA_2_FILE_NAME),
-        DistToolchainName::Beta3 => url.push_str(CHANNEL_BETA_3_FILE_NAME),
-        DistToolchainName::Beta4 => url.push_str(CHANNEL_BETA_4_FILE_NAME),
-        DistToolchainName::Beta5 => url.push_str(CHANNEL_BETA_5_FILE_NAME),
-        DistToolchainName::Devnet => url.push_str(CHANNEL_DEVNET_FILE_NAME),
         DistToolchainName::Testnet => url.push_str(CHANNEL_TESTNET_FILE_NAME),
+        DistToolchainName::Mainnet => url.push_str(CHANNEL_MAINNET_FILE_NAME),
     };
 
     Ok(url)

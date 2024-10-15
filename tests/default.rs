@@ -104,7 +104,7 @@ fn fuelup_default_override() -> Result<()> {
     testcfg::setup(FuelupState::LatestWithBetaOverride, &|cfg| {
         let output = cfg.fuelup(&["default"]);
         let triple = TargetTriple::from_host().unwrap();
-        let expected_stdout = format!("beta-1-{triple} (override), latest-{triple} (default)\n");
+        let expected_stdout = format!("testnet-{triple} (override), latest-{triple} (default)\n");
         assert_eq!(output.stdout, expected_stdout);
     })?;
     Ok(())

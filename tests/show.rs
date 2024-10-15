@@ -188,7 +188,7 @@ fn fuelup_show_override() -> Result<()> {
 
             active toolchain
             ----------------
-            beta-1-{target} (override), path: {}
+            testnet-{target} (override), path: {}
               forc : not found
                 - forc-client
                   - forc-deploy : not found

@@ -172,7 +172,7 @@ fn fuelup_show_custom() -> Result<()> {
 
 #[test]
 fn fuelup_show_override() -> Result<()> {
-    testcfg::setup(FuelupState::LatestWithBetaOverride, &|cfg| {
+    testcfg::setup(FuelupState::LatestWithTestnetOverride, &|cfg| {
         let stripped = strip_ansi_escapes::strip(cfg.fuelup(&["show"]).stdout);
         let stdout = String::from_utf8_lossy(&stripped);
         let target = TargetTriple::from_host().unwrap();

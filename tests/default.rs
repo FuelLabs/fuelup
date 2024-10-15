@@ -101,7 +101,7 @@ fn fuelup_default_nightly_and_nightly_date() -> Result<()> {
 
 #[test]
 fn fuelup_default_override() -> Result<()> {
-    testcfg::setup(FuelupState::LatestWithBetaOverride, &|cfg| {
+    testcfg::setup(FuelupState::LatestWithTestnetOverride, &|cfg| {
         let output = cfg.fuelup(&["default"]);
         let triple = TargetTriple::from_host().unwrap();
         let expected_stdout = format!("testnet-{triple} (override), latest-{triple} (default)\n");

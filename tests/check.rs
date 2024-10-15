@@ -7,7 +7,6 @@ use testcfg::FuelupState;
 #[test]
 fn test_fuelup_check() -> Result<()> {
     let latest = format!("latest-{}", TargetTriple::from_host().unwrap());
-    let testnet = format!("testnet-{}", TargetTriple::from_host().unwrap());
     let forc = "forc -";
     let fuel_core = "fuel-core -";
     let fuel_indexer = "fuel-indexer -";

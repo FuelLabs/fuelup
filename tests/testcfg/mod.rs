@@ -1,5 +1,5 @@
 use anyhow::Result;
-use fuelup::channel::{BETA_1, LATEST, NIGHTLY};
+use fuelup::channel::{LATEST, NIGHTLY};
 use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;
 use fuelup::file::hard_or_symlink_file;
 use fuelup::settings::SettingsFile;
@@ -256,7 +256,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     let target = TargetTriple::from_host().unwrap();
     let latest = format!("{LATEST}-{target}");
     let nightly = format!("{NIGHTLY}-{target}");
-    let beta_1 = format!("{BETA_1}-{target}");
+    let testnet = format!("{TESTNET}-{target}");
 
     match state {
         FuelupState::Empty => {}
@@ -311,9 +311,9 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_settings_file(&tmp_fuelup_root_path, &nightly)?;
         }
         FuelupState::TestnetInstalled => {
-            setup_toolchain(&tmp_fuelup_root_path, &beta_1)?;
+            setup_toolchain(&tmp_fuelup_root_path, &testnet)?;
             setup_toolchain(&tmp_fuelup_root_path, &format!("testnet-{DATE}-{target}"))?;
-            setup_settings_file(&tmp_fuelup_root_path, &beta_1)?;
+            setup_settings_file(&tmp_fuelup_root_path, &testnet)?;
         }
         FuelupState::LatestWithTestnetOverride => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;

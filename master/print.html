@@ -290,14 +290,12 @@ or your currently active toolchain (in order of priority).</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="channels"><a class="header" href="#channels">Channels</a></h1>
 <!-- This section should give an overview of fuelup channels -->
 <!-- channels:example:start -->
-<p><code>fuelup</code> adopts a simplified version of <code>rustup</code> <a href="https://rust-lang.github.io/rustup/concepts/channels.html">channels</a>. Currently, the <code>latest</code>, <code>nightly</code>, <code>testnet</code>, and <code>beta</code> channels are published and serve as a source of distribution of Fuel toolchain binaries.</p>
+<p><code>fuelup</code> adopts a simplified version of <code>rustup</code> <a href="https://rust-lang.github.io/rustup/concepts/channels.html">channels</a>. Currently, the <code>latest</code>, <code>nightly</code>, <code>testnet</code>, and <code>mainnet</code> channels are published and serve as a source of distribution of Fuel toolchain binaries.</p>
 <table><thead><tr><th>Channel</th><th>Source</th><th>Integration Tested</th><th>Update Frequency</th><th>Available</th></tr></thead><tbody>
 <tr><td><strong><a href="concepts/channels.html#the-latest-channel">latest</a></strong></td><td>published bins</td><td>✔️</td><td>only when necessary</td><td>✔️</td></tr>
 <tr><td><strong><a href="concepts/channels.html#the-nightly-channel">nightly</a></strong></td><td><code>master</code> branch</td><td>➖</td><td>nightly (1:00 AM UTC)</td><td>✔️</td></tr>
+<tr><td><strong>[mainnet]</strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
 <tr><td><strong><a href="concepts/channels.html#the-testnet-channel">testnet</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
-<tr><td><strong><a href="concepts/channels.html#the-beta-5-channel">beta-5</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
-<tr><td><strong><a href="concepts/channels.html#the-beta-4-channel">beta-4</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
-<tr><td><strong><a href="concepts/channels.html#the-beta-3-channel">beta-3</a></strong></td><td>published bins</td><td>➖</td><td>only when necessary</td><td>✔️</td></tr>
 </tbody></table>
 <!-- channels:example:end -->
 <h2 id="the-latest-channel"><a class="header" href="#the-latest-channel">The <code>latest</code> channel</a></h2>
@@ -319,14 +317,10 @@ Note that the <code>nightly</code> channel might fail to build, in which case it
 <p>You should use <code>nightly</code> if you want the latest changes to <code>master</code> that have not been officially released yet.
 Keep in mind that compatibility between <code>forc</code> and <code>fuel-core</code> is not guaranteed here, and you should expect unstable features to break.</p>
 <!-- nightly:example:end -->
+<h2 id="the-mainnet-channel"><a class="header" href="#the-mainnet-channel">The <code>mainnet</code> channel</a></h2>
+<p>The <code>mainnet</code> channel is a published TOML file describing the toolchain that is compatible with our final public <a href="https://fuel.mirror.xyz/U2xqey0oZFCrIBf7bO3yYyFplJKiJ0sfzAyYmhrPjag">mainnet</a> on the Ignition network. This toolchain should be used to interact with and build on the mainnet. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-mainnet.toml">here</a>.</p>
 <h2 id="the-testnet-channel"><a class="header" href="#the-testnet-channel">The <code>testnet</code> channel</a></h2>
 <p>The <code>testnet</code> channel is a published TOML file describing the toolchain that is compatible with our final public <a href="https://fuel.mirror.xyz/fztu8P_NJz6k7qLXhaGHX3ArctlQpxsUp87pgRpJ4bE">testnet</a> on the Sepolia network. This toolchain should be used to interact with and build on the testnet. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-testnet.toml">here</a>.</p>
-<h2 id="the-beta-5-channel"><a class="header" href="#the-beta-5-channel">The <code>beta-5</code> channel</a></h2>
-<p>The <code>beta-5</code> channel is a published TOML file describing the toolchain that is compatible with our <a href="https://fuel.mirror.xyz/5JCTjM3jSG84QYLKqQ4idHf6X_zVtwTInQvg7kWhaMA">beta-5 testnet</a>. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-5.toml">here</a>.</p>
-<h2 id="the-beta-4-channel"><a class="header" href="#the-beta-4-channel">The <code>beta-4</code> channel</a></h2>
-<p>The <code>beta-4</code> channel is a published TOML file describing the toolchain that is compatible with our <a href="https://fuel-labs.ghost.io/announcing-beta-4-testnet/">beta-4 testnet</a>. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-4.toml">here</a>.</p>
-<h2 id="the-beta-3-channel"><a class="header" href="#the-beta-3-channel">The <code>beta-3</code> channel</a></h2>
-<p>The <code>beta-3</code> channel is a published TOML file describing the toolchain that is compatible with our <a href="https://fuel-labs.ghost.io/announcing-beta-3-testnet/">beta-3 testnet</a>. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-beta-3.toml">here</a>.</p>
 <h2 id="developer-guide"><a class="header" href="#developer-guide">Developer Guide</a></h2>
 <h3 id="understanding-the-latest-workflow"><a class="header" href="#understanding-the-latest-workflow">Understanding the <code>latest</code> workflow</a></h3>
 <blockquote>
@@ -496,16 +490,16 @@ the <a href="concepts/toolchains.html#toolchains">distributed toolchains</a> at 
 └── SPECIFICATION.md
 </code></pre>
 <h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
-<p>An application using the <a href="concepts/channels.html#the-beta-3-channel"><code>beta-3</code></a> toolchain:</p>
+<p>An application using the <a href="concepts/channels.html#the-testnet-channel"><code>testnet</code></a> toolchain:</p>
 <pre><code class="language-toml">[toolchain]
-channel = &quot;beta-3&quot;
+channel = &quot;testnet&quot;
 </code></pre>
-<p>Let's say we have a project on the <code>beta-3</code> testnet, and we want to try using a different version forc to develop on it:</p>
+<p>Let's say we have a project on the Fuel testnet network, and we want to try using a different version forc to develop on it:</p>
 <pre><code class="language-toml">[toolchain]
-channel = &quot;beta-3&quot;
+channel = &quot;testnet&quot;
 
 [components]
-forc = &quot;0.36.0&quot; # in beta-3, forc is pinned to v0.37.3
+forc = &quot;0.65.0&quot; # in testnet, forc is pinned to v0.66.1
 </code></pre>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
 <p><em>fuelup</em> has a <a href="https://github.com/toml-lang/toml">TOML</a> settings file at
@@ -754,11 +748,11 @@ links to binaries found within the <a href="https://github.com/FuelLabs/sway-nig
 <h3 id="manual"><a class="header" href="#manual">Manual</a></h3>
 <p>There may be times when we need a channel for a one-off event e.g. testnets. During these events, we do not</p>
 <p>require a routine update, and can essentially publish once and be done. This is when manual publishing is done.</p>
-<p>For example, building a <code>beta-3</code> toolchain is done like so:</p>
+<p>For example, building a <code>testnet</code> toolchain is done like so:</p>
 <pre><code class="language-sh"># from fuelup project root
-cd ci/build-channel &amp;&amp; cargo run -- channel-fuel-beta-3.toml 2023-02-13 forc=0.35.0 fuel-core=0.17.1
+cd ci/build-channel &amp;&amp; cargo run -- channel-fuel-testnet.toml 2023-02-13 forc=0.35.0 fuel-core=0.17.1
 </code></pre>
-<p>The above command means that we're building a channel named <code>channel-fuel-beta-3.toml</code> with the date <code>2023-02-13</code> (<code>YYYY-MM-DD</code>)
+<p>The above command means that we're building a channel named <code>channel-fuel-testnet.toml</code> with the date <code>2023-02-13</code> (<code>YYYY-MM-DD</code>)
 and <code>forc</code> and <code>fuel-core</code> versions <code>0.35.0</code> and <code>0.17.1</code> respectively, and the latest versions for the other unlisted components.</p>
 <p>Other than for these one-off events, manually running <code>build-channel</code> locally is a good sanity check when working
 on this codebase.</p>

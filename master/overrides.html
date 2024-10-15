@@ -198,16 +198,16 @@ the <a href="concepts/toolchains.html#toolchains">distributed toolchains</a> at 
 └── SPECIFICATION.md
 </code></pre>
 <h3 id="examples"><a class="header" href="#examples">Examples</a></h3>
-<p>An application using the <a href="concepts/channels.html#the-beta-3-channel"><code>beta-3</code></a> toolchain:</p>
+<p>An application using the <a href="concepts/channels.html#the-testnet-channel"><code>testnet</code></a> toolchain:</p>
 <pre><code class="language-toml">[toolchain]
-channel = &quot;beta-3&quot;
+channel = &quot;testnet&quot;
 </code></pre>
-<p>Let's say we have a project on the <code>beta-3</code> testnet, and we want to try using a different version forc to develop on it:</p>
+<p>Let's say we have a project on the Fuel testnet network, and we want to try using a different version forc to develop on it:</p>
 <pre><code class="language-toml">[toolchain]
-channel = &quot;beta-3&quot;
+channel = &quot;testnet&quot;
 
 [components]
-forc = &quot;0.36.0&quot; # in beta-3, forc is pinned to v0.37.3
+forc = &quot;0.65.0&quot; # in testnet, forc is pinned to v0.66.1
 </code></pre>
 
                     </main>

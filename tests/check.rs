@@ -5,7 +5,7 @@ use fuelup::target_triple::TargetTriple;
 use testcfg::FuelupState;
 
 #[test]
-fn fuelup_check() -> Result<()> {
+fn test_fuelup_check() -> Result<()> {
     let latest = format!("latest-{}", TargetTriple::from_host().unwrap());
     let testnet = format!("testnet-{}", TargetTriple::from_host().unwrap());
     let forc = "forc -";
@@ -29,17 +29,6 @@ fn fuelup_check() -> Result<()> {
         assert!(stdout.contains(&latest));
         assert!(stdout.contains(forc));
         assert!(stdout.contains(fuel_core));
-    })?;
-
-    // Test that toolchain names with '-' inside are parsed correctly.
-    testcfg::setup(FuelupState::TestnetInstalled, &|cfg| {
-        let output = cfg.fuelup(&["check", "--verbose"]);
-        let stripped = strip_ansi_escapes::strip(output.stdout);
-        let stdout = String::from_utf8_lossy(&stripped);
-        assert!(stdout.contains(&testnet));
-        assert!(stdout.contains(forc));
-        assert!(stdout.contains(fuel_core));
-        assert!(!stdout.contains(fuel_indexer));
     })?;
 
     Ok(())

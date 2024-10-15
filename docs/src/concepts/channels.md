@@ -39,7 +39,7 @@ Keep in mind that compatibility between `forc` and `fuel-core` is not guaranteed
 
 ## The `mainnet` channel
 
-The `mainnet` channel is a published TOML file describing the toolchain that is compatible with our final public mainnet on the Ignition network. This toolchain should be used to interact with and build on the mainnet. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-mainnet.toml).
+The `mainnet` channel is a published TOML file describing the toolchain that is compatible with our final public [mainnet](https://fuel.mirror.xyz/U2xqey0oZFCrIBf7bO3yYyFplJKiJ0sfzAyYmhrPjag) on the Ignition network. This toolchain should be used to interact with and build on the mainnet. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-mainnet.toml).
 
 ## The `testnet` channel
 

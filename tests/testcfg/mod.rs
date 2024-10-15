@@ -1,5 +1,5 @@
 use anyhow::Result;
-use fuelup::channel::{BETA_1, LATEST, NIGHTLY};
+use fuelup::channel::{LATEST, NIGHTLY, TESTNET};
 use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;
 use fuelup::file::hard_or_symlink_file;
 use fuelup::settings::SettingsFile;
@@ -34,11 +34,9 @@ pub enum FuelupState {
     FuelupUpdateConflict,
     /// Inits a state with the `nightly` and `nightly-2022-08-30` toolchains.
     NightlyAndNightlyDateInstalled,
-    /// Inits a state with only the `beta-1` toolchain.
-    Beta1Installed,
-    /// Inits a state with the `latest` toolchain, with `beta-1` declared within
+    /// Inits a state with the `latest` toolchain, with `testnet` declared within
     /// fuel-toolchain.toml.
-    LatestWithBetaOverride,
+    LatestWithTestnetOverride,
 }
 
 #[derive(Debug)]
@@ -256,7 +254,7 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     let target = TargetTriple::from_host().unwrap();
     let latest = format!("{LATEST}-{target}");
     let nightly = format!("{NIGHTLY}-{target}");
-    let beta_1 = format!("{BETA_1}-{target}");
+    let testnet = format!("{TESTNET}-{target}");
 
     match state {
         FuelupState::Empty => {}
@@ -310,18 +308,13 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
             setup_toolchain(&tmp_fuelup_root_path, &format!("nightly-{DATE}-{target}"))?;
             setup_settings_file(&tmp_fuelup_root_path, &nightly)?;
         }
-        FuelupState::Beta1Installed => {
-            setup_toolchain(&tmp_fuelup_root_path, &beta_1)?;
-            setup_toolchain(&tmp_fuelup_root_path, &format!("beta-1-{DATE}-{target}"))?;
-            setup_settings_file(&tmp_fuelup_root_path, &beta_1)?;
-        }
-        FuelupState::LatestWithBetaOverride => {
+        FuelupState::LatestWithTestnetOverride => {
             setup_toolchain(&tmp_fuelup_root_path, &latest)?;
             setup_settings_file(&tmp_fuelup_root_path, &latest)?;
             setup_override_file(ToolchainOverride {
                 cfg: OverrideCfg::new(
                     ToolchainCfg {
-                        channel: toolchain_override::Channel::from_str("beta-1").unwrap(),
+                        channel: toolchain_override::Channel::from_str(&testnet).unwrap(),
                     },
                     None,
                 ),

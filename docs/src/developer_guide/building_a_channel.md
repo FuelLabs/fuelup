@@ -32,14 +32,14 @@ There may be times when we need a channel for a one-off event e.g. testnets. Dur
 
 require a routine update, and can essentially publish once and be done. This is when manual publishing is done.
 
-For example, building a `beta-3` toolchain is done like so:
+For example, building a `testnet` toolchain is done like so:
 
 ```sh
 # from fuelup project root
-cd ci/build-channel && cargo run -- channel-fuel-beta-3.toml 2023-02-13 forc=0.35.0 fuel-core=0.17.1
+cd ci/build-channel && cargo run -- channel-fuel-testnet.toml 2023-02-13 forc=0.35.0 fuel-core=0.17.1
 ```
 
-The above command means that we're building a channel named `channel-fuel-beta-3.toml` with the date `2023-02-13` (`YYYY-MM-DD`)
+The above command means that we're building a channel named `channel-fuel-testnet.toml` with the date `2023-02-13` (`YYYY-MM-DD`)
 and `forc` and `fuel-core` versions `0.35.0` and `0.17.1` respectively, and the latest versions for the other unlisted components.
 
 Other than for these one-off events, manually running `build-channel` locally is a good sanity check when working

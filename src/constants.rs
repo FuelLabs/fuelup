@@ -6,15 +6,10 @@ pub const FUELS_VERSION_FILE: &str = "fuels_version";
 
 pub const CHANNEL_LATEST_URL: &str =
     "https://raw.githubusercontent.com/FuelLabs/fuelup/gh-pages/channel-fuel-testnet.toml";
-pub const CHANNEL_LATEST_FILE_NAME: &str = "channel-fuel-testnet.toml";
 pub const CHANNEL_NIGHTLY_FILE_NAME: &str = "channel-fuel-nightly.toml";
-pub const CHANNEL_BETA_1_FILE_NAME: &str = "channel-fuel-beta-1.toml";
-pub const CHANNEL_BETA_2_FILE_NAME: &str = "channel-fuel-beta-2.toml";
-pub const CHANNEL_BETA_3_FILE_NAME: &str = "channel-fuel-beta-3.toml";
-pub const CHANNEL_BETA_4_FILE_NAME: &str = "channel-fuel-beta-4.toml";
-pub const CHANNEL_BETA_5_FILE_NAME: &str = "channel-fuel-beta-5.toml";
-pub const CHANNEL_DEVNET_FILE_NAME: &str = "channel-fuel-devnet.toml";
 pub const CHANNEL_TESTNET_FILE_NAME: &str = "channel-fuel-testnet.toml";
+pub const CHANNEL_MAINNET_FILE_NAME: &str = "channel-fuel-mainnet.toml";
+pub const CHANNEL_LATEST_FILE_NAME: &str = CHANNEL_MAINNET_FILE_NAME;
 
 pub const DATE_FORMAT: &[FormatItem] = format_description!("[year]-[month]-[day]");
 pub const DATE_FORMAT_URL_FRIENDLY: &[FormatItem] = format_description!("[year]/[month]/[day]");

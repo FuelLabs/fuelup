@@ -26,28 +26,19 @@ use tracing::{error, info};
 
 pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
     channel::LATEST,
-    channel::BETA_1,
-    channel::BETA_2,
-    channel::BETA_3,
-    channel::BETA_4,
-    channel::BETA_5,
     channel::NIGHTLY,
-    channel::DEVNET,
     // Stable is reserved, although currently unused.
     channel::STABLE,
+    // Ignition is reserved, although currently unused.
+    channel::IGNITION,
 ];
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum DistToolchainName {
-    Beta1,
-    Beta2,
-    Beta3,
-    Beta4,
-    Beta5,
     Latest,
     Nightly,
-    Devnet,
     Testnet,
+    Mainnet,
 }
 
 impl fmt::Display for DistToolchainName {
@@ -55,13 +46,8 @@ impl fmt::Display for DistToolchainName {
         match self {
             DistToolchainName::Latest => write!(f, "{}", channel::LATEST),
             DistToolchainName::Nightly => write!(f, "{}", channel::NIGHTLY),
-            DistToolchainName::Beta1 => write!(f, "{}", channel::BETA_1),
-            DistToolchainName::Beta2 => write!(f, "{}", channel::BETA_2),
-            DistToolchainName::Beta3 => write!(f, "{}", channel::BETA_3),
-            DistToolchainName::Beta4 => write!(f, "{}", channel::BETA_4),
-            DistToolchainName::Beta5 => write!(f, "{}", channel::BETA_5),
-            DistToolchainName::Devnet => write!(f, "{}", channel::DEVNET),
             DistToolchainName::Testnet => write!(f, "{}", channel::TESTNET),
+            DistToolchainName::Mainnet => write!(f, "{}", channel::MAINNET),
         }
     }
 }
@@ -72,13 +58,8 @@ impl FromStr for DistToolchainName {
         match s {
             channel::LATEST => Ok(Self::Latest),
             channel::NIGHTLY => Ok(Self::Nightly),
-            channel::BETA_1 => Ok(Self::Beta1),
-            channel::BETA_2 => Ok(Self::Beta2),
-            channel::BETA_3 => Ok(Self::Beta3),
-            channel::BETA_4 => Ok(Self::Beta4),
-            channel::BETA_5 => Ok(Self::Beta5),
-            channel::DEVNET => Ok(Self::Devnet),
             channel::TESTNET => Ok(Self::Testnet),
+            channel::MAINNET => Ok(Self::Mainnet),
             _ => bail!("Unknown name for toolchain: {}", s),
         }
     }

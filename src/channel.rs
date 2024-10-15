@@ -42,7 +42,7 @@ pub struct Package {
     pub fuels_version: Option<String>,
 }
 
-pub fn is_beta_toolchain(name: &str) -> bool {
+pub fn is_dateless_distributed_toolchain(name: &str) -> bool {
     name == TESTNET || name == MAINNET
 }
 

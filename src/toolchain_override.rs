@@ -1,5 +1,5 @@
 use crate::{
-    channel::{is_beta_toolchain, LATEST, NIGHTLY},
+    channel::{is_dateless_distributed_toolchain, LATEST, NIGHTLY},
     constants::{DATE_FORMAT, FUEL_TOOLCHAIN_TOML_FILE},
     download::DownloadCfg,
     file,
@@ -88,7 +88,7 @@ impl fmt::Display for Channel {
 impl FromStr for Channel {
     type Err = anyhow::Error;
     fn from_str(s: &str) -> Result<Self> {
-        if is_beta_toolchain(s) {
+        if is_dateless_distributed_toolchain(s) {
             return Ok(Self {
                 name: s.to_string(),
                 date: None,

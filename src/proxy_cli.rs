@@ -6,7 +6,7 @@ use crate::{
     toolchain_override::ToolchainOverride,
 };
 use anyhow::Result;
-use component::Components;
+use component::{Component, Components};
 use std::{
     env,
     ffi::OsString,
@@ -48,7 +48,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
 
             // Plugins distributed by forc have to be handled a little differently,
             // if one of them is called we want to check for 'forc' instead.
-            let component_name = if Components::is_distributed_by_forc(proc_name) {
+            let component_name = if Component::is_distributed_by_forc(proc_name) {
                 component::FORC
             } else {
                 proc_name

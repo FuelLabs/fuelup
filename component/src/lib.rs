@@ -53,6 +53,19 @@ impl Component {
             .cloned()
     }
 
+    // Resolve the component from either a publishable name, plugin name, or executable name
+    pub fn resolve_from_name(name: &str) -> Option<Component> {
+        Components::collect().ok().and_then(|components| {
+            components.component.get(name).cloned().or_else(|| {
+                components
+                    .component
+                    .values()
+                    .find(|comp| comp.executables.contains(&name.to_string()))
+                    .cloned()
+            })
+        })
+    }
+
     pub fn is_default_forc_plugin(name: &str) -> bool {
         (Self::from_name(FORC)
             .expect("there must always be a `forc` component")
@@ -60,6 +73,24 @@ impl Component {
             .contains(&name.to_string())
             && name != FORC)
             || name == FORC_CLIENT
+    }
+
+    pub fn is_distributed_by_forc(component_name: &str) -> bool {
+        match component_name {
+            FORC => true,
+            _ => Component::from_name(FORC)
+                .ok()
+                .and_then(|forc| {
+                    Component::resolve_from_name(component_name)
+                        .map(|component| Self::is_in_same_distribution(&forc, &component))
+                })
+                .unwrap_or(false),
+        }
+    }
+
+    pub fn is_in_same_distribution(forc: &Component, component: &Component) -> bool {
+        component.repository_name == forc.repository_name
+            && component.tarball_prefix == forc.tarball_prefix
     }
 }
 
@@ -186,14 +217,6 @@ impl Components {
             .collect();
         Ok(executables)
     }
-
-    pub fn is_distributed_by_forc(plugin_name: &str) -> bool {
-        let components = Self::from_toml(COMPONENTS_TOML).expect("Failed to parse components toml");
-        if let Some(forc) = components.component.get(FORC) {
-            return forc.executables.contains(&plugin_name.to_string());
-        };
-        false
-    }
 }
 
 #[cfg(test)]
@@ -252,5 +275,81 @@ mod tests {
     #[test]
     fn test_collect_plugin_executables() {
         assert!(Components::collect_plugin_executables().is_ok());
+    }
+
+    #[test]
+    fn test_resolve_from_name_publishable() {
+        for publishable in Components::collect_publishables().unwrap() {
+            let component = Component::resolve_from_name(&publishable.name).unwrap();
+            assert_eq!(component.name, publishable.name);
+        }
+    }
+
+    #[test]
+    fn test_resolve_from_name_plugin() {
+        for plugin in Components::collect_plugins().unwrap() {
+            let component = Component::resolve_from_name(&plugin.name).unwrap();
+            assert_eq!(component.name, plugin.name);
+        }
+    }
+
+    #[test]
+    fn test_resolve_from_name_from_executable() {
+        let executables = Components::collect_plugin_executables().unwrap();
+
+        for executable in &executables {
+            let component = Component::resolve_from_name(executable).unwrap();
+
+            if component.executables.len() == 1 {
+                assert_eq!(component.name, *executable);
+            } else {
+                assert!(component.executables.contains(executable));
+            }
+        }
+    }
+
+    #[test]
+    fn test_is_distributed_by_forc_publishable() {
+        assert!(Component::is_distributed_by_forc(FORC));
+
+        for publishable in Components::collect_publishables().unwrap() {
+            if publishable.name == FORC {
+                assert!(Component::is_distributed_by_forc(&publishable.name));
+            } else {
+                assert!(!Component::is_distributed_by_forc(&publishable.name));
+            }
+        }
+    }
+
+    #[test]
+    fn test_is_distributed_by_forc_plugin() {
+        let forc = Component::from_name(FORC).unwrap();
+
+        for plugin in Components::collect_plugins().unwrap() {
+            let component = Component::resolve_from_name(&plugin.name).unwrap();
+
+            // A tautology, but may help catch future regressions
+            if Component::is_in_same_distribution(&forc, &component) {
+                assert!(Component::is_distributed_by_forc(&component.name))
+            } else {
+                assert!(!Component::is_distributed_by_forc(&component.name))
+            }
+        }
+    }
+
+    #[test]
+    fn test_is_distributed_by_forc_executable() {
+        let forc = Component::from_name(FORC).unwrap();
+
+        for executable in Components::collect_plugin_executables().unwrap() {
+            let component = Component::resolve_from_name(&executable).unwrap();
+
+            // A tautology, but may help catch future regressions
+            if Component::is_in_same_distribution(&forc, &component) {
+                assert!(Component::is_distributed_by_forc(&component.name))
+            } else {
+                assert!(!Component::is_distributed_by_forc(&component.name))
+            }
+        }
     }
 }

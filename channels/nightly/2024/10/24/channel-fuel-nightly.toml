@@ -1,0 +1,66 @@
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/11491325653"
+date = "2024-10-24"
+
+[pkg.forc]
+version = "0.66.2+nightly.20241024.ba8951e0bd"
+
+[pkg.forc.target.darwin_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241024/forc-binaries-0.66.2%2Bnightly.20241024.ba8951e0bd-darwin_amd64.tar.gz"
+hash = "520833854c1cc0c7d46720a515632e3b0d09f4e67357a3485ee06b624baa30ad"
+
+[pkg.forc.target.darwin_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241024/forc-binaries-0.66.2%2Bnightly.20241024.ba8951e0bd-darwin_arm64.tar.gz"
+hash = "816ba3f22ffe5b27645330e5c90d70a5e276e55c7f3bb8970be860efe266ff4f"
+
+[pkg.forc.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241024/forc-binaries-0.66.2%2Bnightly.20241024.ba8951e0bd-linux_arm64.tar.gz"
+hash = "a1c61058a2e550fe27b8839abbe7a0c8d33badca0fa75b0346ebfb08844b9ca9"
+
+[pkg.forc-wallet]
+version = "0.11.0+nightly.20241024.152bfb48c3"
+
+[pkg.forc-wallet.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241024/forc-wallet-0.11.0%2Bnightly.20241024.152bfb48c3-aarch64-apple-darwin.tar.gz"
+hash = "fa92c2900c4bd20e05eef60ff81ff88113a3332225d97e60301806a5369f6c3c"
+
+[pkg.forc-wallet.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241024/forc-wallet-0.11.0%2Bnightly.20241024.152bfb48c3-aarch64-unknown-linux-gnu.tar.gz"
+hash = "b86d30fbc108e0e787b2645c9bcbf755eb2bbcd7709ba798a94dbd9de4306ba8"
+
+[pkg.forc-wallet.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241024/forc-wallet-0.11.0%2Bnightly.20241024.152bfb48c3-x86_64-apple-darwin.tar.gz"
+hash = "409b036dea6ea003b738f8cd2f3cd5e07015a8757a790fdc431dd642a69ec5d0"
+
+[pkg.forc-wallet.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241024/forc-wallet-0.11.0%2Bnightly.20241024.152bfb48c3-x86_64-unknown-linux-gnu.tar.gz"
+hash = "81525af33f625a6581cda5a9ea6cf0938e71139e7356c669097c77f51ec3b6ac"
+
+[pkg.fuel-core]
+version = "0.40.0+nightly.20241024.eea8c60525"
+
+[pkg.fuel-core.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241024/fuel-core-0.40.0%2Bnightly.20241024.eea8c60525-aarch64-apple-darwin.tar.gz"
+hash = "f3785227a1c1934dc382c50df6ae78487ae87c43a05d65d6d4ab669b5c5f3ad9"
+
+[pkg.fuel-core.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241024/fuel-core-0.40.0%2Bnightly.20241024.eea8c60525-aarch64-unknown-linux-gnu.tar.gz"
+hash = "c0c6742f96e0ddd7545d5e473a3b88f7f23918dfe8ae679aa90544d48e4e9695"
+
+[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241024/fuel-core-0.40.0%2Bnightly.20241024.eea8c60525-x86_64-unknown-linux-gnu.tar.gz"
+hash = "7ff0be515baaea4f1271b53e4937ed467319a0c1cf1d62e4c929a2ec95f5165b"
+
+[pkg.fuel-core-keygen]
+version = "0.40.0+nightly.20241024.eea8c60525"
+
+[pkg.fuel-core-keygen.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241024/fuel-core-0.40.0%2Bnightly.20241024.eea8c60525-aarch64-apple-darwin.tar.gz"
+hash = "f3785227a1c1934dc382c50df6ae78487ae87c43a05d65d6d4ab669b5c5f3ad9"
+
+[pkg.fuel-core-keygen.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241024/fuel-core-0.40.0%2Bnightly.20241024.eea8c60525-aarch64-unknown-linux-gnu.tar.gz"
+hash = "c0c6742f96e0ddd7545d5e473a3b88f7f23918dfe8ae679aa90544d48e4e9695"
+
+[pkg.fuel-core-keygen.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241024/fuel-core-0.40.0%2Bnightly.20241024.eea8c60525-x86_64-unknown-linux-gnu.tar.gz"
+hash = "7ff0be515baaea4f1271b53e4937ed467319a0c1cf1d62e4c929a2ec95f5165b"

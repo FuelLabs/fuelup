@@ -1,9 +1,12 @@
 use anyhow::Result;
+use chrono::{Duration, Utc};
+use component::Component;
 use fuelup::channel::{LATEST, NIGHTLY, TESTNET};
 use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;
 use fuelup::file::hard_or_symlink_file;
 use fuelup::settings::SettingsFile;
 use fuelup::target_triple::TargetTriple;
+use fuelup::toolchain::Toolchain;
 use fuelup::toolchain_override::{self, OverrideCfg, ToolchainCfg, ToolchainOverride};
 use semver::Version;
 use std::os::unix::fs::OpenOptionsExt;
@@ -83,6 +86,18 @@ pub static ALL_BINS: &[&str] = &[
     "fuel-core-keygen",
     "fuel-indexer",
 ];
+
+pub fn yesterday() -> String {
+    // CI failed building linux binaries on 2024-10-25 which happens to be
+    // "yesterday" when I'm trying to push this PR, so we need to override this
+    // temporarily to pass CI over the weekend. I'll be merging on top of this
+    // PR in the next few days and will remove this temporary fix
+
+    let current_date = Utc::now();
+    let yesterday = current_date - Duration::days(1);
+    let _ = yesterday.format("%Y-%m-%d").to_string();
+    "2024-10-23".to_string()
+}
 
 impl TestCfg {
     pub fn new(fuelup_path: PathBuf, fuelup_bin_dirpath: PathBuf, home: PathBuf) -> Self {
@@ -184,6 +199,21 @@ fn create_fuel_executable(path: &Path) -> std::io::Result<()> {
     Ok(())
 }
 
+pub fn delete_default_toolchain_override_toolchain(cfg: &TestCfg) {
+    let toolchain = get_default_toolchain_override_toolchain();
+    delete_toolchain(cfg, &toolchain);
+}
+
+pub fn delete_toolchain(cfg: &TestCfg, toolchain: &Toolchain) {
+    let toolchain_bin_dir = cfg.toolchain_bin_dir(toolchain.name.as_str());
+    let toolchain_dir = &toolchain_bin_dir.parent().unwrap();
+    std::fs::remove_dir_all(toolchain_dir).unwrap();
+}
+
+pub fn get_default_toolchain_override_toolchain() -> Toolchain {
+    Toolchain::new(format!("nightly-{}", yesterday()).as_str()).unwrap()
+}
+
 fn setup_toolchain(fuelup_home_path: &Path, toolchain: &str) -> Result<()> {
     let bin_dir = fuelup_home_path
         .join("toolchains")
@@ -227,6 +257,29 @@ pub fn setup_override_file(toolchain_override: ToolchainOverride) -> Result<()> 
         .unwrap_or_else(|_| panic!("Failed to write {FUEL_TOOLCHAIN_TOML_FILE}"));
 
     Ok(())
+}
+
+pub fn setup_default_override_file(cfg: &TestCfg, component_name: Option<&str>) {
+    // TODO: "0.61.0" is a placeholder until #666 is merged. Then we can use
+    // Component::resolve_from_name() to get a valid version (i.e the latest)
+    // via download::get_latest_version() as the component override version
+
+    let toolchain_override = ToolchainOverride {
+        cfg: OverrideCfg::new(
+            ToolchainCfg {
+                channel: toolchain_override::Channel::from_str(&format!("nightly-{}", yesterday()))
+                    .unwrap(),
+            },
+            component_name.map(|c| {
+                vec![(c.to_string(), "0.61.0".parse().unwrap())]
+                    .into_iter()
+                    .collect()
+            }),
+        ),
+        path: cfg.home.join(FUEL_TOOLCHAIN_TOML_FILE),
+    };
+
+    setup_override_file(toolchain_override.clone()).unwrap()
 }
 
 /// Based on a given FuelupState, sets up a temporary directory with all the necessary mock
@@ -330,4 +383,32 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     ));
 
     Ok(())
+}
+
+pub fn verify_default_toolchain_override_toolchain_executables(
+    cfg: &TestCfg,
+    component: Option<&Component>,
+) {
+    let toolchain = get_default_toolchain_override_toolchain();
+    verify_toolchain_executables(cfg, component, &toolchain);
+}
+
+pub fn verify_toolchain_executables(
+    cfg: &TestCfg,
+    component: Option<&Component>,
+    toolchain: &Toolchain,
+) {
+    let toolchain_bin_dir = cfg.toolchain_bin_dir(toolchain.name.as_str());
+    let executables = component
+        .map(|c| c.executables.clone())
+        .unwrap_or(vec!["forc".to_string()]);
+
+    for executable in executables {
+        assert!(
+            toolchain_bin_dir.join(&executable).exists(),
+            "Executable '{}' not found in '{}'",
+            executable,
+            toolchain_bin_dir.to_string_lossy(),
+        );
+    }
 }

@@ -21,27 +21,27 @@ use tracing::{info, warn};
 // additional info to OverrideCfg (representation of 'fuel-toolchain.toml').
 // In this case, we want the path to the toml file. More info might be
 // needed in future.
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct ToolchainOverride {
     pub cfg: OverrideCfg,
     pub path: PathBuf,
 }
 
 // Representation of the entire 'fuel-toolchain.toml'.
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct OverrideCfg {
     pub toolchain: ToolchainCfg,
     pub components: Option<HashMap<String, Version>>,
 }
 
 // Represents the [toolchain] table in 'fuel-toolchain.toml'.
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct ToolchainCfg {
     #[serde(deserialize_with = "deserialize_channel")]
     pub channel: Channel,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Channel {
     pub name: String,
     pub date: Option<Date>,

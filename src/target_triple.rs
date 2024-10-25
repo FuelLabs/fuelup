@@ -90,3 +90,70 @@ impl TargetTriple {
         }
     }
 }
+
+#[cfg(test)]
+mod test_from_component {
+    use super::*;
+    use component::{Component, Components};
+    use regex::Regex;
+
+    #[test]
+    fn forc() {
+        let component = Component::from_name("forc").unwrap();
+        let target_triple = TargetTriple::from_component(&component.name).unwrap();
+        test_target_triple(&component, &target_triple);
+    }
+
+    #[test]
+    fn publishables() {
+        for publishable in Components::collect_publishables().unwrap() {
+            let component = Component::from_name(&publishable.name).unwrap();
+            let target_triple = TargetTriple::from_component(&component.name).unwrap();
+            test_target_triple(&component, &target_triple);
+        }
+    }
+
+    #[test]
+    #[should_panic] // TODO: #654 will fix this
+    fn plugins() {
+        for plugin in Components::collect_plugins().unwrap() {
+            let component = Component::from_name(&plugin.name).unwrap();
+            let target_triple = TargetTriple::from_component(&component.name).unwrap();
+            test_target_triple(&component, &target_triple);
+        }
+    }
+
+    #[test]
+    #[should_panic] // TODO: #654 will fix this
+    fn executables() {
+        for executable in Components::collect_plugin_executables().unwrap() {
+            let components = Components::collect().unwrap();
+            let component = components
+                .component
+                .values()
+                .find(|c| c.executables.contains(&executable))
+                .unwrap();
+
+            let target_triple = TargetTriple::from_component(&component.name).unwrap();
+            test_target_triple(component, &target_triple);
+        }
+    }
+
+    fn test_target_triple(component: &Component, target_triple: &TargetTriple) {
+        let forc = Component::from_name("forc").unwrap();
+
+        let expected_triple_regex = if Component::is_in_same_distribution(&forc, component) {
+            "^(darwin|linux)_(arm64|amd64)$"
+        } else {
+            "^(aarch64|x86_64)-(apple|unknown)-(darwin|linux-gnu)$"
+        };
+
+        let expected_triple = Regex::new(expected_triple_regex).unwrap();
+        assert!(
+            expected_triple.is_match(&target_triple.0),
+            "{} has triple '{}'",
+            component.name,
+            &target_triple.0
+        );
+    }
+}

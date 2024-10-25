@@ -47,6 +47,7 @@ members = ["component", "ci/build-channel", "ci/compare-versions"]
 
 [dev-dependencies]
 chrono = "0.4.33"
+regex = "1.11"
 strip-ansi-escapes = "0.2.0"
 
 [lints.clippy]

@@ -61,6 +61,11 @@ impl Component {
             && name != FORC)
             || name == FORC_CLIENT
     }
+
+    pub fn is_in_same_distribution(forc: &Component, component: &Component) -> bool {
+        component.repository_name == forc.repository_name
+            && component.tarball_prefix == forc.tarball_prefix
+    }
 }
 
 #[derive(Debug)]
@@ -252,5 +257,108 @@ mod tests {
     #[test]
     fn test_collect_plugin_executables() {
         assert!(Components::collect_plugin_executables().is_ok());
+    }
+
+    #[test]
+    fn test_from_name_forc() {
+        let component = Component::from_name(FORC).unwrap();
+        assert_eq!(component.name, FORC, "forc is a publishable component");
+    }
+
+    #[test]
+    fn test_from_name_publishables() {
+        for publishable in Components::collect_publishables().unwrap() {
+            let component = Component::from_name(&publishable.name).unwrap();
+            assert_eq!(
+                component.name, publishable.name,
+                "{} is a publishable component",
+                publishable.name
+            );
+        }
+    }
+
+    #[test]
+    fn test_from_name_plugins() {
+        for plugin in Components::collect_plugins().unwrap() {
+            let component = Component::from_name(&plugin.name).unwrap();
+            assert_eq!(
+                component.name, plugin.name,
+                "{} is a plugin in {}",
+                plugin.name, component.name
+            );
+        }
+    }
+
+    #[test]
+    #[should_panic] // TODO: #654 will fix this
+    fn test_from_name_executables() {
+        for executable in &Components::collect_plugin_executables().unwrap() {
+            let component = Component::from_name(executable).unwrap();
+            assert!(
+                component.executables.contains(executable),
+                "{} is an executable in {}",
+                executable,
+                component.name
+            );
+        }
+    }
+
+    #[test]
+    fn test_is_distributed_by_forc_forc() {
+        assert!(
+            Components::is_distributed_by_forc("forc"),
+            "forc is distributed by forc"
+        );
+    }
+
+    #[test]
+    fn test_is_distributed_by_forc_publishables() {
+        for publishable in Components::collect_publishables().unwrap() {
+            let component = Component::from_name(&publishable.name).unwrap();
+            is_distributed_by_forc(&component);
+        }
+    }
+
+    #[test]
+    #[should_panic] // TODO: #654 will fix this
+    fn test_is_distributed_by_forc_plugins() {
+        for plugin in Components::collect_plugins().unwrap() {
+            let component = Component::from_name(&plugin.name).unwrap();
+            is_distributed_by_forc(&component);
+        }
+    }
+
+    #[test]
+    #[should_panic] // TODO: #654 will fix this
+    fn test_is_distributed_by_forc_executables() {
+        for executable in Components::collect_plugin_executables().unwrap() {
+            let components = Components::collect().unwrap();
+            let component = components
+                .component
+                .values()
+                .find(|c| c.executables.contains(&executable))
+                .unwrap();
+
+            is_distributed_by_forc(component);
+        }
+    }
+
+    fn is_distributed_by_forc(component: &Component) {
+        let forc = Component::from_name(FORC).unwrap();
+        let is_distributed = Components::is_distributed_by_forc(&component.name);
+
+        if Component::is_in_same_distribution(&forc, component) {
+            assert!(
+                is_distributed,
+                "{:?} is distributed by forc",
+                component.name
+            )
+        } else {
+            assert!(
+                !is_distributed,
+                "{:?} is not distributed by forc",
+                component.name
+            )
+        }
     }
 }

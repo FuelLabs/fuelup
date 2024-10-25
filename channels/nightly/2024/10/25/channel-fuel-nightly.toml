@@ -1,0 +1,70 @@
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/11510613746"
+date = "2024-10-25"
+
+[pkg.forc]
+version = "0.66.2+nightly.20241025.058f4e2afe"
+
+[pkg.forc.target.darwin_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241025/forc-binaries-0.66.2%2Bnightly.20241025.058f4e2afe-darwin_amd64.tar.gz"
+hash = "8f0bf5d2ae88f9af84a994a960f4c23e8837468417f9afb0aeeff1282a098982"
+
+[pkg.forc.target.darwin_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241025/forc-binaries-0.66.2%2Bnightly.20241025.058f4e2afe-darwin_arm64.tar.gz"
+hash = "f9601ba2596092bfebf96f85a748bee0ef33a073091b979982f2485ab88120ee"
+
+[pkg.forc.target.linux_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241025/forc-binaries-0.66.2%2Bnightly.20241025.058f4e2afe-linux_amd64.tar.gz"
+hash = "eaa5ee03ed17d9a2d65f14299b46db0d1e3f6af6061c87bc8d5a092c5b73d307"
+
+[pkg.forc.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241025/forc-binaries-0.66.2%2Bnightly.20241025.058f4e2afe-linux_arm64.tar.gz"
+hash = "4b7c9ca2e5c324176cbb7f6c6fb7114834b40dfd5dfb0160f51dc6ff9c70681a"
+
+[pkg.forc-wallet]
+version = "0.11.0+nightly.20241025.152bfb48c3"
+
+[pkg.forc-wallet.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241025/forc-wallet-0.11.0%2Bnightly.20241025.152bfb48c3-aarch64-apple-darwin.tar.gz"
+hash = "c6dc8295930ba2a44cd33cb7f8600cdc86490257f26d214d791484c71351f077"
+
+[pkg.forc-wallet.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241025/forc-wallet-0.11.0%2Bnightly.20241025.152bfb48c3-aarch64-unknown-linux-gnu.tar.gz"
+hash = "34e807285fd5abd6d73ad3a8e065995948859e3b0ef4028ef4480cafc490e4ac"
+
+[pkg.forc-wallet.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241025/forc-wallet-0.11.0%2Bnightly.20241025.152bfb48c3-x86_64-apple-darwin.tar.gz"
+hash = "6463ad61b7c03c43ea9c5e0861e0e0d87eabb5433aa54313777a47af97f561bf"
+
+[pkg.forc-wallet.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241025/forc-wallet-0.11.0%2Bnightly.20241025.152bfb48c3-x86_64-unknown-linux-gnu.tar.gz"
+hash = "ba3e4e3b4b93153ede234838149bc5970ec777d02866f6739043b241a876f94f"
+
+[pkg.fuel-core]
+version = "0.40.0+nightly.20241025.eea8c60525"
+
+[pkg.fuel-core.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241025/fuel-core-0.40.0%2Bnightly.20241025.eea8c60525-aarch64-apple-darwin.tar.gz"
+hash = "76441ec4a1c8ef0753f19cd7f8c18a766ad9776030a06dc01381f45ce5bbba90"
+
+[pkg.fuel-core.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241025/fuel-core-0.40.0%2Bnightly.20241025.eea8c60525-aarch64-unknown-linux-gnu.tar.gz"
+hash = "0dae6bd299caea0342a52ad1990166d5c1f95f6d4bacd131c8317fcd7edccc94"
+
+[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241025/fuel-core-0.40.0%2Bnightly.20241025.eea8c60525-x86_64-unknown-linux-gnu.tar.gz"
+hash = "90d83341d09878dc29408db0d322eff4e54438cc9a4903fdc82b9c8a4238c491"
+
+[pkg.fuel-core-keygen]
+version = "0.40.0+nightly.20241025.eea8c60525"
+
+[pkg.fuel-core-keygen.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241025/fuel-core-0.40.0%2Bnightly.20241025.eea8c60525-aarch64-apple-darwin.tar.gz"
+hash = "76441ec4a1c8ef0753f19cd7f8c18a766ad9776030a06dc01381f45ce5bbba90"
+
+[pkg.fuel-core-keygen.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241025/fuel-core-0.40.0%2Bnightly.20241025.eea8c60525-aarch64-unknown-linux-gnu.tar.gz"
+hash = "0dae6bd299caea0342a52ad1990166d5c1f95f6d4bacd131c8317fcd7edccc94"
+
+[pkg.fuel-core-keygen.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241025/fuel-core-0.40.0%2Bnightly.20241025.eea8c60525-x86_64-unknown-linux-gnu.tar.gz"
+hash = "90d83341d09878dc29408db0d322eff4e54438cc9a4903fdc82b9c8a4238c491"

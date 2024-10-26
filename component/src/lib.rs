@@ -62,9 +62,30 @@ impl Component {
             || name == FORC_CLIENT
     }
 
-    pub fn is_in_same_distribution(forc: &Component, component: &Component) -> bool {
-        component.repository_name == forc.repository_name
-            && component.tarball_prefix == forc.tarball_prefix
+    /// Tests if the supplied `Component`s come from same distribution
+    ///
+    /// # Arguments
+    ///
+    /// * `first` - The first `Component` to compare with
+    ///
+    /// * `second` - The second `Component` to compare with
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use component::Component;
+    ///
+    /// let forc = Component::from_name("forc").unwrap();
+    /// let forc_fmt = Component::from_name("forc-fmt").unwrap();
+    ///
+    /// assert!(Component::is_in_same_distribution(&forc, &forc_fmt));
+    /// ```
+    pub fn is_in_same_distribution(first: &Component, second: &Component) -> bool {
+        // Components come from the same distribution if:
+        //  - their repository names are the same, and
+        //  - their tarball prefixes are the same
+        first.repository_name == second.repository_name
+            && first.tarball_prefix == second.tarball_prefix
     }
 }
 

@@ -87,6 +87,19 @@ pub static ALL_BINS: &[&str] = &[
     "fuel-indexer",
 ];
 
+/// Returns a `String` containing yesterday's UTC date in ISO-8601 format
+///
+/// # Examples
+///
+/// ```rust
+/// use testcfg::yesterday;
+/// use regex::Regex;
+///
+/// let yesterday = yesterday();
+/// let re = Regex::new(r"20\d{2}-\d{2}-\d{2}").unwrap();
+///
+/// assert!(re.is_match(&yesterday));
+/// ```
 pub fn yesterday() -> String {
     // CI failed building linux binaries on 2024-10-25 which happens to be
     // "yesterday" when I'm trying to push this PR, so we need to override this
@@ -199,17 +212,63 @@ fn create_fuel_executable(path: &Path) -> std::io::Result<()> {
     Ok(())
 }
 
+/// Deletes the default toolchain override `Toolchain` from the test environment
+///
+/// # Arguments:
+///
+/// * `cfg` - The `TestCfg` test environment
+///
+/// # Examples
+///
+/// ```no_run
+/// use testcfg::{self, delete_default_toolchain_override_toolchain, FuelupState};
+///
+/// testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+///     delete_default_toolchain_override_toolchain(cfg);
+/// });
+/// ```
 pub fn delete_default_toolchain_override_toolchain(cfg: &TestCfg) {
     let toolchain = get_default_toolchain_override_toolchain();
     delete_toolchain(cfg, &toolchain);
 }
 
+/// Deletes the `Toolchain` from the test environment
+///
+/// # Arguments:
+///
+/// * `cfg` - The `TestCfg` test environment
+///
+/// * `toolchain` - The `Toolchain` to be deleted
+///
+/// # Examples
+///
+/// ```no_run
+/// use testcfg::{self, delete_toolchain, yesterday, FuelupState};
+/// use fuelup::toolchain::Toolchain;
+///
+/// testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+///     let toolchain = Toolchain::new(&format!("nightly-{}", yesterday())).unwrap();
+///     delete_toolchain(&cfg, &toolchain);
+/// });
+/// ```
 pub fn delete_toolchain(cfg: &TestCfg, toolchain: &Toolchain) {
     let toolchain_bin_dir = cfg.toolchain_bin_dir(toolchain.name.as_str());
     let toolchain_dir = &toolchain_bin_dir.parent().unwrap();
     std::fs::remove_dir_all(toolchain_dir).unwrap();
 }
 
+/// Returns the default toolchain override `Toolchain` for the test environment
+///
+/// # Examples
+///
+/// ```no_run
+/// use testcfg::{self, get_default_toolchain_override_toolchain, FuelupState};
+///
+/// testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+///     let toolchain = get_default_toolchain_override_toolchain();
+///     assert_eq!(toolchain.name, format!("nightly-{}", yesterday()));
+/// });
+/// ```
 pub fn get_default_toolchain_override_toolchain() -> Toolchain {
     Toolchain::new(format!("nightly-{}", yesterday()).as_str()).unwrap()
 }
@@ -259,6 +318,25 @@ pub fn setup_override_file(toolchain_override: ToolchainOverride) -> Result<()> 
     Ok(())
 }
 
+/// Creates the default toolchain override for the test environment
+///
+/// # Arguments:
+///
+/// * `cfg` - The `TestCfg` test environment
+///
+/// * `component_name` - If supplied, it will be used as a `Component` override
+///   in the "components" section of the toolchain override file. Otherwise, the
+///   "components" section will be empty.
+///
+/// # Examples
+///
+/// ```no_run
+/// use testcfg::{self, setup_default_override_file, FuelupState};
+///
+/// testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+///     setup_default_override_file(cfg, Some("forc-fmt"));
+/// });
+/// ```
 pub fn setup_default_override_file(cfg: &TestCfg, component_name: Option<&str>) {
     // TODO: "0.61.0" is a placeholder until #666 is merged. Then we can use
     // Component::resolve_from_name() to get a valid version (i.e the latest)
@@ -385,6 +463,26 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     Ok(())
 }
 
+/// Verifies all `Component` executables exist in the default toolchain override
+/// `Toolchain`'s bin directory
+///
+/// # Arguments:
+///
+/// * `cfg` - The `TestCfg` test environment
+///
+/// * `component` - The `Component` to check executables from
+///
+/// # Examples
+///
+/// ```no_run
+/// use testcfg::{self, verify_default_toolchain_override_toolchain_executables, FuelupState};
+/// use fuelup::component::Component;
+///
+/// testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+///     let component = Component::from_name("forc-fmt").unwrap();
+///     verify_default_toolchain_override_toolchain_executables(cfg, Some(&component));
+/// });
+/// ```
 pub fn verify_default_toolchain_override_toolchain_executables(
     cfg: &TestCfg,
     component: Option<&Component>,
@@ -393,6 +491,29 @@ pub fn verify_default_toolchain_override_toolchain_executables(
     verify_toolchain_executables(cfg, component, &toolchain);
 }
 
+/// Verifies all `Component` executables exist in the `Toolchain`'s bin directory
+///
+/// # Arguments:
+///
+/// * `cfg` - The `TestCfg` test environment
+///
+/// * `component` - The `Component` to check executables from
+///
+/// * `toolchain` - The `Toolchain` to check executables files exist in
+///
+/// # Examples
+///
+/// ```no_run
+/// use testcfg::{self, verify_toolchain_executables, yesterday, FuelupState};
+/// use fuelup::component::Component;
+/// use fuelup::toolchain::Toolchain;
+///
+/// testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+///     let component = Component::from_name("forc-fmt").unwrap();
+///     let toolchain = Toolchain::new(&format!("nightly-{}", yesterday())).unwrap();
+///     verify_toolchain_executables(cfg, Some(&component), &toolchain);
+/// });
+/// ```
 pub fn verify_toolchain_executables(
     cfg: &TestCfg,
     component: Option<&Component>,

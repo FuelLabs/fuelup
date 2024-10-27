@@ -385,16 +385,19 @@ impl Toolchain {
                 let store = Store::from_env()?;
                 for cfg in channel.build_download_configs() {
                     if store.has_component(&cfg.name, &cfg.version) {
-                        hard_or_symlink_file(
-                            &store
-                                .component_dir_path(&cfg.name, &cfg.version)
-                                .join(&cfg.name),
-                            &self.bin_path.join(&cfg.name),
-                        )?;
+                        self.add_component(cfg)?;
                     } else {
                         let downloaded = store.install_component(&cfg)?;
                         for bin in downloaded {
-                            hard_or_symlink_file(&bin, &self.bin_path.join(&cfg.name))?;
+                            // Use the actual binary filename rather than the
+                            // config name to prevent multiple binaries from
+                            // being linked to the same target file.
+                            match bin.file_name() {
+                                None => bail!("Failed to read file '{bin:?}' from download"),
+                                Some(executable) => {
+                                    hard_or_symlink_file(&bin, &self.bin_path.join(executable))?
+                                }
+                            }
                         }
                     }
                 }

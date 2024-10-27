@@ -181,13 +181,11 @@ fn direct_proxy_install_toolchain_in_store_publishable() {
 }
 
 #[test]
-#[should_panic] // TODO: #654 will fix this
 fn direct_proxy_install_toolchain_in_store_forc_plugin() {
     test_direct_proxy_install_toolchain_in_store(Some("forc-client"));
 }
 
 #[test]
-#[should_panic] // TODO: #654 will fix this
 fn direct_proxy_install_toolchain_in_store_forc_plugin_external() {
     test_direct_proxy_install_toolchain_in_store(Some("forc-tx"));
 }
@@ -208,13 +206,11 @@ fn direct_proxy_install_toolchain_not_in_store_publishable() {
 }
 
 #[test]
-#[should_panic] // TODO: #654 will fix this
 fn direct_proxy_install_toolchain_not_in_store_forc_plugin() {
     test_direct_proxy_install_toolchain_not_in_store(Some("forc-client"));
 }
 
 #[test]
-#[should_panic] // TODO: #654 will fix this
 fn direct_proxy_install_toolchain_not_in_store_forc_plugin_external() {
     test_direct_proxy_install_toolchain_not_in_store(Some("forc-tx"));
 }

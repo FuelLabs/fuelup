@@ -2,16 +2,10 @@ mod expects;
 pub mod testcfg;
 
 use anyhow::Result;
-use chrono::{Duration, Utc};
+use component::{Component, FORC};
 use expects::expect_files_exist;
 use fuelup::{channel, fmt::format_toolchain_with_target, target_triple::TargetTriple};
-use testcfg::{FuelupState, ALL_BINS, CUSTOM_TOOLCHAIN_NAME, DATE};
-
-fn yesterday() -> String {
-    let current_date = Utc::now();
-    let yesterday = current_date - Duration::days(1);
-    yesterday.format("%Y-%m-%d").to_string()
-}
+use testcfg::{yesterday, FuelupState, ALL_BINS, CUSTOM_TOOLCHAIN_NAME, DATE};
 
 #[test]
 fn fuelup_toolchain_install_latest() -> Result<()> {
@@ -174,4 +168,116 @@ fn fuelup_toolchain_new_disallowed_with_target() -> Result<()> {
         assert_eq!(output.stderr, expected_stderr);
     })?;
     Ok(())
+}
+
+#[test]
+fn direct_proxy_install_toolchain_in_store_forc() {
+    test_direct_proxy_install_toolchain_in_store(None);
+}
+
+#[test]
+fn direct_proxy_install_toolchain_in_store_publishable() {
+    test_direct_proxy_install_toolchain_in_store(Some("fuel-core"));
+}
+
+#[test]
+#[should_panic] // TODO: #654 will fix this
+fn direct_proxy_install_toolchain_in_store_forc_plugin() {
+    test_direct_proxy_install_toolchain_in_store(Some("forc-client"));
+}
+
+#[test]
+#[should_panic] // TODO: #654 will fix this
+fn direct_proxy_install_toolchain_in_store_forc_plugin_external() {
+    test_direct_proxy_install_toolchain_in_store(Some("forc-tx"));
+}
+
+#[test]
+fn direct_proxy_install_toolchain_in_store_not_forc_plugin() {
+    test_direct_proxy_install_toolchain_in_store(Some("forc-wallet"));
+}
+
+#[test]
+fn direct_proxy_install_toolchain_not_in_store_forc() {
+    test_direct_proxy_install_toolchain_not_in_store(None);
+}
+
+#[test]
+fn direct_proxy_install_toolchain_not_in_store_publishable() {
+    test_direct_proxy_install_toolchain_not_in_store(Some("fuel-core"));
+}
+
+#[test]
+#[should_panic] // TODO: #654 will fix this
+fn direct_proxy_install_toolchain_not_in_store_forc_plugin() {
+    test_direct_proxy_install_toolchain_not_in_store(Some("forc-client"));
+}
+
+#[test]
+#[should_panic] // TODO: #654 will fix this
+fn direct_proxy_install_toolchain_not_in_store_forc_plugin_external() {
+    test_direct_proxy_install_toolchain_not_in_store(Some("forc-tx"));
+}
+
+#[test]
+fn direct_proxy_install_toolchain_not_in_store_not_forc_plugin() {
+    test_direct_proxy_install_toolchain_not_in_store(Some("forc-wallet"));
+}
+
+fn test_direct_proxy_install_toolchain_in_store(component_name: Option<&str>) {
+    // Test steps:
+    //   - trigger direct proxy call
+    //     - install override toolchain
+    //   - delete toolchain but keep it in store
+    //   - trigger another direct proxy call
+    //     - install override toolchain from store
+    //   - check executables are symlinked from the store
+
+    let component = component_name.map(|name| Component::from_name(name).unwrap());
+
+    testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+        testcfg::setup_default_override_file(cfg, component_name);
+
+        // trigger direct_proxy install with toolchain override
+        let executable = component
+            .as_ref()
+            .map(|c| c.executables.first().unwrap().clone())
+            .unwrap_or_else(|| FORC.to_string());
+
+        // trigger direct_proxy install with toolchain override
+        cfg.exec(&executable, &["--version"]);
+
+        // delete toolchain but keep it in store
+        testcfg::delete_default_toolchain_override_toolchain(cfg);
+
+        // trigger direct_proxy install with toolchain override already in store
+        cfg.exec(&executable, &["--version"]);
+
+        testcfg::verify_default_toolchain_override_toolchain_executables(cfg, component.as_ref());
+    })
+    .unwrap();
+}
+
+fn test_direct_proxy_install_toolchain_not_in_store(component_name: Option<&str>) {
+    // Test steps:
+    //   - trigger direct proxy call
+    //     - install override toolchain
+    //   - check executables are symlinked from the store
+
+    let component = component_name.map(|name| Component::from_name(name).unwrap());
+
+    testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+        testcfg::setup_default_override_file(cfg, component_name);
+
+        // trigger direct_proxy install with toolchain override
+        let executable = component
+            .as_ref()
+            .map(|c| c.executables.first().unwrap().clone())
+            .unwrap_or_else(|| FORC.to_string());
+
+        cfg.exec(&executable, &["--version"]);
+
+        testcfg::verify_default_toolchain_override_toolchain_executables(cfg, component.as_ref());
+    })
+    .unwrap();
 }

@@ -53,6 +53,34 @@ impl Component {
             .cloned()
     }
 
+    /// Returns a `Component` from the supplied `Component` name, plugin, or executable
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The name of the component, plugin, or executable
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use component::Component;
+    ///
+    /// let forc = Component::resolve_from_name("forc").unwrap();
+    /// let publishable = Component::resolve_from_name("fuel-core").unwrap();
+    /// let plugin = Component::resolve_from_name("forc-fmt").unwrap();
+    /// let executable = Component::resolve_from_name("forc-run").unwrap();
+    /// ```
+    pub fn resolve_from_name(name: &str) -> Option<Component> {
+        Components::collect().ok().and_then(|components| {
+            components.component.get(name).cloned().or_else(|| {
+                components
+                    .component
+                    .values()
+                    .find(|comp| comp.executables.contains(&name.to_string()))
+                    .cloned()
+            })
+        })
+    }
+
     pub fn is_default_forc_plugin(name: &str) -> bool {
         (Self::from_name(FORC)
             .expect("there must always be a `forc` component")
@@ -213,12 +241,34 @@ impl Components {
         Ok(executables)
     }
 
-    pub fn is_distributed_by_forc(plugin_name: &str) -> bool {
-        let components = Self::from_toml(COMPONENTS_TOML).expect("Failed to parse components toml");
-        if let Some(forc) = components.component.get(FORC) {
-            return forc.executables.contains(&plugin_name.to_string());
-        };
-        false
+    /// Tests if the supplied `Component` name, plugin, or executable is
+    /// distributed by forc
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The name of the `Component`, plugin, or executable
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use component::Components;
+    ///
+    /// assert!(Components::is_distributed_by_forc("forc"));
+    /// assert!(!Components::is_distributed_by_forc("fuel-core"));
+    /// assert!(Components::is_distributed_by_forc("forc-fmt"));
+    /// assert!(Components::is_distributed_by_forc("forc-run"));
+    /// ```
+    pub fn is_distributed_by_forc(name: &str) -> bool {
+        match name {
+            FORC => true,
+            _ => Component::from_name(FORC)
+                .ok()
+                .and_then(|forc| {
+                    Component::resolve_from_name(name)
+                        .map(|component| Component::is_in_same_distribution(&forc, &component))
+                })
+                .unwrap_or(false),
+        }
     }
 }
 
@@ -311,7 +361,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic] // TODO: #654 will fix this
+    #[should_panic] // This will fail as long as some executables are not plugins
     fn test_from_name_executables() {
         for executable in &Components::collect_plugin_executables().unwrap() {
             let component = Component::from_name(executable).unwrap();
@@ -322,6 +372,55 @@ mod tests {
                 component.name
             );
         }
+    }
+
+    #[test]
+    fn test_resolve_from_name_forc() {
+        let component = Component::resolve_from_name(FORC).unwrap();
+        assert_eq!(component.name, FORC, "forc is a publishable component");
+    }
+
+    #[test]
+    fn test_resolve_from_name_publishable() {
+        for publishable in Components::collect_publishables().unwrap() {
+            let component = Component::resolve_from_name(&publishable.name).unwrap();
+            assert_eq!(component.name, publishable.name);
+        }
+    }
+
+    #[test]
+    fn test_resolve_from_name_plugin() {
+        for plugin in Components::collect_plugins().unwrap() {
+            let component = Component::resolve_from_name(&plugin.name).unwrap();
+            assert_eq!(component.name, plugin.name);
+        }
+    }
+
+    #[test]
+    fn test_resolve_from_name_from_executable() {
+        let executables = Components::collect_plugin_executables().unwrap();
+
+        for executable in &executables {
+            let component = Component::resolve_from_name(executable).unwrap();
+
+            if component.executables.len() == 1 {
+                assert_eq!(component.name, *executable);
+            } else {
+                assert!(component.executables.contains(executable));
+            }
+        }
+    }
+
+    #[test]
+    fn test_resolve_from_name_nonexistent() {
+        assert!(Component::resolve_from_name("nonexistent-component").is_none());
+    }
+
+    #[test]
+    fn test_resolve_from_name_case_sensitivity() {
+        let original = Component::resolve_from_name("forc");
+        let uppercase = Component::resolve_from_name("FORC");
+        assert_ne!(original, uppercase);
     }
 
     #[test]
@@ -341,7 +440,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic] // TODO: #654 will fix this
     fn test_is_distributed_by_forc_plugins() {
         for plugin in Components::collect_plugins().unwrap() {
             let component = Component::from_name(&plugin.name).unwrap();
@@ -350,7 +448,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic] // TODO: #654 will fix this
     fn test_is_distributed_by_forc_executables() {
         for executable in Components::collect_plugin_executables().unwrap() {
             let components = Components::collect().unwrap();

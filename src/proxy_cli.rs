@@ -6,7 +6,7 @@ use crate::{
     toolchain_override::ToolchainOverride,
 };
 use anyhow::Result;
-use component::Components;
+use component::{Component, Components};
 use std::{
     env,
     ffi::OsString,
@@ -46,31 +46,35 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
             // Install the entire toolchain declared in [toolchain] if it does not exist.
             toolchain.install_if_nonexistent(&description)?;
 
-            // Plugins distributed by forc have to be handled a little differently,
-            // if one of them is called we want to check for 'forc' instead.
-            let component_name = if Components::is_distributed_by_forc(proc_name) {
-                component::FORC
-            } else {
-                proc_name
-            };
+            // If a specific version is declared, we want to call it from the
+            // store and not from the toolchain directory.
+            if let Some(version) = to.get_component_version(proc_name) {
+                let component = match Component::resolve_from_name(proc_name) {
+                    Some(component) => component,
+                    None => {
+                        return Err(Error::new(
+                            ErrorKind::NotFound,
+                            format!("Component '{proc_name}' with version '{version}' not found"),
+                        )
+                        .into());
+                    }
+                };
 
-            // If a specific version is declared, we want to call it from the store and not from the toolchain directory.
-            if let Some(version) = to.get_component_version(component_name) {
                 let store = Store::from_env()?;
 
-                if !store.has_component(component_name, version) {
+                if !store.has_component(&component.name, version) {
                     let download_cfg = DownloadCfg::new(
-                        component_name,
-                        TargetTriple::from_component(component_name)?,
+                        &component.name,
+                        TargetTriple::from_component(&component.name)?,
                         Some(version.clone()),
                     )?;
                     // Install components within [components] that are declared but missing from the store.
                     store.install_component(&download_cfg)?;
-                };
+                }
 
                 (
                     store
-                        .component_dir_path(component_name, version)
+                        .component_dir_path(&component.name, version)
                         .join(proc_name),
                     description.to_string(),
                 )
@@ -94,7 +98,7 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
             ErrorKind::NotFound => Err(Error::new(
                 ErrorKind::NotFound,
                 format!(
-                    "component '{proc_name}' not found in currently active toolchain '{toolchain_name}'"
+                    "Component '{proc_name}' not found in currently active toolchain '{toolchain_name}'"
                 ),
             )),
             _ => Err(error),

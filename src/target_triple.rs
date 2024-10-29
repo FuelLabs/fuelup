@@ -1,5 +1,5 @@
 use anyhow::{bail, Result};
-use component::{self, Component};
+use component::{self, Components};
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
@@ -52,41 +52,59 @@ impl TargetTriple {
         Ok(Self(target_triple))
     }
 
-    pub fn from_component(component: &str) -> Result<Self> {
-        match Component::from_name(component).map(|c| c.name)?.as_str() {
-            component::FORC => {
-                let os = match std::env::consts::OS {
-                    "macos" => "darwin",
-                    "linux" => "linux",
-                    unsupported_os => bail!("Unsupported os: {}", unsupported_os),
-                };
-                let architecture = match std::env::consts::ARCH {
-                    "aarch64" => "arm64",
-                    "x86_64" => "amd64",
-                    unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
-                };
+    /// Returns a target triple from the supplied `Component` name, plugin, or executable
+    ///
+    /// Target triples come in two forms:
+    ///
+    /// 1. Components distributed by `forc` have the value "[darwin|linux]_[arm64|amd64]"
+    /// 2. All other components have the value "[aarch64|x86_64]-[apple|unknown]-[darwin|linux-gnu]"
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The name of the component, plugin, or executable.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use component::Component;
+    /// use fuelup::target_triple::TargetTriple;
+    ///
+    /// let component = Component::from_name("forc").unwrap();
+    /// let target_triple = TargetTriple::from_component(&component.name);
+    /// println!("Target triple for 'forc' is: {}", target_triple.unwrap());
+    /// ```
+    pub fn from_component(name: &str) -> Result<Self> {
+        if Components::is_distributed_by_forc(name) {
+            let os = match std::env::consts::OS {
+                "macos" => "darwin",
+                "linux" => "linux",
+                unsupported_os => bail!("Unsupported os: {}", unsupported_os),
+            };
+            let architecture = match std::env::consts::ARCH {
+                "aarch64" => "arm64",
+                "x86_64" => "amd64",
+                unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
+            };
 
-                Ok(Self(format!("{os}_{architecture}")))
-            }
-            _ => {
-                let architecture = match std::env::consts::ARCH {
-                    "aarch64" | "x86_64" => std::env::consts::ARCH,
-                    unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
-                };
+            Ok(Self(format!("{os}_{architecture}")))
+        } else {
+            let architecture = match std::env::consts::ARCH {
+                "aarch64" | "x86_64" => std::env::consts::ARCH,
+                unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
+            };
 
-                let vendor = match std::env::consts::OS {
-                    "macos" => "apple",
-                    _ => "unknown",
-                };
+            let vendor = match std::env::consts::OS {
+                "macos" => "apple",
+                _ => "unknown",
+            };
 
-                let os = match std::env::consts::OS {
-                    "macos" => "darwin",
-                    "linux" => "linux-gnu",
-                    unsupported_os => bail!("Unsupported os: {}", unsupported_os),
-                };
+            let os = match std::env::consts::OS {
+                "macos" => "darwin",
+                "linux" => "linux-gnu",
+                unsupported_os => bail!("Unsupported os: {}", unsupported_os),
+            };
 
-                Ok(Self(format!("{architecture}-{vendor}-{os}")))
-            }
+            Ok(Self(format!("{architecture}-{vendor}-{os}")))
         }
     }
 }
@@ -114,7 +132,6 @@ mod test_from_component {
     }
 
     #[test]
-    #[should_panic] // TODO: #654 will fix this
     fn plugins() {
         for plugin in Components::collect_plugins().unwrap() {
             let component = Component::from_name(&plugin.name).unwrap();
@@ -124,7 +141,6 @@ mod test_from_component {
     }
 
     #[test]
-    #[should_panic] // TODO: #654 will fix this
     fn executables() {
         for executable in Components::collect_plugin_executables().unwrap() {
             let components = Components::collect().unwrap();

@@ -1,4 +1,4 @@
-date = "2024-10-15"
+date = "2024-10-30"
 
 [pkg.forc]
 version = "0.66.2"
@@ -20,23 +20,23 @@ url = "https://github.com/FuelLabs/sway/releases/download/v0.66.2/forc-binaries-
 hash = "c582825ce72385680912bb0ae2626794e66772a74ad6cf061eb5c56e328b16ab"
 
 [pkg.forc-wallet]
-version = "0.11.0"
+version = "0.11.1"
 
 [pkg.forc-wallet.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.11.0/forc-wallet-0.11.0-aarch64-unknown-linux-gnu.tar.gz"
-hash = "27dd5dd6730c67a59d8c89fc0cb80b61dc59cabd2a9ec60c84c6a11f48376142"
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.11.1/forc-wallet-0.11.1-aarch64-unknown-linux-gnu.tar.gz"
+hash = "502e17d29b715f35e1eebd447094baa49ed05544fc2e5c15cb9fb8e1f30ff48d"
 
 [pkg.forc-wallet.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.11.0/forc-wallet-0.11.0-x86_64-unknown-linux-gnu.tar.gz"
-hash = "8f9f1b1ed855ba5f8d43cfdb46506d52ca2a3cf8aaa8e7f7d97255e529efbce8"
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.11.1/forc-wallet-0.11.1-x86_64-unknown-linux-gnu.tar.gz"
+hash = "c2c752f13499c5dc1f8024dd2991a168a5af091660a46194466705ed9cdb98cc"
 
 [pkg.forc-wallet.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.11.0/forc-wallet-0.11.0-aarch64-apple-darwin.tar.gz"
-hash = "68122fd459d654213f7a34871b3508c9f14705572f081cee150dc50ed3402e60"
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.11.1/forc-wallet-0.11.1-aarch64-apple-darwin.tar.gz"
+hash = "77ce3f7e56dc2e1d63213f5c41aeb644198f705b37fccfa95c0c8e60d2c7d52c"
 
 [pkg.forc-wallet.target.x86_64-apple-darwin]
-url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.11.0/forc-wallet-0.11.0-x86_64-apple-darwin.tar.gz"
-hash = "9c0a3dad2dd9727392e0953c15b28206b047dc529bb9ee85fa4fa0578d51bb02"
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.11.1/forc-wallet-0.11.1-x86_64-apple-darwin.tar.gz"
+hash = "2f1bf20157b8fcac3343472fd093f11ee9135d4619abe2bb7a3ebdb88e7ddf22"
 
 [pkg.fuel-core]
 version = "0.40.0"

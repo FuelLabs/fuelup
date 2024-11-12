@@ -1,58 +1,50 @@
-published_by = "https://github.com/FuelLabs/fuelup/actions/runs/11770808660"
-date = "2024-11-11"
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/11789385597"
+date = "2024-11-12"
 
 [pkg.forc]
-version = "0.66.4+nightly.20241111.f933f557e4"
+version = "0.66.4+nightly.20241112.f933f557e4"
 
 [pkg.forc.target.darwin_amd64]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241111/forc-binaries-0.66.4%2Bnightly.20241111.f933f557e4-darwin_amd64.tar.gz"
-hash = "98a9ecdfafbfd70451dd6e5d06ed7a3aa62daa6d9ecd019909d61b18bb3b445e"
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241112/forc-binaries-0.66.4%2Bnightly.20241112.f933f557e4-darwin_amd64.tar.gz"
+hash = "e7837386c21880ae0c22092e25328314f728464a85cda65c9099e009943dbf28"
 
 [pkg.forc-wallet]
-version = "0.11.1+nightly.20241111.f4052012e0"
+version = "0.11.1+nightly.20241112.f4052012e0"
 
 [pkg.forc-wallet.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241111/forc-wallet-0.11.1%2Bnightly.20241111.f4052012e0-aarch64-apple-darwin.tar.gz"
-hash = "f687988a45951faa306fffa41ba7dfb83988dcb9f7173f8a1357a507de4e0bce"
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241112/forc-wallet-0.11.1%2Bnightly.20241112.f4052012e0-aarch64-apple-darwin.tar.gz"
+hash = "6b5b6eeb108d6b3d80a56e866581672c7fb05edcac8505dcff3dad0c299506ae"
 
 [pkg.forc-wallet.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241111/forc-wallet-0.11.1%2Bnightly.20241111.f4052012e0-aarch64-unknown-linux-gnu.tar.gz"
-hash = "0ac0dc1e207e4583802191b7d5b6b0a5f92b4a8f110be3a0f8c37fcb7cbfae3d"
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241112/forc-wallet-0.11.1%2Bnightly.20241112.f4052012e0-aarch64-unknown-linux-gnu.tar.gz"
+hash = "569f5635697000eccda8d5b0567baa3d8bae7a46bdfe25072bc74bc2586b01d8"
 
 [pkg.forc-wallet.target.x86_64-apple-darwin]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241111/forc-wallet-0.11.1%2Bnightly.20241111.f4052012e0-x86_64-apple-darwin.tar.gz"
-hash = "7d8941093b04371b857b97b7cb871f5f8df8c87962fd63ebf3eac32f9df3420a"
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241112/forc-wallet-0.11.1%2Bnightly.20241112.f4052012e0-x86_64-apple-darwin.tar.gz"
+hash = "97aabae18da1d806a0692f6419356738e653a17b246662ef4f41f16dc134379b"
 
 [pkg.forc-wallet.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241111/forc-wallet-0.11.1%2Bnightly.20241111.f4052012e0-x86_64-unknown-linux-gnu.tar.gz"
-hash = "844bda4a9f1825aeb002bc5a2e02ffd6a03e30c3586eb5c19511c75b22ca2555"
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241112/forc-wallet-0.11.1%2Bnightly.20241112.f4052012e0-x86_64-unknown-linux-gnu.tar.gz"
+hash = "347fff8bcd62df7c667d07be01d12c04ecd400a0b5fdf23aa2cf209f8626e9cf"
 
 [pkg.fuel-core]
-version = "0.40.0+nightly.20241111.676ca8f683"
+version = "0.40.0+nightly.20241112.676ca8f683"
 
 [pkg.fuel-core.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241111/fuel-core-0.40.0%2Bnightly.20241111.676ca8f683-aarch64-apple-darwin.tar.gz"
-hash = "e1ea65c0f769e8db2073e95217cdccae1c9d9bec4312101b68b5094b30ba693f"
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241112/fuel-core-0.40.0%2Bnightly.20241112.676ca8f683-aarch64-apple-darwin.tar.gz"
+hash = "a803d42f9fd774d9e050fd2cc4caf2b49781bd20bb822d056339fdcb0130b355"
 
 [pkg.fuel-core.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241111/fuel-core-0.40.0%2Bnightly.20241111.676ca8f683-aarch64-unknown-linux-gnu.tar.gz"
-hash = "e73c7956572a13095d910a5f761b5a0fc8a9faadc13975759622c7d8804d62fa"
-
-[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241111/fuel-core-0.40.0%2Bnightly.20241111.676ca8f683-x86_64-unknown-linux-gnu.tar.gz"
-hash = "8ab055dc3ebede67a104493a8763c71e6e3045769bca1c8feef51145d7f71940"
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241112/fuel-core-0.40.0%2Bnightly.20241112.676ca8f683-aarch64-unknown-linux-gnu.tar.gz"
+hash = "ef67d347004869307e3c218b6fed37d765e31a7eb359c8ddbccf0f1d6c039125"
 
 [pkg.fuel-core-keygen]
-version = "0.40.0+nightly.20241111.676ca8f683"
+version = "0.40.0+nightly.20241112.676ca8f683"
 
 [pkg.fuel-core-keygen.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241111/fuel-core-0.40.0%2Bnightly.20241111.676ca8f683-aarch64-apple-darwin.tar.gz"
-hash = "e1ea65c0f769e8db2073e95217cdccae1c9d9bec4312101b68b5094b30ba693f"
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241112/fuel-core-0.40.0%2Bnightly.20241112.676ca8f683-aarch64-apple-darwin.tar.gz"
+hash = "a803d42f9fd774d9e050fd2cc4caf2b49781bd20bb822d056339fdcb0130b355"
 
 [pkg.fuel-core-keygen.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241111/fuel-core-0.40.0%2Bnightly.20241111.676ca8f683-aarch64-unknown-linux-gnu.tar.gz"
-hash = "e73c7956572a13095d910a5f761b5a0fc8a9faadc13975759622c7d8804d62fa"
-
-[pkg.fuel-core-keygen.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241111/fuel-core-0.40.0%2Bnightly.20241111.676ca8f683-x86_64-unknown-linux-gnu.tar.gz"
-hash = "8ab055dc3ebede67a104493a8763c71e6e3045769bca1c8feef51145d7f71940"
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241112/fuel-core-0.40.0%2Bnightly.20241112.676ca8f683-aarch64-unknown-linux-gnu.tar.gz"
+hash = "ef67d347004869307e3c218b6fed37d765e31a7eb359c8ddbccf0f1d6c039125"

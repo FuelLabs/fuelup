@@ -1,0 +1,66 @@
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/11809270139"
+date = "2024-11-13"
+
+[pkg.forc-wallet]
+version = "0.11.1+nightly.20241113.f4052012e0"
+
+[pkg.forc-wallet.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241113/forc-wallet-0.11.1%2Bnightly.20241113.f4052012e0-aarch64-apple-darwin.tar.gz"
+hash = "4d90dd0bea0ed8b0db2d328863eee874f00ed11ee3b2c7e7ded8459be953d42f"
+
+[pkg.forc-wallet.target.x86_64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241113/forc-wallet-0.11.1%2Bnightly.20241113.f4052012e0-x86_64-apple-darwin.tar.gz"
+hash = "5e6a93e9b7eb24613bef609b84f030956104ffa4058f4b4efed26fd29fd9393f"
+
+[pkg.forc-wallet.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241113/forc-wallet-0.11.1%2Bnightly.20241113.f4052012e0-aarch64-unknown-linux-gnu.tar.gz"
+hash = "b86b776b9578fe22916c0214875800746ac7b5c3bda654d65e29ae9222919f38"
+
+[pkg.forc-wallet.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241113/forc-wallet-0.11.1%2Bnightly.20241113.f4052012e0-x86_64-unknown-linux-gnu.tar.gz"
+hash = "b46001669f1aad1f27765f82aa11aafd27bdd5293e3625cf74f3fd0086b1a0f8"
+
+[pkg.forc]
+version = "0.66.4+nightly.20241113.ae9f172005"
+
+[pkg.forc.target.darwin_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241113/forc-binaries-0.66.4%2Bnightly.20241113.ae9f172005-darwin_arm64.tar.gz"
+hash = "64282559be86688a0d29f4efb2574ec1c8d81d2774a71ab46a6240f423b65cb6"
+
+[pkg.forc.target.linux_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241113/forc-binaries-0.66.4%2Bnightly.20241113.ae9f172005-linux_amd64.tar.gz"
+hash = "fd4a0260bacc8693e4bbeb6fd411757a848f1169f2b63574b1df15c2853fea4c"
+
+[pkg.forc.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241113/forc-binaries-0.66.4%2Bnightly.20241113.ae9f172005-linux_arm64.tar.gz"
+hash = "d4de9856172af45e5f887c8bdea93976ddad67a9810c7b7582125bcc30617dae"
+
+[pkg.fuel-core]
+version = "0.40.0+nightly.20241113.676ca8f683"
+
+[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241113/fuel-core-0.40.0%2Bnightly.20241113.676ca8f683-x86_64-unknown-linux-gnu.tar.gz"
+hash = "e84c53c4257faa58dfbc465884e2c9d73bb67fe1b57bf5daf3687ce358b71f09"
+
+[pkg.fuel-core.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241113/fuel-core-0.40.0%2Bnightly.20241113.676ca8f683-aarch64-unknown-linux-gnu.tar.gz"
+hash = "684f58e807941cef3f19b13da66acb66a5f119d2380f719962cb613b1c168c91"
+
+[pkg.fuel-core.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241113/fuel-core-0.40.0%2Bnightly.20241113.676ca8f683-aarch64-apple-darwin.tar.gz"
+hash = "20f94c38d29dff82babde8244b02e66ed6943bdfa65da1988590d1595ce8ac17"
+
+[pkg.fuel-core-keygen]
+version = "0.40.0+nightly.20241113.676ca8f683"
+
+[pkg.fuel-core-keygen.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241113/fuel-core-0.40.0%2Bnightly.20241113.676ca8f683-x86_64-unknown-linux-gnu.tar.gz"
+hash = "e84c53c4257faa58dfbc465884e2c9d73bb67fe1b57bf5daf3687ce358b71f09"
+
+[pkg.fuel-core-keygen.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241113/fuel-core-0.40.0%2Bnightly.20241113.676ca8f683-aarch64-unknown-linux-gnu.tar.gz"
+hash = "684f58e807941cef3f19b13da66acb66a5f119d2380f719962cb613b1c168c91"
+
+[pkg.fuel-core-keygen.target.aarch64-apple-darwin]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20241113/fuel-core-0.40.0%2Bnightly.20241113.676ca8f683-aarch64-apple-darwin.tar.gz"
+hash = "20f94c38d29dff82babde8244b02e66ed6943bdfa65da1988590d1595ce8ac17"

@@ -254,14 +254,12 @@ jobs:
           tar -czvf $ZIP_FILE_NAME "$ARTIFACT"
 
       - name: Upload release archive
-        uses: actions/upload-release-asset@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./${{ env.ZIP_FILE_NAME }}
-          asset_name: ${{ env.ZIP_FILE_NAME }}
-          asset_content_type: application/gzipa
+          files:
+            ${{ env.ZIP_FILE_NAME }}
 
   post-release-checks:
     name: Do post-release checks

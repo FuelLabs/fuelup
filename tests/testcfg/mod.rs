@@ -80,6 +80,7 @@ pub static ALL_BINS: &[&str] = &[
     "forc-index",
     "forc-lsp",
     "forc-run",
+    "forc-submit",
     "forc-tx",
     "forc-wallet",
     "fuel-core",

@@ -102,15 +102,11 @@ pub static ALL_BINS: &[&str] = &[
 /// assert!(re.is_match(&yesterday));
 /// ```
 pub fn yesterday() -> String {
-    // CI failed building linux binaries on 2024-10-25 which happens to be
-    // "yesterday" when I'm trying to push this PR, so we need to override this
-    // temporarily to pass CI over the weekend. I'll be merging on top of this
-    // PR in the next few days and will remove this temporary fix
-
     let current_date = Utc::now();
     let yesterday = current_date - Duration::days(1);
     let _ = yesterday.format("%Y-%m-%d").to_string();
-    "2024-10-23".to_string()
+    // TODO: point to a nightly that has `forc-submit`
+    "2024-11-16".to_string()
 }
 
 impl TestCfg {

@@ -43,6 +43,7 @@ forc-crypto --version
 forc-debug --version
 forc-lsp --version
 forc-run --version
+forc-submit --version
 ```
 
 [repository]: https://github.com/FuelLabs/fuelup

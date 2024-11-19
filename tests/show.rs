@@ -36,6 +36,7 @@ fn fuelup_show_latest() -> Result<()> {
                 - forc-client
                   - forc-deploy : 0.1.0
                   - forc-run : 0.1.0
+                  - forc-submit : 0.1.0
                 - forc-crypto : 0.1.0
                 - forc-debug : 0.1.0
                 - forc-doc : 0.1.0
@@ -78,6 +79,7 @@ fn fuelup_show_and_switch() -> Result<()> {
                 - forc-client
                   - forc-deploy : 0.1.0
                   - forc-run : 0.1.0
+                  - forc-submit : 0.1.0
                 - forc-crypto : 0.1.0
                 - forc-debug : 0.1.0
                 - forc-doc : 0.1.0
@@ -113,6 +115,7 @@ fn fuelup_show_and_switch() -> Result<()> {
                 - forc-client
                   - forc-deploy : 0.2.0
                   - forc-run : 0.2.0
+                  - forc-submit : 0.2.0
                 - forc-crypto : 0.2.0
                 - forc-debug : 0.2.0
                 - forc-doc : 0.2.0
@@ -154,6 +157,7 @@ fn fuelup_show_custom() -> Result<()> {
                 - forc-client
                   - forc-deploy : not found
                   - forc-run : not found
+                  - forc-submit : not found
                 - forc-crypto : not found
                 - forc-debug : not found
                 - forc-doc : not found
@@ -193,6 +197,7 @@ fn fuelup_show_override() -> Result<()> {
                 - forc-client
                   - forc-deploy : not found
                   - forc-run : not found
+                  - forc-submit : not found
                 - forc-crypto : not found
                 - forc-debug : not found
                 - forc-doc : not found
@@ -235,6 +240,7 @@ fn fuelup_show_latest_then_override() -> Result<()> {
                 - forc-client
                   - forc-deploy : 0.1.0
                   - forc-run : 0.1.0
+                  - forc-submit : 0.1.0
                 - forc-crypto : 0.1.0
                 - forc-debug : 0.1.0
                 - forc-doc : 0.1.0
@@ -283,6 +289,7 @@ fn fuelup_show_latest_then_override() -> Result<()> {
                 - forc-client
                   - forc-deploy : 0.2.0
                   - forc-run : 0.2.0
+                  - forc-submit : 0.2.0
                 - forc-crypto : 0.2.0
                 - forc-debug : 0.2.0
                 - forc-doc : 0.2.0

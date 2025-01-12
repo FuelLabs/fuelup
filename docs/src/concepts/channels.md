@@ -16,12 +16,8 @@
 
 <!-- This section should give an overview of the latest channel -->
 <!-- latest:example:start -->
-The `latest` channel is pointing to our latest beta network. This toolchain should be used to interact with and build on the latest testnet. This is also the default channel for `fuelup`.
+The `latest` channel is pointing to our mainnet network. This toolchain should be used to interact with and build on mainnet. This is also the default channel for `fuelup`.
 <!-- latest:example:end -->
-
-> **Note**
->
-> The `latest` channel is used to point latest compatible versions of `forc` and `fuel-core`, after version v0.20.0 latest is changed to point to the latest network. This is a breaking change and should be taken into account for existing workflows.
 
 ## The `nightly` channel
 

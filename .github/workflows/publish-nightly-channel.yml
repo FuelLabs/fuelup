@@ -41,7 +41,7 @@ jobs:
       - name: Deploy nightly channel (latest version)
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.REPO_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
           keep_files: true
           destination_dir: ./
@@ -51,7 +51,7 @@ jobs:
       - name: Deploy nightly channel (archive)
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.REPO_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
           keep_files: true
           destination_dir: ${{ steps.setup.outputs.archive_dir }}

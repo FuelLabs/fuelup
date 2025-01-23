@@ -13,6 +13,7 @@ jobs:
   publish-channel:
     name: Publish channel (nightly)
     runs-on: ubuntu-latest
+    environment: fuelup-bot
     steps:
       - name: checkout master
         uses: actions/checkout@v3
@@ -38,10 +39,16 @@ jobs:
 
           echo "::set-output name=archive_dir::channels/nightly/${FORMATTED_PUBLISHED_DATE}"
 
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_KEY }}
+
       - name: Deploy nightly channel (latest version)
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ steps.app-token.outputs.token }}
           publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
           keep_files: true
           destination_dir: ./
@@ -51,7 +58,7 @@ jobs:
       - name: Deploy nightly channel (archive)
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ steps.app-token.outputs.token }}
           publish_dir: ${{ env.NIGHTLY_CHANNEL_DIR }}
           keep_files: true
           destination_dir: ${{ steps.setup.outputs.archive_dir }}

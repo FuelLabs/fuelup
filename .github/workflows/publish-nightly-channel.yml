@@ -19,24 +19,24 @@ jobs:
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
-      
+
       - name: Install build-channel script
         run: cargo install --debug --path ./ci/build-channel
 
       - name: Publish nightly channel
         id: setup
         run: |
-            PUBLISHED_DATE=$(date +'%Y-%m-%d')
-            FORMATTED_PUBLISHED_DATE=$(date +'%Y/%m/%d')
-            mkdir -p ${{ env.NIGHTLY_CHANNEL_DIR }}
+          PUBLISHED_DATE=$(date +'%Y-%m-%d')
+          FORMATTED_PUBLISHED_DATE=$(date +'%Y/%m/%d')
+          mkdir -p ${{ env.NIGHTLY_CHANNEL_DIR }}
 
-            CHANNEL_TOML="channel-fuel-nightly.toml"
+          CHANNEL_TOML="channel-fuel-nightly.toml"
 
-            build-channel --nightly $CHANNEL_TOML $PUBLISHED_DATE --github-run-id $GITHUB_RUN_ID
+          build-channel --nightly $CHANNEL_TOML $PUBLISHED_DATE --github-run-id $GITHUB_RUN_ID
 
-            cp $CHANNEL_TOML ${{ env.NIGHTLY_CHANNEL_DIR }}
+          cp $CHANNEL_TOML ${{ env.NIGHTLY_CHANNEL_DIR }}
 
-            echo "::set-output name=archive_dir::channels/nightly/${FORMATTED_PUBLISHED_DATE}"
+          echo "::set-output name=archive_dir::channels/nightly/${FORMATTED_PUBLISHED_DATE}"
 
       - name: Deploy nightly channel (latest version)
         uses: peaceiris/actions-gh-pages@v3
@@ -58,14 +58,17 @@ jobs:
           user_name: 'fuel-service-user'
           user_email: 'fuel-service-user@users.noreply.github.com'
 
-      - name: Notify if Job Fails
-        uses: ravsamhq/notify-slack-action@v1
+  notify-slack-on-failure:
+    if: failure()
+    needs: [publish-channel]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ravsamhq/notify-slack-action@v1
         with:
-          status: ${{ job.status }}
+          status: 'failure'
           token: ${{ secrets.GITHUB_TOKEN }}
-          notification_title: "{workflow} has {status_message}"
-          message_format: "{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}> : <{run_url}|View Run Results>"
-          footer: ""
-          notify_when: "failure"
+          notification_title: '{workflow} has {status_message}'
+          message_format: '{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}> : <{run_url}|View Run Results>'
+          footer: ''
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_TOOLING }}

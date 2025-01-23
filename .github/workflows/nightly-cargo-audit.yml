@@ -12,15 +12,18 @@ jobs:
       - uses: actions-rs/audit-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Notify if Job Fails
-        uses: ravsamhq/notify-slack-action@v1
+
+  notify-slack-on-failure:
+    if: failure()
+    needs: [cargo_audit]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ravsamhq/notify-slack-action@v1
         with:
-          status: ${{ job.status }}
+          status: 'failure'
           token: ${{ secrets.GITHUB_TOKEN }}
-          notification_title: "{workflow} has {status_message}"
-          message_format: "{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}> : <{run_url}|View Run Results>"
-          footer: ""
-          notify_when: "failure"
+          notification_title: '{workflow} has {status_message}'
+          message_format: '{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}> : <{run_url}|View Run Results>'
+          footer: ''
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_TOOLING }}
-

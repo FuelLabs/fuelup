@@ -59,7 +59,7 @@ jobs:
         uses: hrishikesh-kadam/setup-lcov@v1
 
       - name: Report code coverage
-        uses: zgosalvez/github-actions-report-lcov@v3
+        uses: zgosalvez/github-actions-report-lcov@v4
         with:
           coverage-files: lcov.info
           minimum-coverage: 0 # for now we are not enforcing any minimum coverage.
@@ -267,7 +267,7 @@ jobs:
         run: ./fuelup-init.sh
 
   notify-slack-on-failure:
-    if: failure()
+    if: failure() && github.ref == 'refs/heads/master'
     needs:
       [
         publish-codecov,

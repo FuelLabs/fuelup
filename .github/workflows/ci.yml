@@ -267,7 +267,7 @@ jobs:
         run: ./fuelup-init.sh
 
   notify-slack-on-failure:
-    if: failure()
+    if: failure() && github.ref == 'refs/heads/master'
     needs:
       [
         publish-codecov,

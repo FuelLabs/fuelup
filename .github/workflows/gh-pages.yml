@@ -10,6 +10,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: fuelup-bot
     steps:
       - uses: actions/checkout@v3
 

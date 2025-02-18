@@ -372,7 +372,7 @@ fn log_progress_bar(progress_bar: &ProgressBar) {
 }
 
 /// Read the version (as a plain String) used by the `fuels` dependency, if it exists.
-fn fuels_version_from_toml(toml: toml_edit::Document) -> Result<String> {
+fn fuels_version_from_toml(toml: toml_edit::DocumentMut) -> Result<String> {
     if let Some(deps) = toml.get("dependencies") {
         if let Some(fuels) = deps.get("fuels") {
             let version = match fuels.as_value() {
@@ -419,7 +419,7 @@ pub fn fetch_fuels_version(cfg: &DownloadCfg) -> Result<String> {
     };
 
     if let Ok(resp) = handle.get(&url).call() {
-        let cargo_toml = toml_edit::Document::from_str(&resp.into_string()?)?;
+        let cargo_toml = toml_edit::DocumentMut::from_str(&resp.into_string()?)?;
         return fuels_version_from_toml(cargo_toml);
     }
 
@@ -475,7 +475,7 @@ mod tests {
         "#};
         assert_eq!(
             "0.1",
-            fuels_version_from_toml(toml_edit::Document::from_str(toml).unwrap()).unwrap()
+            fuels_version_from_toml(toml_edit::DocumentMut::from_str(toml).unwrap()).unwrap()
         );
 
         let toml = indoc! {r#"
@@ -487,7 +487,7 @@ mod tests {
         "#};
         assert_eq!(
             "0.1",
-            fuels_version_from_toml(toml_edit::Document::from_str(toml).unwrap()).unwrap()
+            fuels_version_from_toml(toml_edit::DocumentMut::from_str(toml).unwrap()).unwrap()
         );
     }
 

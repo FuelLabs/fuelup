@@ -27,6 +27,8 @@ use tracing::{error, info};
 pub const RESERVED_TOOLCHAIN_NAMES: &[&str] = &[
     channel::LATEST,
     channel::NIGHTLY,
+    channel::TESTNET,
+    channel::MAINNET,
     // Stable is reserved, although currently unused.
     channel::STABLE,
     // Ignition is reserved, although currently unused.

@@ -2,7 +2,7 @@ use crate::file;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::{cell::RefCell, path::PathBuf};
-use toml_edit::{de, ser, Document};
+use toml_edit::{de, ser, DocumentMut};
 
 pub struct SettingsFile {
     path: PathBuf,
@@ -79,7 +79,7 @@ impl Settings {
         Ok(self.to_toml()?.to_string())
     }
 
-    pub(crate) fn to_toml(&self) -> std::result::Result<Document, ser::Error> {
+    pub(crate) fn to_toml(&self) -> std::result::Result<DocumentMut, ser::Error> {
         ser::to_document(&self)
     }
 }

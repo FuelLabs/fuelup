@@ -14,7 +14,7 @@ use serde::ser::SerializeStruct;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::{collections::HashMap, fmt, path::PathBuf, str::FromStr};
 use time::Date;
-use toml_edit::{de, ser, value, Document};
+use toml_edit::{de, ser, value, DocumentMut};
 use tracing::{info, warn};
 
 // For composability with other functionality of fuelup, we want to add
@@ -119,8 +119,8 @@ impl ToolchainOverride {
     }
 
     #[allow(clippy::indexing_slicing)]
-    pub fn to_toml(&self) -> Document {
-        let mut document = toml_edit::Document::new();
+    pub fn to_toml(&self) -> DocumentMut {
+        let mut document = toml_edit::DocumentMut::new();
 
         document["toolchain"]["channel"] = value(self.cfg.toolchain.channel.to_string());
         if let Some(components) = &self.cfg.components {
@@ -260,17 +260,17 @@ mod tests {
         let result = OverrideCfg::from_toml(LATEST);
         assert!(result.is_err());
         let e = result.unwrap_err();
-        assert_eq!(e
-            .to_string(),
-            "invalid value: string \"latest\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|testnet|mainnet> for key `toolchain.channel`".to_string());
+        assert!(e
+            .to_string().contains(
+            "invalid value: string \"latest\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|testnet|mainnet>"));
 
         let result = OverrideCfg::from_toml(NIGHTLY);
         assert!(result.is_err());
         let e = result.unwrap_err();
 
-        assert_eq!(e
-            .to_string(),
-            "invalid value: string \"nightly\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|testnet|mainnet> for key `toolchain.channel`".to_string());
+        assert!(e
+            .to_string().contains(
+            "invalid value: string \"nightly\", expected one of <latest-YYYY-MM-DD|nightly-YYYY-MM-DD|testnet|mainnet>"));
     }
 
     #[test]

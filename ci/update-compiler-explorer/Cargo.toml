@@ -1,0 +1,9 @@
+[package]
+name = "update-compiler-explorer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+indoc = "2.0"
+serde_yaml = "0.9"
+tempfile = "3.3"

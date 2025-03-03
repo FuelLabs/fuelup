@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow = "1"
 indoc = "2.0"
 serde_yaml = "0.9"
 tempfile = "3.3"

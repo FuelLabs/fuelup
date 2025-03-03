@@ -20,6 +20,8 @@ jobs:
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
 
       - name: Install build-channel script
         run: cargo install --debug --path ./ci/build-channel

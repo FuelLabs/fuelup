@@ -10,7 +10,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_VERSION_COV: 1.84.1
+  RUST_VERSION: 1.84.1
   REGISTRY: ghcr.io
 
 jobs:
@@ -44,16 +44,16 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v3
-      - name: Install latest Rust
-        uses: dtolnay/rust-toolchain@master
+      - name: Install nightly toolchain
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: ${{ env.RUST_VERSION_COV }}
+          toolchain: "nightly"
 
       - name: Install cargo-llvm-codecov
         uses: taiki-e/install-action@cargo-llvm-cov
 
       - name: Code coverage report
-        run: cargo  +${{ env.RUST_VERSION_COV }} llvm-cov --all-features --lcov --branch --output-path lcov.info
+        run: cargo +nightly llvm-cov --all-features --lcov --branch --output-path lcov.info
 
       - name: Setup LCOV
         uses: hrishikesh-kadam/setup-lcov@v1
@@ -90,6 +90,8 @@ jobs:
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
 
       - uses: Swatinem/rust-cache@v1
 
@@ -104,6 +106,8 @@ jobs:
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
 
       - name: Check Formatting
         run: cargo fmt --all -- --check
@@ -116,6 +120,8 @@ jobs:
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
 
       - name: Run tests
         run: cargo test --locked --workspace
@@ -130,6 +136,8 @@ jobs:
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
 
       - name: Install Cargo.toml linter
         uses: baptiste0928/cargo-install@v1
@@ -184,6 +192,7 @@ jobs:
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: ${{ env.RUST_VERSION }}
           target: ${{ matrix.job.target }}
 
       - uses: Swatinem/rust-cache@v1

@@ -10,7 +10,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_VERSION_COV: nightly-2024-06-05
+  RUST_VERSION_COV: 1.84.1
   REGISTRY: ghcr.io
 
 jobs:

@@ -1,5 +1,4 @@
-use anyhow::{Context, Result};
-use serde_yaml::{self, Value};
+use anyhow::{Context, Result, anyhow};
 use std::{env, fs, path::Path, process::Command};
 use tempfile::tempdir;
 
@@ -51,9 +50,14 @@ fn update_compiler_explorer(version: &str) -> Result<()> {
     )?;
 
     // Make updates
-    update_amazon_properties(&ce_path, version)?;
-    update_sway_yaml(&infra_path, version)?;
-    update_libraries_yaml(&infra_path, version)?;
+    let content = fs::read_to_string(&ce_path.join(AMAZON_PROPERTIES_PATH))?;
+    update_amazon_properties(&content, version)?;
+
+    let content = fs::read_to_string(&infra_path.join(SWAY_YAML_PATH))?;
+    update_sway_yaml(&content, version)?;
+
+    let content = fs::read_to_string(&infra_path.join(LIBRARIES_YAML_PATH))?;
+    update_libraries_yaml(&content, version)?;
 
     println!("Updated for Sway version {}", version);
 
@@ -388,47 +392,132 @@ fn create_pull_request(repo: &str, head: &str, version: &str, github_token: &str
     Ok(())
 }
 
-// Updates the targets section of the sway.yaml file with the given version
-fn update_sway_yaml(repo_path: &Path, version: &str) -> Result<()> {
-    let path = repo_path.join(SWAY_YAML_PATH);
-    let content = fs::read_to_string(&path)?;
-    let mut yaml = serde_yaml::from_str::<Value>(&content)?;
+/// Updates the targets section of the sway.yaml file with the given version
+/// Finds the last target and appends the new version after it
+fn update_sway_yaml(content: &str, version: &str) -> Result<String> {
+    let mut lines: Vec<String> = content.lines().map(String::from).collect();
 
-    let targets = yaml["compilers"]["sway"]["targets"]
-        .as_sequence_mut()
-        .context("Invalid YAML structure")?;
-    if !targets.iter().any(|v| v.as_str() == Some(version)) {
-        targets.push(Value::String(version.to_string()));
-        fs::write(&path, serde_yaml::to_string(&yaml)?)?;
-        println!("Added {} to sway.yaml", version);
+    // Find the first target line
+    let first_target_idx = lines
+        .iter()
+        .position(|l| l.trim().starts_with("- "))
+        .ok_or_else(|| anyhow!("Could not find any target lines"))?;
+
+    // Find the last target line
+    let last_target_idx = lines
+        .iter()
+        .enumerate()
+        .skip(first_target_idx)
+        .take_while(|(_, l)| l.trim().starts_with("- "))
+        .last()
+        .map(|(i, _)| i)
+        .unwrap_or(first_target_idx);
+
+    // Extract indentation from the first target
+    let indent = lines[first_target_idx]
+        .chars()
+        .take_while(|c| c.is_whitespace())
+        .collect::<String>();
+
+    // Check if the version already exists
+    let version_exists = lines
+        .iter()
+        .skip(first_target_idx)
+        .take(last_target_idx - first_target_idx + 1)
+        .any(|l| l.trim() == format!("- {}", version));
+
+    if version_exists {
+        // Return the original content unchanged
+        return Ok(content.to_string());
     }
-    Ok(())
+
+    // Insert new version at the end of the targets list
+    let new_line = format!("{}- {}", indent, version);
+    lines.insert(last_target_idx + 1, new_line);
+
+    // Preserve trailing newline if it existed in the original
+    let result = if content.ends_with('\n') {
+        lines.join("\n") + "\n"
+    } else {
+        lines.join("\n")
+    };
+    Ok(result)
 }
 
-// Updates the targets section of sway in the libraries.yaml file with the given version
-fn update_libraries_yaml(repo_path: &Path, version: &str) -> Result<()> {
-    let path = repo_path.join(LIBRARIES_YAML_PATH);
-    let content = fs::read_to_string(&path)?;
-    let mut yaml = serde_yaml::from_str::<Value>(&content)?;
+/// Updates the targets section of the sway std library in libraries.yaml with the given version
+fn update_libraries_yaml(content: &str, version: &str) -> Result<String> {
+    let mut lines: Vec<String> = content.lines().map(String::from).collect();
 
-    let targets = yaml["libraries"]["sway"]["std"]["targets"]
-        .as_sequence_mut()
-        .context("Invalid YAML structure")?;
-    if !targets.iter().any(|v| v.as_str() == Some(version)) {
-        targets.push(Value::String(version.to_string()));
-        fs::write(&path, serde_yaml::to_string(&yaml)?)?;
-        println!("Added {} to libraries.yaml", version);
+    // Find the "sway" section
+    let sway_idx = lines
+        .iter()
+        .position(|l| l.trim() == "sway:")
+        .ok_or_else(|| anyhow!("Could not find sway section"))?;
+
+    // Find the targets section within the sway std section
+    let mut in_sway_section = false;
+    let mut targets_idx = 0;
+
+    for (i, line) in lines.iter().enumerate().skip(sway_idx) {
+        if line.trim() == "std:" && !in_sway_section {
+            in_sway_section = true;
+            continue;
+        }
+        if in_sway_section && line.trim() == "targets:" {
+            targets_idx = i;
+            break;
+        }
     }
-    Ok(())
+
+    if targets_idx == 0 {
+        return Err(anyhow!(
+            "Could not find targets section in sway std library"
+        ));
+    }
+
+    // Get the indentation from the first target line
+    let first_target_idx = targets_idx + 1;
+    if first_target_idx >= lines.len() {
+        return Err(anyhow!("Targets section has no elements"));
+    }
+
+    let indent = lines[first_target_idx]
+        .chars()
+        .take_while(|c| c.is_whitespace())
+        .collect::<String>();
+
+    // Find the last target line
+    let last_target_idx = lines
+        .iter()
+        .enumerate()
+        .skip(first_target_idx)
+        .take_while(|(_, l)| l.trim().starts_with('-'))
+        .last()
+        .map(|(i, _)| i)
+        .unwrap_or(first_target_idx);
+
+    // Check if the version already exists
+    let version_exists = lines
+        .iter()
+        .skip(first_target_idx)
+        .take(last_target_idx - first_target_idx + 1)
+        .any(|l| l.contains(version));
+
+    if version_exists {
+        // Return the original content unchanged
+        return Ok(content.to_string());
+    }
+
+    // Insert new version with the same indentation at the end of the targets list
+    let new_line = format!("{}- {}", indent, version);
+    lines.insert(last_target_idx + 1, new_line);
+
+    Ok(lines.join("\n"))
 }
 
-// Adds a new compiler version to the amazon.properties file
-fn update_amazon_properties(repo_path: &Path, version: &str) -> Result<()> {
-    let path = repo_path.join(AMAZON_PROPERTIES_PATH);
-    let mut lines = fs::read_to_string(&path)?
-        .lines()
-        .map(String::from)
-        .collect::<Vec<_>>();
+/// Adds a new compiler version to the amazon.properties file
+fn update_amazon_properties(content: &str, version: &str) -> Result<String> {
+    let mut lines = content.lines().map(String::from).collect::<Vec<_>>();
 
     // Create compiler ID and configure key properties
     let compiler_id = format!("swayv{}", version.replace(".", ""));
@@ -521,8 +610,7 @@ fn update_amazon_properties(repo_path: &Path, version: &str) -> Result<()> {
         }
     }
 
-    fs::write(path, lines.join("\n"))?;
-    Ok(())
+    Ok(lines.join("\n"))
 }
 
 // Extracts the Forc version from the fuelup channel-fuel-mainnet.toml file
@@ -563,6 +651,7 @@ fn extract_forc_version_from_fuelup() -> Result<String> {
 mod tests {
     use super::*;
     use indoc::indoc;
+    use serde_yaml::{self, Value};
     use std::fs;
 
     #[test]
@@ -586,7 +675,10 @@ mod tests {
                     - 0.66.7
         "#}).unwrap();
 
-        update_sway_yaml(dir.path(), "0.67.0").unwrap();
+        // Read the content, update it, and write it back
+        let content = fs::read_to_string(&path).unwrap();
+        let updated_content = update_sway_yaml(&content, "0.67.0").unwrap();
+        fs::write(&path, updated_content).unwrap();
 
         // Verify 0.67.0 was added without removing 0.66.7
         let updated = fs::read_to_string(&path).unwrap();
@@ -609,7 +701,7 @@ mod tests {
             indoc! {r#"
         libraries:
             other_lib:
-                type: example 
+                type: example
             sway:
                 std:
                     repo: fuellabs/sway
@@ -626,7 +718,10 @@ mod tests {
         )
         .unwrap();
 
-        update_libraries_yaml(dir.path(), "0.67.0").unwrap();
+        // Read content, update it and write it back
+        let content = fs::read_to_string(&path).unwrap();
+        let updated_content = update_libraries_yaml(&content, "0.67.0").unwrap();
+        fs::write(&path, updated_content).unwrap();
 
         // Verify correct section was updated
         let updated = fs::read_to_string(&path).unwrap();
@@ -646,9 +741,7 @@ mod tests {
         fs::create_dir_all(path.parent().unwrap()).unwrap();
 
         // Create realistic properties file
-        fs::write(
-            &path,
-            indoc! {r#"
+        let original_content = indoc! {r#"
         compilers=&sway
         defaultCompiler=swayv0667
         objdumper=/opt/compiler-explorer/gcc-14.2.0/bin/objdump
@@ -665,13 +758,16 @@ mod tests {
         compiler.swayv0667.name=sway 0.66.7
         # Basic tools that might be useful
         tools=
-        "#},
-        )
-        .unwrap();
+        "#};
 
-        // Test adding a new version
-        update_amazon_properties(dir.path(), "0.67.0").unwrap();
+        fs::write(&path, original_content).unwrap();
 
+        // Read the content, update it, and write it back
+        let content = fs::read_to_string(&path).unwrap();
+        let updated_content = update_amazon_properties(&content, "0.67.0").unwrap();
+        fs::write(&path, updated_content).unwrap();
+
+        // Read the updated file
         let content = fs::read_to_string(&path).unwrap();
         let lines: Vec<&str> = content.lines().collect();
 

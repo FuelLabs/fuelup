@@ -8,6 +8,7 @@ on:
 
 env:
   NIGHTLY_CHANNEL_DIR: ./channel-fuel-nightly.toml.d/
+  RUST_VERSION: 1.85.0
 
 jobs:
   publish-channel:

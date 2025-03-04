@@ -1,7 +1,7 @@
 use crate::{COMPILER_EXPLORER_REPO, FORK_COMPILER_EXPLORER_REPO, FORK_INFRA_REPO, INFRA_REPO};
 
-use anyhow::{Context, Result, anyhow};
-use std::{env, fs, path::Path, process::Command};
+use anyhow::{Context, Result};
+use std::{path::Path, process::Command};
 use tempfile::tempdir;
 
 pub fn clone_fork(
@@ -103,47 +103,6 @@ pub fn commit_and_push(
     git_push_with_retry(repo_path, branch_name, 3)?;
 
     Ok(())
-}
-
-fn git_push_with_retry(repo_path: &Path, branch_name: &str, max_retries: usize) -> Result<()> {
-    let mut attempt = 0;
-    let mut last_error = None;
-
-    while attempt < max_retries {
-        println!("Push attempt {} of {}", attempt + 1, max_retries);
-
-        // Try push
-        let result = Command::new("git")
-            .current_dir(repo_path)
-            .args(["push", "-f", "-u", "origin", branch_name])
-            .status();
-
-        match result {
-            Ok(status) if status.success() => {
-                println!("Successfully pushed to branch {}", branch_name);
-                return Ok(());
-            }
-            Ok(status) => {
-                println!("Push failed with exit code: {:?}", status.code());
-                // Wait before retrying
-                std::thread::sleep(std::time::Duration::from_secs(2));
-            }
-            Err(e) => {
-                last_error = Some(e);
-                println!("Push error: {:?}. Retrying...", last_error);
-                std::thread::sleep(std::time::Duration::from_secs(2));
-            }
-        }
-
-        attempt += 1;
-    }
-
-    // If we get here, all retry attempts failed
-    Err(anyhow::anyhow!(
-        "Failed to push after {} attempts: {:?}",
-        max_retries,
-        last_error
-    ))
 }
 
 pub fn create_pull_request(
@@ -279,4 +238,45 @@ pub fn create_pull_request(
     }
 
     Ok(())
+}
+
+fn git_push_with_retry(repo_path: &Path, branch_name: &str, max_retries: usize) -> Result<()> {
+    let mut attempt = 0;
+    let mut last_error = None;
+
+    while attempt < max_retries {
+        println!("Push attempt {} of {}", attempt + 1, max_retries);
+
+        // Try push
+        let result = Command::new("git")
+            .current_dir(repo_path)
+            .args(["push", "-f", "-u", "origin", branch_name])
+            .status();
+
+        match result {
+            Ok(status) if status.success() => {
+                println!("Successfully pushed to branch {}", branch_name);
+                return Ok(());
+            }
+            Ok(status) => {
+                println!("Push failed with exit code: {:?}", status.code());
+                // Wait before retrying
+                std::thread::sleep(std::time::Duration::from_secs(2));
+            }
+            Err(e) => {
+                last_error = Some(e);
+                println!("Push error: {:?}. Retrying...", last_error);
+                std::thread::sleep(std::time::Duration::from_secs(2));
+            }
+        }
+
+        attempt += 1;
+    }
+
+    // If we get here, all retry attempts failed
+    Err(anyhow::anyhow!(
+        "Failed to push after {} attempts: {:?}",
+        max_retries,
+        last_error
+    ))
 }

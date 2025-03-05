@@ -21,7 +21,7 @@ pub fn clone_fork(
         .with_context(|| format!("Failed to clone {} repo", dir_name))?;
 
     // Add the upstream repo as "origin"
-    let upstream_repo = if repo.starts_with("JoshuaBatty/") {
+    let upstream_repo = if repo.starts_with("FuelLabs/") {
         format!(
             "https://github.com/compiler-explorer/{}",
             repo.split('/').nth(1).unwrap_or(dir_name)
@@ -78,7 +78,7 @@ pub fn commit_and_push(
         .args([
             "config",
             "user.email",
-            "joshpbatty@gmail.com", // Use an appropriate email
+            "fuel-service-user@users.noreply.github.com",
         ])
         .status()
         .context("Failed to set git user email")?;

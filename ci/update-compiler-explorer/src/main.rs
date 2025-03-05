@@ -21,7 +21,7 @@ fn main() -> Result<()> {
     // Check if we're running in manual mode with a specific version
     let manual_version = env::args().nth(1);
 
-    // Get the Forc version from the command line or automatically 
+    // Get the Forc version from the command line or automatically
     // extract version from fuelup's mainnet channel file.
     let forc_version = match manual_version {
         Some(version) => version,

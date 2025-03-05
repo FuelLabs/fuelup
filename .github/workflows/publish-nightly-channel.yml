@@ -8,6 +8,7 @@ on:
 
 env:
   NIGHTLY_CHANNEL_DIR: ./channel-fuel-nightly.toml.d/
+  RUST_VERSION: 1.85.0
 
 jobs:
   publish-channel:
@@ -20,6 +21,8 @@ jobs:
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
 
       - name: Install build-channel script
         run: cargo install --debug --path ./ci/build-channel

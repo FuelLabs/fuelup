@@ -11,8 +11,8 @@ const AMAZON_PROPERTIES_PATH: &str = "etc/config/sway.amazon.properties";
 const STD_LIB_PATH: &str = "/opt/compiler-explorer/libs/sway/std";
 
 // Forks to use for PRs
-const FORK_INFRA_REPO: &str = "JoshuaBatty/infra";
-const FORK_COMPILER_EXPLORER_REPO: &str = "JoshuaBatty/compiler-explorer";
+const FORK_INFRA_REPO: &str = "FuelLabs/compiler-explorer-infra";
+const FORK_COMPILER_EXPLORER_REPO: &str = "FuelLabs/compiler-explorer";
 
 // For GitHub API operations
 const GITHUB_TOKEN: &str = "GITHUB_TOKEN"; // Environment variable name
@@ -21,13 +21,11 @@ fn main() -> Result<()> {
     // Check if we're running in manual mode with a specific version
     let manual_version = env::args().nth(1);
 
-    // Get the Forc version
+    // Get the Forc version from the command line or automatically 
+    // extract version from fuelup's mainnet channel file.
     let forc_version = match manual_version {
         Some(version) => version,
-        None => {
-            // Automatically extract version from fuelup's mainnet channel file
-            extract_forc_version_from_fuelup()?
-        }
+        None => extract_forc_version_from_fuelup()?,
     };
 
     println!("Using Sway/Forc version: {}", forc_version);

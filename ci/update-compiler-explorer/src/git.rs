@@ -1,5 +1,3 @@
-use crate::{COMPILER_EXPLORER_REPO, FORK_COMPILER_EXPLORER_REPO, FORK_INFRA_REPO, INFRA_REPO};
-
 use anyhow::{Context, Result};
 use std::{path::Path, process::Command};
 use tempfile::tempdir;
@@ -111,15 +109,6 @@ pub fn create_pull_request(
     version: &str,
     github_token: &str,
 ) -> Result<()> {
-    // For testing, create PR against the fork itself instead of upstream
-    let fork_repo = if repo == INFRA_REPO {
-        FORK_INFRA_REPO
-    } else if repo == COMPILER_EXPLORER_REPO {
-        FORK_COMPILER_EXPLORER_REPO
-    } else {
-        repo
-    };
-
     // Check if gh CLI is available
     let gh_available = Command::new("gh")
         .arg("--version")
@@ -135,7 +124,7 @@ pub fn create_pull_request(
             .args([
                 "pr",
                 "create",
-                "--repo", fork_repo,
+                "--repo", repo,
                 "--head", head,
                 "--base", "main",
                 "--title", &format!("Update Sway compiler to version {}", version),
@@ -157,9 +146,9 @@ pub fn create_pull_request(
         println!("GitHub CLI not found. Using direct API call...");
 
         // Parse owner/repo
-        let parts: Vec<&str> = fork_repo.split('/').collect();
+        let parts: Vec<&str> = repo.split('/').collect();
         if parts.len() != 2 {
-            return Err(anyhow::anyhow!("Invalid repository format: {}", fork_repo));
+            return Err(anyhow::anyhow!("Invalid repository format: {}", repo));
         }
         let owner = parts[0];
         let repo_name = parts[1];

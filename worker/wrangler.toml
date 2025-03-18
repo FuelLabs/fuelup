@@ -1,0 +1,6 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "fuelup-init"
+main = "src/index.js"
+compatibility_date = "2024-08-21"
+send_metrics = true
+route = { pattern = "install.fuel.network/", zone_name = "fuel.network" }

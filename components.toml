@@ -71,7 +71,7 @@ executables = ["forc-tx"]
 repository_name = "sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 
-[component.forc-tx]
+[component.forc-node]
 name = "forc-node"
 tarball_prefix = "forc-binaries"
 is_plugin = true

@@ -126,7 +126,7 @@ fn fuelup_show_and_switch() -> Result<()> {
                 - forc-fmt : 0.2.0
                 - forc-lsp : 0.2.0
                 - forc-migrate : 0.2.0
-                - forc-node : 0.1.0
+                - forc-node : 0.2.0
                 - forc-tx : 0.2.0
                 - forc-wallet : 0.2.0
               fuel-core : 0.2.0
@@ -212,7 +212,7 @@ fn fuelup_show_override() -> Result<()> {
                 - forc-fmt : not found
                 - forc-lsp : not found
                 - forc-migrate : not found
-                - forc-node: not found
+                - forc-node : not found
                 - forc-tx : not found
                 - forc-wallet : not found
               fuel-core : not found

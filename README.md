@@ -14,7 +14,7 @@
 
 ## Quickstart
 
-Currently, this script supports Linux/macOS systems only. For other systems, please [read the Installation chapter](https://fuellabs.github.io/fuelup/master/installation/other.html).
+Currently, this script supports Linux/macOS systems only. For other systems, please [read the Installation chapter](http://install.fuel.network/master/installation/other.html).
 
 Installation is simple: all you need is `fuelup-init.sh`, which downloads the core Fuel binaries needed to get you started on development.
 

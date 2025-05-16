@@ -338,7 +338,7 @@ pub fn setup_override_file(toolchain_override: ToolchainOverride) -> Result<()> 
 /// });
 /// ```
 pub fn setup_default_override_file(cfg: &TestCfg, component_name: Option<&str>) {
-    // TODO: "0.61.0" is a placeholder until #666 is merged. Then we can use
+    // TODO: "0.68.4" is a placeholder until #666 is merged. Then we can use
     // Component::resolve_from_name() to get a valid version (i.e the latest)
     // via download::get_latest_version() as the component override version
 
@@ -349,7 +349,7 @@ pub fn setup_default_override_file(cfg: &TestCfg, component_name: Option<&str>) 
                     .unwrap(),
             },
             component_name.map(|c| {
-                vec![(c.to_string(), "0.61.0".parse().unwrap())]
+                vec![(c.to_string(), "0.68.4".parse().unwrap())]
                     .into_iter()
                     .collect()
             }),

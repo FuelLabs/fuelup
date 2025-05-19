@@ -17,11 +17,7 @@ pub fn clone_fork(
         github_token, repo
     );
     let clone_status = Command::new("git")
-        .args([
-            "clone",
-            &clone_url,
-            repo_path.to_str().unwrap(),
-        ])
+        .args(["clone", &clone_url, repo_path.to_str().unwrap()])
         .status()
         .with_context(|| format!("Failed to clone {} repo using token", dir_name))?;
 
@@ -58,7 +54,11 @@ pub fn clone_fork(
 
     let reset_status = Command::new("git")
         .current_dir(&repo_path)
-        .args(["reset", "--hard", &format!("upstream/{}", upstream_default_branch)])
+        .args([
+            "reset",
+            "--hard",
+            &format!("upstream/{}", upstream_default_branch),
+        ])
         .status()
         .with_context(|| format!("Failed to reset to upstream/{}", upstream_default_branch))?;
 
@@ -69,7 +69,7 @@ pub fn clone_fork(
             reset_status.code()
         ));
     }
-    
+
     Command::new("git")
         .current_dir(&repo_path)
         .args(["checkout", "-b", branch_name])
@@ -122,9 +122,10 @@ pub fn commit_and_push(
             .current_dir(repo_path)
             .args(["diff", "--cached", "--quiet"]) // Checks staged changes
             .status()?;
-        
-        if diff_output.success() { // success means no diff, so nothing was staged/committed
-             println!("No changes to commit for version {}.", version);
+
+        if diff_output.success() {
+            // success means no diff, so nothing was staged/committed
+            println!("No changes to commit for version {}.", version);
         } else {
             // If diff shows changes, or some other commit error
             return Err(anyhow::anyhow!(
@@ -288,7 +289,9 @@ fn git_push_with_retry(
             String::from_utf8_lossy(&origin_url_output.stderr)
         ));
     }
-    let origin_url_str = String::from_utf8_lossy(&origin_url_output.stdout).trim().to_string();
+    let origin_url_str = String::from_utf8_lossy(&origin_url_output.stdout)
+        .trim()
+        .to_string();
 
     let authenticated_push_url = if origin_url_str.starts_with("https://github.com/") {
         format!(
@@ -299,18 +302,19 @@ fn git_push_with_retry(
     } else if origin_url_str.starts_with(&format!("https://x-access-token:{}@", github_token)) {
         // Already correctly authenticated from clone
         origin_url_str
-    }
-    else if origin_url_str.starts_with("https://x-access-token:") {
+    } else if origin_url_str.starts_with("https://x-access-token:") {
         // Authenticated, but potentially with a different token (e.g. if one token for clone, another for push)
         // This is unlikely given the script's structure but added for robustness.
         let parts: Vec<&str> = origin_url_str.split('@').collect();
         if parts.len() == 2 {
             format!("https://x-access-token:{}@{}", github_token, parts[1])
         } else {
-            return Err(anyhow::anyhow!("Unexpected authenticated origin URL format for re-authentication: {}", origin_url_str));
+            return Err(anyhow::anyhow!(
+                "Unexpected authenticated origin URL format for re-authentication: {}",
+                origin_url_str
+            ));
         }
-    }
-    else {
+    } else {
         return Err(anyhow::anyhow!(
             "Origin URL is not HTTPS, cannot inject token: {}",
             origin_url_str
@@ -326,7 +330,7 @@ fn git_push_with_retry(
                 "push",
                 "-f", // Force push is used, ensure this is intended for the target branches
                 "-u",
-                &authenticated_push_url, // Use the authenticated URL
+                &authenticated_push_url,          // Use the authenticated URL
                 &format!("HEAD:{}", branch_name), // Push current HEAD to the remote branch_name
             ])
             .status();

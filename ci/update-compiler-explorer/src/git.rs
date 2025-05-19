@@ -1,56 +1,75 @@
 use anyhow::{Context, Result};
-use std::{path::Path, process::Command};
+use std::{env, path::Path, process::Command};
 use tempfile::tempdir;
 
 pub fn clone_fork(
     repo: &str,
     dir_name: &str,
     branch_name: &str,
+    github_token: &str,
 ) -> Result<(tempfile::TempDir, std::path::PathBuf)> {
     let temp_dir = tempdir()?;
     let repo_path = temp_dir.path().join(dir_name);
 
-    // Clone the fork directly
-    Command::new("git")
+    // Clone the fork using the token
+    let clone_url = format!(
+        "https://x-access-token:{}@github.com/{}.git",
+        github_token, repo
+    );
+    let clone_status = Command::new("git")
         .args([
             "clone",
-            &format!("https://github.com/{}.git", repo),
+            &clone_url,
             repo_path.to_str().unwrap(),
         ])
         .status()
-        .with_context(|| format!("Failed to clone {} repo", dir_name))?;
+        .with_context(|| format!("Failed to clone {} repo using token", dir_name))?;
 
-    // Add the upstream repo as "origin"
-    let upstream_repo = if repo.starts_with("FuelLabs/") {
-        format!(
-            "https://github.com/compiler-explorer/{}",
-            repo.split('/').nth(1).unwrap_or(dir_name)
-        )
+    if !clone_status.success() {
+        return Err(anyhow::anyhow!(
+            "Failed to clone {} repo. Exit code: {:?}",
+            dir_name,
+            clone_status.code()
+        ));
+    }
+
+    // The cloned fork is 'origin' by default.
+    // Add the actual upstream repository.
+    let upstream_name = if repo.starts_with("FuelLabs/") {
+        repo.split('/').nth(1).unwrap_or(dir_name)
     } else {
-        format!("https://github.com/{}.git", repo)
+        dir_name // Should not happen if FORK_XXX_REPO constants are correct
     };
+    let upstream_url = format!("https://github.com/compiler-explorer/{}.git", upstream_name);
 
     Command::new("git")
         .current_dir(&repo_path)
-        .args(["remote", "add", "upstream", &upstream_repo])
+        .args(["remote", "add", "upstream", &upstream_url])
         .status()
         .with_context(|| format!("Failed to add upstream remote for {}", repo))?;
 
-    // Fetch from upstream
     Command::new("git")
         .current_dir(&repo_path)
         .args(["fetch", "upstream"])
         .status()
         .context("Failed to fetch from upstream")?;
 
-    // Reset to upstream/main
-    Command::new("git")
-        .current_dir(&repo_path)
-        .args(["reset", "--hard", "upstream/main"])
-        .status()
-        .context("Failed to reset to upstream/main")?;
+    let upstream_default_branch = "main";
 
-    // Create a new branch
+    let reset_status = Command::new("git")
+        .current_dir(&repo_path)
+        .args(["reset", "--hard", &format!("upstream/{}", upstream_default_branch)])
+        .status()
+        .with_context(|| format!("Failed to reset to upstream/{}", upstream_default_branch))?;
+
+    if !reset_status.success() {
+        return Err(anyhow::anyhow!(
+            "Failed to reset to upstream/{}. Exit code: {:?}",
+            upstream_default_branch,
+            reset_status.code()
+        ));
+    }
+    
     Command::new("git")
         .current_dir(&repo_path)
         .args(["checkout", "-b", branch_name])
@@ -65,6 +84,7 @@ pub fn commit_and_push(
     version: &str,
     message: &str,
     branch_name: &str,
+    github_token: &str,
 ) -> Result<()> {
     // Configure git user
     Command::new("git")
@@ -83,22 +103,39 @@ pub fn commit_and_push(
         .status()
         .context("Failed to set git user email")?;
 
-    // Add all changes
     Command::new("git")
         .current_dir(repo_path)
         .args(["add", "."])
         .status()
         .context("Failed to git add")?;
 
-    // Commit
-    Command::new("git")
+    // Commit, allow it to "fail" if there are no changes (it will exit non-zero)
+    let commit_status = Command::new("git")
         .current_dir(repo_path)
         .args(["commit", "-m", &format!("{}: {}", message, version)])
         .status()
-        .context("Failed to git commit")?;
+        .context("Git commit command failed to execute")?;
 
-    // Push with retry
-    git_push_with_retry(repo_path, branch_name, 3)?;
+    if !commit_status.success() {
+        // Check if it failed because there's nothing to commit
+        let diff_output = Command::new("git")
+            .current_dir(repo_path)
+            .args(["diff", "--cached", "--quiet"]) // Checks staged changes
+            .status()?;
+        
+        if diff_output.success() { // success means no diff, so nothing was staged/committed
+             println!("No changes to commit for version {}.", version);
+        } else {
+            // If diff shows changes, or some other commit error
+            return Err(anyhow::anyhow!(
+                "Failed to git commit. Exit code: {:?}",
+                commit_status.code()
+            ));
+        }
+    }
+
+    // Push with retry using the token
+    git_push_with_retry(repo_path, branch_name, 3, github_token)?;
 
     Ok(())
 }
@@ -229,17 +266,69 @@ pub fn create_pull_request(
     Ok(())
 }
 
-fn git_push_with_retry(repo_path: &Path, branch_name: &str, max_retries: usize) -> Result<()> {
+fn git_push_with_retry(
+    repo_path: &Path,
+    branch_name: &str,
+    max_retries: usize,
+    github_token: &str,
+) -> Result<()> {
     let mut attempt = 0;
-    let mut last_error = None;
+    let mut last_error: Option<anyhow::Error> = None;
+
+    // Get the original origin URL to reformat it with the token
+    let origin_url_output = Command::new("git")
+        .current_dir(repo_path)
+        .args(["config", "--get", "remote.origin.url"])
+        .output()
+        .context("Failed to get remote.origin.url")?;
+
+    if !origin_url_output.status.success() {
+        return Err(anyhow::anyhow!(
+            "Failed to get origin URL: {}",
+            String::from_utf8_lossy(&origin_url_output.stderr)
+        ));
+    }
+    let origin_url_str = String::from_utf8_lossy(&origin_url_output.stdout).trim().to_string();
+
+    let authenticated_push_url = if origin_url_str.starts_with("https://github.com/") {
+        format!(
+            "https://x-access-token:{}@{}",
+            github_token,
+            origin_url_str.trim_start_matches("https://")
+        )
+    } else if origin_url_str.starts_with(&format!("https://x-access-token:{}@", github_token)) {
+        // Already correctly authenticated from clone
+        origin_url_str
+    }
+    else if origin_url_str.starts_with("https://x-access-token:") {
+        // Authenticated, but potentially with a different token (e.g. if one token for clone, another for push)
+        // This is unlikely given the script's structure but added for robustness.
+        let parts: Vec<&str> = origin_url_str.split('@').collect();
+        if parts.len() == 2 {
+            format!("https://x-access-token:{}@{}", github_token, parts[1])
+        } else {
+            return Err(anyhow::anyhow!("Unexpected authenticated origin URL format for re-authentication: {}", origin_url_str));
+        }
+    }
+    else {
+        return Err(anyhow::anyhow!(
+            "Origin URL is not HTTPS, cannot inject token: {}",
+            origin_url_str
+        ));
+    };
 
     while attempt < max_retries {
         println!("Push attempt {} of {}", attempt + 1, max_retries);
 
-        // Try push
         let result = Command::new("git")
             .current_dir(repo_path)
-            .args(["push", "-f", "-u", "origin", branch_name])
+            .args([
+                "push",
+                "-f", // Force push is used, ensure this is intended for the target branches
+                "-u",
+                &authenticated_push_url, // Use the authenticated URL
+                &format!("HEAD:{}", branch_name), // Push current HEAD to the remote branch_name
+            ])
             .status();
 
         match result {
@@ -253,7 +342,7 @@ fn git_push_with_retry(repo_path: &Path, branch_name: &str, max_retries: usize) 
                 std::thread::sleep(std::time::Duration::from_secs(2));
             }
             Err(e) => {
-                last_error = Some(e);
+                last_error = Some(e.into());
                 println!("Push error: {:?}. Retrying...", last_error);
                 std::thread::sleep(std::time::Duration::from_secs(2));
             }

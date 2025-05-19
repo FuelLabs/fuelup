@@ -30,22 +30,29 @@ fn main() -> Result<()> {
 
     println!("Using Sway/Forc version: {}", forc_version);
 
+    // Get the GitHub token from environment
+    let github_token = env::var(GITHUB_TOKEN).context(
+        "GitHub token not found in environment. Set the GITHUB_TOKEN environment variable.",
+    )?;
+
     // Clone and update the repositories
-    update_compiler_explorer(&forc_version)?;
+    update_compiler_explorer(&forc_version, &github_token)?;
 
     Ok(())
 }
 
-fn update_compiler_explorer(version: &str) -> Result<()> {
+fn update_compiler_explorer(version: &str, github_token: &str) -> Result<()> {
     // Create a unique branch name based on the version
     let branch_name = format!("update-sway-{}", version);
 
     // Clone the forks
-    let (infra_temp_dir, infra_path) = git::clone_fork(FORK_INFRA_REPO, "infra", &branch_name)?;
+    let (infra_temp_dir, infra_path) =
+        git::clone_fork(FORK_INFRA_REPO, "infra", &branch_name, github_token)?;
     let (ce_temp_dir, ce_path) = git::clone_fork(
         FORK_COMPILER_EXPLORER_REPO,
         "compiler-explorer",
         &branch_name,
+        github_token,
     )?;
 
     // Make updates
@@ -61,20 +68,22 @@ fn update_compiler_explorer(version: &str) -> Result<()> {
     println!("Updated for Sway version {}", version);
 
     // Commit and push changes
-    git::commit_and_push(&infra_path, version, "Updated Sway in infra", &branch_name)?;
+    git::commit_and_push(
+        &infra_path,
+        version,
+        "Updated Sway in infra",
+        &branch_name,
+        github_token,
+    )?;
     git::commit_and_push(
         &ce_path,
         version,
         "Updated Sway in compiler-explorer",
         &branch_name,
+        github_token,
     )?;
 
     println!("Committed and pushed changes to forks");
-
-    // Get the GitHub token from environment
-    let github_token = env::var(GITHUB_TOKEN).context(
-        "GitHub token not found in environment. Set the GITHUB_TOKEN environment variable.",
-    )?;
 
     // Create pull requests
     git::create_pull_request(
@@ -85,7 +94,7 @@ fn update_compiler_explorer(version: &str) -> Result<()> {
             branch_name
         ),
         version,
-        &github_token,
+        github_token,
     )?;
 
     git::create_pull_request(
@@ -96,7 +105,7 @@ fn update_compiler_explorer(version: &str) -> Result<()> {
             branch_name
         ),
         version,
-        &github_token,
+        github_token,
     )?;
 
     // Keep directories alive until the end of the function

@@ -34,6 +34,7 @@ fn fuelup_show_latest() -> Result<()> {
             latest-{target} (default)
               forc : 0.1.0
                 - forc-client
+                  - forc-call : 0.1.0
                   - forc-deploy : 0.1.0
                   - forc-run : 0.1.0
                   - forc-submit : 0.1.0
@@ -80,6 +81,7 @@ fn fuelup_show_and_switch() -> Result<()> {
             latest-{target} (default)
               forc : 0.1.0
                 - forc-client
+                  - forc-call : 0.1.0
                   - forc-deploy : 0.1.0
                   - forc-run : 0.1.0
                   - forc-submit : 0.1.0
@@ -119,6 +121,7 @@ fn fuelup_show_and_switch() -> Result<()> {
             nightly-{target} (default)
               forc : 0.2.0
                 - forc-client
+                  - forc-call : 0.2.0
                   - forc-deploy : 0.2.0
                   - forc-run : 0.2.0
                   - forc-submit : 0.2.0
@@ -164,6 +167,7 @@ fn fuelup_show_custom() -> Result<()> {
             my_toolchain (default)
               forc : not found
                 - forc-client
+                  - forc-call : not found
                   - forc-deploy : not found
                   - forc-run : not found
                   - forc-submit : not found
@@ -207,6 +211,7 @@ fn fuelup_show_override() -> Result<()> {
             testnet-{target} (override), path: {}
               forc : not found
                 - forc-client
+                  - forc-call : not found
                   - forc-deploy : not found
                   - forc-run : not found
                   - forc-submit : not found
@@ -253,6 +258,7 @@ fn fuelup_show_latest_then_override() -> Result<()> {
             latest-{target} (default)
               forc : 0.1.0
                 - forc-client
+                  - forc-call : 0.1.0
                   - forc-deploy : 0.1.0
                   - forc-run : 0.1.0
                   - forc-submit : 0.1.0
@@ -305,6 +311,7 @@ fn fuelup_show_latest_then_override() -> Result<()> {
             nightly-2022-08-30-{target} (override), path: {ovveride_path_str}
               forc : 0.2.0
                 - forc-client
+                  - forc-call : 0.2.0
                   - forc-deploy : 0.2.0
                   - forc-run : 0.2.0
                   - forc-submit : 0.2.0

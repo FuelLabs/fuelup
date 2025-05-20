@@ -72,6 +72,7 @@ const VERSION_2: &Version = &Version::new(0, 2, 0);
 
 pub static ALL_BINS: &[&str] = &[
     "forc",
+    "forc-call",
     "forc-crypto",
     "forc-debug",
     "forc-deploy",
@@ -108,8 +109,8 @@ pub fn yesterday() -> String {
     let current_date = Utc::now();
     let yesterday = current_date - Duration::days(1);
     let _ = yesterday.format("%Y-%m-%d").to_string();
-    // TODO: point to a nightly that has `forc-submit`
-    "2024-11-16".to_string()
+    // NOTE: point to a version that includes `forc-call`.
+    "2025-05-19".to_string()
 }
 
 impl TestCfg {

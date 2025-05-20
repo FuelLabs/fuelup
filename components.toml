@@ -1,7 +1,7 @@
 [component.forc]
 name = "forc"
 tarball_prefix = "forc-binaries"
-executables = ["forc", "forc-fmt", "forc-lsp", "forc-doc", "forc-deploy", "forc-run"]
+executables = ["forc", "forc-fmt", "forc-lsp", "forc-doc", "forc-call", "forc-deploy", "forc-run"]
 repository_name = "sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 publish = true
@@ -51,7 +51,7 @@ targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 name = "forc-client"
 tarball_prefix = "forc-binaries"
 is_plugin = true
-executables = ["forc-deploy", "forc-run", "forc-submit"]
+executables = ["forc-call", "forc-deploy", "forc-run", "forc-submit"]
 repository_name = "sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 

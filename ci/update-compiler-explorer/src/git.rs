@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use std::{env, path::Path, process::Command};
+use std::{path::Path, process::Command};
 use tempfile::tempdir;
 
 pub fn clone_fork(
@@ -11,44 +11,63 @@ pub fn clone_fork(
     let temp_dir = tempdir()?;
     let repo_path = temp_dir.path().join(dir_name);
 
-    // Clone the fork using the token
     let clone_url = format!(
         "https://x-access-token:{}@github.com/{}.git",
         github_token, repo
     );
     let clone_status = Command::new("git")
-        .args(["clone", &clone_url, repo_path.to_str().unwrap()])
+        .args([
+            "clone",
+            "--verbose",
+            &clone_url,
+            repo_path.to_str().unwrap(),
+        ])
         .status()
-        .with_context(|| format!("Failed to clone {} repo using token", dir_name))?;
+        .with_context(|| format!("Failed to execute git clone for {} repo", dir_name))?;
 
     if !clone_status.success() {
         return Err(anyhow::anyhow!(
-            "Failed to clone {} repo. Exit code: {:?}",
+            "Failed to clone {} repo ('{}') with token. Exit code: {:?}. Ensure GITHUB_TOKEN has correct permissions (e.g., contents: read/write) for the repository.",
             dir_name,
-            clone_status.code()
+            repo,
+            clone_status.code(),
         ));
     }
 
-    // The cloned fork is 'origin' by default.
-    // Add the actual upstream repository.
     let upstream_name = if repo.starts_with("FuelLabs/") {
         repo.split('/').nth(1).unwrap_or(dir_name)
     } else {
-        dir_name // Should not happen if FORK_XXX_REPO constants are correct
+        dir_name
     };
     let upstream_url = format!("https://github.com/compiler-explorer/{}.git", upstream_name);
 
-    Command::new("git")
+    let remote_add_status = Command::new("git")
         .current_dir(&repo_path)
         .args(["remote", "add", "upstream", &upstream_url])
         .status()
         .with_context(|| format!("Failed to add upstream remote for {}", repo))?;
+    if !remote_add_status.success() {
+        return Err(anyhow::anyhow!(
+            "Failed to add upstream remote ('{}') for {}. Exit code: {:?}",
+            upstream_url,
+            repo,
+            remote_add_status.code()
+        ));
+    }
 
-    Command::new("git")
+    let fetch_status = Command::new("git")
         .current_dir(&repo_path)
-        .args(["fetch", "upstream"])
+        .args(["-c", "credential.helper=", "fetch", "--verbose", "upstream"])
         .status()
-        .context("Failed to fetch from upstream")?;
+        .context("Failed to execute git fetch upstream")?;
+
+    if !fetch_status.success() {
+        return Err(anyhow::anyhow!(
+            "Failed to fetch from upstream remote {}. Exit code: {:?}. This might indicate an issue fetching a public repository or an unexpected authentication prompt.",
+            upstream_url,
+            fetch_status.code()
+        ));
+    }
 
     let upstream_default_branch = "main";
 
@@ -70,11 +89,19 @@ pub fn clone_fork(
         ));
     }
 
-    Command::new("git")
+    let checkout_status = Command::new("git")
         .current_dir(&repo_path)
         .args(["checkout", "-b", branch_name])
         .status()
-        .with_context(|| format!("Failed to create branch {}", branch_name))?;
+        .with_context(|| format!("Failed to execute git checkout -b {}", branch_name))?;
+
+    if !checkout_status.success() {
+        return Err(anyhow::anyhow!(
+            "Failed to create branch {}. Exit code: {:?}",
+            branch_name,
+            checkout_status.code()
+        ));
+    }
 
     Ok((temp_dir, repo_path))
 }
@@ -87,13 +114,20 @@ pub fn commit_and_push(
     github_token: &str,
 ) -> Result<()> {
     // Configure git user
-    Command::new("git")
+    let config_user_name_status = Command::new("git")
         .current_dir(repo_path)
         .args(["config", "user.name", "Sway Compiler Explorer Bot"])
         .status()
-        .context("Failed to set git user name")?;
+        .context("Failed to execute git config user.name")?;
 
-    Command::new("git")
+    if !config_user_name_status.success() {
+        return Err(anyhow::anyhow!(
+            "Failed to set git user.name. Exit code: {:?}",
+            config_user_name_status.code()
+        ));
+    }
+
+    let config_user_email_status = Command::new("git")
         .current_dir(repo_path)
         .args([
             "config",
@@ -101,13 +135,27 @@ pub fn commit_and_push(
             "fuel-service-user@users.noreply.github.com",
         ])
         .status()
-        .context("Failed to set git user email")?;
+        .context("Failed to execute git config user.email")?;
 
-    Command::new("git")
+    if !config_user_email_status.success() {
+        return Err(anyhow::anyhow!(
+            "Failed to set git user.email. Exit code: {:?}",
+            config_user_email_status.code()
+        ));
+    }
+
+    let add_status = Command::new("git")
         .current_dir(repo_path)
         .args(["add", "."])
         .status()
-        .context("Failed to git add")?;
+        .context("Failed to execute git add")?;
+
+    if !add_status.success() {
+        return Err(anyhow::anyhow!(
+            "Failed to git add changes. Exit code: {:?}",
+            add_status.code()
+        ));
+    }
 
     // Commit, allow it to "fail" if there are no changes (it will exit non-zero)
     let commit_status = Command::new("git")
@@ -172,13 +220,17 @@ pub fn create_pull_request(
             .context("Failed to execute gh command")?;
 
         if !output.status.success() {
-            let error = String::from_utf8_lossy(&output.stderr);
-            println!("PR creation error: {}", error);
-            return Err(anyhow::anyhow!("Failed to create pull request: {}", error));
+            let error_msg = String::from_utf8_lossy(&output.stderr);
+            println!("PR creation error (gh): {}", error_msg);
+            return Err(anyhow::anyhow!(
+                "Failed to create pull request using gh: {}. Exit code: {:?}",
+                error_msg,
+                output.status.code()
+            ));
         }
 
         let url = String::from_utf8_lossy(&output.stdout);
-        println!("Created pull request: {}", url);
+        println!("Created pull request: {}", url.trim());
     } else {
         // Fallback to using curl with GitHub API
         println!("GitHub CLI not found. Using direct API call...");
@@ -200,13 +252,8 @@ pub fn create_pull_request(
             version, branch_name, version
         );
 
-        println!(
-            "API URL: https://api.github.com/repos/{}/{}/pulls",
-            owner, repo_name
-        );
-        println!("PR payload: {}", payload);
+        // Removed API URL and payload print here, curl -v will show it.
 
-        // Use curl with verbose output
         let output = Command::new("curl")
             .args([
                 "-v", // Verbose output
@@ -228,24 +275,37 @@ pub fn create_pull_request(
         let response_body = String::from_utf8_lossy(&output.stdout);
         let error_output = String::from_utf8_lossy(&output.stderr);
 
-        println!("API response: {}", response_body);
-        if !error_output.is_empty() {
-            println!("Curl stderr: {}", error_output);
-        }
-
         if !output.status.success() {
+            println!("Curl command failed. HTTP Status: {}", output.status);
+            println!("Curl response body: {}", response_body);
+            println!("Curl stderr (verbose logs): {}", error_output);
             return Err(anyhow::anyhow!(
-                "Failed to create pull request via API. Status code: {}",
+                "Failed to create pull request via API (curl). Status code: {}. See CI logs for curl's verbose output.",
                 output.status
             ));
         }
 
         // Check for error message in response
-        if response_body.contains("\"message\":") && response_body.contains("\"error\":") {
-            return Err(anyhow::anyhow!("GitHub API error: {}", response_body));
+        if response_body.contains("\"message\":")
+            && (response_body.contains("\"errors\":")
+                || response_body.to_lowercase().contains("problem"))
+            && !response_body.contains("\"html_url\":")
+        {
+            println!(
+                "GitHub API reported an error in response body: {}",
+                response_body
+            );
+            return Err(anyhow::anyhow!(
+                "GitHub API call succeeded with HTTP {} but reported an error in the response body: {}",
+                output.status,
+                response_body
+            ));
         }
 
-        println!("Created pull request via GitHub API");
+        println!(
+            "Successfully created pull request via GitHub API (HTTP {}).",
+            output.status
+        );
 
         // Try to extract PR URL
         if let Some(html_url) = response_body
@@ -254,13 +314,16 @@ pub fn create_pull_request(
             .and_then(|line| {
                 let parts: Vec<&str> = line.split('"').collect();
                 parts
-                    .iter()
-                    .position(|&s| s == "html_url")
-                    .and_then(|pos| parts.get(pos + 2))
-                    .map(|s| *s)
+                    .get(parts.iter().position(|&s| s == "html_url")? + 2)
+                    .copied()
             })
         {
             println!("Pull request URL: {}", html_url);
+        } else {
+            println!(
+                "Could not reliably extract PR URL from API response. Full response: {}",
+                response_body
+            );
         }
     }
 
@@ -285,8 +348,9 @@ fn git_push_with_retry(
 
     if !origin_url_output.status.success() {
         return Err(anyhow::anyhow!(
-            "Failed to get origin URL: {}",
-            String::from_utf8_lossy(&origin_url_output.stderr)
+            "Failed to get origin URL: {}. Exit code: {:?}",
+            String::from_utf8_lossy(&origin_url_output.stderr),
+            origin_url_output.status.code()
         ));
     }
     let origin_url_str = String::from_utf8_lossy(&origin_url_output.stdout)
@@ -324,30 +388,39 @@ fn git_push_with_retry(
     while attempt < max_retries {
         println!("Push attempt {} of {}", attempt + 1, max_retries);
 
-        let result = Command::new("git")
+        let push_status_result = Command::new("git")
             .current_dir(repo_path)
             .args([
                 "push",
-                "-f", // Force push is used, ensure this is intended for the target branches
+                "--verbose",
+                "-f",
                 "-u",
-                &authenticated_push_url,          // Use the authenticated URL
-                &format!("HEAD:{}", branch_name), // Push current HEAD to the remote branch_name
+                &authenticated_push_url,
+                &format!("HEAD:{}", branch_name),
             ])
-            .status();
+            .status()
+            .context("Failed to execute git push command");
 
-        match result {
+        match push_status_result {
             Ok(status) if status.success() => {
                 println!("Successfully pushed to branch {}", branch_name);
                 return Ok(());
             }
             Ok(status) => {
                 println!("Push failed with exit code: {:?}", status.code());
-                // Wait before retrying
+                last_error = Some(anyhow::anyhow!(
+                    "Push attempt {} failed with exit code: {:?}",
+                    attempt + 1,
+                    status.code()
+                ));
                 std::thread::sleep(std::time::Duration::from_secs(2));
             }
             Err(e) => {
-                last_error = Some(e.into());
-                println!("Push error: {:?}. Retrying...", last_error);
+                last_error = Some(e);
+                println!(
+                    "Push command execution error: {:?}. Retrying...",
+                    last_error
+                );
                 std::thread::sleep(std::time::Duration::from_secs(2));
             }
         }

@@ -109,7 +109,7 @@ pub fn yesterday() -> String {
     let yesterday = current_date - Duration::days(1);
     let _ = yesterday.format("%Y-%m-%d").to_string();
     // TODO: point to a nightly that has `forc-submit`
-    "2024-11-16".to_string()
+    "2025-05-20".to_string()
 }
 
 impl TestCfg {

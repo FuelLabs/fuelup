@@ -108,9 +108,8 @@ pub static ALL_BINS: &[&str] = &[
 pub fn yesterday() -> String {
     let current_date = Utc::now();
     let yesterday = current_date - Duration::days(1);
-    let _ = yesterday.format("%Y-%m-%d").to_string();
     // NOTE: point to a version that includes `forc-call`.
-    "2025-05-19".to_string()
+    yesterday.format("%Y-%m-%d").to_string()
 }
 
 impl TestCfg {

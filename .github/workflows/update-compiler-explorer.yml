@@ -1,50 +1,11 @@
 name: Update Compiler Explorer
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - gh-pages
-    paths:
-      - 'channel-fuel-mainnet.toml'
+  workflow_dispatch: # Only runs when manually dispatched
+    # No inputs needed if the script always determines the version automatically
 
 jobs:
-  check-forc-version:
-    runs-on: ubuntu-latest
-    outputs:
-      changed: ${{ steps.check-version.outputs.changed }}
-    steps:
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v3
-        with:
-          ref: gh-pages
-          fetch-depth: 2
-
-      - name: Check if Forc version changed
-        id: check-version
-        run: |
-          # Get the current and previous version of the file
-          git show HEAD:channel-fuel-mainnet.toml > current.toml
-          git show HEAD~1:channel-fuel-mainnet.toml > previous.toml 2>/dev/null || touch previous.toml
-          
-          # Extract the forc version specifically
-          NEW_VERSION=$(grep -A1 '[pkg.forc]' current.toml | grep 'version' | cut -d'"' -f2)
-          OLD_VERSION=$(grep -A1 '[pkg.forc]' previous.toml | grep 'version' | cut -d'"' -f2 || echo "")
-          
-          echo "Current Forc version: $NEW_VERSION"
-          echo "Previous Forc version: $OLD_VERSION"
-          
-          if [ "$NEW_VERSION" != "$OLD_VERSION" ]; then
-            echo "Forc version changed from $OLD_VERSION to $NEW_VERSION"
-            echo "changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "Forc version unchanged"
-            echo "changed=false" >> $GITHUB_OUTPUT
-          fi
-
   update-compiler-explorer:
-    needs: check-forc-version
-    if: needs.check-forc-version.outputs.changed == 'true'
     runs-on: ubuntu-latest
     environment: fuelup-bot
     steps:
@@ -61,6 +22,9 @@ jobs:
         with:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.APP_KEY }}
+          # Ensure the GitHub App (identified by APP_ID) is installed on 
+          # FuelLabs/compiler-explorer-infra and FuelLabs/compiler-explorer
+          # with 'contents: read' and 'contents: write' permissions.
           repositories: compiler-explorer-infra, compiler-explorer
 
       - name: Run update-compiler-explorer

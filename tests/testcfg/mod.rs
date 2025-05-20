@@ -81,6 +81,7 @@ pub static ALL_BINS: &[&str] = &[
     "forc-lsp",
     "forc-migrate",
     "forc-node",
+    "forc-publish",
     "forc-run",
     "forc-submit",
     "forc-tx",

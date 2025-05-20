@@ -79,6 +79,14 @@ executables = ["forc-node"]
 repository_name = "sway"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 
+[component.forc-publish]
+name = "forc-publish"
+tarball_prefix = "forc-binaries"
+is_plugin = true
+executables = ["forc-publish"]
+repository_name = "sway"
+targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
+
 [component.fuel-core]
 name = "fuel-core"
 tarball_prefix = "fuel-core"

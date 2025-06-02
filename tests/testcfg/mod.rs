@@ -106,10 +106,13 @@ pub static ALL_BINS: &[&str] = &[
 /// assert!(re.is_match(&yesterday));
 /// ```
 pub fn yesterday() -> String {
-    let current_date = Utc::now();
-    let yesterday = current_date - Duration::days(1);
-    // NOTE: point to a version that includes `forc-call`.
-    yesterday.format("%Y-%m-%d").to_string()
+    // TODO: once https://github.com/FuelLabs/fuelup/issues/739 is closed, this
+    // can be reverted back to being dynamically calculated as actual yesterday
+    //
+    // let current_date = Utc::now();
+    // let yesterday = current_date - Duration::days(1);
+    // yesterday.format("%Y-%m-%d").to_string()
+    "2025-05-26".to_string()
 }
 
 impl TestCfg {

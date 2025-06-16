@@ -108,6 +108,19 @@ pub fn clone_fork(
         ));
     }
 
+    // Remove workflow files from git tracking to avoid permission issues
+    let rm_status = Command::new("git")
+        .current_dir(&repo_path)
+        .args(["rm", "-r", "--cached", ".github/workflows/"])
+        .status();
+
+    // Don't fail if .github/workflows doesn't exist
+    if let Ok(status) = rm_status {
+        if status.success() {
+            println!("Removed .github/workflows/ from git tracking");
+        }
+    }
+
     Ok((temp_dir, repo_path))
 }
 

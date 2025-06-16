@@ -34,8 +34,13 @@ pub fn clone_fork(
         ));
     }
 
+    // Map the repo to the upstream name
     let upstream_name = if repo.starts_with("FuelLabs/") {
-        repo.split('/').nth(1).unwrap_or(dir_name)
+        match repo {
+            "FuelLabs/compiler-explorer-infra" => "infra",
+            "FuelLabs/compiler-explorer" => "compiler-explorer", 
+            _ => unreachable!("Unexpected repo: {}", repo),
+        }
     } else {
         dir_name
     };

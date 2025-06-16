@@ -38,7 +38,7 @@ pub fn clone_fork(
     let upstream_name = if repo.starts_with("FuelLabs/") {
         match repo {
             "FuelLabs/compiler-explorer-infra" => "infra",
-            "FuelLabs/compiler-explorer" => "compiler-explorer", 
+            "FuelLabs/compiler-explorer" => "compiler-explorer",
             _ => unreachable!("Unexpected repo: {}", repo),
         }
     } else {

@@ -57,13 +57,16 @@ fn update_compiler_explorer(version: &str, github_token: &str) -> Result<()> {
 
     // Make updates
     let content = fs::read_to_string(&ce_path.join(AMAZON_PROPERTIES_PATH))?;
-    update_amazon_properties(&content, version)?;
+    let updated_content = update_amazon_properties(&content, version)?;
+    fs::write(&ce_path.join(AMAZON_PROPERTIES_PATH), updated_content)?;
 
     let content = fs::read_to_string(&infra_path.join(SWAY_YAML_PATH))?;
-    update_sway_yaml(&content, version)?;
+    let updated_content = update_sway_yaml(&content, version)?;
+    fs::write(&infra_path.join(SWAY_YAML_PATH), updated_content)?;
 
     let content = fs::read_to_string(&infra_path.join(LIBRARIES_YAML_PATH))?;
-    update_libraries_yaml(&content, version)?;
+    let updated_content = update_libraries_yaml(&content, version)?;
+    fs::write(&infra_path.join(LIBRARIES_YAML_PATH), updated_content)?;
 
     println!("Updated for Sway version {}", version);
 

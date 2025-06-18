@@ -171,7 +171,8 @@ fn update_sway_yaml(content: &str, version: &str) -> Result<String> {
 
 /// Updates the targets section of the sway std library in libraries.yaml with the given version
 fn update_libraries_yaml(content: &str, version: &str) -> Result<String> {
-    let mut lines: Vec<String> = content.lines().map(String::from).collect();
+    // Split while preserving all original formatting
+    let mut lines: Vec<String> = content.split('\n').map(String::from).collect();
 
     // Find the "sway" section
     let sway_idx = lines
@@ -237,7 +238,13 @@ fn update_libraries_yaml(content: &str, version: &str) -> Result<String> {
     let new_line = format!("{}- {}", indent, version);
     lines.insert(last_target_idx + 1, new_line);
 
-    Ok(lines.join("\n"))
+    // Preserve trailing newline if it existed in the original
+    let result = if content.ends_with('\n') {
+        lines.join("\n") + "\n"
+    } else {
+        lines.join("\n")
+    };
+    Ok(result)
 }
 
 /// Adds a new compiler version to the amazon.properties file

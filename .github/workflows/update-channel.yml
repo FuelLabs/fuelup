@@ -144,6 +144,34 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Build PR title with changed packages
+          PR_TITLE_PARTS=()
+          
+          # Add packages that were explicitly provided as inputs
+          if [ -n "${{ github.event.inputs.forc }}" ]; then
+            PR_TITLE_PARTS+=("forc@v${FORC_VERSION}")
+          fi
+          if [ -n "${{ github.event.inputs.forc-wallet }}" ]; then
+            PR_TITLE_PARTS+=("forc-wallet@v${FORC_WALLET_VERSION}")
+          fi
+          if [ -n "${{ github.event.inputs.fuel-core }}" ]; then
+            PR_TITLE_PARTS+=("fuel-core@v${FUEL_CORE_VERSION}")
+          fi
+          if [ -n "${{ github.event.inputs.fuel-core-keygen }}" ]; then
+            PR_TITLE_PARTS+=("fuel-core-keygen@v${FUEL_CORE_KEYGEN_VERSION}")
+          fi
+          
+          # Build the final PR title
+          if [ ${#PR_TITLE_PARTS[@]} -eq 0 ]; then
+            # No specific packages provided, use generic title
+            PR_TITLE="bump ${{ github.event.inputs.channel }} channel"
+          else
+            # Join the parts with ", "
+            IFS=", "
+            PR_TITLE_PACKAGES="${PR_TITLE_PARTS[*]}"
+            PR_TITLE="bump ${{ github.event.inputs.channel }}: ${PR_TITLE_PACKAGES}"
+          fi
+
           # Build PR description
           PR_DESCRIPTION="Bumps ${{ github.event.inputs.channel }} channel.
 
@@ -159,12 +187,12 @@ jobs:
           if [ -z "$PR_EXISTS" ]; then
             # Create a new PR
             gh pr create \
-              --title "bump ${{ github.event.inputs.channel }} channel" \
+              --title "$PR_TITLE" \
               --body "$PR_DESCRIPTION" \
               --base gh-pages \
               --head "$BRANCH_NAME"
           else
             # Update existing PR
-            echo "PR #$PR_EXISTS already exists, updating description..."
-            gh pr edit "$PR_EXISTS" --body "$PR_DESCRIPTION"
+            echo "PR #$PR_EXISTS already exists, updating title and description..."
+            gh pr edit "$PR_EXISTS" --title "$PR_TITLE" --body "$PR_DESCRIPTION"
           fi

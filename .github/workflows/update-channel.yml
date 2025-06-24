@@ -151,8 +151,6 @@ jobs:
           fi
           if [ -n "${{ github.event.inputs.fuel-core }}" ]; then
             PR_TITLE_PARTS+=("fuel-core@v${FUEL_CORE_VERSION}")
-            # fuel-core-keygen always uses the same version as fuel-core
-            PR_TITLE_PARTS+=("fuel-core-keygen@v${FUEL_CORE_KEYGEN_VERSION}")
           fi
           
           # Build the final PR title

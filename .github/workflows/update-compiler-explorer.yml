@@ -17,19 +17,9 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          app-id: ${{ vars.APP_ID }}
-          private-key: ${{ secrets.APP_KEY }}
-          # Ensure the GitHub App (identified by APP_ID) is installed on 
-          # FuelLabs/compiler-explorer-infra and FuelLabs/compiler-explorer
-          # with 'contents: read' and 'contents: write' permissions.
-          repositories: compiler-explorer-infra, compiler-explorer
-
       - name: Run update-compiler-explorer
         env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.SERVICE_USER_PAT }}
         run: |
           cd ci/update-compiler-explorer
           cargo run

@@ -58,7 +58,16 @@ where
     let pos = s
         .find('=')
         .ok_or_else(|| format!("invalid KEY=value: no `=` found in `{}`", s))?;
-    Ok((s[..pos].parse()?, s[pos + 1..].parse()?))
+    let key = s[..pos].parse()?;
+    let value_str = &s[pos + 1..];
+    // Handle version strings with 'v' prefix
+    let cleaned_value_str = if value_str.starts_with('v') {
+        &value_str[1..]
+    } else {
+        value_str
+    };
+    let value = cleaned_value_str.parse()?;
+    Ok((key, value))
 }
 
 #[derive(Debug, Parser)]

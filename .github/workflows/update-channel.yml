@@ -1,0 +1,190 @@
+name: Update Channel
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  RUST_VERSION: 1.85.0
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Channel to update (devnet, mainnet, nightly, preview, testnet)'
+        required: true
+        type: choice
+        options:
+          - devnet
+          - mainnet
+          - nightly
+          - preview
+          - testnet
+      forc:
+        description: 'forc version (e.g., 0.68.4 or v0.68.4)'
+        required: false
+        type: string
+      forc-wallet:
+        description: 'forc-wallet version (e.g., 0.14.0 or v0.14.0)'
+        required: false
+        type: string
+      fuel-core:
+        description: 'fuel-core version (e.g., 0.43.2 or v0.43.2)'
+        required: false
+        type: string
+
+jobs:
+  update-channel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout master branch
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Set up Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+
+      - name: Install build-channel script
+        run: cargo install --debug --path ./ci/build-channel
+
+      - name: Switch to gh-pages branch
+        run: |
+          git fetch origin gh-pages
+          git checkout gh-pages
+
+      - name: Create bump branch
+        run: |
+          CURRENT_DATE=$(date +'%Y-%m-%d')
+          BRANCH_NAME="bump/${{ github.event.inputs.channel }}-${CURRENT_DATE}"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "CURRENT_DATE=$CURRENT_DATE" >> $GITHUB_ENV
+          
+          # Check if branch exists remotely
+          if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
+            echo "Branch $BRANCH_NAME already exists remotely, checking it out"
+            git fetch origin "$BRANCH_NAME"
+            git checkout -b "$BRANCH_NAME" origin/"$BRANCH_NAME"
+          else
+            echo "Creating new branch $BRANCH_NAME"
+            git checkout -b "$BRANCH_NAME"
+          fi
+
+      - name: Build channel
+        run: |
+          CHANNEL_FILE="channel-fuel-${{ github.event.inputs.channel }}.toml"
+          echo "CHANNEL_FILE=$CHANNEL_FILE" >> $GITHUB_ENV
+
+          # Build script arguments
+          ARGS="$CHANNEL_FILE $CURRENT_DATE"
+
+          # Handle nightly channel
+          if [ "${{ github.event.inputs.channel }}" = "nightly" ]; then
+            ARGS="--nightly $ARGS"
+          fi
+
+          # Add package versions if provided
+          if [ -n "${{ github.event.inputs.forc }}" ]; then
+            ARGS="$ARGS forc=${{ github.event.inputs.forc }}"
+          fi
+          if [ -n "${{ github.event.inputs.forc-wallet }}" ]; then
+            ARGS="$ARGS forc-wallet=${{ github.event.inputs.forc-wallet }}"
+          fi
+          if [ -n "${{ github.event.inputs.fuel-core }}" ]; then
+            ARGS="$ARGS fuel-core=${{ github.event.inputs.fuel-core }}"
+            # fuel-core-keygen always uses the same version as fuel-core
+            ARGS="$ARGS fuel-core-keygen=${{ github.event.inputs.fuel-core }}"
+          fi
+
+          # Run the build-channel binary
+          echo "Running: build-channel $ARGS"
+          build-channel $ARGS
+
+      - name: Extract package versions for PR description
+        id: extract-versions
+        run: |
+          CHANNEL_FILE="channel-fuel-${{ github.event.inputs.channel }}.toml"
+
+          # Extract versions from the generated TOML file
+          FORC_VERSION=$(grep -A1 '\[pkg\.forc\]' "$CHANNEL_FILE" | grep 'version' | sed 's/.*"\(.*\)".*/\1/')
+          FORC_WALLET_VERSION=$(grep -A1 '\[pkg\.forc-wallet\]' "$CHANNEL_FILE" | grep 'version' | sed 's/.*"\(.*\)".*/\1/')
+          FUEL_CORE_VERSION=$(grep -A1 '\[pkg\.fuel-core\]' "$CHANNEL_FILE" | grep 'version' | sed 's/.*"\(.*\)".*/\1/')
+          FUEL_CORE_KEYGEN_VERSION=$(grep -A1 '\[pkg\.fuel-core-keygen\]' "$CHANNEL_FILE" | grep 'version' | sed 's/.*"\(.*\)".*/\1/')
+
+          echo "FORC_VERSION=$FORC_VERSION" >> $GITHUB_ENV
+          echo "FORC_WALLET_VERSION=$FORC_WALLET_VERSION" >> $GITHUB_ENV
+          echo "FUEL_CORE_VERSION=$FUEL_CORE_VERSION" >> $GITHUB_ENV
+          echo "FUEL_CORE_KEYGEN_VERSION=$FUEL_CORE_KEYGEN_VERSION" >> $GITHUB_ENV
+
+      - name: Commit and push changes
+        run: |
+          git add "$CHANNEL_FILE"
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          else
+            git commit -m "chore: update ${{ github.event.inputs.channel }} channel"
+            # Force push to handle existing branches
+            git push --force-with-lease origin "$BRANCH_NAME"
+          fi
+
+      - name: Create or update pull request
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Build PR title with changed packages
+          PR_TITLE_PARTS=()
+          
+          # Add packages that were explicitly provided as inputs
+          if [ -n "${{ github.event.inputs.forc }}" ]; then
+            PR_TITLE_PARTS+=("forc@v${FORC_VERSION}")
+          fi
+          if [ -n "${{ github.event.inputs.forc-wallet }}" ]; then
+            PR_TITLE_PARTS+=("forc-wallet@v${FORC_WALLET_VERSION}")
+          fi
+          if [ -n "${{ github.event.inputs.fuel-core }}" ]; then
+            PR_TITLE_PARTS+=("fuel-core@v${FUEL_CORE_VERSION}")
+          fi
+          
+          # Build the final PR title
+          if [ ${#PR_TITLE_PARTS[@]} -eq 0 ]; then
+            # No specific packages provided, use generic title
+            PR_TITLE="bump ${{ github.event.inputs.channel }} channel"
+          else
+            # Join the parts with ", "
+            IFS=", "
+            PR_TITLE_PACKAGES="${PR_TITLE_PARTS[*]}"
+            PR_TITLE="bump ${{ github.event.inputs.channel }}: ${PR_TITLE_PACKAGES}"
+          fi
+
+          # Build PR description
+          PR_DESCRIPTION="Bumps ${{ github.event.inputs.channel }} channel.
+
+          **${{ github.event.inputs.channel }}:**
+          \`forc\`: \`v${FORC_VERSION}\`
+          \`forc-wallet\`: \`v${FORC_WALLET_VERSION}\`
+          \`fuel-core\`: \`v${FUEL_CORE_VERSION}\`
+          \`fuel-core-keygen\`: \`v${FUEL_CORE_KEYGEN_VERSION}\`"
+
+          # Check if a PR already exists for this branch
+          PR_EXISTS=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number' || echo "")
+
+          if [ -z "$PR_EXISTS" ]; then
+            # Create a new PR
+            gh pr create \
+              --title "$PR_TITLE" \
+              --body "$PR_DESCRIPTION" \
+              --base gh-pages \
+              --head "$BRANCH_NAME"
+          else
+            # Update existing PR
+            echo "PR #$PR_EXISTS already exists, updating title and description..."
+            gh pr edit "$PR_EXISTS" --title "$PR_TITLE" --body "$PR_DESCRIPTION"
+          fi

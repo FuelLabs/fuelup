@@ -34,8 +34,13 @@ pub fn clone_fork(
         ));
     }
 
+    // Map the repo to the upstream name
     let upstream_name = if repo.starts_with("FuelLabs/") {
-        repo.split('/').nth(1).unwrap_or(dir_name)
+        match repo {
+            "FuelLabs/compiler-explorer-infra" => "infra",
+            "FuelLabs/compiler-explorer" => "compiler-explorer",
+            _ => unreachable!("Unexpected repo: {}", repo),
+        }
     } else {
         dir_name
     };
@@ -114,45 +119,18 @@ pub fn commit_and_push(
     github_token: &str,
 ) -> Result<()> {
     // Configure git user
-    let config_user_name_status = Command::new("git")
-        .current_dir(repo_path)
-        .args(["config", "user.name", "Sway Compiler Explorer Bot"])
-        .status()
-        .context("Failed to execute git config user.name")?;
+    configure_git_user(repo_path)?;
 
-    if !config_user_name_status.success() {
-        return Err(anyhow::anyhow!(
-            "Failed to set git user.name. Exit code: {:?}",
-            config_user_name_status.code()
-        ));
-    }
-
-    let config_user_email_status = Command::new("git")
-        .current_dir(repo_path)
-        .args([
-            "config",
-            "user.email",
-            "fuel-service-user@users.noreply.github.com",
-        ])
-        .status()
-        .context("Failed to execute git config user.email")?;
-
-    if !config_user_email_status.success() {
-        return Err(anyhow::anyhow!(
-            "Failed to set git user.email. Exit code: {:?}",
-            config_user_email_status.code()
-        ));
-    }
-
+    // Add everything except .github/workflows
     let add_status = Command::new("git")
         .current_dir(repo_path)
-        .args(["add", "."])
+        .args(["add", ".", ":(exclude).github/workflows/*"])
         .status()
-        .context("Failed to execute git add")?;
+        .context("Failed to execute git add with exclusions")?;
 
     if !add_status.success() {
         return Err(anyhow::anyhow!(
-            "Failed to git add changes. Exit code: {:?}",
+            "Failed to git add changes (excluding workflows). Exit code: {:?}",
             add_status.code()
         ));
     }
@@ -185,6 +163,40 @@ pub fn commit_and_push(
 
     // Push with retry using the token
     git_push_with_retry(repo_path, branch_name, 3, github_token)?;
+
+    Ok(())
+}
+
+fn configure_git_user(repo_path: &Path) -> Result<()> {
+    let config_user_name_status = Command::new("git")
+        .current_dir(repo_path)
+        .args(["config", "user.name", "Sway Compiler Explorer Bot"])
+        .status()
+        .context("Failed to execute git config user.name")?;
+
+    if !config_user_name_status.success() {
+        return Err(anyhow::anyhow!(
+            "Failed to set git user.name. Exit code: {:?}",
+            config_user_name_status.code()
+        ));
+    }
+
+    let config_user_email_status = Command::new("git")
+        .current_dir(repo_path)
+        .args([
+            "config",
+            "user.email",
+            "fuel-service-user@users.noreply.github.com",
+        ])
+        .status()
+        .context("Failed to execute git config user.email")?;
+
+    if !config_user_email_status.success() {
+        return Err(anyhow::anyhow!(
+            "Failed to set git user.email. Exit code: {:?}",
+            config_user_email_status.code()
+        ));
+    }
 
     Ok(())
 }

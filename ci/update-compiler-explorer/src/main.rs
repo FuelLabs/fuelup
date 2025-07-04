@@ -57,13 +57,16 @@ fn update_compiler_explorer(version: &str, github_token: &str) -> Result<()> {
 
     // Make updates
     let content = fs::read_to_string(&ce_path.join(AMAZON_PROPERTIES_PATH))?;
-    update_amazon_properties(&content, version)?;
+    let updated_content = update_amazon_properties(&content, version)?;
+    fs::write(&ce_path.join(AMAZON_PROPERTIES_PATH), updated_content)?;
 
     let content = fs::read_to_string(&infra_path.join(SWAY_YAML_PATH))?;
-    update_sway_yaml(&content, version)?;
+    let updated_content = update_sway_yaml(&content, version)?;
+    fs::write(&infra_path.join(SWAY_YAML_PATH), updated_content)?;
 
     let content = fs::read_to_string(&infra_path.join(LIBRARIES_YAML_PATH))?;
-    update_libraries_yaml(&content, version)?;
+    let updated_content = update_libraries_yaml(&content, version)?;
+    fs::write(&infra_path.join(LIBRARIES_YAML_PATH), updated_content)?;
 
     println!("Updated for Sway version {}", version);
 
@@ -168,7 +171,8 @@ fn update_sway_yaml(content: &str, version: &str) -> Result<String> {
 
 /// Updates the targets section of the sway std library in libraries.yaml with the given version
 fn update_libraries_yaml(content: &str, version: &str) -> Result<String> {
-    let mut lines: Vec<String> = content.lines().map(String::from).collect();
+    // Split while preserving all original formatting
+    let mut lines: Vec<String> = content.split('\n').map(String::from).collect();
 
     // Find the "sway" section
     let sway_idx = lines
@@ -234,7 +238,13 @@ fn update_libraries_yaml(content: &str, version: &str) -> Result<String> {
     let new_line = format!("{}- {}", indent, version);
     lines.insert(last_target_idx + 1, new_line);
 
-    Ok(lines.join("\n"))
+    // Preserve trailing newline if it existed in the original
+    let result = if content.ends_with('\n') {
+        lines.join("\n") + "\n"
+    } else {
+        lines.join("\n")
+    };
+    Ok(result)
 }
 
 /// Adds a new compiler version to the amazon.properties file
@@ -256,7 +266,7 @@ fn update_amazon_properties(content: &str, version: &str) -> Result<String> {
     // Clean up any problematic entries
     lines.retain(|l| {
         !(l.starts_with(&format!("compiler.{}.std=", compiler_id))
-            && !l.ends_with(&format!("/v{}", version)))
+            && !l.ends_with(&format!("/v{}/sway-lib-std", version)))
             && l != &format!("compiler.{}.semver", compiler_id)
     });
 
@@ -270,9 +280,9 @@ fn update_amazon_properties(content: &str, version: &str) -> Result<String> {
                 let ver = line.split('=').nth(1).unwrap_or("").trim();
 
                 let std_key = format!("{}.std", prefix);
-                let has_valid_std = lines
-                    .iter()
-                    .any(|l| l.starts_with(&std_key) && l.ends_with(&format!("/v{}", ver)));
+                let has_valid_std = lines.iter().any(|l| {
+                    l.starts_with(&std_key) && l.ends_with(&format!("/v{}/sway-lib-std", ver))
+                });
 
                 if !has_valid_std {
                     prefixes_to_fix.push((prefix, ver.to_string()));
@@ -291,7 +301,7 @@ fn update_amazon_properties(content: &str, version: &str) -> Result<String> {
         .any(|l| l.starts_with(&format!("compiler.{}.exe", compiler_id)))
     {
         let new_config = format!(
-            "compiler.{0}.exe=/opt/compiler-explorer/sway-{1}/forc-binaries/forc\ncompiler.{0}.semver={1}\ncompiler.{0}.name=sway {1}\ncompiler.{0}.std=/opt/compiler-explorer/libs/sway/std/v{1}",
+            "compiler.{0}.exe=/opt/compiler-explorer/sway-{1}/forc-binaries/forc\ncompiler.{0}.semver={1}\ncompiler.{0}.name=sway {1}\ncompiler.{0}.std=/opt/compiler-explorer/libs/sway/std/v{1}/sway-lib-std",
             compiler_id, version
         );
         lines.insert(tools_pos, new_config);
@@ -301,7 +311,8 @@ fn update_amazon_properties(content: &str, version: &str) -> Result<String> {
     for (prefix, ver) in prefixes_to_fix {
         // Remove any incorrect std lines
         lines.retain(|l| {
-            !(l.starts_with(&format!("{}.std", prefix)) && !l.ends_with(&format!("/v{}", ver)))
+            !(l.starts_with(&format!("{}.std", prefix))
+                && !l.ends_with(&format!("/v{}/sway-lib-std", ver)))
         });
 
         // Add the std line after name or semver
@@ -309,12 +320,18 @@ fn update_amazon_properties(content: &str, version: &str) -> Result<String> {
             .iter()
             .position(|l| l.starts_with(&format!("{}.name", prefix)))
         {
-            lines.insert(pos + 1, format!("{}.std={}/v{}", prefix, STD_LIB_PATH, ver));
+            lines.insert(
+                pos + 1,
+                format!("{}.std={}/v{}/sway-lib-std", prefix, STD_LIB_PATH, ver),
+            );
         } else if let Some(pos) = lines
             .iter()
             .position(|l| l.starts_with(&format!("{}.semver", prefix)))
         {
-            lines.insert(pos + 1, format!("{}.std={}/v{}", prefix, STD_LIB_PATH, ver));
+            lines.insert(
+                pos + 1,
+                format!("{}.std={}/v{}/sway-lib-std", prefix, STD_LIB_PATH, ver),
+            );
         }
     }
 
@@ -332,7 +349,13 @@ fn update_amazon_properties(content: &str, version: &str) -> Result<String> {
         }
     }
 
-    Ok(lines.join("\n"))
+    // Preserve trailing newline if it existed in the original
+    let result = if content.ends_with('\n') {
+        lines.join("\n") + "\n"
+    } else {
+        lines.join("\n")
+    };
+    Ok(result)
 }
 
 // Extracts the Forc version from the fuelup channel-fuel-mainnet.toml file
@@ -502,8 +525,8 @@ mod tests {
         ));
         assert!(lines.contains(&"compiler.swayv0670.semver=0.67.0"));
         assert!(lines.contains(&"compiler.swayv0670.name=sway 0.67.0"));
-        assert!(
-            lines.contains(&"compiler.swayv0670.std=/opt/compiler-explorer/libs/sway/std/v0.67.0")
-        );
+        assert!(lines.contains(
+            &"compiler.swayv0670.std=/opt/compiler-explorer/libs/sway/std/v0.67.0/sway-lib-std"
+        ));
     }
 }

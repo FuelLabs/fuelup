@@ -279,7 +279,7 @@ fn fuelup_show_latest_then_override() -> Result<()> {
         assert_eq!(stdout, expected_stdout);
 
         let override_path = cfg.home.join(FUEL_TOOLCHAIN_TOML_FILE);
-        let ovveride_path_str = override_path.to_string_lossy();
+        let override_path_str = override_path.to_string_lossy();
         let toolchain_override = ToolchainOverride {
             cfg: OverrideCfg::new(
                 ToolchainCfg {
@@ -308,7 +308,7 @@ fn fuelup_show_latest_then_override() -> Result<()> {
 
             active toolchain
             ----------------
-            nightly-2022-08-30-{target} (override), path: {ovveride_path_str}
+            nightly-2022-08-30-{target} (override), path: {override_path_str}
               forc : 0.2.0
                 - forc-client
                   - forc-call : 0.2.0

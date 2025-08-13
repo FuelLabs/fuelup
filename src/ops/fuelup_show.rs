@@ -83,7 +83,7 @@ pub fn show() -> Result<()> {
         } else {
             active_toolchain.bin_path.join(&component.name)
         };
-        
+
         let version_text: String = match get_bin_version(component_executable.as_path()) {
             Ok(version) => {
                 version_map.insert(component.name.clone(), version.clone());

@@ -55,6 +55,30 @@ channel = "testnet"
 forc = "0.65.0" # in testnet, forc is pinned to v0.66.1
 ```
 
+Alternatively, you can specify local paths to custom binaries. This is useful for development with locally-built tools:
+
+```toml
+[toolchain]
+channel = "testnet"
+
+[components]
+forc = "/usr/local/bin/forc" # absolute path to custom forc binary
+fuel-core = "./bin/fuel-core" # relative path from fuel-toolchain.toml location
+```
+
+You can also mix version specifications with local paths:
+
+```toml
+[toolchain]
+channel = "testnet"
+
+[components]
+forc = "/path/to/custom/forc" # use local custom forc
+fuel-core = "0.41.7"         # use specific version of fuel-core
+```
+
+Local paths can be either absolute or relative to the `fuel-toolchain.toml` file. When using local paths, `fuelup` will validate that the specified binaries exist and are executable.
+
 [toolchain]: concepts/toolchains.md
 [distributed toolchains]: concepts/toolchains.md#toolchains
 [`testnet`]: concepts/channels.md#the-testnet-channel

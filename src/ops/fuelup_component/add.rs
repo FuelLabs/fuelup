@@ -53,11 +53,10 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
             component,
             toolchain.name,
             component,
-            if version.is_some() {
-                format!(" ({})", &version.as_ref().unwrap().to_string())
-            } else {
-                " (latest)".to_string()
-            }
+            version
+                .as_ref()
+                .map(|v| format!(" ({})", v))
+                .unwrap_or_else(|| " (latest)".to_string())
         );
     }
 

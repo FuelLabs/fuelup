@@ -63,7 +63,7 @@ channel = "testnet"
 
 [components]
 forc = "/usr/local/bin/forc" # absolute path to custom forc binary
-fuel-core = "./bin/fuel-core" # relative path from fuel-toolchain.toml location
+fuel-core = "../../../fuel-core/target/release/fuel-core" # relative path from fuel-toolchain.toml location
 ```
 
 You can also mix version specifications with local paths:

@@ -387,7 +387,9 @@ impl ToolchainOverride {
                             };
                         }
                     } else {
-                        // For path-based components, just validate they exist
+                        // For path-based components, validate they exist and are executable
+                        let base_dir = self.base_dir();
+                        spec.validate_binary(&base_dir)?;
                         info!(
                             "Using local binary for component '{}' specified in {}",
                             component_name, FUEL_TOOLCHAIN_TOML_FILE

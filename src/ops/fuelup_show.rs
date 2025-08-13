@@ -50,7 +50,7 @@ pub fn show() -> Result<()> {
     }
 
     let mut active_toolchain_message = String::new();
-    if let Some(toolchain_override) = toolchain_override {
+    if let Some(ref toolchain_override) = toolchain_override {
         // We know that the override exists, but we want to show the target triple as well.
         let override_name = override_name.as_ref().unwrap();
 
@@ -73,7 +73,17 @@ pub fn show() -> Result<()> {
 
     let mut version_map: HashMap<String, Version> = HashMap::new();
     for component in Components::collect_exclude_plugins()? {
-        let component_executable = active_toolchain.bin_path.join(&component.name);
+        // Check if there's a local path override for this component
+        let component_executable = if let Some(ref toolchain_override) = toolchain_override {
+            if let Some(path) = toolchain_override.get_component_path(&component.name) {
+                path
+            } else {
+                active_toolchain.bin_path.join(&component.name)
+            }
+        } else {
+            active_toolchain.bin_path.join(&component.name)
+        };
+        
         let version_text: String = match get_bin_version(component_executable.as_path()) {
             Ok(version) => {
                 version_map.insert(component.name.clone(), version.clone());

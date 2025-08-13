@@ -89,26 +89,17 @@ impl ComponentSpec {
     }
 
     /// Resolves a path relative to the given base directory (fuel-toolchain.toml location)
-    /// Prevents path traversal attacks by checking resolved paths stay within bounds
     pub fn resolve_path(&self, base_dir: &Path) -> Option<PathBuf> {
         match self {
             ComponentSpec::Path(path) => {
                 if path.is_absolute() {
                     Some(path.clone())
                 } else {
-                    // Prevent path traversal attacks
+                    // Resolve relative path from the base directory
                     let resolved = base_dir.join(path);
+                    // Try to canonicalize for a clean path, but allow non-existent paths
                     if let Ok(canonical_resolved) = resolved.canonicalize() {
-                        if let Ok(canonical_base) = base_dir.canonicalize() {
-                            if canonical_resolved.starts_with(canonical_base) {
-                                Some(canonical_resolved)
-                            } else {
-                                warn!("Path traversal attempt blocked: {}", path.display());
-                                None
-                            }
-                        } else {
-                            Some(resolved) // Allow if base dir doesn't exist yet
-                        }
+                        Some(canonical_resolved)
                     } else {
                         Some(resolved) // Allow non-existent paths for later validation
                     }

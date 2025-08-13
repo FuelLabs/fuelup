@@ -502,6 +502,23 @@ channel = &quot;testnet&quot;
 [components]
 forc = &quot;0.65.0&quot; # in testnet, forc is pinned to v0.66.1
 </code></pre>
+<p>Alternatively, you can specify local paths to custom binaries. This is useful for development with locally-built tools:</p>
+<pre><code class="language-toml">[toolchain]
+channel = &quot;testnet&quot;
+
+[components]
+forc = &quot;/usr/local/bin/forc&quot; # absolute path to custom forc binary
+fuel-core = &quot;../../../fuel-core/target/release/fuel-core&quot; # relative path from fuel-toolchain.toml location
+</code></pre>
+<p>You can also mix version specifications with local paths:</p>
+<pre><code class="language-toml">[toolchain]
+channel = &quot;testnet&quot;
+
+[components]
+forc = &quot;/path/to/custom/forc&quot; # use local custom forc
+fuel-core = &quot;0.41.7&quot;         # use specific version of fuel-core
+</code></pre>
+<p>Local paths can be either absolute or relative to the <code>fuel-toolchain.toml</code> file. When using local paths, <code>fuelup</code> will validate that the specified binaries exist and are executable.</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
 <p><em>fuelup</em> has a <a href="https://github.com/toml-lang/toml">TOML</a> settings file at
 <code>.fuelup/settings.toml</code>. The schema for this file is not part of the public

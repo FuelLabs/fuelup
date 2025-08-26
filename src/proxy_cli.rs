@@ -12,6 +12,7 @@ use std::{
     ffi::OsString,
     io::{self, Error, ErrorKind},
     os::unix::prelude::CommandExt,
+    path::PathBuf,
     process::{Command, ExitCode, Stdio},
     str::FromStr,
 };
@@ -19,15 +20,36 @@ use std::{
 /// Runs forc or fuel-core in proxy mode
 pub fn proxy_run(arg0: &str) -> Result<ExitCode> {
     let cmd_args: Vec<_> = env::args_os().skip(1).collect();
-    let toolchain = Toolchain::from_settings()?;
-
+    
+    // Check for plugin overrides first, before loading toolchain
+    let toolchain_override: Option<ToolchainOverride> = ToolchainOverride::from_project_root();
+    
+    // Handle plugin calls (e.g., "forc fmt" -> "forc-fmt")
     if let Some(first_arg) = cmd_args.first() {
         let plugin = format!("{}-{}", arg0, first_arg.to_string_lossy());
+        
+        // Check for plugin override first
+        if let Some(to) = &toolchain_override {
+            if let Ok(Some(plugin_path)) = to.resolve_plugin_path(&plugin) {
+                return execute_plugin(plugin_path, cmd_args.get(1..).unwrap_or_default());
+            }
+        }
+        
+        // Fall back to existing plugin resolution if no override
         if Components::collect_plugin_executables()?.contains(&plugin) {
+            let toolchain = Toolchain::from_settings()?;
             direct_proxy(&plugin, cmd_args.get(1..).unwrap_or_default(), &toolchain)?;
         }
     }
 
+    // Handle direct tool calls (e.g., "forc")
+    if let Some(to) = &toolchain_override {
+        if let Ok(Some(plugin_path)) = to.resolve_plugin_path(arg0) {
+            return execute_plugin(plugin_path, &cmd_args);
+        }
+    }
+
+    let toolchain = Toolchain::from_settings()?;
     direct_proxy(arg0, &cmd_args, &toolchain)?;
     Ok(ExitCode::SUCCESS)
 }
@@ -37,6 +59,10 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
 
     let (bin_path, toolchain_name) = match toolchain_override {
         Some(to) => {
+            // Check for plugin path override first
+            if let Ok(Some(plugin_path)) = to.resolve_plugin_path(proc_name) {
+                return execute_plugin(plugin_path, args);
+            }
             // unwrap() is safe here since we try DistToolchainDescription::from_str()
             // when deserializing from the toml.
             let description =
@@ -99,5 +125,21 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
             )),
             _ => Err(error),
         }
+    }
+}
+
+/// Execute a plugin directly from the given path
+fn execute_plugin(plugin_path: PathBuf, args: &[OsString]) -> Result<ExitCode> {
+    let mut cmd = Command::new(&plugin_path);
+    cmd.args(args);
+    cmd.stdin(Stdio::inherit());
+
+    let error = cmd.exec();
+    match error.kind() {
+        ErrorKind::NotFound => Err(anyhow::Error::new(Error::new(
+            ErrorKind::NotFound,
+            format!("Plugin not found at path: {}", plugin_path.display()),
+        ))),
+        _ => Err(anyhow::Error::from(error)),
     }
 }

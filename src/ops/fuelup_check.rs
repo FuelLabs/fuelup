@@ -183,7 +183,7 @@ pub fn check(command: CheckCommand) -> Result<()> {
                 )
             };
             // Pad the toolchain name with spaces to align the `-` signs
-            let padded_toolchain = format!("{:<width$}", toolchain, width = max_length);
+            let padded_toolchain = format!("{toolchain:<max_length$}");
             info!("{} - {}", &padded_toolchain, s);
         }
     }

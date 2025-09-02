@@ -3,7 +3,7 @@ use crate::{
     store::Store,
     target_triple::TargetTriple,
     toolchain::{DistToolchainDescription, Toolchain},
-    toolchain_override::ToolchainOverride,
+    toolchain_override::{ComponentSpec, ToolchainOverride},
 };
 use anyhow::Result;
 use component::Components;
@@ -54,26 +54,43 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
                 proc_name
             };
 
-            // If a specific version is declared, we want to call it from the store and not from the toolchain directory.
-            if let Some(version) = to.get_component_version(component_name) {
-                let store = Store::from_env()?;
+            // Check if a specific component is declared in the override
+            if let Some(spec) = to.get_component_spec(component_name) {
+                match spec {
+                    ComponentSpec::Version(version) => {
+                        // For version specs, get component from store
+                        let store = Store::from_env()?;
 
-                if !store.has_component(component_name, version) {
-                    let download_cfg = DownloadCfg::new(
-                        component_name,
-                        TargetTriple::from_component(component_name)?,
-                        Some(version.clone()),
-                    )?;
-                    // Install components within [components] that are declared but missing from the store.
-                    store.install_component(&download_cfg)?;
-                };
+                        if !store.has_component(component_name, version) {
+                            let download_cfg = DownloadCfg::new(
+                                component_name,
+                                TargetTriple::from_component(component_name)?,
+                                Some(version.clone()),
+                            )?;
+                            // Install components within [components] that are declared but missing from the store.
+                            store.install_component(&download_cfg)?;
+                        };
 
-                (
-                    store
-                        .component_dir_path(component_name, version)
-                        .join(proc_name),
-                    description.to_string(),
-                )
+                        (
+                            store
+                                .component_dir_path(component_name, version)
+                                .join(proc_name),
+                            description.to_string(),
+                        )
+                    }
+                    ComponentSpec::Path(_) => {
+                        // For path specs, validate this specific component and use the resolved path
+                        spec.validate_binary(&to.base_dir())?;
+
+                        let local_path = spec.resolve_path(&to.base_dir()).ok_or_else(|| {
+                            anyhow::Error::msg(format!(
+                                "Failed to resolve local path for component '{component_name}'"
+                            ))
+                        })?;
+
+                        (local_path, description.to_string())
+                    }
+                }
             } else {
                 (toolchain.bin_path.join(proc_name), description.to_string())
             }

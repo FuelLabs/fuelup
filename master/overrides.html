@@ -226,6 +226,52 @@ forc = &quot;/path/to/custom/forc&quot; # use local custom forc
 fuel-core = &quot;0.41.7&quot;         # use specific version of fuel-core
 </code></pre>
 <p>Local paths can be either absolute or relative to the <code>fuel-toolchain.toml</code> file. When using local paths, <code>fuelup</code> will validate that the specified binaries exist and are executable.</p>
+<h2 id="exporting-toolchains"><a class="header" href="#exporting-toolchains">Exporting toolchains</a></h2>
+<!-- This section should explain how to export toolchains -->
+<!-- export:example:start -->
+<p>You can generate a <code>fuel-toolchain.toml</code> file from your current toolchain configuration using the <code>export</code> command. This is useful for sharing your exact toolchain setup with team members or documenting the specific tool versions used in your project.</p>
+<!-- export:example:end -->
+<p>To export your currently active toolchain:</p>
+<pre><code class="language-sh">fuelup toolchain export
+</code></pre>
+<p>This creates a <code>fuel-toolchain.toml</code> file in the current directory containing your active toolchain's channel and installed component versions.</p>
+<p>You can also export a specific toolchain by name:</p>
+<pre><code class="language-sh">fuelup toolchain export my-custom-toolchain
+</code></pre>
+<p>To export to a custom file path:</p>
+<pre><code class="language-sh">fuelup toolchain export -o my-backup.toml
+fuelup toolchain export --output /path/to/my-toolchain.toml
+</code></pre>
+<h3 id="export-examples"><a class="header" href="#export-examples">Export examples</a></h3>
+<p>Exporting a <code>latest</code> toolchain produces a file like:</p>
+<pre><code class="language-toml">[toolchain]
+channel = &quot;latest-2025-09-03&quot;
+
+[components]
+forc = &quot;0.69.1&quot;
+fuel-core = &quot;0.45.1&quot;
+fuel-core-keygen = &quot;0.45.1&quot;
+forc-wallet = &quot;0.15.1&quot;
+</code></pre>
+<p>Exporting a custom toolchain preserves the custom name:</p>
+<pre><code class="language-toml">[toolchain]
+channel = &quot;my-dev-toolchain&quot;
+
+[components]
+forc = &quot;0.69.1&quot;
+fuel-core = &quot;0.45.1&quot;
+</code></pre>
+<h3 id="overwrite-protection"><a class="header" href="#overwrite-protection">Overwrite protection</a></h3>
+<p>By default, <code>export</code> will fail if a <code>fuel-toolchain.toml</code> file already exists in the current directory:</p>
+<pre><code class="language-console">$ fuelup toolchain export
+error: fuel-toolchain.toml already exists in the current directory. Use --force to overwrite.
+</code></pre>
+<p>You can either use the <code>--force</code> flag to overwrite the existing file:</p>
+<pre><code class="language-sh">fuelup toolchain export --force
+</code></pre>
+<p>Or export to a different path to avoid the conflict entirely:</p>
+<pre><code class="language-sh">fuelup toolchain export -o backup-toolchain.toml
+</code></pre>
 
                     </main>
 

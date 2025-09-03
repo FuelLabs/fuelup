@@ -100,6 +100,13 @@ You can also export a specific toolchain by name:
 fuelup toolchain export my-custom-toolchain
 ```
 
+To export to a custom file path:
+
+```sh
+fuelup toolchain export -o my-backup.toml
+fuelup toolchain export --output /path/to/my-toolchain.toml
+```
+
 ### Export examples
 
 Exporting a `latest` toolchain produces a file like:
@@ -128,17 +135,23 @@ fuel-core = "0.45.1"
 
 ### Overwrite protection
 
-By default, `export` will fail if a `fuel-toolchain.toml` file already exists:
+By default, `export` will fail if a `fuel-toolchain.toml` file already exists in the current directory:
 
 ```console
 $ fuelup toolchain export
 error: fuel-toolchain.toml already exists in the current directory. Use --force to overwrite.
 ```
 
-Use the `--force` flag to overwrite an existing file:
+You can either use the `--force` flag to overwrite the existing file:
 
 ```sh
 fuelup toolchain export --force
+```
+
+Or export to a different path to avoid the conflict entirely:
+
+```sh
+fuelup toolchain export -o backup-toolchain.toml
 ```
 
 [toolchain]: concepts/toolchains.md

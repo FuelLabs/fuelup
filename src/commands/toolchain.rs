@@ -39,7 +39,10 @@ pub struct UninstallCommand {
 pub struct ExportCommand {
     /// Toolchain to export (defaults to active toolchain)
     pub name: Option<String>,
-    /// Overwrite existing fuel-toolchain.toml file
+    /// Output file path (defaults to fuel-toolchain.toml)
+    #[clap(short, long)]
+    pub output: Option<String>,
+    /// Overwrite existing file
     #[clap(long)]
     pub force: bool,
 }

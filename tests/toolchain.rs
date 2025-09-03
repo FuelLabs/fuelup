@@ -385,3 +385,50 @@ fn fuelup_toolchain_export_nonexistent_toolchain() -> Result<()> {
     })?;
     Ok(())
 }
+
+#[test]
+fn fuelup_toolchain_export_custom_output_path() -> Result<()> {
+    testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+        let custom_path = cfg.home.join("my-custom-toolchain.toml");
+        let output = cfg.fuelup(&["toolchain", "export", "-o", "my-custom-toolchain.toml"]);
+        assert!(output.status.success());
+        
+        // Check that custom file was created
+        assert!(custom_path.exists(), "Custom output file should be created");
+        
+        // Verify TOML content is valid
+        let content = std::fs::read_to_string(&custom_path)
+            .expect("Should be able to read custom file");
+        assert!(content.contains("[toolchain]"));
+        assert!(content.contains("channel"));
+        
+        // Clean up
+        std::fs::remove_file(&custom_path).ok();
+    })?;
+    Ok(())
+}
+
+#[test]
+fn fuelup_toolchain_export_bypass_force_with_custom_path() -> Result<()> {
+    testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
+        // Create default fuel-toolchain.toml
+        let default_path = cfg.home.join("fuel-toolchain.toml");
+        std::fs::write(&default_path, "# existing file").unwrap();
+        
+        // Export to custom path should work without --force
+        let custom_path = cfg.home.join("backup.toml");
+        let output = cfg.fuelup(&["toolchain", "export", "-o", "backup.toml"]);
+        assert!(output.status.success());
+        
+        // Verify custom file was created
+        assert!(custom_path.exists(), "Custom output file should be created");
+        let content = std::fs::read_to_string(&custom_path)
+            .expect("Should be able to read custom file");
+        assert!(content.contains("[toolchain]"));
+        
+        // Clean up
+        std::fs::remove_file(&default_path).ok();
+        std::fs::remove_file(&custom_path).ok();
+    })?;
+    Ok(())
+}

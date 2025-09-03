@@ -11,10 +11,13 @@ use time::OffsetDateTime;
 use tracing::info;
 
 pub fn export(command: ExportCommand) -> Result<()> {
-    let output_path = Path::new("fuel-toolchain.toml");
+    let output_path = match &command.output {
+        Some(path) => Path::new(path),
+        None => Path::new("fuel-toolchain.toml"),
+    };
     
-    // Check if file exists
-    if output_path.exists() && !command.force {
+    // Check if file exists (only when using default path)
+    if command.output.is_none() && output_path.exists() && !command.force {
         bail!(
             "fuel-toolchain.toml already exists in the current directory. \
              Use --force to overwrite."
@@ -49,7 +52,7 @@ pub fn export(command: ExportCommand) -> Result<()> {
     let toml_content = cfg.to_string_pretty()?;
     write_file(output_path, &toml_content)?;
     
-    info!("Exported toolchain '{}' to fuel-toolchain.toml", toolchain.name);
+    info!("Exported toolchain '{}' to {}", toolchain.name, output_path.display());
     Ok(())
 }
 

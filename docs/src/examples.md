@@ -5,6 +5,7 @@
 | `fuelup toolchain install latest`         | Installs the toolchain distributed by the `latest` channel                               |
 | `fuelup toolchain new my_toolchain`       | Creates a new custom toolchain named 'my_toolchain' and sets it as the default           |
 | `fuelup toolchain uninstall my_toolchain` | Uninstalls the toolchain named 'my_toolchain'                                            |
+| `fuelup toolchain export`                 | Exports the active toolchain configuration to `fuel-toolchain.toml`                      |
 | `fuelup default my_toolchain`             | Sets 'my_toolchain' as the active toolchain                                              |
 | `fuelup component add forc`               | Adds _[forc]_ to the currently active custom toolchain                                   |
 | `fuelup component add fuel-core@0.9.5`    | Adds _[fuel-core]_ v0.9.5 to the currently active custom toolchain                       |

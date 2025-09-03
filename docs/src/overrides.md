@@ -79,6 +79,68 @@ fuel-core = "0.41.7"         # use specific version of fuel-core
 
 Local paths can be either absolute or relative to the `fuel-toolchain.toml` file. When using local paths, `fuelup` will validate that the specified binaries exist and are executable.
 
+## Exporting toolchains
+
+<!-- This section should explain how to export toolchains -->
+<!-- export:example:start -->
+You can generate a `fuel-toolchain.toml` file from your current toolchain configuration using the `export` command. This is useful for sharing your exact toolchain setup with team members or documenting the specific tool versions used in your project.
+<!-- export:example:end -->
+
+To export your currently active toolchain:
+
+```sh
+fuelup toolchain export
+```
+
+This creates a `fuel-toolchain.toml` file in the current directory containing your active toolchain's channel and installed component versions.
+
+You can also export a specific toolchain by name:
+
+```sh
+fuelup toolchain export my-custom-toolchain
+```
+
+### Export examples
+
+Exporting a `latest` toolchain produces a file like:
+
+```toml
+[toolchain]
+channel = "latest-2025-09-03"
+
+[components]
+forc = "0.69.1"
+fuel-core = "0.45.1"
+fuel-core-keygen = "0.45.1"
+forc-wallet = "0.15.1"
+```
+
+Exporting a custom toolchain preserves the custom name:
+
+```toml
+[toolchain]
+channel = "my-dev-toolchain"
+
+[components]
+forc = "0.69.1"
+fuel-core = "0.45.1"
+```
+
+### Overwrite protection
+
+By default, `export` will fail if a `fuel-toolchain.toml` file already exists:
+
+```console
+$ fuelup toolchain export
+error: fuel-toolchain.toml already exists in the current directory. Use --force to overwrite.
+```
+
+Use the `--force` flag to overwrite an existing file:
+
+```sh
+fuelup toolchain export --force
+```
+
 [toolchain]: concepts/toolchains.md
 [distributed toolchains]: concepts/toolchains.md#toolchains
 [`testnet`]: concepts/channels.md#the-testnet-channel

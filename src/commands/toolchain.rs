@@ -1,4 +1,4 @@
-use crate::ops::fuelup_toolchain::{install::install, new::new, uninstall::uninstall};
+use crate::ops::fuelup_toolchain::{export::export, install::install, new::new, uninstall::uninstall};
 use crate::target_triple::TargetTriple;
 use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 use anyhow::{bail, Result};
@@ -12,6 +12,8 @@ pub enum ToolchainCommand {
     New(NewCommand),
     /// Uninstall a toolchain
     Uninstall(UninstallCommand),
+    /// Export a toolchain configuration to fuel-toolchain.toml
+    Export(ExportCommand),
 }
 
 #[derive(Debug, Parser)]
@@ -31,6 +33,15 @@ pub struct NewCommand {
 pub struct UninstallCommand {
     /// Toolchain to uninstall
     pub name: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct ExportCommand {
+    /// Toolchain to export (defaults to active toolchain)
+    pub name: Option<String>,
+    /// Overwrite existing fuel-toolchain.toml file
+    #[clap(long)]
+    pub force: bool,
 }
 
 fn name_allowed(s: &str) -> Result<String> {
@@ -60,6 +71,7 @@ pub fn exec(command: ToolchainCommand) -> Result<()> {
         ToolchainCommand::Install(command) => install(command)?,
         ToolchainCommand::New(command) => new(command)?,
         ToolchainCommand::Uninstall(command) => uninstall(command)?,
+        ToolchainCommand::Export(command) => export(command)?,
     };
 
     Ok(())

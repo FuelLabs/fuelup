@@ -8,7 +8,7 @@ use anyhow::{bail, Result};
 use component::Components;
 use std::{collections::HashMap, path::Path, str::FromStr};
 use time::OffsetDateTime;
-use tracing::{info, warn};
+use tracing::info;
 
 pub fn export(command: ExportCommand) -> Result<()> {
     let output_path = Path::new("fuel-toolchain.toml");
@@ -38,15 +38,6 @@ pub fn export(command: ExportCommand) -> Result<()> {
     
     // Collect installed components
     let components = collect_toolchain_components(&toolchain)?;
-    
-    // Check for local paths and warn user
-    let local_components = check_for_local_paths(&components);
-    if !local_components.is_empty() {
-        warn!(
-            "⚠️  Local paths detected in toolchain. These may not work for other users:\n{}",
-            local_components.iter().map(|c| format!("  - {}", c)).collect::<Vec<_>>().join("\n")
-        );
-    }
     
     // Create override config
     let cfg = OverrideCfg::new(
@@ -117,14 +108,3 @@ fn collect_toolchain_components(toolchain: &Toolchain) -> Result<HashMap<String,
     Ok(components)
 }
 
-fn check_for_local_paths(components: &HashMap<String, ComponentSpec>) -> Vec<String> {
-    components.iter()
-        .filter_map(|(name, spec)| {
-            if spec.is_path() {
-                Some(name.clone())
-            } else {
-                None
-            }
-        })
-        .collect()
-}

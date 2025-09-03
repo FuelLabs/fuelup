@@ -15,7 +15,7 @@ pub fn export(command: ExportCommand) -> Result<()> {
         Some(path) => Path::new(path),
         None => Path::new("fuel-toolchain.toml"),
     };
-    
+
     // Check if file exists (only when using default path)
     if command.output.is_none() && output_path.exists() && !command.force {
         bail!(
@@ -23,7 +23,7 @@ pub fn export(command: ExportCommand) -> Result<()> {
              Use --force to overwrite."
         );
     }
-    
+
     // Get toolchain to export
     let toolchain = match command.name {
         Some(name) => {
@@ -35,24 +35,32 @@ pub fn export(command: ExportCommand) -> Result<()> {
         }
         None => Toolchain::from_settings()?,
     };
-    
+
     // Parse toolchain name to get channel info
     let channel = parse_toolchain_channel(&toolchain.name)?;
-    
+
     // Collect installed components
     let components = collect_toolchain_components(&toolchain)?;
-    
+
     // Create override config
     let cfg = OverrideCfg::new(
         ToolchainCfg { channel },
-        if components.is_empty() { None } else { Some(components) },
+        if components.is_empty() {
+            None
+        } else {
+            Some(components)
+        },
     );
-    
+
     // Write to file
     let toml_content = cfg.to_string_pretty()?;
     write_file(output_path, &toml_content)?;
-    
-    info!("Exported toolchain '{}' to {}", toolchain.name, output_path.display());
+
+    info!(
+        "Exported toolchain '{}' to {}",
+        toolchain.name,
+        output_path.display()
+    );
     Ok(())
 }
 
@@ -95,19 +103,15 @@ fn parse_toolchain_channel(toolchain_name: &str) -> Result<Channel> {
 
 fn collect_toolchain_components(toolchain: &Toolchain) -> Result<HashMap<String, ComponentSpec>> {
     let mut components = HashMap::new();
-    
+
     for component in Components::collect_publishables()? {
         if toolchain.has_component(&component.name) {
             let bin_path = toolchain.bin_path.join(&component.name);
             if let Ok(version) = get_bin_version(&bin_path) {
-                components.insert(
-                    component.name.clone(),
-                    ComponentSpec::Version(version),
-                );
+                components.insert(component.name.clone(), ComponentSpec::Version(version));
             }
         }
     }
-    
+
     Ok(components)
 }
-

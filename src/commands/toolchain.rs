@@ -1,4 +1,6 @@
-use crate::ops::fuelup_toolchain::{export::export, install::install, new::new, uninstall::uninstall};
+use crate::ops::fuelup_toolchain::{
+    export::export, install::install, new::new, uninstall::uninstall,
+};
 use crate::target_triple::TargetTriple;
 use crate::toolchain::RESERVED_TOOLCHAIN_NAMES;
 use anyhow::{bail, Result};

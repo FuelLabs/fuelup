@@ -51,7 +51,7 @@ The `testnet` channel is a published TOML file describing the toolchain that is 
 
 The entry point of the scheduled workflow is within `index-versions.yml`. We run the Rust script `compare-versions` to collect versions of `forc` and `fuel-core` to be tested. These versions are filtered for incompatible versions prior to being used as a JSON string input to `test-toolchain-compatibility.yml`, where the testing occurs.
 
-In `test-toolchain-compatibility.yml`, The versions JSON string input is used to initialize a matrix using the [`fromJSON`](https://docs.github.com/en/actions/learn-github-actions/expressions#fromjson) expression. We checkout the Sway repo at the given `forc` version and pull the `fuel-core` Docker image at the given `fuel-core` version and run integration tests found in the [Sway CI](https://github.com/FuelLabs/sway/blob/3bd8eaf4a0f11a3009c9421100cc06c2e897b6c2/.github/workflows/ci.yml#L229-L270) for them.
+In `test-toolchain-compatibility.yml`, the versions JSON string input is used to initialize a matrix using the [`fromJSON`](https://docs.github.com/en/actions/learn-github-actions/expressions#fromjson) expression. We checkout the Sway repo at the given `forc` version and pull the `fuel-core` Docker image at the given `fuel-core` version and run integration tests found in the [Sway CI](https://github.com/FuelLabs/sway/blob/3bd8eaf4a0f11a3009c9421100cc06c2e897b6c2/.github/workflows/ci.yml#L229-L270) for them.
 
 Note that we only mark versions as incompatible specifically if tests fail, and not if other prior steps fail (e.g. we do not want to mark versions as incompatible if there were errors pulling the Docker image)
 

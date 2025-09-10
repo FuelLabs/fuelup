@@ -377,7 +377,7 @@ check_help_for() {
                     *)
                         # Unknown product version, warn and continue
                         echo "Warning: Detected unknown macOS major version: $(sw_vers -productVersion)"
-                        echo "Warning TLS capabilities detection may fail"
+                        echo "Warning: TLS capabilities detection may fail"
                         ;;
                 esac
             fi

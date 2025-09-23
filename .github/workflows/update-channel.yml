@@ -130,7 +130,9 @@ jobs:
             echo "No changes to commit"
             exit 0
           else
-            git commit -m "chore: update ${{ github.event.inputs.channel }} channel"
+            git commit -m "chore: update ${{ github.event.inputs.channel }} channel
+
+Co-authored-by: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
             # Force push to handle existing branches
             git push --force-with-lease origin "$BRANCH_NAME"
           fi

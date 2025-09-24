@@ -42,6 +42,7 @@ jobs:
     permissions: # Write access to push changes to pages
       contents: write
       pull-requests: write
+      issues: write
     steps:
       - uses: actions/checkout@v3
       - name: Install nightly toolchain

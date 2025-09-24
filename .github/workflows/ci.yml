@@ -59,14 +59,15 @@ jobs:
       - name: Setup LCOV
         uses: hrishikesh-kadam/setup-lcov@v1
 
-      - name: Report code coverage
+      - name: Report code coverage (with PR comment)
+        if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
         uses: zgosalvez/github-actions-report-lcov@v4
         with:
           coverage-files: lcov.info
           minimum-coverage: 0 # for now we are not enforcing any minimum coverage.
           artifact-name: code-coverage-report
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          update-comment: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+          update-comment: true
 
   try-run-fuelup-init:
     needs: cancel-previous-runs

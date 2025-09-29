@@ -59,7 +59,8 @@ jobs:
       - name: Setup LCOV
         uses: hrishikesh-kadam/setup-lcov@v1
 
-      - name: Report code coverage
+      - name: Report code coverage (with PR comment)
+        if: github.event.pull_request == null || github.event.pull_request.head.repo.full_name == github.repository
         uses: zgosalvez/github-actions-report-lcov@v4
         with:
           coverage-files: lcov.info

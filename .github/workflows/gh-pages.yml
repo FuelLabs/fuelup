@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: fuelup-bot
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup mdBook
         uses: peaceiris/actions-mdbook@v1
@@ -41,7 +41,7 @@ jobs:
       - name: Get tag
         id: branch_name
         run: |
-          echo ::set-output name=BRANCH_NAME::${GITHUB_REF#refs/tags/}
+          echo "BRANCH_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
         if: startsWith(github.ref, 'refs/tags')
 
       - name: Deploy tag

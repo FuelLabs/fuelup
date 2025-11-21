@@ -63,13 +63,13 @@ A description of the configuration keys:
 
 `tarball_prefix`
 
-- Fuel binaries conform to the format `<prefix>-<version>-<target>` for tar files. 
+- Fuel binaries conform to the format `<prefix>-<version>-<target>` for tar files.
   This field specifies the `<prefix>` part (e.g., `"forc-wallet"`, `"forc-binaries"`).
 
 `executables`
 
-- List of executable binaries provided by this component. In most cases, the component 
-  name matches the executable, but components like `forc` and `forc-client` may package 
+- List of executable binaries provided by this component. In most cases, the component
+  name matches the executable, but components like `forc` and `forc-client` may package
   multiple executables.
 
 `repository_name`
@@ -78,16 +78,16 @@ A description of the configuration keys:
 
 `legacy_repository_name`
 
-- _Optional_. Legacy repository name for versions before a migration. Used when a component 
+- _Optional_. Legacy repository name for versions before a migration. Used when a component
   moves between repositories to maintain backward compatibility for older versions.
-  For example, `forc-wallet` was originally released from `"forc-wallet"` repository but moved 
+  For example, `forc-wallet` was originally released from `"forc-wallet"` repository but moved
   to the `"forc"` monorepo starting with version 0.16.0.
 
 `legacy_before`
 
-- _Optional_. Semver version cutoff (e.g., `"0.16.0"`) before which `legacy_repository_name` 
+- _Optional_. Semver version cutoff (e.g., `"0.16.0"`) before which `legacy_repository_name`
   is used. Versions below this use the legacy repo; versions at or above use the current repo.
-  For `forc-wallet`, versions < 0.16.0 use the legacy `"forc-wallet"` repository, while 
+  For `forc-wallet`, versions < 0.16.0 use the legacy `"forc-wallet"` repository, while
   versions >= 0.16.0 use the `"forc"` monorepo.
 
 `targets`
@@ -96,12 +96,12 @@ A description of the configuration keys:
 
 `is_plugin`
 
-- _Optional_. Boolean indicating if this component is a `forc` plugin (`true`) or 
+- _Optional_. Boolean indicating if this component is a `forc` plugin (`true`) or
   standalone binary (`false`).
 
 `publish`
 
-- _Optional_. Boolean declaring if the component is published as a standalone release 
+- _Optional_. Boolean declaring if the component is published as a standalone release
   (`true`) or packaged with `forc` (`false`).
 
 `show_fuels_version`
@@ -111,3 +111,5 @@ A description of the configuration keys:
 [`components.toml`]:https://github.com/FuelLabs/fuelup/blob/master/components.toml
 [the PR adding `forc-tx`]:https://github.com/FuelLabs/fuelup/pull/363
 [the PR adding `forc-wallet`]:https://github.com/FuelLabs/fuelup/pull/195
+[forc-wallet-repo]:https://github.com/FuelLabs/forc-wallet
+[forc-repo]:https://github.com/FuelLabs/forc

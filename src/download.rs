@@ -388,10 +388,12 @@ fn fuels_version_from_toml(toml: toml_edit::DocumentMut) -> Result<String> {
     };
 
     // Check workspace.dependencies then regular dependencies
-    if let Some(fuels) = toml.get("workspace")
+    if let Some(fuels) = toml
+        .get("workspace")
         .and_then(|w| w.get("dependencies"))
         .and_then(|d| d.get("fuels"))
-        .or_else(|| toml.get("dependencies").and_then(|d| d.get("fuels"))) {
+        .or_else(|| toml.get("dependencies").and_then(|d| d.get("fuels")))
+    {
         return Ok(extract_version(fuels));
     }
 
@@ -617,7 +619,10 @@ mod tests {
         };
 
         let legacy_result = fetch_fuels_version(&legacy_cfg);
-        assert!(legacy_result.is_ok(), "Should successfully fetch fuels version for legacy forc-wallet");
+        assert!(
+            legacy_result.is_ok(),
+            "Should successfully fetch fuels version for legacy forc-wallet"
+        );
 
         // Test new forc-wallet version (should fetch from forc repo)
         let new_cfg = DownloadCfg {
@@ -630,6 +635,9 @@ mod tests {
         };
 
         let new_result = fetch_fuels_version(&new_cfg);
-        assert!(new_result.is_ok(), "Should successfully fetch fuels version for new forc-wallet");
+        assert!(
+            new_result.is_ok(),
+            "Should successfully fetch fuels version for new forc-wallet"
+        );
     }
 }

@@ -264,22 +264,19 @@ fn write_document(
             &component.name
         };
 
-        let version = match component_versions.contains_key(&component.name) {
-            true => component_versions[&component.name].clone(),
-            false => get_version(&component)?,
+        let version = match component_versions.get(&component.name) {
+            Some(v) => v.clone(),
+            None => get_version(&component)?,
         };
 
-        let (repo, tag, tarball_prefix) = {
-            let tarball_prefix = if tag_prefix == "forc-binaries" {
-                tag_prefix.to_string()
-            } else {
-                format!("{}-{}", tag_prefix, version)
-            };
-            (
-                component.repository_name,
-                "v".to_owned() + &version.to_string(),
-                tarball_prefix,
-            )
+        // Allow components to move between repositories over time while keeping
+        // older versions downloadable from their original repositories.
+        let repo = component.repository_for_version(&version);
+        let tag = component.tag_for_version(&version);
+        let tarball_prefix = if tag_prefix == "forc-binaries" {
+            tag_prefix.to_string()
+        } else {
+            format!("{}-{}", tag_prefix, version)
         };
 
         document["pkg"][&component.name] = implicit_table();

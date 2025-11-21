@@ -27,6 +27,10 @@ fn github_releases_download_url(repo: &str, tag: &Version, tarball: &str) -> Str
     format!("https://github.com/FuelLabs/{repo}/releases/download/v{tag}/{tarball}")
 }
 
+fn github_releases_download_url_with_tag(repo: &str, tag: &str, tarball: &str) -> String {
+    format!("https://github.com/FuelLabs/{repo}/releases/download/{tag}/{tarball}")
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 struct LatestReleaseApiResponse {
     url: String,
@@ -51,15 +55,15 @@ impl DownloadCfg {
             None => get_latest_version(name)
                 .map_err(|e| anyhow!("Error getting latest tag for '{}': {}", name, e))?,
         };
-
         let (tarball_name, tarball_url) = if name == FUELUP {
             let tarball_name = tarball_name(FUELUP, &version, &target);
             let tarball_url = github_releases_download_url(FUELUP, &version, &tarball_name);
             (tarball_name, tarball_url)
         } else if let Ok(component) = Component::from_name(name) {
             let tarball_name = tarball_name(&component.tarball_prefix, &version, &target);
-            let tarball_url =
-                github_releases_download_url(&component.repository_name, &version, &tarball_name);
+            let repo = component.repository_for_version(&version);
+            let tag = component.tag_for_version(&version);
+            let tarball_url = github_releases_download_url_with_tag(repo, &tag, &tarball_name);
             (tarball_name, tarball_url)
         } else {
             bail!("Unrecognized component: {}", name)

@@ -37,6 +37,6 @@ with some built-in plugin executables, including but not limited to: [`forc-clie
 [`forc-debug`]: https://fuellabs.github.io/sway/master/book/forc/plugins/forc_debug.html
 [`forc-lsp`]: https://fuellabs.github.io/sway/master/book/forc/plugins/forc_lsp.html
 [`forc-client`]: https://fuellabs.github.io/sway/master/book/forc/plugins/forc_client/index.html
-[`forc-wallet`]: https://github.com/FuelLabs/forc-wallet
+[`forc-wallet`]: https://github.com/FuelLabs/forc
 [`fuel-indexer`]: https://github.com/FuelLabs/fuel-indexer
 [`forc-index`]: https://github.com/FuelLabs/fuel-indexer

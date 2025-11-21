@@ -454,13 +454,13 @@ mod tests {
     #[test]
     fn test_tag_for_version_standard_components() {
         let components = Components::collect().unwrap();
-        
+
         // Test forc component (should always use v-prefixed tags)
         let forc = components
             .component
             .get("forc")
             .expect("forc component must exist");
-        
+
         let version = Version::new(0, 50, 0);
         assert_eq!(
             forc.tag_for_version(&version),

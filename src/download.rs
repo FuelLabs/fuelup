@@ -377,23 +377,25 @@ fn log_progress_bar(progress_bar: &ProgressBar) {
 
 /// Read the version (as a plain String) used by the `fuels` dependency, if it exists.
 fn fuels_version_from_toml(toml: toml_edit::DocumentMut) -> Result<String> {
-    if let Some(deps) = toml.get("dependencies") {
-        if let Some(fuels) = deps.get("fuels") {
-            let version = match fuels.as_value() {
-                Some(toml_edit::Value::String(s)) => s.value().to_string(),
-                Some(toml_edit::Value::InlineTable(t)) => t
-                    .get("version")
-                    .map_or_else(String::new, |v| v.as_str().unwrap_or_default().to_string()),
-                _ => String::default(),
-            };
-
-            return Ok(version);
-        } else {
-            bail!("'fuels' dependency does not exist");
-        };
+    let extract_version = |fuels: &toml_edit::Item| -> String {
+        match fuels.as_value() {
+            Some(toml_edit::Value::String(s)) => s.value().to_string(),
+            Some(toml_edit::Value::InlineTable(t)) => t
+                .get("version")
+                .map_or_else(String::new, |v| v.as_str().unwrap_or_default().to_string()),
+            _ => String::default(),
+        }
     };
 
-    bail!("the table 'dependencies' does not exist");
+    // Check workspace.dependencies then regular dependencies
+    if let Some(fuels) = toml.get("workspace")
+        .and_then(|w| w.get("dependencies"))
+        .and_then(|d| d.get("fuels"))
+        .or_else(|| toml.get("dependencies").and_then(|d| d.get("fuels"))) {
+        return Ok(extract_version(fuels));
+    }
+
+    bail!("'fuels' dependency not found in dependencies or workspace.dependencies");
 }
 
 /// Fetches the Cargo.toml of a component in its repository and tries to read the version of
@@ -405,9 +407,12 @@ pub fn fetch_fuels_version(cfg: &DownloadCfg) -> Result<String> {
             cfg.version
         ),
         "forc-wallet" => {
+            let component = Component::from_name("forc-wallet")?;
+            let repo = component.repository_for_version(&cfg.version);
+            let tag = component.tag_for_version(&cfg.version);
             format!(
-                "https://raw.githubusercontent.com/FuelLabs/forc-wallet/v{}/Cargo.toml",
-                cfg.version
+                "https://raw.githubusercontent.com/FuelLabs/{}/{}/Cargo.toml",
+                repo, tag
             )
         }
         _ => bail!("invalid component to fetch fuels version for"),
@@ -597,5 +602,34 @@ mod tests {
             error.to_string(),
             format!("No binary for target: {}", expected_target)
         );
+    }
+
+    #[test]
+    fn test_fetch_fuels_version_forc_wallet_migration() {
+        // Test legacy forc-wallet version (should fetch from forc-wallet repo)
+        let legacy_cfg = DownloadCfg {
+            name: "forc-wallet".to_string(),
+            target: TargetTriple::from_host().unwrap(),
+            version: Version::parse("0.15.0").unwrap(),
+            tarball_name: "dummy".to_string(),
+            tarball_url: "dummy".to_string(),
+            hash: None,
+        };
+
+        let legacy_result = fetch_fuels_version(&legacy_cfg);
+        assert!(legacy_result.is_ok(), "Should successfully fetch fuels version for legacy forc-wallet");
+
+        // Test new forc-wallet version (should fetch from forc repo)
+        let new_cfg = DownloadCfg {
+            name: "forc-wallet".to_string(),
+            target: TargetTriple::from_host().unwrap(),
+            version: Version::parse("0.16.1").unwrap(),
+            tarball_name: "dummy".to_string(),
+            tarball_url: "dummy".to_string(),
+            hash: None,
+        };
+
+        let new_result = fetch_fuels_version(&new_cfg);
+        assert!(new_result.is_ok(), "Should successfully fetch fuels version for new forc-wallet");
     }
 }

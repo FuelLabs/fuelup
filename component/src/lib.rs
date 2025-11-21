@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::{anyhow, Result};
+use semver::Version;
 use serde::Deserialize;
 use toml_edit::de;
 
@@ -19,14 +20,29 @@ pub struct Components {
 
 #[derive(Debug, Deserialize, Clone, PartialEq, Eq, Hash)]
 pub struct Component {
+    /// The name of the component (e.g., "forc", "fuel-core", "forc-wallet")
     pub name: String,
+    /// Whether this component is a plugin (true) or standalone binary (false).
+    /// Plugins are typically forc extensions like forc-fmt, forc-lsp, etc.
     pub is_plugin: Option<bool>,
+    /// Prefix used in release tarball names (e.g., "forc-binaries", "fuel-core")
     pub tarball_prefix: String,
+    /// List of executable binaries provided by this component
     pub executables: Vec<String>,
+    /// GitHub repository name where releases are published (e.g., "sway", "fuel-core")
     pub repository_name: String,
+    /// Supported target platforms (e.g., "linux_amd64", "aarch64-apple-darwin")
     pub targets: Vec<String>,
+    /// Whether this component should be included in published toolchains
     pub publish: Option<bool>,
+    /// Whether to show this component's version in `fuelup show` output
     pub show_fuels_version: Option<bool>,
+    /// Legacy repository name for versions before the migration cutoff.
+    /// Used when component moved between repositories to maintain backward compatibility.
+    pub legacy_repository_name: Option<String>,
+    /// Semver version cutoff (e.g., "0.16.0") before which `legacy_repository_name` is used.
+    /// Versions < this value use legacy repo, versions >= this value use current repo.
+    pub legacy_before: Option<String>,
 }
 
 impl Component {
@@ -36,11 +52,13 @@ impl Component {
                 name: FUELUP.to_string(),
                 tarball_prefix: FUELUP.to_string(),
                 executables: vec![FUELUP.to_string()],
+                is_plugin: Some(false),
                 repository_name: FUELUP.to_string(),
                 targets: vec![FUELUP.to_string()],
-                is_plugin: Some(false),
                 publish: Some(true),
                 show_fuels_version: Some(false),
+                legacy_repository_name: None,
+                legacy_before: None,
             });
         }
 
@@ -51,6 +69,36 @@ impl Component {
             .get(name)
             .ok_or_else(|| anyhow!("component with name '{}' does not exist", name))
             .cloned()
+    }
+
+    /// Returns the repository name to use for a given component version.
+    ///
+    /// This allows components to migrate between repositories over time while
+    /// keeping older versions fetchable from their original repository.
+    pub fn repository_for_version<'a>(&'a self, version: &Version) -> &'a str {
+        if let (Some(legacy_repo), Some(legacy_before)) =
+            (&self.legacy_repository_name, &self.legacy_before)
+        {
+            if let Ok(cutoff) = Version::parse(legacy_before) {
+                if version < &cutoff {
+                    return legacy_repo;
+                }
+            }
+        }
+
+        &self.repository_name
+    }
+
+    /// Returns the git tag format to use for a given component version.
+    ///
+    /// Different repositories use different tag naming conventions. This method
+    /// returns the correct tag format based on the component and repository.
+    pub fn tag_for_version(&self, version: &Version) -> String {
+        let repo = self.repository_for_version(version);
+        match (self.name.as_str(), repo) {
+            ("forc-wallet", "forc") => format!("forc-wallet-{}", version),
+            _ => format!("v{}", version),
+        }
     }
 
     /// Returns a `Component` from the supplied `Component` name, plugin, or executable
@@ -328,6 +376,97 @@ mod tests {
     #[test]
     fn test_collect_plugin_executables() {
         assert!(Components::collect_plugin_executables().is_ok());
+    }
+
+    #[test]
+    fn test_repository_for_version_forc_wallet_migration() {
+        let components = Components::collect().unwrap();
+        let forc_wallet = components
+            .component
+            .get("forc-wallet")
+            .expect("forc-wallet component must exist");
+
+        let legacy = Version::new(0, 15, 1);
+        let migrated = Version::new(0, 16, 0);
+
+        assert_eq!(
+            forc_wallet.repository_for_version(&legacy),
+            "forc-wallet",
+            "pre-0.16.0 forc-wallet versions should use the legacy repository"
+        );
+        assert_eq!(
+            forc_wallet.repository_for_version(&migrated),
+            "forc",
+            "0.16.0+ forc-wallet versions should use the forc monorepo"
+        );
+    }
+
+    #[test]
+    fn test_repository_for_version_no_legacy() {
+        let components = Components::collect().unwrap();
+        let forc = components
+            .component
+            .get("forc")
+            .expect("forc component must exist");
+
+        // Components without legacy config should always use repository_name
+        let version = Version::new(0, 1, 0);
+        assert_eq!(
+            forc.repository_for_version(&version),
+            "sway",
+            "Components without legacy config should use repository_name"
+        );
+    }
+
+    #[test]
+    fn test_tag_for_version_forc_wallet_migration() {
+        let components = Components::collect().unwrap();
+        let forc_wallet = components
+            .component
+            .get("forc-wallet")
+            .expect("forc-wallet component must exist");
+
+        // Legacy versions (< 0.16.0) should use standard v-prefixed tags
+        let legacy = Version::new(0, 15, 2);
+        assert_eq!(
+            forc_wallet.tag_for_version(&legacy),
+            "v0.15.2",
+            "Legacy forc-wallet versions should use v-prefixed tags"
+        );
+
+        // New versions (>= 0.16.0) in forc repo should use forc-wallet-prefixed tags
+        let migrated = Version::new(0, 16, 0);
+        assert_eq!(
+            forc_wallet.tag_for_version(&migrated),
+            "forc-wallet-0.16.0",
+            "Migrated forc-wallet versions should use forc-wallet-prefixed tags"
+        );
+
+        // Future version to ensure consistency
+        let future = Version::new(0, 17, 5);
+        assert_eq!(
+            forc_wallet.tag_for_version(&future),
+            "forc-wallet-0.17.5",
+            "Future forc-wallet versions should use forc-wallet-prefixed tags"
+        );
+    }
+
+    #[test]
+    fn test_tag_for_version_standard_components() {
+        let components = Components::collect().unwrap();
+        
+        // Test forc component (should always use v-prefixed tags)
+        let forc = components
+            .component
+            .get("forc")
+            .expect("forc component must exist");
+        
+        let version = Version::new(0, 50, 0);
+        assert_eq!(
+            forc.tag_for_version(&version),
+            "v0.50.0",
+            "Standard components should use v-prefixed tags"
+        );
     }
 
     #[test]

@@ -188,7 +188,8 @@ like <code>fuelup show</code> may not work until you add them to the <a href="ht
 reads from this TOML file to know which components are supported directly through itself, so this step is
 important. You may follow <a href="https://github.com/FuelLabs/fuelup/pull/363">the PR adding <code>forc-tx</code></a> as an example of how to add such a component.</p>
 <h3 id="binary-packaged-outside-of-forc"><a class="header" href="#binary-packaged-outside-of-forc">Binary packaged outside of forc</a></h3>
-<p>This refers to standalone binaries like <code>forc-wallet</code> which have their own repositories.</p>
+<p>This refers to standalone binaries like <code>forc-wallet</code> which are released outside of the Sway <code>forc-binaries</code>
+bundle (i.e. they are not packaged natively in the Sway repository).</p>
 <p>In this case, <code>fuelup</code> <strong>will NOT</strong> download the tar file automatically since it does not know where to
 download it from. Currently, we do not support downloading and using arbitrary forc plugins and components, so
 information will have to be added to <code>components.toml</code> for <code>fuelup</code> to know how to handle these. You may follow
@@ -199,39 +200,67 @@ name = &quot;forc-wallet&quot;
 tarball_prefix = &quot;forc-wallet&quot;
 is_plugin = true
 executables = [&quot;forc-wallet&quot;]
-repository_name = &quot;forc-wallet&quot;
+repository_name = &quot;forc&quot;
 targets = [ &quot;aarch64-unknown-linux-gnu&quot;, &quot;x86_64-unknown-linux-gnu&quot;, &quot;aarch64-apple-darwin&quot;, &quot;x86_64-apple-darwin&quot; ]
 publish = true
 </code></pre>
-<p>A short description of the keys you find above:</p>
+<blockquote>
+<p>Note: <code>forc-wallet</code> was originally released from its own repository
+<a href="https://github.com/FuelLabs/forc-wallet"><code>FuelLabs/forc-wallet</code></a> up to version <code>0.15.x</code>. From
+<code>0.16.0</code> onwards it is released from the <a href="https://github.com/FuelLabs/forc"><code>FuelLabs/forc</code></a>
+monorepo as an independent workspace member with its own release cycle.</p>
+</blockquote>
+<p>A description of the configuration keys:</p>
 <p><code>name</code></p>
 <ul>
-<li>Name of the component/plugin.</li>
+<li>Name of the component/plugin (e.g., <code>&quot;forc-wallet&quot;</code>, <code>&quot;fuel-core&quot;</code>).</li>
 </ul>
 <p><code>tarball_prefix</code></p>
 <ul>
-<li>Fuel binaries mostly conform to the format <code>&lt;name&gt;-&lt;version&gt;-&lt;target&gt;</code> for our tar files. <code>tarball_prefix</code> refers to the <code>&lt;name&gt;</code> part.</li>
+<li>Fuel binaries conform to the format <code>&lt;prefix&gt;-&lt;version&gt;-&lt;target&gt;</code> for tar files.
+This field specifies the <code>&lt;prefix&gt;</code> part (e.g., <code>&quot;forc-wallet&quot;</code>, <code>&quot;forc-binaries&quot;</code>).</li>
 </ul>
 <p><code>executables</code></p>
 <ul>
-<li>In most cases, the name of the component is the executable itself,
-but certain components like <code>forc</code> itself and <code>forc-client</code> may package multiple executables and therefore have different names.</li>
+<li>List of executable binaries provided by this component. In most cases, the component
+name matches the executable, but components like <code>forc</code> and <code>forc-client</code> may package
+multiple executables.</li>
 </ul>
 <p><code>repository_name</code></p>
 <ul>
-<li>The repo name that contains the releases.</li>
+<li>GitHub repository name where releases are published (e.g., <code>&quot;sway&quot;</code>, <code>&quot;fuel-core&quot;</code>, <code>&quot;forc&quot;</code>).</li>
+</ul>
+<p><code>legacy_repository_name</code></p>
+<ul>
+<li><em>Optional</em>. Legacy repository name for versions before a migration. Used when a component
+moves between repositories to maintain backward compatibility for older versions.
+For example, <code>forc-wallet</code> was originally released from <code>&quot;forc-wallet&quot;</code> repository but moved
+to the <code>&quot;forc&quot;</code> monorepo starting with version 0.16.0.</li>
+</ul>
+<p><code>legacy_before</code></p>
+<ul>
+<li><em>Optional</em>. Semver version cutoff (e.g., <code>&quot;0.16.0&quot;</code>) before which <code>legacy_repository_name</code>
+is used. Versions below this use the legacy repo; versions at or above use the current repo.
+For <code>forc-wallet</code>, versions &lt; 0.16.0 use the legacy <code>&quot;forc-wallet&quot;</code> repository, while
+versions &gt;= 0.16.0 use the <code>&quot;forc&quot;</code> monorepo.</li>
 </ul>
 <p><code>targets</code></p>
 <ul>
-<li>A list of targets the component is released for.</li>
+<li>List of supported target platforms (e.g., <code>&quot;linux_amd64&quot;</code>, <code>&quot;aarch64-apple-darwin&quot;</code>).</li>
 </ul>
 <p><code>is_plugin</code></p>
 <ul>
-<li><em>Optional</em>. This tells you if this component is a <code>forc</code> plugin.</li>
+<li><em>Optional</em>. Boolean indicating if this component is a <code>forc</code> plugin (<code>true</code>) or
+standalone binary (<code>false</code>).</li>
 </ul>
 <p><code>publish</code></p>
 <ul>
-<li><em>Optional</em>. Declares if the component is published as a standalone, or packaged with <code>forc</code>.</li>
+<li><em>Optional</em>. Boolean declaring if the component is published as a standalone release
+(<code>true</code>) or packaged with <code>forc</code> (<code>false</code>).</li>
+</ul>
+<p><code>show_fuels_version</code></p>
+<ul>
+<li><em>Optional</em>. Boolean indicating whether to show this component's version in <code>fuelup show</code> output.</li>
 </ul>
 
                     </main>

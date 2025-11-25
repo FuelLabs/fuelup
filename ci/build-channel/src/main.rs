@@ -121,21 +121,39 @@ fn get_version(component: &Component) -> Result<Version> {
     let handle = ureq::builder().user_agent("fuelup").build();
     let mut data = Vec::new();
 
+    // For monorepo components, we need to filter by component-specific tags
     let url = format!(
-        "https://api.github.com/repos/FuelLabs/{}/releases/latest",
+        "https://api.github.com/repos/FuelLabs/{}/releases",
         component.repository_name
     );
 
     let resp = handle.get(&url).call()?;
 
     resp.into_reader().read_to_end(&mut data)?;
-    let response: LatestReleaseApiResponse = serde_json::from_str(&String::from_utf8_lossy(&data))?;
+    let releases: Vec<LatestReleaseApiResponse> =
+        serde_json::from_str(&String::from_utf8_lossy(&data))?;
 
-    let version_str = response.tag_name["v".len()..].to_string();
+    // Find the latest release with a tag that matches this component
+    for release in releases {
+        let tag = &release.tag_name;
 
-    let version = Version::parse(&version_str)?;
+        let version_str = if tag.starts_with(&format!("{}-", component.name)) {
+            // Component-specific tag like "forc-wallet-0.16.1"
+            tag[component.name.len() + 1..].to_string()
+        } else if tag.starts_with("v") {
+            // Legacy v-prefixed tag for older releases
+            tag[1..].to_string()
+        } else {
+            // Try parsing the tag as-is (could be version-only for single-component repos)
+            tag.clone()
+        };
 
-    Ok(version)
+        if let Ok(version) = Version::parse(&version_str) {
+            return Ok(version);
+        }
+    }
+
+    bail!("No valid version found for component {}", component.name)
 }
 
 fn components_exists(components: &HashMap<String, Version>) -> bool {
@@ -264,22 +282,19 @@ fn write_document(
             &component.name
         };
 
-        let version = match component_versions.contains_key(&component.name) {
-            true => component_versions[&component.name].clone(),
-            false => get_version(&component)?,
+        let version = match component_versions.get(&component.name) {
+            Some(v) => v.clone(),
+            None => get_version(&component)?,
         };
 
-        let (repo, tag, tarball_prefix) = {
-            let tarball_prefix = if tag_prefix == "forc-binaries" {
-                tag_prefix.to_string()
-            } else {
-                format!("{}-{}", tag_prefix, version)
-            };
-            (
-                component.repository_name,
-                "v".to_owned() + &version.to_string(),
-                tarball_prefix,
-            )
+        // Allow components to move between repositories over time while keeping
+        // older versions downloadable from their original repositories.
+        let repo = component.repository_for_version(&version);
+        let tag = component.tag_for_version(&version);
+        let tarball_prefix = if tag_prefix == "forc-binaries" {
+            tag_prefix.to_string()
+        } else {
+            format!("{}-{}", tag_prefix, version)
         };
 
         document["pkg"][&component.name] = implicit_table();
@@ -352,4 +367,40 @@ fn main() -> Result<()> {
     fs::write(&args.out_file, &channel_str)?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_version_no_broken_prefix() {
+        // Test that the version string doesn't have broken prefixes
+        let forc_wallet = Component::from_name("forc-wallet").unwrap();
+
+        let version = get_version(&forc_wallet).unwrap();
+        let version_str = version.to_string();
+
+        // Should not have mangled prefix from incorrect tag parsing
+        assert!(
+            !version_str.starts_with("orc-wallet"),
+            "Version should not have broken prefix: {}",
+            version_str
+        );
+        assert!(
+            !version_str.contains("forc-wallet"),
+            "Version should be clean semver without component name: {}",
+            version_str
+        );
+
+        println!("Version string is clean: {}", version_str);
+    }
+
+    #[test]
+    fn test_get_version_fuel_core() {
+        let fuel_core = Component::from_name("fuel-core").unwrap();
+        let version = get_version(&fuel_core).unwrap();
+        assert!(!version.to_string().is_empty());
+        println!("fuel-core version: {}", version);
+    }
 }

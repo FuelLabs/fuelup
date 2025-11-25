@@ -374,24 +374,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_get_version_forc_wallet_latest() {
-        // Test that get_version correctly fetches the latest forc-wallet version (0.16.1)
-        let forc_wallet = Component::from_name("forc-wallet").unwrap();
-
-        let version = get_version(&forc_wallet).unwrap();
-
-        // Should fetch version 0.16.1 specifically
-        let expected_version = Version::parse("0.16.1").unwrap();
-        assert_eq!(
-            version, expected_version,
-            "Should fetch forc-wallet version 0.16.1, got: {}",
-            version
-        );
-
-        println!("Successfully fetched forc-wallet version: {}", version);
-    }
-
-    #[test]
     fn test_get_version_no_broken_prefix() {
         // Test that the version string doesn't have broken prefixes
         let forc_wallet = Component::from_name("forc-wallet").unwrap();

@@ -60,7 +60,8 @@ impl DownloadCfg {
             let tarball_url = github_releases_download_url(FUELUP, &version, &tarball_name);
             (tarball_name, tarball_url)
         } else if let Ok(component) = Component::from_name(name) {
-            let tarball_name = tarball_name(&component.tarball_prefix, &version, &target);
+            let tarball_prefix = component.tarball_prefix_for_version(&version);
+            let tarball_name = tarball_name(tarball_prefix, &version, &target);
             let repo = component.repository_for_version(&version);
             let tag = component.tag_for_version(&version);
             let tarball_url = github_releases_download_url_with_tag(repo, &tag, &tarball_name);

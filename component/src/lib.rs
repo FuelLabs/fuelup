@@ -43,6 +43,9 @@ pub struct Component {
     /// Semver version cutoff (e.g., "0.16.0") before which `legacy_repository_name` is used.
     /// Versions < this value use legacy repo, versions >= this value use current repo.
     pub legacy_before: Option<String>,
+    /// Legacy tarball prefix for versions before the migration cutoff.
+    /// Used when the component was bundled differently (e.g., forc-crypto was in forc-binaries).
+    pub legacy_tarball_prefix: Option<String>,
 }
 
 impl Component {
@@ -59,6 +62,7 @@ impl Component {
                 show_fuels_version: Some(false),
                 legacy_repository_name: None,
                 legacy_before: None,
+                legacy_tarball_prefix: None,
             });
         }
 
@@ -89,6 +93,24 @@ impl Component {
         &self.repository_name
     }
 
+    /// Returns the tarball prefix to use for a given component version.
+    ///
+    /// This allows components to change their packaging format over time while
+    /// keeping older versions downloadable with their original tarball prefix.
+    pub fn tarball_prefix_for_version<'a>(&'a self, version: &Version) -> &'a str {
+        if let (Some(legacy_prefix), Some(legacy_before)) =
+            (&self.legacy_tarball_prefix, &self.legacy_before)
+        {
+            if let Ok(cutoff) = Version::parse(legacy_before) {
+                if version < &cutoff {
+                    return legacy_prefix;
+                }
+            }
+        }
+
+        &self.tarball_prefix
+    }
+
     /// Returns the git tag format to use for a given component version.
     ///
     /// Different repositories use different tag naming conventions. This method
@@ -96,7 +118,9 @@ impl Component {
     pub fn tag_for_version(&self, version: &Version) -> String {
         let repo = self.repository_for_version(version);
         match (self.name.as_str(), repo) {
-            ("forc-wallet", "forc") => format!("forc-wallet-{}", version),
+            ("forc-wallet", "forc") | ("forc-crypto", "forc") => {
+                format!("{}-{}", self.name, version)
+            }
             _ => format!("v{}", version),
         }
     }
@@ -419,6 +443,69 @@ mod tests {
     }
 
     #[test]
+    fn test_repository_for_version_forc_crypto_migration() {
+        let components = Components::collect().unwrap();
+        let forc_crypto = components
+            .component
+            .get("forc-crypto")
+            .expect("forc-crypto component must exist");
+
+        let legacy = Version::new(0, 70, 1);
+        let migrated = Version::new(0, 71, 0);
+
+        assert_eq!(
+            forc_crypto.repository_for_version(&legacy),
+            "sway",
+            "pre-0.71.0 forc-crypto versions should use the sway repository"
+        );
+        assert_eq!(
+            forc_crypto.repository_for_version(&migrated),
+            "forc",
+            "0.71.0+ forc-crypto versions should use the forc monorepo"
+        );
+    }
+
+    #[test]
+    fn test_tarball_prefix_for_version_forc_crypto_migration() {
+        let components = Components::collect().unwrap();
+        let forc_crypto = components
+            .component
+            .get("forc-crypto")
+            .expect("forc-crypto component must exist");
+
+        let legacy = Version::new(0, 70, 1);
+        let migrated = Version::new(0, 71, 0);
+
+        assert_eq!(
+            forc_crypto.tarball_prefix_for_version(&legacy),
+            "forc-binaries",
+            "pre-0.71.0 forc-crypto was bundled in forc-binaries"
+        );
+        assert_eq!(
+            forc_crypto.tarball_prefix_for_version(&migrated),
+            "forc-crypto",
+            "0.71.0+ forc-crypto has its own tarball"
+        );
+    }
+
+    #[test]
+    fn test_tarball_prefix_for_version_no_legacy() {
+        let components = Components::collect().unwrap();
+        let forc = components
+            .component
+            .get("forc")
+            .expect("forc component must exist");
+
+        // Components without legacy_tarball_prefix should always use tarball_prefix
+        let version = Version::new(0, 50, 0);
+        assert_eq!(
+            forc.tarball_prefix_for_version(&version),
+            "forc-binaries",
+            "Components without legacy_tarball_prefix should use tarball_prefix"
+        );
+    }
+
+    #[test]
     fn test_tag_for_version_forc_wallet_migration() {
         let components = Components::collect().unwrap();
         let forc_wallet = components
@@ -448,6 +535,31 @@ mod tests {
             forc_wallet.tag_for_version(&future),
             "forc-wallet-0.17.5",
             "Future forc-wallet versions should use forc-wallet-prefixed tags"
+        );
+    }
+
+    #[test]
+    fn test_tag_for_version_forc_crypto_migration() {
+        let components = Components::collect().unwrap();
+        let forc_crypto = components
+            .component
+            .get("forc-crypto")
+            .expect("forc-crypto component must exist");
+
+        // Legacy versions (< 0.71.0) should use standard v-prefixed tags
+        let legacy = Version::new(0, 70, 1);
+        assert_eq!(
+            forc_crypto.tag_for_version(&legacy),
+            "v0.70.1",
+            "Legacy forc-crypto versions should use v-prefixed tags"
+        );
+
+        // New versions (>= 0.71.0) in forc repo should use forc-crypto-prefixed tags
+        let migrated = Version::new(0, 71, 0);
+        assert_eq!(
+            forc_crypto.tag_for_version(&migrated),
+            "forc-crypto-0.71.0",
+            "Migrated forc-crypto versions should use forc-crypto-prefixed tags"
         );
     }
 

@@ -407,13 +407,19 @@ mod tests {
         let repo = forc_crypto.repository_for_version(&legacy);
         let tag = forc_crypto.tag_for_version(&legacy);
         let prefix = forc_crypto.tarball_prefix_for_version(&legacy);
-        assert_eq!((repo, tag.as_str(), prefix), ("sway", "v0.70.1", "forc-binaries"));
+        assert_eq!(
+            (repo, tag.as_str(), prefix),
+            ("sway", "v0.70.1", "forc-binaries")
+        );
 
         // Migrated version (>= 0.71.0) should use forc repo with forc-crypto tarball
         let migrated = Version::new(0, 71, 0);
         let repo = forc_crypto.repository_for_version(&migrated);
         let tag = forc_crypto.tag_for_version(&migrated);
         let prefix = forc_crypto.tarball_prefix_for_version(&migrated);
-        assert_eq!((repo, tag.as_str(), prefix), ("forc", "forc-crypto-0.71.0", "forc-crypto"));
+        assert_eq!(
+            (repo, tag.as_str(), prefix),
+            ("forc", "forc-crypto-0.71.0", "forc-crypto")
+        );
     }
 }

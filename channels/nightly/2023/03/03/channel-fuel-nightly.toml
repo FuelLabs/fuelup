@@ -19,10 +19,10 @@ hash = "0e45429ba620215846a7772f357d4d8009ed8b849f34b4b0c9e7ec0e5edcbf9b"
 [pkg.forc-wallet]
 version = "0.2.1+nightly.20230303.41a0e30ac4"
 
-[pkg.forc-wallet.target.aarch64-unknown-linux-gnu]
+[pkg.forc-wallet.target.linux_arm64]
 url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20230303/forc-wallet-0.2.1%2Bnightly.20230303.41a0e30ac4-aarch64-unknown-linux-gnu.tar.gz"
 hash = "f0e43858e92c9fa72e45b43024d2128a9f87dc16d0df4a49a020fd681b05c908"
 
-[pkg.forc-wallet.target.x86_64-unknown-linux-gnu]
+[pkg.forc-wallet.target.linux_amd64]
 url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20230303/forc-wallet-0.2.1%2Bnightly.20230303.41a0e30ac4-x86_64-unknown-linux-gnu.tar.gz"
 hash = "d576da5e6be9d7d1eb16f7e07bac492861baf7054ff5cabe5b7dfc09ae64fdfe"

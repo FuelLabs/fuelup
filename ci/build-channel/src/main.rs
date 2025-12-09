@@ -274,13 +274,6 @@ fn write_document(
 ) -> Result<()> {
     for component in components {
         println!("\nWriting package info for component '{}'", &component.name);
-        let tag_prefix = if component.name == "forc" {
-            "forc-binaries"
-        } else if component.name == "fuel-core" || component.name == "fuel-core-keygen" {
-            "fuel-core"
-        } else {
-            &component.name
-        };
 
         let version = match component_versions.get(&component.name) {
             Some(v) => v.clone(),
@@ -291,10 +284,11 @@ fn write_document(
         // older versions downloadable from their original repositories.
         let repo = component.repository_for_version(&version);
         let tag = component.tag_for_version(&version);
-        let tarball_prefix = if tag_prefix == "forc-binaries" {
-            tag_prefix.to_string()
+        let tarball_prefix_base = component.tarball_prefix_for_version(&version);
+        let tarball_prefix = if tarball_prefix_base == "forc-binaries" {
+            tarball_prefix_base.to_string()
         } else {
-            format!("{}-{}", tag_prefix, version)
+            format!("{}-{}", tarball_prefix_base, version)
         };
 
         document["pkg"][&component.name] = implicit_table();
@@ -402,5 +396,24 @@ mod tests {
         let version = get_version(&fuel_core).unwrap();
         assert!(!version.to_string().is_empty());
         println!("fuel-core version: {}", version);
+    }
+
+    #[test]
+    fn test_forc_crypto_url_generation() {
+        let forc_crypto = Component::from_name("forc-crypto").unwrap();
+
+        // Legacy version (< 0.71.0) should use sway repo with forc-binaries tarball
+        let legacy = Version::new(0, 70, 1);
+        let repo = forc_crypto.repository_for_version(&legacy);
+        let tag = forc_crypto.tag_for_version(&legacy);
+        let prefix = forc_crypto.tarball_prefix_for_version(&legacy);
+        assert_eq!((repo, tag.as_str(), prefix), ("sway", "v0.70.1", "forc-binaries"));
+
+        // Migrated version (>= 0.71.0) should use forc repo with forc-crypto tarball
+        let migrated = Version::new(0, 71, 0);
+        let repo = forc_crypto.repository_for_version(&migrated);
+        let tag = forc_crypto.tag_for_version(&migrated);
+        let prefix = forc_crypto.tarball_prefix_for_version(&migrated);
+        assert_eq!((repo, tag.as_str(), prefix), ("forc", "forc-crypto-0.71.0", "forc-crypto"));
     }
 }

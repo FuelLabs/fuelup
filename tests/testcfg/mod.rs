@@ -111,7 +111,7 @@ pub fn yesterday() -> String {
     // let current_date = Utc::now();
     // let yesterday = current_date - Duration::days(1);
     // yesterday.format("%Y-%m-%d").to_string()
-    "2025-05-26".to_string()
+    "2025-12-10".to_string()
 }
 
 impl TestCfg {

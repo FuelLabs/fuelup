@@ -1,4 +1,6 @@
 use anyhow::Result;
+use chrono::Duration;
+use chrono::Utc;
 use component::Component;
 use fuelup::channel::{LATEST, NIGHTLY, TESTNET};
 use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;

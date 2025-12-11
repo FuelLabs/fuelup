@@ -1,5 +1,5 @@
 use anyhow::{bail, Result};
-use component::{self, Components};
+use component::Component;
 use std::fmt;
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
@@ -52,29 +52,20 @@ impl TargetTriple {
         Ok(Self(target_triple))
     }
 
-    /// Returns a target triple from the supplied `Component` name, plugin, or executable
+    /// Returns a target triple for the current host from the supplied component name.
     ///
-    /// Target triples come in two forms:
-    ///
-    /// 1. Components distributed by `forc` have the value "[darwin|linux]_[arm64|amd64]"
-    /// 2. All other components have the value "[aarch64|x86_64]-[apple|unknown]-[darwin|linux-gnu]"
-    ///
-    /// # Arguments
-    ///
-    /// * `name` - The name of the component, plugin, or executable.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use component::Component;
-    /// use fuelup::target_triple::TargetTriple;
-    ///
-    /// let component = Component::from_name("forc").unwrap();
-    /// let target_triple = TargetTriple::from_component(&component.name);
-    /// println!("Target triple for 'forc' is: {}", target_triple.unwrap());
-    /// ```
+    /// The format is determined by the component's `targets` field in `components.toml`:
+    /// - Simplified format: `[darwin|linux]_[arm64|amd64]` (e.g., forc, forc-wallet, forc-crypto)
+    /// - Rust triple format: `[arch]-[vendor]-[os]` (e.g., fuel-core, fuel-core-keygen)
     pub fn from_component(name: &str) -> Result<Self> {
-        if Components::is_distributed_by_forc(name) {
+        let component = Component::from_name(name)?;
+        let uses_simplified_targets = component
+            .targets
+            .first()
+            .map(|t| t.contains('_'))
+            .unwrap_or(false);
+
+        if uses_simplified_targets {
             let os = match std::env::consts::OS {
                 "macos" => "darwin",
                 "linux" => "linux",
@@ -85,25 +76,21 @@ impl TargetTriple {
                 "x86_64" => "amd64",
                 unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
             };
-
             Ok(Self(format!("{os}_{architecture}")))
         } else {
             let architecture = match std::env::consts::ARCH {
                 "aarch64" | "x86_64" => std::env::consts::ARCH,
                 unsupported_arch => bail!("Unsupported architecture: {}", unsupported_arch),
             };
-
             let vendor = match std::env::consts::OS {
                 "macos" => "apple",
                 _ => "unknown",
             };
-
             let os = match std::env::consts::OS {
                 "macos" => "darwin",
                 "linux" => "linux-gnu",
                 unsupported_os => bail!("Unsupported os: {}", unsupported_os),
             };
-
             Ok(Self(format!("{architecture}-{vendor}-{os}")))
         }
     }
@@ -112,53 +99,19 @@ impl TargetTriple {
 #[cfg(test)]
 mod test_from_component {
     use super::*;
-    use component::{Component, Components};
+    use component::Components;
     use regex::Regex;
 
-    #[test]
-    fn forc() {
-        let component = Component::from_name("forc").unwrap();
-        let target_triple = TargetTriple::from_component(&component.name).unwrap();
-        test_target_triple(&component, &target_triple);
-    }
-
-    #[test]
-    fn publishables() {
-        for publishable in Components::collect_publishables().unwrap() {
-            let component = Component::from_name(&publishable.name).unwrap();
-            let target_triple = TargetTriple::from_component(&component.name).unwrap();
-            test_target_triple(&component, &target_triple);
-        }
-    }
-
-    #[test]
-    fn plugins() {
-        for plugin in Components::collect_plugins().unwrap() {
-            let component = Component::from_name(&plugin.name).unwrap();
-            let target_triple = TargetTriple::from_component(&component.name).unwrap();
-            test_target_triple(&component, &target_triple);
-        }
-    }
-
-    #[test]
-    fn executables() {
-        for executable in Components::collect_plugin_executables().unwrap() {
-            let components = Components::collect().unwrap();
-            let component = components
-                .component
-                .values()
-                .find(|c| c.executables.contains(&executable))
-                .unwrap();
-
-            let target_triple = TargetTriple::from_component(&component.name).unwrap();
-            test_target_triple(component, &target_triple);
-        }
+    fn uses_simplified_targets(component: &Component) -> bool {
+        component
+            .targets
+            .first()
+            .map(|t| t.contains('_'))
+            .unwrap_or(false)
     }
 
     fn test_target_triple(component: &Component, target_triple: &TargetTriple) {
-        let forc = Component::from_name("forc").unwrap();
-
-        let expected_triple_regex = if Component::is_in_same_distribution(&forc, component) {
+        let expected_triple_regex = if uses_simplified_targets(component) {
             "^(darwin|linux)_(arm64|amd64)$"
         } else {
             "^(aarch64|x86_64)-(apple|unknown)-(darwin|linux-gnu)$"
@@ -167,9 +120,63 @@ mod test_from_component {
         let expected_triple = Regex::new(expected_triple_regex).unwrap();
         assert!(
             expected_triple.is_match(&target_triple.0),
-            "{} has triple '{}'",
+            "{} has triple '{}', expected to match '{}'",
             component.name,
-            &target_triple.0
+            &target_triple.0,
+            expected_triple_regex
+        );
+    }
+
+    #[test]
+    fn all_components() {
+        for component in Components::collect().unwrap().component.values() {
+            let target_triple = TargetTriple::from_component(&component.name).unwrap();
+            test_target_triple(component, &target_triple);
+        }
+    }
+
+    #[test]
+    fn forc_uses_simplified() {
+        let target = TargetTriple::from_component("forc").unwrap();
+        assert!(
+            target.0.contains('_'),
+            "forc should use simplified target format"
+        );
+    }
+
+    #[test]
+    fn forc_wallet_uses_simplified() {
+        let target = TargetTriple::from_component("forc-wallet").unwrap();
+        assert!(
+            target.0.contains('_'),
+            "forc-wallet should use simplified target format"
+        );
+    }
+
+    #[test]
+    fn forc_crypto_uses_simplified() {
+        let target = TargetTriple::from_component("forc-crypto").unwrap();
+        assert!(
+            target.0.contains('_'),
+            "forc-crypto should use simplified target format"
+        );
+    }
+
+    #[test]
+    fn fuel_core_uses_rust_triple() {
+        let target = TargetTriple::from_component("fuel-core").unwrap();
+        assert!(
+            target.0.contains('-'),
+            "fuel-core should use Rust triple format"
+        );
+    }
+
+    #[test]
+    fn fuel_core_keygen_uses_rust_triple() {
+        let target = TargetTriple::from_component("fuel-core-keygen").unwrap();
+        assert!(
+            target.0.contains('-'),
+            "fuel-core-keygen should use Rust triple format"
         );
     }
 }

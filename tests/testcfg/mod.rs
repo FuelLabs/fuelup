@@ -1,4 +1,6 @@
 use anyhow::Result;
+use chrono::Duration;
+use chrono::Utc;
 use component::Component;
 use fuelup::channel::{LATEST, NIGHTLY, TESTNET};
 use fuelup::constants::FUEL_TOOLCHAIN_TOML_FILE;
@@ -105,13 +107,9 @@ pub static ALL_BINS: &[&str] = &[
 /// assert!(re.is_match(&yesterday));
 /// ```
 pub fn yesterday() -> String {
-    // TODO: once https://github.com/FuelLabs/fuelup/issues/739 is closed, this
-    // can be reverted back to being dynamically calculated as actual yesterday
-    //
-    // let current_date = Utc::now();
-    // let yesterday = current_date - Duration::days(1);
-    // yesterday.format("%Y-%m-%d").to_string()
-    "2025-05-26".to_string()
+    let current_date = Utc::now();
+    let yesterday = current_date - Duration::days(1);
+    yesterday.format("%Y-%m-%d").to_string()
 }
 
 impl TestCfg {
@@ -344,6 +342,10 @@ pub fn setup_default_override_file(cfg: &TestCfg, component_name: Option<&str>) 
     // Component::resolve_from_name() to get a valid version (i.e the latest)
     // via download::get_latest_version() as the component override version
 
+    // Use a realistic version per component where needed.
+    // forc-wallet follows its own semver (>=0.16.x after migration),
+    // while other components used here can keep the placeholder until
+    // latest-resolution lands.
     let toolchain_override = ToolchainOverride {
         cfg: OverrideCfg::new(
             ToolchainCfg {
@@ -351,7 +353,11 @@ pub fn setup_default_override_file(cfg: &TestCfg, component_name: Option<&str>) 
                     .unwrap(),
             },
             component_name.map(|c| {
-                vec![(c.to_string(), "0.61.0".parse().unwrap())]
+                let version_str = match c {
+                    "forc-wallet" => "0.16.2",
+                    _ => "0.61.0",
+                };
+                vec![(c.to_string(), version_str.parse().unwrap())]
                     .into_iter()
                     .collect()
             }),

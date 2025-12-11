@@ -1,6 +1,5 @@
 use crate::{
     download::DownloadCfg,
-    store::Store,
     target_triple::TargetTriple,
     toolchain::{DistToolchainDescription, Toolchain},
     toolchain_override::{ComponentSpec, ToolchainOverride},
@@ -58,25 +57,15 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
             if let Some(spec) = to.get_component_spec(component_name) {
                 match spec {
                     ComponentSpec::Version(version) => {
-                        // For version specs, get component from store
-                        let store = Store::from_env()?;
+                        // For version specs, ensure the component is linked into the toolchain bin
+                        let download_cfg = DownloadCfg::new(
+                            component_name,
+                            TargetTriple::from_component(component_name)?,
+                            Some(version.clone()),
+                        )?;
+                        toolchain.add_component(download_cfg)?;
 
-                        if !store.has_component(component_name, version) {
-                            let download_cfg = DownloadCfg::new(
-                                component_name,
-                                TargetTriple::from_component(component_name)?,
-                                Some(version.clone()),
-                            )?;
-                            // Install components within [components] that are declared but missing from the store.
-                            store.install_component(&download_cfg)?;
-                        };
-
-                        (
-                            store
-                                .component_dir_path(component_name, version)
-                                .join(proc_name),
-                            description.to_string(),
-                        )
+                        (toolchain.bin_path.join(proc_name), description.to_string())
                     }
                     ComponentSpec::Path(_) => {
                         // For path specs, validate this specific component and use the resolved path

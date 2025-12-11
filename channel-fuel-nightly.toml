@@ -39,6 +39,25 @@ hash = "1459da802a58d431e85116313797d84fae473b4fa637600cfb4b467ee01c28e9"
 url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20251211/forc-wallet-0.16.2%2Bnightly.20251211.c10463b0cb-linux_arm64.tar.gz"
 hash = "1a3e086b2ba5d67e6eef21d20f2bce09c22ff55b4f37ff928b66d9a81cdd256b"
 
+[pkg.forc-crypto]
+version = "0.71.0+nightly.20251210.c10463b0cb"
+
+[pkg.forc-crypto.target.darwin_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20251210/forc-crypto-0.71.0%2Bnightly.20251210.c10463b0cb-darwin_arm64.tar.gz"
+hash = "5082796ee72a5abb63ea3ec82b9d7ef2bffe54f0e904c9322baa34a13d600375"
+
+[pkg.forc-crypto.target.darwin_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20251210/forc-crypto-0.71.0%2Bnightly.20251210.c10463b0cb-darwin_amd64.tar.gz"
+hash = "fd0be396b31ac660fdcda4d73a7e156b4ed4643a2d8fddc540bf212a723624ad"
+
+[pkg.forc-crypto.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20251210/forc-crypto-0.71.0%2Bnightly.20251210.c10463b0cb-linux_arm64.tar.gz"
+hash = "7f9861ef786303edb0690b53529292dc6f35f3245e4640e4315046368b6932d0"
+
+[pkg.forc-crypto.target.linux_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20251210/forc-crypto-0.71.0%2Bnightly.20251210.c10463b0cb-linux_amd64.tar.gz"
+hash = "a13706354b9b3d7fd5700b24874a3d65ef67859120dc3751d08b93f40bb72053"
+
 [pkg.fuel-core]
 version = "0.47.1+nightly.20251211.6889ed156b"
 

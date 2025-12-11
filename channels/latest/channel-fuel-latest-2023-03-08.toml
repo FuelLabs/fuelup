@@ -61,20 +61,20 @@ hash = "7dd58d1667ba38f7070b28a5349c273f04fd7052b2b0ff1c0d657f8fb6a5b0ce"
 [pkg.forc-wallet]
 version = "0.2.1"
 
-[pkg.forc-wallet.target.aarch64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.2.1/forc-wallet-0.2.1-aarch64-unknown-linux-gnu.tar.gz"
+[pkg.forc-wallet.target.linux_arm64]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.2.1/forc-wallet-0.2.1-linux_arm64.tar.gz"
 hash = "43c4334c25a0395febea2e9e8285d2e455909a9d4da00e6c8e9441f48c878dec"
 
-[pkg.forc-wallet.target.x86_64-unknown-linux-gnu]
-url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.2.1/forc-wallet-0.2.1-x86_64-unknown-linux-gnu.tar.gz"
+[pkg.forc-wallet.target.linux_amd64]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.2.1/forc-wallet-0.2.1-linux_amd64.tar.gz"
 hash = "bab52bab69311bf99d8fae2e7b666e783a1a20c5208887d568c01b95e7cb28ac"
 
-[pkg.forc-wallet.target.aarch64-apple-darwin]
-url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.2.1/forc-wallet-0.2.1-aarch64-apple-darwin.tar.gz"
+[pkg.forc-wallet.target.darwin_arm64]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.2.1/forc-wallet-0.2.1-darwin_arm64.tar.gz"
 hash = "7de094aa408918cd4706741a43161c3f3b2314fa26ebb7e91d50444513377c6f"
 
-[pkg.forc-wallet.target.x86_64-apple-darwin]
-url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.2.1/forc-wallet-0.2.1-x86_64-apple-darwin.tar.gz"
+[pkg.forc-wallet.target.darwin_amd64]
+url = "https://github.com/FuelLabs/forc-wallet/releases/download/v0.2.1/forc-wallet-0.2.1-darwin_amd64.tar.gz"
 hash = "eb79a2b75a50d6a63ba7d859866bb175e368fafb00c6f86e4c14b0a531dd067c"
 
 [pkg.fuel-core]

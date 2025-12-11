@@ -42,19 +42,19 @@ hash = "a7dd8beb75414ab30e5c7d6f4670b7ae330136e07a95fa7d7ffcc93b46c5359a"
 [pkg.forc-wallet]
 version = "0.2.2+nightly.20230423.ac829508f4"
 
-[pkg.forc-wallet.target.aarch64-apple-darwin]
+[pkg.forc-wallet.target.darwin_arm64]
 url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20230423/forc-wallet-0.2.2%2Bnightly.20230423.ac829508f4-aarch64-apple-darwin.tar.gz"
 hash = "ec0d8e6d59eac84c307c450d02df78ccf41f764f11c39b55c9dc9821093e408d"
 
-[pkg.forc-wallet.target.aarch64-unknown-linux-gnu]
+[pkg.forc-wallet.target.linux_arm64]
 url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20230423/forc-wallet-0.2.2%2Bnightly.20230423.ac829508f4-aarch64-unknown-linux-gnu.tar.gz"
 hash = "e96c2cfb53e364bdf071fca440b147085edfe0d981f0bae1295196add6e7a621"
 
-[pkg.forc-wallet.target.x86_64-apple-darwin]
+[pkg.forc-wallet.target.darwin_amd64]
 url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20230423/forc-wallet-0.2.2%2Bnightly.20230423.ac829508f4-x86_64-apple-darwin.tar.gz"
 hash = "d7a32339262361b31d5ef3a4b1191b88aad20768bc409f923b6bed1b00ac021b"
 
-[pkg.forc-wallet.target.x86_64-unknown-linux-gnu]
+[pkg.forc-wallet.target.linux_amd64]
 url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20230423/forc-wallet-0.2.2%2Bnightly.20230423.ac829508f4-x86_64-unknown-linux-gnu.tar.gz"
 hash = "00b48c76272c22333a2a33a2607925a429b658145282206134ff85f84d46e12d"
 

@@ -342,6 +342,10 @@ pub fn setup_default_override_file(cfg: &TestCfg, component_name: Option<&str>) 
     // Component::resolve_from_name() to get a valid version (i.e the latest)
     // via download::get_latest_version() as the component override version
 
+    // Use a realistic version per component where needed.
+    // forc-wallet follows its own semver (>=0.16.x after migration),
+    // while other components used here can keep the placeholder until
+    // latest-resolution lands.
     let toolchain_override = ToolchainOverride {
         cfg: OverrideCfg::new(
             ToolchainCfg {
@@ -349,7 +353,11 @@ pub fn setup_default_override_file(cfg: &TestCfg, component_name: Option<&str>) 
                     .unwrap(),
             },
             component_name.map(|c| {
-                vec![(c.to_string(), "0.61.0".parse().unwrap())]
+                let version_str = match c {
+                    "forc-wallet" => "0.16.2",
+                    _ => "0.61.0",
+                };
+                vec![(c.to_string(), version_str.parse().unwrap())]
                     .into_iter()
                     .collect()
             }),

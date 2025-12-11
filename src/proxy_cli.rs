@@ -1,6 +1,5 @@
 use crate::{
     download::DownloadCfg,
-    store::Store,
     target_triple::TargetTriple,
     toolchain::{DistToolchainDescription, Toolchain},
     toolchain_override::{ComponentSpec, ToolchainOverride},

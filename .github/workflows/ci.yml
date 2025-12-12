@@ -209,6 +209,7 @@ jobs:
         with:
           crate: cross
           cache-key: '${{ matrix.job.target }}'
+          locked: true
 
       - name: Build fuelup
         run: |

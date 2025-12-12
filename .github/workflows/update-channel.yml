@@ -114,11 +114,13 @@ jobs:
 
           # Extract versions from the generated TOML file
           FORC_VERSION=$(grep -A1 '\[pkg\.forc\]' "$CHANNEL_FILE" | grep 'version' | sed 's/.*"\(.*\)".*/\1/')
+          FORC_CRYPTO_VERSION=$(grep -A1 '\[pkg\.forc-crypto\]' "$CHANNEL_FILE" | grep 'version' | sed 's/.*"\(.*\)".*/\1/')
           FORC_WALLET_VERSION=$(grep -A1 '\[pkg\.forc-wallet\]' "$CHANNEL_FILE" | grep 'version' | sed 's/.*"\(.*\)".*/\1/')
           FUEL_CORE_VERSION=$(grep -A1 '\[pkg\.fuel-core\]' "$CHANNEL_FILE" | grep 'version' | sed 's/.*"\(.*\)".*/\1/')
           FUEL_CORE_KEYGEN_VERSION=$(grep -A1 '\[pkg\.fuel-core-keygen\]' "$CHANNEL_FILE" | grep 'version' | sed 's/.*"\(.*\)".*/\1/')
 
           echo "FORC_VERSION=$FORC_VERSION" >> $GITHUB_ENV
+          echo "FORC_CRYPTO_VERSION=$FORC_CRYPTO_VERSION" >> $GITHUB_ENV
           echo "FORC_WALLET_VERSION=$FORC_WALLET_VERSION" >> $GITHUB_ENV
           echo "FUEL_CORE_VERSION=$FUEL_CORE_VERSION" >> $GITHUB_ENV
           echo "FUEL_CORE_KEYGEN_VERSION=$FUEL_CORE_KEYGEN_VERSION" >> $GITHUB_ENV
@@ -169,6 +171,7 @@ jobs:
 
           **${{ github.event.inputs.channel }}:**
           \`forc\`: \`v${FORC_VERSION}\`
+          \`forc-crypto\`: \`v${FORC_CRYPTO_VERSION}\`
           \`forc-wallet\`: \`v${FORC_WALLET_VERSION}\`
           \`fuel-core\`: \`v${FUEL_CORE_VERSION}\`
           \`fuel-core-keygen\`: \`v${FUEL_CORE_KEYGEN_VERSION}\`"

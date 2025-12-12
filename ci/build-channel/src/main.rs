@@ -42,10 +42,52 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
 use std::io::Read;
+use std::thread;
+use std::time::Duration;
 use toml_edit::value;
 use toml_edit::Document;
 
+const MAX_ATTEMPTS: u32 = 3;
+const INITIAL_RETRY_DELAY_MS: u64 = 1000;
+
 static TODAY: Lazy<String> = Lazy::new(|| chrono::Utc::now().format("%Y%m%d").to_string());
+
+/// Fetch URL content with retry logic and exponential backoff.
+/// Makes up to MAX_ATTEMPTS total attempts (1 initial + 2 retries).
+fn fetch_with_retry(url: &str) -> Result<Vec<u8>> {
+    let mut last_error = None;
+    for attempt in 0..MAX_ATTEMPTS {
+        if attempt > 0 {
+            let delay = INITIAL_RETRY_DELAY_MS * 2u64.pow(attempt - 1);
+            eprintln!(
+                "Retry attempt {} for {} (waiting {}ms)",
+                attempt, url, delay
+            );
+            thread::sleep(Duration::from_millis(delay));
+        }
+
+        match ureq::get(url).call() {
+            Ok(res) => {
+                let mut data = Vec::new();
+                if let Err(e) = res.into_reader().read_to_end(&mut data) {
+                    last_error = Some(format!("Failed to read response body: {}", e));
+                    continue;
+                }
+                return Ok(data);
+            }
+            Err(e) => {
+                last_error = Some(format!("{}", e));
+            }
+        }
+    }
+
+    bail!(
+        "Failed to fetch {} after {} attempts: {}",
+        url,
+        MAX_ATTEMPTS,
+        last_error.unwrap_or_else(|| "unknown error".to_string())
+    )
+}
 
 /// Parse a single key-value pair
 fn parse_key_val<T, U>(s: &str) -> Result<(T, U), Box<dyn Error + Send + Sync + 'static>>
@@ -61,11 +103,7 @@ where
     let key = s[..pos].parse()?;
     let value_str = &s[pos + 1..];
     // Handle version strings with 'v' prefix
-    let cleaned_value_str = if value_str.starts_with('v') {
-        &value_str[1..]
-    } else {
-        value_str
-    };
+    let cleaned_value_str = value_str.strip_prefix('v').unwrap_or(value_str);
     let value = cleaned_value_str.parse()?;
     Ok((key, value))
 }
@@ -137,12 +175,13 @@ fn get_version(component: &Component) -> Result<Version> {
     for release in releases {
         let tag = &release.tag_name;
 
-        let version_str = if tag.starts_with(&format!("{}-", component.name)) {
+        let prefix = format!("{}-", component.name);
+        let version_str = if let Some(stripped) = tag.strip_prefix(&prefix) {
             // Component-specific tag like "forc-wallet-0.16.1"
-            tag[component.name.len() + 1..].to_string()
-        } else if tag.starts_with("v") {
+            stripped.to_string()
+        } else if let Some(stripped) = tag.strip_prefix('v') {
             // Legacy v-prefixed tag for older releases
-            tag[1..].to_string()
+            stripped.to_string()
         } else {
             // Try parsing the tag as-is (could be version-only for single-component repos)
             tag.clone()
@@ -298,31 +337,21 @@ fn write_document(
         for target in &component.targets {
             println!("Adding url and hash for target '{}'", &target);
 
-            let mut data = Vec::new();
             let url = format!(
                 "https://github.com/FuelLabs/{}/releases/download/{}/{}-{}.tar.gz",
                 repo, tag, tarball_prefix, target
             );
 
-            match ureq::get(&url).call() {
-                Ok(res) => {
-                    res.into_reader().read_to_end(&mut data)?;
-                    let mut hasher = Sha256::new();
-                    hasher.update(data);
-                    let actual_hash = format!("{:x}", hasher.finalize());
-                    println!("url: {}\nhash: {}", &url, &actual_hash);
+            let data = fetch_with_retry(&url)?;
+            let mut hasher = Sha256::new();
+            hasher.update(&data);
+            let actual_hash = format!("{:x}", hasher.finalize());
+            println!("url: {}\nhash: {}", &url, &actual_hash);
 
-                    document["pkg"][&component.name]["target"][target.to_string()] =
-                        implicit_table();
-                    document["pkg"][&component.name]["target"][target.to_string()]["url"] =
-                        value(url);
-                    document["pkg"][&component.name]["target"][target.to_string()]["hash"] =
-                        value(actual_hash);
-                }
-                Err(e) => {
-                    eprintln!("Error adding url and hash for target '{}':\n{}", target, e);
-                }
-            };
+            document["pkg"][&component.name]["target"][target.to_string()] = implicit_table();
+            document["pkg"][&component.name]["target"][target.to_string()]["url"] = value(url);
+            document["pkg"][&component.name]["target"][target.to_string()]["hash"] =
+                value(actual_hash);
         }
     }
     Ok(())

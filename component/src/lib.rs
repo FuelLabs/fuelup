@@ -118,7 +118,7 @@ impl Component {
     pub fn tag_for_version(&self, version: &Version) -> String {
         let repo = self.repository_for_version(version);
         match (self.name.as_str(), repo) {
-            ("forc-wallet", "forc") | ("forc-crypto", "forc") => {
+            ("forc-wallet", "forc") | ("forc-crypto", "forc") | ("forc-node", "forc") => {
                 format!("{}-{}", self.name, version)
             }
             _ => format!("v{}", version),
@@ -560,6 +560,77 @@ mod tests {
             forc_crypto.tag_for_version(&migrated),
             "forc-crypto-0.71.0",
             "Migrated forc-crypto versions should use forc-crypto-prefixed tags"
+        );
+    }
+
+    #[test]
+    fn test_repository_for_version_forc_node_migration() {
+        let components = Components::collect().unwrap();
+        let forc_node = components
+            .component
+            .get("forc-node")
+            .expect("forc-node component must exist");
+
+        let legacy = Version::new(0, 70, 1);
+        let migrated = Version::new(0, 71, 0);
+
+        assert_eq!(
+            forc_node.repository_for_version(&legacy),
+            "sway",
+            "pre-0.71.0 forc-node versions should use the sway repository"
+        );
+        assert_eq!(
+            forc_node.repository_for_version(&migrated),
+            "forc",
+            "0.71.0+ forc-node versions should use the forc monorepo"
+        );
+    }
+
+    #[test]
+    fn test_tarball_prefix_for_version_forc_node_migration() {
+        let components = Components::collect().unwrap();
+        let forc_node = components
+            .component
+            .get("forc-node")
+            .expect("forc-node component must exist");
+
+        let legacy = Version::new(0, 70, 1);
+        let migrated = Version::new(0, 71, 0);
+
+        assert_eq!(
+            forc_node.tarball_prefix_for_version(&legacy),
+            "forc-binaries",
+            "pre-0.71.0 forc-node was bundled in forc-binaries"
+        );
+        assert_eq!(
+            forc_node.tarball_prefix_for_version(&migrated),
+            "forc-node",
+            "0.71.0+ forc-node has its own tarball"
+        );
+    }
+
+    #[test]
+    fn test_tag_for_version_forc_node_migration() {
+        let components = Components::collect().unwrap();
+        let forc_node = components
+            .component
+            .get("forc-node")
+            .expect("forc-node component must exist");
+
+        // Legacy versions (< 0.71.0) should use standard v-prefixed tags
+        let legacy = Version::new(0, 70, 1);
+        assert_eq!(
+            forc_node.tag_for_version(&legacy),
+            "v0.70.1",
+            "Legacy forc-node versions should use v-prefixed tags"
+        );
+
+        // New versions (>= 0.71.0) in forc repo should use forc-node-prefixed tags
+        let migrated = Version::new(0, 71, 0);
+        assert_eq!(
+            forc_node.tag_for_version(&migrated),
+            "forc-node-0.71.0",
+            "Migrated forc-node versions should use forc-node-prefixed tags"
         );
     }
 

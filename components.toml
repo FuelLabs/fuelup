@@ -77,11 +77,15 @@ targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
 
 [component.forc-node]
 name = "forc-node"
-tarball_prefix = "forc-binaries"
+tarball_prefix = "forc-node"
 is_plugin = true
 executables = ["forc-node"]
-repository_name = "sway"
+repository_name = "forc"
+legacy_repository_name = "sway"
+legacy_before = "0.71.0"
+legacy_tarball_prefix = "forc-binaries"
 targets = ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"]
+publish = true
 
 [component.forc-publish]
 name = "forc-publish"

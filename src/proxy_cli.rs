@@ -1,6 +1,7 @@
 use crate::{
     download::DownloadCfg,
     target_triple::TargetTriple,
+    telemetry::is_telemetry_enabled,
     toolchain::{DistToolchainDescription, Toolchain},
     toolchain_override::{ComponentSpec, ToolchainOverride},
 };
@@ -91,6 +92,12 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
 
     cmd.args(args);
     cmd.stdin(Stdio::inherit());
+
+    // Set FUELUP_NO_TELEMETRY based on user's opt-in preference
+    // FUELUP_NO_TELEMETRY disables telemetry, so we set it when user has opted out
+    if !is_telemetry_enabled() {
+        cmd.env("FUELUP_NO_TELEMETRY", "1");
+    }
 
     return exec(&mut cmd, proc_name, &toolchain_name).map_err(anyhow::Error::from);
 

@@ -40,9 +40,9 @@ main() {
     if [ -t 2 ]; then
         if [ "${TERM+set}" = 'set' ]; then
             case "$TERM" in
-                xterm* | rxvt* | urxvt* | linux* | vt*)
-                    _ansi_escapes_are_valid=true
-                    ;;
+            xterm* | rxvt* | urxvt* | linux* | vt*)
+                _ansi_escapes_are_valid=true
+                ;;
             esac
         fi
     fi
@@ -54,37 +54,37 @@ main() {
 
     for arg in "$@"; do
         case "$arg" in
-            --no-modify-path)
-                prompt_modify=no
-                ;;
-            --skip-toolchain-installation)
-                skip_toolchain_installation=yes
-                ;;
-            *)
-                OPTIND=1
-                if [ "${arg%%--*}" = "" ]; then
-                    # Long option (other than --help);
-                    # don't attempt to interpret it.
-                    continue
-                fi
-                ;;
+        --no-modify-path)
+            prompt_modify=no
+            ;;
+        --skip-toolchain-installation)
+            skip_toolchain_installation=yes
+            ;;
+        *)
+            OPTIND=1
+            if [ "${arg%%--*}" = "" ]; then
+                # Long option (other than --help);
+                # don't attempt to interpret it.
+                continue
+            fi
+            ;;
         esac
     done
 
     if [ "$prompt_modify" = "yes" ]; then
         case $SHELL in
-            */bash)
-                SHELL_PROFILE=$HOME/.bashrc
-                ;;
-            */zsh)
-                SHELL_PROFILE=$HOME/.zshrc
-                ;;
-            */fish)
-                SHELL_PROFILE=$HOME/.config/fish/config.fish
-                ;;
-            *)
-                warn "Failed to detect shell; please add ${FUELUP_DIR}/bin to your PATH manually."
-                ;;
+        */bash)
+            SHELL_PROFILE=$HOME/.bashrc
+            ;;
+        */zsh)
+            SHELL_PROFILE=$HOME/.zshrc
+            ;;
+        */fish)
+            SHELL_PROFILE=$HOME/.config/fish/config.fish
+            ;;
+        *)
+            warn "Failed to detect shell; please add ${FUELUP_DIR}/bin to your PATH manually."
+            ;;
         esac
 
         if [ -n "$SHELL_PROFILE" ]; then
@@ -92,14 +92,14 @@ main() {
             read -r answer </dev/tty
             allow_modify=$(echo "$answer" | cut -c1-1)
             case $allow_modify in
-                "y" | "Y")
-                    allow_modify=yes
-                    printf "\nfuelup will modify your PATH variable for you.\n\n"
-                    ;;
-                *)
-                    allow_modify=no
-                    printf "\nfuelup will not modify your PATH variable for you.\n\n"
-                    ;;
+            "y" | "Y")
+                allow_modify=yes
+                printf "\nfuelup will modify your PATH variable for you.\n\n"
+                ;;
+            *)
+                allow_modify=no
+                printf "\nfuelup will not modify your PATH variable for you.\n\n"
+                ;;
             esac
         else
             allow_modify=no
@@ -204,15 +204,15 @@ EOF
     # Default to yes if user just presses enter
     read -r answer </dev/tty
     case $answer in
-        "n" | "N" | "no" | "No" | "NO")
-            printf "0" > "$FUELUP_DIR/.telemetry_opt_in"
-            printf "\nTelemetry disabled. You can enable it later with 'fuelup telemetry enable'.\n\n"
-            ;;
-        *)
-            printf "1" > "$FUELUP_DIR/.telemetry_opt_in"
-            printf "\nTelemetry enabled. Thank you for helping improve the Fuel toolchain!\n"
-            printf "You can disable it at any time with 'fuelup telemetry disable'.\n\n"
-            ;;
+    "n" | "N" | "no" | "No" | "NO")
+        printf "0" >"$FUELUP_DIR/.telemetry_opt_in"
+        printf "\nTelemetry disabled. You can enable it later with 'fuelup telemetry enable'.\n\n"
+        ;;
+    *)
+        printf "1" >"$FUELUP_DIR/.telemetry_opt_in"
+        printf "\nTelemetry enabled. Thank you for helping improve the Fuel toolchain!\n"
+        printf "You can disable it at any time with 'fuelup telemetry disable'.\n\n"
+        ;;
     esac
 }
 
@@ -222,27 +222,27 @@ get_architecture() {
     _cputype="$(uname -m)"
 
     case "$_ostype" in
-        Linux)
-            _ostype="unknown-linux-gnu"
-            ;;
-        Darwin)
-            _ostype="apple-darwin"
-            ;;
-        *)
-            err "unsupported os type: $_ostype"
-            ;;
+    Linux)
+        _ostype="unknown-linux-gnu"
+        ;;
+    Darwin)
+        _ostype="apple-darwin"
+        ;;
+    *)
+        err "unsupported os type: $_ostype"
+        ;;
     esac
 
     case "$_cputype" in
-        x86_64 | x86-64 | x64 | amd64)
-            _cputype="x86_64"
-            ;;
-        aarch64 | arm64)
-            _cputype="aarch64"
-            ;;
-        *)
-            err "unsupported cpu type: $_cputype"
-            ;;
+    x86_64 | x86-64 | x64 | amd64)
+        _cputype="x86_64"
+        ;;
+    aarch64 | arm64)
+        _cputype="aarch64"
+        ;;
+    *)
+        err "unsupported cpu type: $_cputype"
+        ;;
     esac
 
     _arch="${_cputype}-${_ostype}"
@@ -393,29 +393,29 @@ check_help_for() {
 
     case "$_arch" in
 
-        *darwin*)
-            if check_cmd sw_vers; then
-                case $(sw_vers -productVersion) in
-                    10.*)
-                        # If we're running on macOS, older than 10.13, then we always
-                        # fail to find these options to force fallback
-                        if [ "$(sw_vers -productVersion | cut -d. -f2)" -lt 13 ]; then
-                            # Older than 10.13
-                            echo "Warning: Detected macOS platform older than 10.13"
-                            return 1
-                        fi
-                        ;;
-                    11.*)
-                        # We assume Big Sur will be OK for now
-                        ;;
-                    *)
-                        # Unknown product version, warn and continue
-                        echo "Warning: Detected unknown macOS major version: $(sw_vers -productVersion)"
-                        echo "Warning: TLS capabilities detection may fail"
-                        ;;
-                esac
-            fi
-            ;;
+    *darwin*)
+        if check_cmd sw_vers; then
+            case $(sw_vers -productVersion) in
+            10.*)
+                # If we're running on macOS, older than 10.13, then we always
+                # fail to find these options to force fallback
+                if [ "$(sw_vers -productVersion | cut -d. -f2)" -lt 13 ]; then
+                    # Older than 10.13
+                    echo "Warning: Detected macOS platform older than 10.13"
+                    return 1
+                fi
+                ;;
+            11.*)
+                # We assume Big Sur will be OK for now
+                ;;
+            *)
+                # Unknown product version, warn and continue
+                echo "Warning: Detected unknown macOS major version: $(sw_vers -productVersion)"
+                echo "Warning: TLS capabilities detection may fail"
+                ;;
+            esac
+        fi
+        ;;
 
     esac
 

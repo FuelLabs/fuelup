@@ -95,7 +95,10 @@ fn direct_proxy(proc_name: &str, args: &[OsString], toolchain: &Toolchain) -> Re
 
     // Set FUELUP_NO_TELEMETRY based on user's opt-in preference
     // FUELUP_NO_TELEMETRY disables telemetry, so we set it when user has opted out
-    if !is_telemetry_enabled() {
+    // and explicitly remove it when user has opted in (to override any inherited value)
+    if is_telemetry_enabled() {
+        cmd.env_remove("FUELUP_NO_TELEMETRY");
+    } else {
         cmd.env("FUELUP_NO_TELEMETRY", "1");
     }
 

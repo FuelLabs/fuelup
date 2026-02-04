@@ -191,6 +191,13 @@ prompt_telemetry() {
         return
     fi
 
+    # Check if running in a non-interactive environment (CI/CD, Docker, etc.)
+    # If no terminal is available, default to telemetry disabled
+    if [ ! -t 0 ] && [ ! -t 1 ]; then
+        printf "0" >"$FUELUP_DIR/.telemetry_opt_in"
+        return
+    fi
+
     cat 1>&2 <<EOF
 
 Telemetry helps improve the Fuel toolchain by collecting anonymous usage data.

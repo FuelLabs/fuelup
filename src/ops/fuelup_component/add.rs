@@ -40,10 +40,12 @@ You may create a custom toolchain using 'fuelup toolchain new <toolchain>'.",
             None => (&maybe_versioned_component, None),
         };
 
-    if Component::is_default_forc_plugin(component) {
+    if let Some(parent) = Component::parent_component_for_executable(component) {
         bail!(
-            "'{}' is a default plugin that comes with core forc; please do 'fuelup component add forc' if you would like to install or update it.",
-            &maybe_versioned_component
+            "'{}' is an executable bundled with '{}'; please do 'fuelup component add {}' if you would like to install or update it.",
+            &maybe_versioned_component,
+            parent,
+            parent
         );
     }
 

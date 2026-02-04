@@ -156,13 +156,35 @@ impl Component {
         })
     }
 
-    pub fn is_default_forc_plugin(name: &str) -> bool {
-        (Self::from_name(FORC)
+    /// Returns the parent component name if the given name is an executable bundled
+    /// with another component (e.g., forc-fmt is bundled with forc, forc-run is
+    /// bundled with forc-client).
+    ///
+    /// Returns `None` if the name is a standalone component or not recognized.
+    pub fn parent_component_for_executable(name: &str) -> Option<&'static str> {
+        // Check if it's a forc executable (except forc itself)
+        if Self::from_name(FORC)
             .expect("there must always be a `forc` component")
             .executables
             .contains(&name.to_string())
-            && name != FORC)
-            || name == FORC_CLIENT
+            && name != FORC
+        {
+            return Some(FORC);
+        }
+
+        // Check if it's a forc-client executable (except forc-client itself)
+        if let Ok(forc_client) = Self::from_name(FORC_CLIENT) {
+            if forc_client.executables.contains(&name.to_string()) && name != FORC_CLIENT {
+                return Some(FORC_CLIENT);
+            }
+        }
+
+        None
+    }
+
+    /// Deprecated: Use `parent_component_for_executable` instead for better error messages.
+    pub fn is_default_forc_plugin(name: &str) -> bool {
+        Self::parent_component_for_executable(name).is_some()
     }
 
     /// Tests if the supplied `Component`s come from same distribution

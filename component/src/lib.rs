@@ -118,7 +118,10 @@ impl Component {
     pub fn tag_for_version(&self, version: &Version) -> String {
         let repo = self.repository_for_version(version);
         match (self.name.as_str(), repo) {
-            ("forc-wallet", "forc") | ("forc-crypto", "forc") | ("forc-node", "forc") => {
+            ("forc-wallet", "forc")
+            | ("forc-crypto", "forc")
+            | ("forc-node", "forc")
+            | ("forc-client", "forc") => {
                 format!("{}-{}", self.name, version)
             }
             _ => format!("v{}", version),
@@ -328,7 +331,7 @@ impl Components {
     /// assert!(Components::is_distributed_by_forc("forc"));
     /// assert!(!Components::is_distributed_by_forc("fuel-core"));
     /// assert!(Components::is_distributed_by_forc("forc-fmt"));
-    /// assert!(Components::is_distributed_by_forc("forc-run"));
+    /// assert!(!Components::is_distributed_by_forc("forc-run")); // forc-run is now distributed by forc-client
     /// ```
     pub fn is_distributed_by_forc(name: &str) -> bool {
         match name {
@@ -631,6 +634,77 @@ mod tests {
             forc_node.tag_for_version(&migrated),
             "forc-node-0.71.0",
             "Migrated forc-node versions should use forc-node-prefixed tags"
+        );
+    }
+
+    #[test]
+    fn test_repository_for_version_forc_client_migration() {
+        let components = Components::collect().unwrap();
+        let forc_client = components
+            .component
+            .get("forc-client")
+            .expect("forc-client component must exist");
+
+        let legacy = Version::new(0, 70, 1);
+        let migrated = Version::new(0, 71, 0);
+
+        assert_eq!(
+            forc_client.repository_for_version(&legacy),
+            "sway",
+            "pre-0.71.0 forc-client versions should use the sway repository"
+        );
+        assert_eq!(
+            forc_client.repository_for_version(&migrated),
+            "forc",
+            "0.71.0+ forc-client versions should use the forc monorepo"
+        );
+    }
+
+    #[test]
+    fn test_tarball_prefix_for_version_forc_client_migration() {
+        let components = Components::collect().unwrap();
+        let forc_client = components
+            .component
+            .get("forc-client")
+            .expect("forc-client component must exist");
+
+        let legacy = Version::new(0, 70, 1);
+        let migrated = Version::new(0, 71, 0);
+
+        assert_eq!(
+            forc_client.tarball_prefix_for_version(&legacy),
+            "forc-binaries",
+            "pre-0.71.0 forc-client was bundled in forc-binaries"
+        );
+        assert_eq!(
+            forc_client.tarball_prefix_for_version(&migrated),
+            "forc-client",
+            "0.71.0+ forc-client has its own tarball"
+        );
+    }
+
+    #[test]
+    fn test_tag_for_version_forc_client_migration() {
+        let components = Components::collect().unwrap();
+        let forc_client = components
+            .component
+            .get("forc-client")
+            .expect("forc-client component must exist");
+
+        // Legacy versions (< 0.71.0) should use standard v-prefixed tags
+        let legacy = Version::new(0, 70, 1);
+        assert_eq!(
+            forc_client.tag_for_version(&legacy),
+            "v0.70.1",
+            "Legacy forc-client versions should use v-prefixed tags"
+        );
+
+        // New versions (>= 0.71.0) in forc repo should use forc-client-prefixed tags
+        let migrated = Version::new(0, 71, 0);
+        assert_eq!(
+            forc_client.tag_for_version(&migrated),
+            "forc-client-0.71.0",
+            "Migrated forc-client versions should use forc-client-prefixed tags"
         );
     }
 

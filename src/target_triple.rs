@@ -163,6 +163,15 @@ mod test_from_component {
     }
 
     #[test]
+    fn forc_client_uses_simplified() {
+        let target = TargetTriple::from_component("forc-client").unwrap();
+        assert!(
+            target.0.contains('_'),
+            "forc-client should use simplified target format"
+        );
+    }
+
+    #[test]
     fn fuel_core_uses_rust_triple() {
         let target = TargetTriple::from_component("fuel-core").unwrap();
         assert!(

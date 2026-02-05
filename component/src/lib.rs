@@ -182,11 +182,6 @@ impl Component {
         None
     }
 
-    /// Deprecated: Use `parent_component_for_executable` instead for better error messages.
-    pub fn is_default_forc_plugin(name: &str) -> bool {
-        Self::parent_component_for_executable(name).is_some()
-    }
-
     /// Tests if the supplied `Component`s come from same distribution
     ///
     /// # Arguments

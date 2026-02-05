@@ -476,4 +476,29 @@ mod tests {
             ("forc", "forc-node-0.71.0", "forc-node")
         );
     }
+
+    #[test]
+    fn test_forc_client_url_generation() {
+        let forc_client = Component::from_name("forc-client").unwrap();
+
+        // Legacy version (< 0.71.0) should use sway repo with forc-binaries tarball
+        let legacy = Version::new(0, 70, 1);
+        let repo = forc_client.repository_for_version(&legacy);
+        let tag = forc_client.tag_for_version(&legacy);
+        let prefix = forc_client.tarball_prefix_for_version(&legacy);
+        assert_eq!(
+            (repo, tag.as_str(), prefix),
+            ("sway", "v0.70.1", "forc-binaries")
+        );
+
+        // Migrated version (>= 0.71.0) should use forc repo with forc-client tarball
+        let migrated = Version::new(0, 71, 0);
+        let repo = forc_client.repository_for_version(&migrated);
+        let tag = forc_client.tag_for_version(&migrated);
+        let prefix = forc_client.tarball_prefix_for_version(&migrated);
+        assert_eq!(
+            (repo, tag.as_str(), prefix),
+            ("forc", "forc-client-0.71.0", "forc-client")
+        );
+    }
 }

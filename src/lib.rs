@@ -16,5 +16,6 @@ pub mod settings;
 pub mod shell;
 pub mod store;
 pub mod target_triple;
+pub mod telemetry;
 pub mod toolchain;
 pub mod toolchain_override;

@@ -4,6 +4,7 @@ use crate::commands::{
     component::{self, ComponentCommand},
     default::{self, DefaultCommand},
     fuelup::{self, FuelupCommand},
+    telemetry::{self, TelemetryCommand},
     toolchain::{self, ToolchainCommand},
     upgrade::{self, UpgradeCommand},
 };
@@ -32,6 +33,9 @@ enum Commands {
     /// Manage your fuelup installation.
     #[clap(name = "self", subcommand)]
     Fuelup(FuelupCommand),
+    /// Manage telemetry settings
+    #[clap(subcommand)]
+    Telemetry(TelemetryCommand),
     /// Install new toolchains or modify/query installed toolchains
     #[clap(subcommand)]
     Toolchain(ToolchainCommand),
@@ -55,6 +59,7 @@ pub fn fuelup_cli() -> Result<()> {
             FuelupCommand::Update(update) => fuelup::update_exec(update.force),
             FuelupCommand::Uninstall(remove) => fuelup::remove_exec(remove.force),
         },
+        Commands::Telemetry(command) => telemetry::exec(command),
         Commands::Show => fuelup_show::show(),
         Commands::Toolchain(command) => toolchain::exec(command),
         Commands::Update => fuelup_update::update(),

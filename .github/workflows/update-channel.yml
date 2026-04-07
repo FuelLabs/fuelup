@@ -53,7 +53,7 @@ jobs:
           toolchain: ${{ env.RUST_VERSION }}
 
       - name: Install build-channel script
-        run: cargo install --debug --path ./ci/build-channel
+        run: cargo install --locked --debug --path ./ci/build-channel
 
       - name: Switch to gh-pages branch
         run: |

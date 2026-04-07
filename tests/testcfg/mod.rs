@@ -67,6 +67,8 @@ pub struct TestOutput {
 
 pub const DATE: &str = "2022-08-30";
 pub const CUSTOM_TOOLCHAIN_NAME: &str = "my-toolchain";
+/// Archived nightly used for override-based tests so they don't depend on the latest nightly publish.
+pub const OVERRIDE_DATE: &str = "2025-12-31";
 
 const VERSION: &Version = &Version::new(0, 1, 0);
 const VERSION_2: &Version = &Version::new(0, 2, 0);
@@ -262,15 +264,16 @@ pub fn delete_toolchain(cfg: &TestCfg, toolchain: &Toolchain) {
 /// # Examples
 ///
 /// ```no_run
-/// use testcfg::{self, get_default_toolchain_override_toolchain, FuelupState};
+/// use testcfg::{self, get_default_toolchain_override_toolchain, FuelupState, OVERRIDE_DATE};
 ///
 /// testcfg::setup(FuelupState::LatestToolchainInstalled, &|cfg| {
 ///     let toolchain = get_default_toolchain_override_toolchain();
-///     assert_eq!(toolchain.name, format!("nightly-{}", yesterday()));
+///     assert_eq!(toolchain.name, format!("nightly-{OVERRIDE_DATE}"));
 /// });
 /// ```
 pub fn get_default_toolchain_override_toolchain() -> Toolchain {
-    Toolchain::new(format!("nightly-{}", yesterday()).as_str()).unwrap()
+    // Use an archived nightly so these tests don't depend on yesterday's publish succeeding.
+    Toolchain::new(format!("nightly-{OVERRIDE_DATE}").as_str()).unwrap()
 }
 
 fn setup_toolchain(fuelup_home_path: &Path, toolchain: &str) -> Result<()> {
@@ -349,7 +352,7 @@ pub fn setup_default_override_file(cfg: &TestCfg, component_name: Option<&str>) 
     let toolchain_override = ToolchainOverride {
         cfg: OverrideCfg::new(
             ToolchainCfg {
-                channel: toolchain_override::Channel::from_str(&format!("nightly-{}", yesterday()))
+                channel: toolchain_override::Channel::from_str(&format!("nightly-{OVERRIDE_DATE}"))
                     .unwrap(),
             },
             component_name.map(|c| {

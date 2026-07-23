@@ -40,8 +40,9 @@ of each channel.
 
 ## Keeping installed Fuel toolchains up to date
 
-Run `fuelup update` to refresh every distributable channel that is already
-installed. This does not change which channel is the default.
+Run `fuelup update` to refresh each installed undated public channel
+(`latest`, `mainnet`, `testnet`, and `nightly`). Dated archives are immutable
+and are not updated. This does not change which channel is the default.
 
 <!-- This section should show the command to update distributable toolchains -->
 <!-- update:example:start -->

@@ -12,15 +12,25 @@ You can override the installed default toolchain using a `fuel-toolchain.toml` f
 
 <!-- This section should explain the fuel-toolchain TOML file -->
 <!-- toolchain:example:start -->
-The `fuel-toolchain.toml` file allows projects to "pin" to a specific set of fuel toolchain component versions.
-This greatly improves the reproducibility of a project, as the `fuel-toolchain.toml` contains the set of known,
-working versions for each tool used to build it.
+The `fuel-toolchain.toml` file allows a project to select a distributable base
+channel and, optionally, specific component versions or local executables.
+Recording these choices improves repeatability, but the file is not a complete
+bit-for-bit lockfile: version entries do not include the artifact hashes from a
+channel manifest.
 
-When this file is present, `fuelup` will override the default toolchain with the specified toolchain when executing binaries
-in the toolchain.
+When this file is present, `fuelup` overrides the default toolchain when it
+executes a managed binary.
 
-In these cases, the toolchain can be specified in a file called `fuel-toolchain.toml`. These toolchains can only be
-the [distributed toolchains] at this point in time.
+The `[toolchain]` channel must be one of:
+
+- `mainnet` or `testnet`; or
+- an archived `latest-YYYY-MM-DD` or `nightly-YYYY-MM-DD` channel whose
+  manifest was actually published.
+
+Although the install command accepts undated `latest` and `nightly`, those two
+names require a date in `fuel-toolchain.toml`. Custom installed toolchain names
+cannot be used as the base channel. Locally built tools are supported through
+path entries in `[components]`.
 <!-- toolchain:example:end -->
 
 Here's what a sample project might look like:
@@ -45,15 +55,19 @@ An application using the [`testnet`] toolchain:
 channel = "testnet"
 ```
 
-Let's say we have a project on the Fuel testnet network, and we want to try using a different version forc to develop on it:
+To override the Forc version while retaining testnet as the base channel:
 
-```toml
+```text
 [toolchain]
 channel = "testnet"
 
 [components]
-forc = "0.65.0" # in testnet, forc is pinned to v0.66.1
+forc = "<FORC_SEMVER>"
 ```
+
+Replace `<FORC_SEMVER>` with a published semantic version that is compatible
+with the network and the other components. Do not infer the current testnet
+version from this page; inspect the [testnet manifest].
 
 Alternatively, you can specify local paths to custom binaries. This is useful for development with locally-built tools:
 
@@ -68,31 +82,37 @@ fuel-core = "../../../fuel-core/target/release/fuel-core" # relative path from f
 
 You can also mix version specifications with local paths:
 
-```toml
+```text
 [toolchain]
 channel = "testnet"
 
 [components]
-forc = "/path/to/custom/forc" # use local custom forc
-fuel-core = "0.41.7"         # use specific version of fuel-core
+forc = "/path/to/custom/forc"
+fuel-core = "<FUEL_CORE_SEMVER>"
 ```
 
-Local paths can be either absolute or relative to the `fuel-toolchain.toml` file. When using local paths, `fuelup` will validate that the specified binaries exist and are executable.
+Local paths can be absolute or relative to the `fuel-toolchain.toml` file.
+Fuelup validates that a referenced path is a file and is executable.
 
 ## Exporting toolchains
 
 <!-- This section should explain how to export toolchains -->
 <!-- export:example:start -->
-You can generate a `fuel-toolchain.toml` file from your current toolchain configuration using the `export` command. This is useful for sharing your exact toolchain setup with team members or documenting the specific tool versions used in your project.
+You can generate a `fuel-toolchain.toml` inventory with the `export` command.
+Review the generated file before sharing it: export records detected component
+versions, but it does not guarantee that the base channel is archived or that
+the file can restore the exact same artifacts.
 <!-- export:example:end -->
 
-To export your currently active toolchain:
+Without a name, export reads the configured default toolchain. It does not
+export a project override that happens to be active in the current directory:
 
 ```sh
 fuelup toolchain export
 ```
 
-This creates a `fuel-toolchain.toml` file in the current directory containing your active toolchain's channel and installed component versions.
+This creates a `fuel-toolchain.toml` file in the current directory containing
+the default toolchain's derived channel and detected component versions.
 
 You can also export a specific toolchain by name:
 
@@ -107,31 +127,52 @@ fuelup toolchain export -o my-backup.toml
 fuelup toolchain export --output /path/to/my-toolchain.toml
 ```
 
-### Export examples
+### What export preserves
 
-Exporting a `latest` toolchain produces a file like:
+For a `mainnet` or `testnet` toolchain, export preserves the dateless network
+channel and records the semantic version of each detected publishable
+component. The output has this shape:
 
-```toml
+```text
 [toolchain]
-channel = "latest-2025-09-03"
+channel = "mainnet"
 
 [components]
-forc = "0.69.1"
-fuel-core = "0.45.1"
-fuel-core-keygen = "0.45.1"
-forc-wallet = "0.15.1"
+forc = "<INSTALLED_FORC_SEMVER>"
+fuel-core = "<INSTALLED_FUEL_CORE_SEMVER>"
+# Other detected components are included here.
 ```
 
-Exporting a custom toolchain preserves the custom name:
+The generated component entries do not preserve channel-manifest hashes. Export
+also does not preserve the source of locally built binaries; it records a
+version when Fuelup can identify one.
 
-```toml
-[toolchain]
-channel = "my-dev-toolchain"
+### Dated channel caveat
 
-[components]
-forc = "0.69.1"
-fuel-core = "0.45.1"
-```
+When the installed toolchain is undated `latest` or `nightly`, export currently
+turns its name into `latest-<today>` or `nightly-<today>`. Export does not check
+whether a matching archive manifest exists.
+
+This is especially important for `latest`: `latest` is an alias for the current
+mainnet manifest, but dated `latest` manifests are not published for every
+date. A dated nightly is available only when that day's nightly was
+successfully published. If the generated archive is missing, Fuelup can still
+install individually listed component versions when they are invoked, so a
+partial restore may look successful even though the base toolchain was not
+restored.
+
+Before committing an export:
+
+1. Verify that its dated channel manifest exists.
+2. If the source was undated `latest`, use `mainnet` as the base channel when a
+   moving, mainnet-compatible base is appropriate.
+3. Test the file with an empty Fuelup home rather than relying on already cached
+   components.
+
+Exporting a custom toolchain preserves its custom name in the generated file,
+but custom names are not accepted as `[toolchain].channel` values by the
+override parser. Such output is an inventory only and is not currently a
+restorable project override.
 
 ### Overwrite protection
 
@@ -148,12 +189,15 @@ You can either use the `--force` flag to overwrite the existing file:
 fuelup toolchain export --force
 ```
 
-Or export to a different path to avoid the conflict entirely:
+Or export to a different path:
 
 ```sh
 fuelup toolchain export -o backup-toolchain.toml
 ```
 
+The default-path protection applies only to `fuel-toolchain.toml`. A custom
+output path is overwritten if it already exists, even without `--force`.
+
 [toolchain]: concepts/toolchains.md
-[distributed toolchains]: concepts/toolchains.md#toolchains
 [`testnet`]: concepts/channels.md#the-testnet-channel
+[testnet manifest]: https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-testnet.toml

@@ -5,27 +5,32 @@
 Many `fuelup` commands deal with _toolchains_, a single installation of the
 Fuel toolchain. `fuelup` supports **two** types of toolchains.
 
-1. Distributable toolchains which track the official release [channels] (e.g., _latest_, _nightly_);
-2. Custom toolchains and install individual components in a modular manner.
+1. Distributable toolchains which track the official release [channels]
+   (`latest`, `mainnet`, `testnet`, and `nightly`);
+2. Custom toolchains, in which individual components can be installed in a
+   modular manner.
 <!-- toolchains:example:end -->
 
 [channels]: channels.md
 
 ## Toolchain specification
 
-Standard release channel toolchain names have the following form:
+Distributable toolchain names have the following form:
 
 ```text
 <channel>[-<date>][-<host>]
 
-<channel>       = latest
+<channel>       = latest | nightly | mainnet | testnet
 <date>          = YYYY-MM-DD
 <host>          = <target-triple>
 ```
 
-'channel' is a named release channel. Channel names can be optionally appended
-with an archive date, as in `nightly-2014-12-18`, in which case the toolchain
-is downloaded from the archive for that date.
+`channel` is a named release channel. `latest` and `nightly` can be appended
+with an archive date, as in `nightly-2025-01-18`, in which case the toolchain
+is downloaded from the archive for that date. A dated name works only when its
+matching manifest was actually published; not every date is available.
+
+`mainnet` and `testnet` are named, undated network channels.
 
 Finally, the host may be specified as a target triple.
 

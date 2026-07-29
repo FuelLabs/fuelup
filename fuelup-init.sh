@@ -149,6 +149,9 @@ main() {
         add_path_message
     fi
 
+    # Prompt for telemetry
+    prompt_telemetry
+
     return "$_retval"
 }
 
@@ -180,6 +183,44 @@ fish:
 
 fish_add_path ~/.fuelup/bin
 EOF
+}
+
+prompt_telemetry() {
+    # Skip if the file already exists (user might have already been prompted)
+    if [ -f "$FUELUP_DIR/.telemetry_opt_in" ]; then
+        return
+    fi
+
+    # Check if running in a non-interactive environment (CI/CD, Docker, etc.)
+    # If no terminal is available, default to telemetry disabled
+    if [ ! -t 0 ] && [ ! -t 1 ]; then
+        printf "0" >"$FUELUP_DIR/.telemetry_opt_in"
+        return
+    fi
+
+    cat 1>&2 <<EOF
+
+Telemetry helps improve the Fuel toolchain by collecting anonymous usage data.
+You can change this setting at any time by running:
+  fuelup telemetry enable   # to enable telemetry
+  fuelup telemetry disable  # to disable telemetry
+
+Would you like to enable telemetry? (Y/n)
+EOF
+
+    # Default to yes if user just presses enter
+    read -r answer </dev/tty
+    case $answer in
+        "n" | "N" | "no" | "No" | "NO")
+            printf "0" >"$FUELUP_DIR/.telemetry_opt_in"
+            printf "\nTelemetry disabled. You can enable it later with 'fuelup telemetry enable'.\n\n"
+            ;;
+        *)
+            printf "1" >"$FUELUP_DIR/.telemetry_opt_in"
+            printf "\nTelemetry enabled. Thank you for helping improve the Fuel toolchain!\n"
+            printf "You can disable it at any time with 'fuelup telemetry disable'.\n\n"
+            ;;
+    esac
 }
 
 get_architecture() {

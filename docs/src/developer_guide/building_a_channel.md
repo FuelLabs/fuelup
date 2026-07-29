@@ -9,30 +9,28 @@ To learn about the args and options used in the script, skip to [Usage].
 
 ## Use cases
 
-There are 2 main ways the `build-channel` script is used: in the CI, and manually.
+There are 2 main ways the `build-channel` script is used: in the CI, and locally.
 
 ### CI
 
-This script's main usage is found within the `fuelup` CI. This script is in charge of publishing the `latest` and
-`nightly` channels on a routine basis.
+This script's main usage is found within the `fuelup` CI, where it publishes the channels to the [`gh-pages`] branch.
 
-The `latest` channel is re-built if the [check versions workflow] detects a new release of `forc` or `fuel-core`, and
-compatibility tests pass after that. This is explained in detail in the [latest channel developer guide].
+The `nightly` channel is published automatically. A channel is built at 01:00 UTC every day by the
+[`Publish Channel (nightly)`] workflow, containing the download links to binaries found within the
+[sway-nightly-binaries repository].
 
-An example of this usage is in [`test-toolchain-compatibility.yml`].
+The `latest`, `mainnet` and `testnet` channels are published manually via the [`Update Channel`] workflow, which is
+triggered with `workflow_dispatch`. An operator selects the channel and provides the component versions to pin; the
+workflow runs `build-channel` and opens a pull request against `gh-pages`. (Note that the `latest` toolchain is served
+by `channel-fuel-mainnet.toml`, so `latest` is updated by bumping the `mainnet` channel.) This flow is explained in more
+detail in the [channels developer guide].
 
-The `nightly` channel is more straightforward - a channel is built at 01:00 UTC every day, containing the download
-links to binaries found within the [sway-nightly-binaries repository].
+### Locally
 
-An example of this usage is in [`publish-nightly-channel.yml`].
+Running `build-channel` locally is a good sanity check when working on this codebase, or when preparing the versions to
+feed into the [`Update Channel`] workflow. It fails fast if a pinned version has missing release artifacts.
 
-### Manual
-
-There may be times when we need a channel for a one-off event e.g. testnets. During these events, we do not
-
-require a routine update, and can essentially publish once and be done. This is when manual publishing is done.
-
-For example, building a `testnet` toolchain is done like so:
+For example, building a `testnet` channel is done like so:
 
 ```sh
 # from fuelup project root
@@ -41,9 +39,6 @@ cd ci/build-channel && cargo run -- channel-fuel-testnet.toml 2023-02-13 forc=0.
 
 The above command means that we're building a channel named `channel-fuel-testnet.toml` with the date `2023-02-13` (`YYYY-MM-DD`)
 and `forc` and `fuel-core` versions `0.35.0` and `0.17.1` respectively, and the latest versions for the other unlisted components.
-
-Other than for these one-off events, manually running `build-channel` locally is a good sanity check when working
-on this codebase.
 
 ## Usage
 
@@ -72,11 +67,11 @@ on this codebase.
 - _Optional_. Specify if we are building a nightly channel.
 
 [Usage]: #usage
-[check versions workflow]: https://github.com/FuelLabs/fuelup/actions/workflows/index-versions.yml
-[latest channel developer guide]: ../concepts/channels.md#understanding-the-latest-workflow
-[`test-toolchain-compatibility.yml`]: https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/test-toolchain-compatibility.yml#L174
+[channels developer guide]: ../concepts/channels.md#developer-guide
+[`gh-pages`]: https://github.com/FuelLabs/fuelup/tree/gh-pages
+[`Update Channel`]: https://github.com/FuelLabs/fuelup/blob/master/.github/workflows/update-channel.yml
+[`Publish Channel (nightly)`]: https://github.com/FuelLabs/fuelup/blob/master/.github/workflows/publish-nightly-channel.yml
 [sway-nightly-binaries repository]: https://github.com/FuelLabs/sway-nightly-binaries
-[`publish-nightly-channel.yml`]: https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/publish-nightly-channel.yml#L37
 [channel]: ../concepts/channels.md
 [variable]: https://docs.github.com/en/actions/learn-github-actions/variables
 [SemVer]: https://semver.org/

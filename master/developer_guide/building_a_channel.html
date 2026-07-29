@@ -176,27 +176,26 @@ Fuel Labs publishes, creating a TOML file based on the collated data, which is t
 during usage.</p>
 <p>To learn about the args and options used in the script, skip to <a href="#usage">Usage</a>.</p>
 <h2 id="use-cases"><a class="header" href="#use-cases">Use cases</a></h2>
-<p>There are 2 main ways the <code>build-channel</code> script is used: in the CI, and manually.</p>
+<p>There are 2 main ways the <code>build-channel</code> script is used: in the CI, and locally.</p>
 <h3 id="ci"><a class="header" href="#ci">CI</a></h3>
-<p>This script's main usage is found within the <code>fuelup</code> CI. This script is in charge of publishing the <code>latest</code> and
-<code>nightly</code> channels on a routine basis.</p>
-<p>The <code>latest</code> channel is re-built if the <a href="https://github.com/FuelLabs/fuelup/actions/workflows/index-versions.yml">check versions workflow</a> detects a new release of <code>forc</code> or <code>fuel-core</code>, and
-compatibility tests pass after that. This is explained in detail in the <a href="../concepts/channels.html#understanding-the-latest-workflow">latest channel developer guide</a>.</p>
-<p>An example of this usage is in <a href="https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/test-toolchain-compatibility.yml#L174"><code>test-toolchain-compatibility.yml</code></a>.</p>
-<p>The <code>nightly</code> channel is more straightforward - a channel is built at 01:00 UTC every day, containing the download
-links to binaries found within the <a href="https://github.com/FuelLabs/sway-nightly-binaries">sway-nightly-binaries repository</a>.</p>
-<p>An example of this usage is in <a href="https://github.com/FuelLabs/fuelup/blob/3abe817673184ac17a78b2a8965234813ac6d911/.github/workflows/publish-nightly-channel.yml#L37"><code>publish-nightly-channel.yml</code></a>.</p>
-<h3 id="manual"><a class="header" href="#manual">Manual</a></h3>
-<p>There may be times when we need a channel for a one-off event e.g. testnets. During these events, we do not</p>
-<p>require a routine update, and can essentially publish once and be done. This is when manual publishing is done.</p>
-<p>For example, building a <code>testnet</code> toolchain is done like so:</p>
+<p>This script's main usage is found within the <code>fuelup</code> CI, where it publishes the channels to the <a href="https://github.com/FuelLabs/fuelup/tree/gh-pages"><code>gh-pages</code></a> branch.</p>
+<p>The <code>nightly</code> channel is published automatically. A channel is built at 01:00 UTC every day by the
+<a href="https://github.com/FuelLabs/fuelup/blob/master/.github/workflows/publish-nightly-channel.yml"><code>Publish Channel (nightly)</code></a> workflow, containing the download links to binaries found within the
+<a href="https://github.com/FuelLabs/sway-nightly-binaries">sway-nightly-binaries repository</a>.</p>
+<p>The <code>latest</code>, <code>mainnet</code> and <code>testnet</code> channels are published manually via the <a href="https://github.com/FuelLabs/fuelup/blob/master/.github/workflows/update-channel.yml"><code>Update Channel</code></a> workflow, which is
+triggered with <code>workflow_dispatch</code>. An operator selects the channel and provides the component versions to pin; the
+workflow runs <code>build-channel</code> and opens a pull request against <code>gh-pages</code>. (Note that the <code>latest</code> toolchain is served
+by <code>channel-fuel-mainnet.toml</code>, so <code>latest</code> is updated by bumping the <code>mainnet</code> channel.) This flow is explained in more
+detail in the <a href="../concepts/channels.html#developer-guide">channels developer guide</a>.</p>
+<h3 id="locally"><a class="header" href="#locally">Locally</a></h3>
+<p>Running <code>build-channel</code> locally is a good sanity check when working on this codebase, or when preparing the versions to
+feed into the <a href="https://github.com/FuelLabs/fuelup/blob/master/.github/workflows/update-channel.yml"><code>Update Channel</code></a> workflow. It fails fast if a pinned version has missing release artifacts.</p>
+<p>For example, building a <code>testnet</code> channel is done like so:</p>
 <pre><code class="language-sh"># from fuelup project root
 cd ci/build-channel &amp;&amp; cargo run -- channel-fuel-testnet.toml 2023-02-13 forc=0.35.0 fuel-core=0.17.1
 </code></pre>
 <p>The above command means that we're building a channel named <code>channel-fuel-testnet.toml</code> with the date <code>2023-02-13</code> (<code>YYYY-MM-DD</code>)
 and <code>forc</code> and <code>fuel-core</code> versions <code>0.35.0</code> and <code>0.17.1</code> respectively, and the latest versions for the other unlisted components.</p>
-<p>Other than for these one-off events, manually running <code>build-channel</code> locally is a good sanity check when working
-on this codebase.</p>
 <h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
 <h3 id="arguments"><a class="header" href="#arguments">Arguments</a></h3>
 <p><code>OUT_FILE</code></p>

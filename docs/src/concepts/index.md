@@ -7,9 +7,9 @@ component of fuelup.
 
 <!-- This section should explain fuelup terminology -->
 <!-- terms:example:start -->
-- **channel** — The Fuel toolchain will be released to different "channels".
-  Currently, it is only released to the **latest** channel.
-  See the [Channels] chapter for more details.
+- **channel** — The Fuel toolchain is released to different "channels".
+  Currently, the **latest**, **nightly**, **testnet** and **mainnet** channels
+  are published. See the [Channels] chapter for more details.
 
 - **toolchain** — A "toolchain" is an installation of the
   Fuel Orchestrator (`forc`), its related plugins (like `forc-fmt`) and

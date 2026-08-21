@@ -1,4 +1,5 @@
 use fuelup::channel::CHANNELS;
+use fuelup::constants::{CHANNEL_LATEST_FILE_NAME, CHANNEL_MAINNET_FILE_NAME};
 
 #[test]
 fn user_guides_list_every_public_channel() {
@@ -25,4 +26,15 @@ fn user_guides_do_not_describe_latest_as_newest_upstream() {
 
     assert!(basics.contains("mainnet-compatible distribution"));
     assert!(channels.contains("same manifest as `mainnet`"));
+}
+
+#[test]
+fn latest_channel_still_aliases_the_mainnet_manifest() {
+    assert_eq!(
+        CHANNEL_LATEST_FILE_NAME, CHANNEL_MAINNET_FILE_NAME,
+        "the user guides describe `latest` as an alias of the mainnet manifest; \
+         update basics.md, concepts/channels.md, concepts/toolchains.md, \
+         developer_guide/building_a_channel.md and overrides.md if the alias \
+         target changes"
+    );
 }

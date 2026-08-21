@@ -19,8 +19,10 @@ distribution channels.
 
 <!-- This section should give an overview of the latest channel -->
 <!-- latest:example:start -->
-`latest` is the default channel and resolves to the same manifest as `mainnet`.
-Use it to interact with and build for mainnet. The name means "the default
+Undated `latest` is the default channel and resolves to the same manifest as `mainnet`.
+Dated `latest-YYYY-MM-DD` names refer to separately archived manifests, which
+are not published for every date. Use the undated channel to interact with and
+build for mainnet. The name means "the default
 mainnet-compatible toolchain"; it does not mean the newest upstream Sway,
 Forc, Fuel Core, or plugin release.
 <!-- latest:example:end -->

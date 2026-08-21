@@ -9,29 +9,28 @@ To learn about the args and options used in the script, skip to [Usage].
 
 ## Use cases
 
-There are two main ways the `build-channel` script is used: in CI and manually.
+There are 2 main ways the `build-channel` script is used: in the CI, and locally.
 
 ### CI
 
-The scheduled [`publish-nightly-channel.yml`] workflow builds the `nightly`
-manifest at 01:00 UTC and publishes both the current manifest and a dated
-archive when the build succeeds.
+This script's main usage is found within the `fuelup` CI, where it publishes the channels to the [`gh-pages`] branch.
 
-The [`update-channel.yml`] workflow is manually dispatched to update named
-network manifests such as `mainnet` and `testnet`. It opens a pull request
-against the `gh-pages` branch so the proposed component versions and hashes can
-be reviewed before publication.
+The `nightly` channel is published automatically. A channel is built at 01:00 UTC every day by the
+[`Publish Channel (nightly)`] workflow, containing the download links to binaries found within the
+[sway-nightly-binaries repository].
 
-Fuelup resolves the `latest` runtime channel to the `mainnet` manifest; it is
-not published by a separate "newest component" workflow.
+The `latest`, `mainnet` and `testnet` channels are published manually via the [`Update Channel`] workflow, which is
+triggered with `workflow_dispatch`. An operator selects the channel and provides the component versions to pin; the
+workflow runs `build-channel` and opens a pull request against `gh-pages`. (Note that the `latest` toolchain is served
+by `channel-fuel-mainnet.toml`, so `latest` is updated by bumping the `mainnet` channel.) This flow is explained in more
+detail in the [channels developer guide].
 
-### Manual
+### Locally
 
-There may be times when we need a channel for a one-off event e.g. testnets. During these events, we do not
+Running `build-channel` locally is a good sanity check when working on this codebase, or when preparing the versions to
+feed into the [`Update Channel`] workflow. It fails fast if a pinned version has missing release artifacts.
 
-require a routine update, and can essentially publish once and be done. This is when manual publishing is done.
-
-For example, a testnet manifest can be built locally like this:
+For example, building a `testnet` channel is done like so:
 
 ```sh
 # from fuelup project root
@@ -43,9 +42,6 @@ cargo run --locked -p build-channel -- \
 Replace the date and version placeholders before running the command. Unlisted
 components are resolved by `build-channel`; inspect every generated version,
 download URL, and hash before publishing the manifest.
-
-Other than for these one-off events, manually running `build-channel` locally is a good sanity check when working
-on this codebase.
 
 ## Usage
 
@@ -74,9 +70,11 @@ on this codebase.
 - _Optional_. Specify if we are building a nightly channel.
 
 [Usage]: #usage
+[channels developer guide]: ../concepts/channels.md#developer-guide
+[`gh-pages`]: https://github.com/FuelLabs/fuelup/tree/gh-pages
+[`Update Channel`]: https://github.com/FuelLabs/fuelup/blob/master/.github/workflows/update-channel.yml
+[`Publish Channel (nightly)`]: https://github.com/FuelLabs/fuelup/blob/master/.github/workflows/publish-nightly-channel.yml
 [sway-nightly-binaries repository]: https://github.com/FuelLabs/sway-nightly-binaries
-[`publish-nightly-channel.yml`]: https://github.com/FuelLabs/fuelup/blob/master/.github/workflows/publish-nightly-channel.yml
-[`update-channel.yml`]: https://github.com/FuelLabs/fuelup/blob/master/.github/workflows/update-channel.yml
 [channel]: ../concepts/channels.md
 [variable]: https://docs.github.com/en/actions/learn-github-actions/variables
 [SemVer]: https://semver.org/

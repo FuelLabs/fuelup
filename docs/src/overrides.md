@@ -48,7 +48,7 @@ channel = "testnet"
 
 To override the Forc version while retaining testnet as the base channel:
 
-```text
+```toml
 [toolchain]
 channel = "testnet"
 
@@ -71,7 +71,7 @@ fuel-core = "../../../fuel-core/target/release/fuel-core" # relative path from f
 
 You can also mix version specifications with local paths:
 
-```text
+```toml
 [toolchain]
 channel = "testnet"
 
@@ -114,7 +114,7 @@ fuelup toolchain export --output /path/to/my-toolchain.toml
 
 For a `mainnet` or `testnet` toolchain, export preserves the dateless network channel and records the semantic version of each detected publishable component. The output has this shape:
 
-```text
+```toml
 [toolchain]
 channel = "mainnet"
 

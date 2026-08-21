@@ -13,7 +13,7 @@ use semver::Version;
 use std::os::unix::fs::OpenOptionsExt;
 use std::str::FromStr;
 use std::{
-    env, fs,
+    fs,
     path::{Path, PathBuf},
     process::{Command, ExitStatus},
 };
@@ -383,13 +383,12 @@ pub fn setup(state: FuelupState, f: &dyn Fn(&mut TestCfg)) -> Result<()> {
     fs::create_dir_all(&tmp_fuelup_bin_dir_path).unwrap();
     fs::create_dir(tmp_fuelup_root_path.join("toolchains")).unwrap();
 
-    let root = env::current_exe()
-        .unwrap()
-        .parent()
-        .expect("fuelup's directory")
-        .to_path_buf();
+    // CARGO_BIN_EXE_fuelup is provided by cargo for integration tests and is
+    // correct under any target/build directory layout (plain cargo test,
+    // cargo llvm-cov, custom --target-dir), unlike paths derived from
+    // env::current_exe().
     hard_or_symlink_file(
-        &root.parent().unwrap().join("fuelup"),
+        Path::new(env!("CARGO_BIN_EXE_fuelup")),
         &tmp_fuelup_bin_dir_path.join("fuelup"),
     )?;
 

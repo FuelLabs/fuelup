@@ -26,6 +26,53 @@ fn user_guides_do_not_describe_latest_as_newest_upstream() {
 
     assert!(basics.contains("mainnet-compatible distribution"));
     assert!(channels.contains("same manifest as `mainnet`"));
+
+    // The marker phrases above cannot catch a contradictory claim added
+    // elsewhere, so also require the explicit negations to survive and allow
+    // "newest upstream" wording only inside a negating or qualifying context.
+    let latest_section = channels
+        .split("<!-- latest:example:start -->")
+        .nth(1)
+        .and_then(|section| section.split("<!-- latest:example:end -->").next())
+        .expect("channels guide must keep the latest section markers");
+    assert!(
+        latest_section.contains("alias for the `mainnet` channel"),
+        "the latest section must describe `latest` as a mainnet alias"
+    );
+    assert!(
+        latest_section.contains("does not mean the newest upstream"),
+        "the latest section must keep the newest-upstream negation"
+    );
+
+    let basics_normalized = basics.split_whitespace().collect::<Vec<_>>().join(" ");
+    assert!(
+        basics_normalized.contains("does not mean the newest upstream release"),
+        "the basics guide must keep the newest-upstream negation"
+    );
+
+    for (name, guide) in [("basics.md", basics), ("channels.md", channels)] {
+        let normalized = guide
+            .split_whitespace()
+            .collect::<Vec<_>>()
+            .join(" ")
+            .to_lowercase();
+        let needle = "newest upstream";
+        let mut from = 0;
+        while let Some(pos) = normalized[from..].find(needle) {
+            let hit = from + pos;
+            let mut window_start = hit.saturating_sub(40);
+            while !normalized.is_char_boundary(window_start) {
+                window_start -= 1;
+            }
+            let window = &normalized[window_start..hit];
+            assert!(
+                window.contains("not mean the") || window.contains("behind the"),
+                "{name} mentions 'newest upstream' outside a negation or \
+                 qualifier: ...{window}{needle}..."
+            );
+            from = hit + needle.len();
+        }
+    }
 }
 
 #[test]

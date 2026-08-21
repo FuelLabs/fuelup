@@ -47,6 +47,8 @@ The `testnet` channel is a published TOML file describing the toolchain selected
 
 The version numbers in a network channel may be behind the newest upstream component releases. This is intentional: choose the channel for the network you need to target, not by comparing its name with upstream release numbers.
 
+## Developer Guide
+
 > **Note**
 >
 > Reading the information below is only really necessary if you wish to contribute to the workflows or want a deeper understanding on how channels are updated.

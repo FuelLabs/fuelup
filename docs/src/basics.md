@@ -1,19 +1,48 @@
 # Basic usage
 
-The quickest way to get started is to install the `latest` toolchain, although this step should be automatically done if you
-installed `fuelup` via `fuelup-init`:
+The quickest way to get started on Fuel mainnet is to install the `latest`
+toolchain. This step is normally performed automatically when `fuelup` is
+installed through `fuelup-init`:
 
 ```sh
 fuelup toolchain install latest
 ```
 
-## Keeping the Fuel toolchain up to date
+`latest` is the default alias for the mainnet-compatible distribution. It does
+not mean the newest upstream release of every component.
 
-The Fuel toolchain is distributed on one [release channel]: latest (with nightly being a WIP).
-`fuelup` uses the `latest` channel by default, which represents the latest stable release of the Fuel toolchain.
+## Choosing a channel
 
-When new versions of the components within a distributable Fuel toolchain (`latest` or `nightly`)
-are released, simply type `fuelup update` to update:
+Fuelup publishes four channels:
+
+| Channel | Intended use |
+| ------- | ------------ |
+| `latest` | Default alias for the mainnet-compatible distribution |
+| `mainnet` | Tooling selected for Fuel mainnet |
+| `testnet` | Tooling selected for Fuel testnet |
+| `nightly` | Daily development builds; compatibility is not guaranteed |
+
+Install the named channel for the network you are targeting:
+
+```sh
+# Fuel mainnet
+fuelup toolchain install mainnet
+
+# Fuel testnet
+fuelup toolchain install testnet
+
+# Unreleased development builds
+fuelup toolchain install nightly
+```
+
+See [release channels] for the source, release policy, and stability guarantees
+of each channel.
+
+## Keeping installed Fuel toolchains up to date
+
+Run `fuelup update` to refresh each installed undated public channel
+(`latest`, `mainnet`, `testnet`, and `nightly`). Dated archives are immutable
+and are not updated. This does not change which channel is the default.
 
 <!-- This section should show the command to update distributable toolchains -->
 <!-- update:example:start -->
@@ -57,6 +86,6 @@ help for each subcommand is also available.
 
 For example, run `fuelup component --help` for specifics on installing [components].
 
-[release channel]: concepts/channels.md
+[release channels]: concepts/channels.md
 [clap]: https://github.com/clap-rs/clap
 [components]: concepts/components.md

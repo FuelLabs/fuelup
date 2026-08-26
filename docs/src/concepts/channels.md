@@ -2,7 +2,7 @@
 
 <!-- This section should give an overview of fuelup channels -->
 <!-- channels:example:start -->
-`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, the `latest`, `nightly`, `testnet`, and `mainnet` channels are published and serve as a source of distribution of Fuel toolchain binaries.
+`fuelup` adopts a simplified version of `rustup` [channels](https://rust-lang.github.io/rustup/concepts/channels.html). Currently, `latest`, `mainnet`, `testnet`, and `nightly` are the public distribution channels.
 
 Each channel is a TOML file (e.g. `channel-fuel-mainnet.toml`) committed to the [`gh-pages`](https://github.com/FuelLabs/fuelup/tree/gh-pages) branch of this repository and served over `raw.githubusercontent.com`. Each file pins exact component versions along with their download URLs and SHA-256 hashes per target. `fuelup` downloads the relevant file and installs exactly what is pinned there.
 
@@ -18,17 +18,17 @@ Each channel is a TOML file (e.g. `channel-fuel-mainnet.toml`) committed to the 
 
 <!-- This section should give an overview of the latest channel -->
 <!-- latest:example:start -->
-The `latest` channel points to our mainnet network. This toolchain should be used to interact with and build on mainnet. This is also the default channel for `fuelup`.
+The `latest` channel points to our mainnet network. This toolchain should be used to interact with and build on mainnet. This is also the default channel for `fuelup`. The name does not mean the newest upstream Sway, Forc, Fuel Core, or plugin release.
 
-`latest` is an alias for the `mainnet` channel: installing the `latest` toolchain downloads the same [`channel-fuel-mainnet.toml`](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-mainnet.toml) file. There is no separate `channel-fuel-latest.toml`, so updating `latest` means updating the `mainnet` channel (see the [Developer Guide](#developer-guide) below).
+`latest` is an alias for the `mainnet` channel: installing the undated `latest` toolchain downloads the same manifest as `mainnet` — the same [`channel-fuel-mainnet.toml`](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-mainnet.toml) file. There is no separate `channel-fuel-latest.toml`, so updating `latest` means updating the `mainnet` channel (see the [Developer Guide](#developer-guide) below). Dated `latest-YYYY-MM-DD` names refer to separately archived manifests, which are not published for every date.
 <!-- latest:example:end -->
 
 ## The `nightly` channel
 
 <!-- This section should give an overview of the nightly channel -->
 <!-- nightly:example:start -->
-The `nightly` channel is a published TOML file describing successful builds of the `master` branch of `forc` and `fuel-core` for the day.
-These builds are released in the [sway-nightly-binaries] repository and the workflows in that repo start building them every day at **00:00 UTC**.
+The `nightly` channel is a published TOML file describing development builds of Forc and Fuel Core for the day.
+These builds are released in the [sway-nightly-binaries] repository, whose workflows start building them every day at **00:00 UTC**.
 
 The `nightly` channel within `fuelup` is updated by a scheduled GitHub workflow that **runs every day at 01:00 UTC**, after builds have finished.
 Note that the `nightly` channel might fail to build, in which case it is possible that the `nightly` toolchain may not be available for that day.
@@ -39,11 +39,13 @@ Keep in mind that compatibility between `forc` and `fuel-core` is not guaranteed
 
 ## The `mainnet` channel
 
-The `mainnet` channel is a published TOML file describing the toolchain that is compatible with our final public [mainnet](https://fuel.mirror.xyz/U2xqey0oZFCrIBf7bO3yYyFplJKiJ0sfzAyYmhrPjag) on the Ignition network. This toolchain should be used to interact with and build on the mainnet. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-mainnet.toml).
+The `mainnet` channel is a published TOML file describing the toolchain selected for Fuel mainnet on the Ignition network. Use this toolchain to interact with and build for mainnet. Its components and artifact hashes are in the [mainnet manifest].
 
 ## The `testnet` channel
 
-The `testnet` channel is a published TOML file describing the toolchain that is compatible with our final public [testnet](https://fuel.mirror.xyz/fztu8P_NJz6k7qLXhaGHX3ArctlQpxsUp87pgRpJ4bE) on the Sepolia network. This toolchain should be used to interact with and build on the testnet. The components to be installed can be found [here](https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-testnet.toml).
+The `testnet` channel is a published TOML file describing the toolchain selected for Fuel testnet on the Sepolia network. Use this toolchain to interact with and build for testnet. Its components and artifact hashes are in the [testnet manifest].
+
+The version numbers in a network channel may be behind the newest upstream component releases. This is intentional: choose the channel for the network you need to target, not by comparing its name with upstream release numbers.
 
 ## Developer Guide
 
@@ -88,6 +90,8 @@ You may also use [`nektos/act`](https://github.com/nektos/act) to run the workfl
 [Building a channel]: ../developer_guide/building_a_channel.md
 [`Update Channel`]: https://github.com/FuelLabs/fuelup/blob/master/.github/workflows/update-channel.yml
 [`Publish Channel (nightly)`]: https://github.com/FuelLabs/fuelup/blob/master/.github/workflows/publish-nightly-channel.yml
+[mainnet manifest]: https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-mainnet.toml
+[testnet manifest]: https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-testnet.toml
 [latest]: #the-latest-channel
 [nightly]: #the-nightly-channel
 [mainnet]: #the-mainnet-channel

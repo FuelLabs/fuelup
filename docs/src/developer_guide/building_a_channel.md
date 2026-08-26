@@ -34,11 +34,14 @@ For example, building a `testnet` channel is done like so:
 
 ```sh
 # from fuelup project root
-cd ci/build-channel && cargo run -- channel-fuel-testnet.toml 2023-02-13 forc=0.35.0 fuel-core=0.17.1
+cargo run --locked -p build-channel -- \
+  channel-fuel-testnet.toml YYYY-MM-DD \
+  forc=<FORC_VERSION> fuel-core=<FUEL_CORE_VERSION>
 ```
 
-The above command means that we're building a channel named `channel-fuel-testnet.toml` with the date `2023-02-13` (`YYYY-MM-DD`)
-and `forc` and `fuel-core` versions `0.35.0` and `0.17.1` respectively, and the latest versions for the other unlisted components.
+Replace the date and version placeholders before running the command. Unlisted
+components are resolved by `build-channel`; inspect every generated version,
+download URL, and hash before publishing the manifest.
 
 ## Usage
 

@@ -170,15 +170,37 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="basic-usage"><a class="header" href="#basic-usage">Basic usage</a></h1>
-<p>The quickest way to get started is to install the <code>latest</code> toolchain, although this step should be automatically done if you
-installed <code>fuelup</code> via <code>fuelup-init</code>:</p>
+<p>The quickest way to get started on Fuel mainnet is to install the <code>latest</code>
+toolchain. This step is normally performed automatically when <code>fuelup</code> is
+installed through <code>fuelup-init</code>:</p>
 <pre><code class="language-sh">fuelup toolchain install latest
 </code></pre>
-<h2 id="keeping-the-fuel-toolchain-up-to-date"><a class="header" href="#keeping-the-fuel-toolchain-up-to-date">Keeping the Fuel toolchain up to date</a></h2>
-<p>The Fuel toolchain is distributed on one <a href="concepts/channels.html">release channel</a>: latest (with nightly being a WIP).
-<code>fuelup</code> uses the <code>latest</code> channel by default, which represents the latest stable release of the Fuel toolchain.</p>
-<p>When new versions of the components within a distributable Fuel toolchain (<code>latest</code> or <code>nightly</code>)
-are released, simply type <code>fuelup update</code> to update:</p>
+<p><code>latest</code> is the default alias for the mainnet-compatible distribution. It does
+not mean the newest upstream release of every component.</p>
+<h2 id="choosing-a-channel"><a class="header" href="#choosing-a-channel">Choosing a channel</a></h2>
+<p>Fuelup publishes four channels:</p>
+<table><thead><tr><th>Channel</th><th>Intended use</th></tr></thead><tbody>
+<tr><td><code>latest</code></td><td>Default alias for the mainnet-compatible distribution</td></tr>
+<tr><td><code>mainnet</code></td><td>Tooling selected for Fuel mainnet</td></tr>
+<tr><td><code>testnet</code></td><td>Tooling selected for Fuel testnet</td></tr>
+<tr><td><code>nightly</code></td><td>Daily development builds; compatibility is not guaranteed</td></tr>
+</tbody></table>
+<p>Install the named channel for the network you are targeting:</p>
+<pre><code class="language-sh"># Fuel mainnet
+fuelup toolchain install mainnet
+
+# Fuel testnet
+fuelup toolchain install testnet
+
+# Unreleased development builds
+fuelup toolchain install nightly
+</code></pre>
+<p>See <a href="concepts/channels.html">release channels</a> for the source, release policy, and stability guarantees
+of each channel.</p>
+<h2 id="keeping-installed-fuel-toolchains-up-to-date"><a class="header" href="#keeping-installed-fuel-toolchains-up-to-date">Keeping installed Fuel toolchains up to date</a></h2>
+<p>Run <code>fuelup update</code> to refresh each installed undated public channel
+(<code>latest</code>, <code>mainnet</code>, <code>testnet</code>, and <code>nightly</code>). Dated archives are immutable
+and are not updated. This does not change which channel is the default.</p>
 <!-- This section should show the command to update distributable toolchains -->
 <!-- update:example:start -->
 <pre><code class="language-sh">fuelup update

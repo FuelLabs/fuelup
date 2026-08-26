@@ -192,10 +192,13 @@ detail in the <a href="../concepts/channels.html#developer-guide">channels devel
 feed into the <a href="https://github.com/FuelLabs/fuelup/blob/master/.github/workflows/update-channel.yml"><code>Update Channel</code></a> workflow. It fails fast if a pinned version has missing release artifacts.</p>
 <p>For example, building a <code>testnet</code> channel is done like so:</p>
 <pre><code class="language-sh"># from fuelup project root
-cd ci/build-channel &amp;&amp; cargo run -- channel-fuel-testnet.toml 2023-02-13 forc=0.35.0 fuel-core=0.17.1
+cargo run --locked -p build-channel -- \
+  channel-fuel-testnet.toml YYYY-MM-DD \
+  forc=&lt;FORC_VERSION&gt; fuel-core=&lt;FUEL_CORE_VERSION&gt;
 </code></pre>
-<p>The above command means that we're building a channel named <code>channel-fuel-testnet.toml</code> with the date <code>2023-02-13</code> (<code>YYYY-MM-DD</code>)
-and <code>forc</code> and <code>fuel-core</code> versions <code>0.35.0</code> and <code>0.17.1</code> respectively, and the latest versions for the other unlisted components.</p>
+<p>Replace the date and version placeholders before running the command. Unlisted
+components are resolved by <code>build-channel</code>; inspect every generated version,
+download URL, and hash before publishing the manifest.</p>
 <h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
 <h3 id="arguments"><a class="header" href="#arguments">Arguments</a></h3>
 <p><code>OUT_FILE</code></p>

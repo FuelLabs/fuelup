@@ -295,7 +295,7 @@ or your currently active toolchain (in order of priority).</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="channels"><a class="header" href="#channels">Channels</a></h1>
 <!-- This section should give an overview of fuelup channels -->
 <!-- channels:example:start -->
-<p><code>fuelup</code> adopts a simplified version of <code>rustup</code> <a href="https://rust-lang.github.io/rustup/concepts/channels.html">channels</a>. Currently, the <code>latest</code>, <code>nightly</code>, <code>testnet</code>, and <code>mainnet</code> channels are published and serve as a source of distribution of Fuel toolchain binaries.</p>
+<p><code>fuelup</code> adopts a simplified version of <code>rustup</code> <a href="https://rust-lang.github.io/rustup/concepts/channels.html">channels</a>. Currently, <code>latest</code>, <code>mainnet</code>, <code>testnet</code>, and <code>nightly</code> are the public distribution channels.</p>
 <p>Each channel is a TOML file (e.g. <code>channel-fuel-mainnet.toml</code>) committed to the <a href="https://github.com/FuelLabs/fuelup/tree/gh-pages"><code>gh-pages</code></a> branch of this repository and served over <code>raw.githubusercontent.com</code>. Each file pins exact component versions along with their download URLs and SHA-256 hashes per target. <code>fuelup</code> downloads the relevant file and installs exactly what is pinned there.</p>
 <table><thead><tr><th>Channel</th><th>Source</th><th>How it is updated</th><th>Available</th></tr></thead><tbody>
 <tr><td><strong><a href="concepts/channels.html#the-latest-channel">latest</a></strong></td><td>published release bins</td><td>manually (alias of <code>mainnet</code>)</td><td>✔️</td></tr>
@@ -307,23 +307,24 @@ or your currently active toolchain (in order of priority).</p>
 <h2 id="the-latest-channel"><a class="header" href="#the-latest-channel">The <code>latest</code> channel</a></h2>
 <!-- This section should give an overview of the latest channel -->
 <!-- latest:example:start -->
-<p>The <code>latest</code> channel points to our mainnet network. This toolchain should be used to interact with and build on mainnet. This is also the default channel for <code>fuelup</code>.</p>
-<p><code>latest</code> is an alias for the <code>mainnet</code> channel: installing the <code>latest</code> toolchain downloads the same <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-mainnet.toml"><code>channel-fuel-mainnet.toml</code></a> file. There is no separate <code>channel-fuel-latest.toml</code>, so updating <code>latest</code> means updating the <code>mainnet</code> channel (see the <a href="concepts/channels.html#developer-guide">Developer Guide</a> below).</p>
+<p>The <code>latest</code> channel points to our mainnet network. This toolchain should be used to interact with and build on mainnet. This is also the default channel for <code>fuelup</code>. The name does not mean the newest upstream Sway, Forc, Fuel Core, or plugin release.</p>
+<p><code>latest</code> is an alias for the <code>mainnet</code> channel: installing the undated <code>latest</code> toolchain downloads the same manifest as <code>mainnet</code> — the same <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-mainnet.toml"><code>channel-fuel-mainnet.toml</code></a> file. There is no separate <code>channel-fuel-latest.toml</code>, so updating <code>latest</code> means updating the <code>mainnet</code> channel (see the <a href="concepts/channels.html#developer-guide">Developer Guide</a> below). Dated <code>latest-YYYY-MM-DD</code> names refer to separately archived manifests, which are not published for every date.</p>
 <!-- latest:example:end -->
 <h2 id="the-nightly-channel"><a class="header" href="#the-nightly-channel">The <code>nightly</code> channel</a></h2>
 <!-- This section should give an overview of the nightly channel -->
 <!-- nightly:example:start -->
-<p>The <code>nightly</code> channel is a published TOML file describing successful builds of the <code>master</code> branch of <code>forc</code> and <code>fuel-core</code> for the day.
-These builds are released in the <a href="https://github.com/FuelLabs/sway-nightly-binaries/releases">sway-nightly-binaries</a> repository and the workflows in that repo start building them every day at <strong>00:00 UTC</strong>.</p>
+<p>The <code>nightly</code> channel is a published TOML file describing development builds of Forc and Fuel Core for the day.
+These builds are released in the <a href="https://github.com/FuelLabs/sway-nightly-binaries/releases">sway-nightly-binaries</a> repository, whose workflows start building them every day at <strong>00:00 UTC</strong>.</p>
 <p>The <code>nightly</code> channel within <code>fuelup</code> is updated by a scheduled GitHub workflow that <strong>runs every day at 01:00 UTC</strong>, after builds have finished.
 Note that the <code>nightly</code> channel might fail to build, in which case it is possible that the <code>nightly</code> toolchain may not be available for that day.</p>
 <p>You should use <code>nightly</code> if you want the latest changes to <code>master</code> that have not been officially released yet.
 Keep in mind that compatibility between <code>forc</code> and <code>fuel-core</code> is not guaranteed here, and you should expect unstable features to break.</p>
 <!-- nightly:example:end -->
 <h2 id="the-mainnet-channel"><a class="header" href="#the-mainnet-channel">The <code>mainnet</code> channel</a></h2>
-<p>The <code>mainnet</code> channel is a published TOML file describing the toolchain that is compatible with our final public <a href="https://fuel.mirror.xyz/U2xqey0oZFCrIBf7bO3yYyFplJKiJ0sfzAyYmhrPjag">mainnet</a> on the Ignition network. This toolchain should be used to interact with and build on the mainnet. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-mainnet.toml">here</a>.</p>
+<p>The <code>mainnet</code> channel is a published TOML file describing the toolchain selected for Fuel mainnet on the Ignition network. Use this toolchain to interact with and build for mainnet. Its components and artifact hashes are in the <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-mainnet.toml">mainnet manifest</a>.</p>
 <h2 id="the-testnet-channel"><a class="header" href="#the-testnet-channel">The <code>testnet</code> channel</a></h2>
-<p>The <code>testnet</code> channel is a published TOML file describing the toolchain that is compatible with our final public <a href="https://fuel.mirror.xyz/fztu8P_NJz6k7qLXhaGHX3ArctlQpxsUp87pgRpJ4bE">testnet</a> on the Sepolia network. This toolchain should be used to interact with and build on the testnet. The components to be installed can be found <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-testnet.toml">here</a>.</p>
+<p>The <code>testnet</code> channel is a published TOML file describing the toolchain selected for Fuel testnet on the Sepolia network. Use this toolchain to interact with and build for testnet. Its components and artifact hashes are in the <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-testnet.toml">testnet manifest</a>.</p>
+<p>The version numbers in a network channel may be behind the newest upstream component releases. This is intentional: choose the channel for the network you need to target, not by comparing its name with upstream release numbers.</p>
 <h2 id="developer-guide"><a class="header" href="#developer-guide">Developer Guide</a></h2>
 <blockquote>
 <p><strong>Note</strong></p>
@@ -353,21 +354,25 @@ cd ci/build-channel &amp;&amp; cargo run -- channel-fuel-mainnet.toml $(date +%F
 <p>Many <code>fuelup</code> commands deal with <em>toolchains</em>, a single installation of the
 Fuel toolchain. <code>fuelup</code> supports <strong>two</strong> types of toolchains.</p>
 <ol>
-<li>Distributable toolchains which track the official release <a href="concepts/channels.html">channels</a> (e.g., <em>latest</em>, <em>nightly</em>);</li>
-<li>Custom toolchains and install individual components in a modular manner.</li>
+<li>Distributable toolchains which track the official release <a href="concepts/channels.html">channels</a>
+(<code>latest</code>, <code>mainnet</code>, <code>testnet</code>, and <code>nightly</code>);</li>
+<li>Custom toolchains, in which individual components can be installed in a
+modular manner.</li>
 </ol>
 <!-- toolchains:example:end -->
 <h2 id="toolchain-specification"><a class="header" href="#toolchain-specification">Toolchain specification</a></h2>
-<p>Standard release channel toolchain names have the following form:</p>
+<p>Distributable toolchain names have the following form:</p>
 <pre><code class="language-text">&lt;channel&gt;[-&lt;date&gt;][-&lt;host&gt;]
 
-&lt;channel&gt;       = latest
+&lt;channel&gt;       = latest | nightly | mainnet | testnet
 &lt;date&gt;          = YYYY-MM-DD
 &lt;host&gt;          = &lt;target-triple&gt;
 </code></pre>
-<p>'channel' is a named release channel. Channel names can be optionally appended
-with an archive date, as in <code>nightly-2014-12-18</code>, in which case the toolchain
-is downloaded from the archive for that date.</p>
+<p><code>channel</code> is a named release channel. <code>latest</code> and <code>nightly</code> can be appended
+with an archive date, as in <code>nightly-2025-01-18</code>, in which case the toolchain
+is downloaded from the archive for that date. A dated name works only when its
+matching manifest was actually published; not every date is available.</p>
+<p><code>mainnet</code> and <code>testnet</code> are named, undated network channels.</p>
 <p>Finally, the host may be specified as a target triple.</p>
 <h2 id="custom-toolchains"><a class="header" href="#custom-toolchains">Custom toolchains</a></h2>
 <p>For most use cases, using the officially packaged toolchains is good enough.</p>
@@ -417,15 +422,37 @@ toolchains if they are working on different projects.</p>
 <a href="concepts/../overrides.html">overrides</a>. Components will be installed in directories named in the format <code>&lt;NAME&gt;-&lt;VERSION&gt;</code>.</p>
 <p>For example, forc v0.35.5 will be installed in a directory called <code>forc-0.35.5</code>.</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="basic-usage"><a class="header" href="#basic-usage">Basic usage</a></h1>
-<p>The quickest way to get started is to install the <code>latest</code> toolchain, although this step should be automatically done if you
-installed <code>fuelup</code> via <code>fuelup-init</code>:</p>
+<p>The quickest way to get started on Fuel mainnet is to install the <code>latest</code>
+toolchain. This step is normally performed automatically when <code>fuelup</code> is
+installed through <code>fuelup-init</code>:</p>
 <pre><code class="language-sh">fuelup toolchain install latest
 </code></pre>
-<h2 id="keeping-the-fuel-toolchain-up-to-date"><a class="header" href="#keeping-the-fuel-toolchain-up-to-date">Keeping the Fuel toolchain up to date</a></h2>
-<p>The Fuel toolchain is distributed on one <a href="concepts/channels.html">release channel</a>: latest (with nightly being a WIP).
-<code>fuelup</code> uses the <code>latest</code> channel by default, which represents the latest stable release of the Fuel toolchain.</p>
-<p>When new versions of the components within a distributable Fuel toolchain (<code>latest</code> or <code>nightly</code>)
-are released, simply type <code>fuelup update</code> to update:</p>
+<p><code>latest</code> is the default alias for the mainnet-compatible distribution. It does
+not mean the newest upstream release of every component.</p>
+<h2 id="choosing-a-channel"><a class="header" href="#choosing-a-channel">Choosing a channel</a></h2>
+<p>Fuelup publishes four channels:</p>
+<table><thead><tr><th>Channel</th><th>Intended use</th></tr></thead><tbody>
+<tr><td><code>latest</code></td><td>Default alias for the mainnet-compatible distribution</td></tr>
+<tr><td><code>mainnet</code></td><td>Tooling selected for Fuel mainnet</td></tr>
+<tr><td><code>testnet</code></td><td>Tooling selected for Fuel testnet</td></tr>
+<tr><td><code>nightly</code></td><td>Daily development builds; compatibility is not guaranteed</td></tr>
+</tbody></table>
+<p>Install the named channel for the network you are targeting:</p>
+<pre><code class="language-sh"># Fuel mainnet
+fuelup toolchain install mainnet
+
+# Fuel testnet
+fuelup toolchain install testnet
+
+# Unreleased development builds
+fuelup toolchain install nightly
+</code></pre>
+<p>See <a href="concepts/channels.html">release channels</a> for the source, release policy, and stability guarantees
+of each channel.</p>
+<h2 id="keeping-installed-fuel-toolchains-up-to-date"><a class="header" href="#keeping-installed-fuel-toolchains-up-to-date">Keeping installed Fuel toolchains up to date</a></h2>
+<p>Run <code>fuelup update</code> to refresh each installed undated public channel
+(<code>latest</code>, <code>mainnet</code>, <code>testnet</code>, and <code>nightly</code>). Dated archives are immutable
+and are not updated. This does not change which channel is the default.</p>
 <!-- This section should show the command to update distributable toolchains -->
 <!-- update:example:start -->
 <pre><code class="language-sh">fuelup update
@@ -466,13 +493,14 @@ help for each subcommand is also available.</p>
 <h2 id="the-toolchain-file"><a class="header" href="#the-toolchain-file">The toolchain file</a></h2>
 <!-- This section should explain the fuel-toolchain TOML file -->
 <!-- toolchain:example:start -->
-<p>The <code>fuel-toolchain.toml</code> file allows projects to &quot;pin&quot; to a specific set of fuel toolchain component versions.
-This greatly improves the reproducibility of a project, as the <code>fuel-toolchain.toml</code> contains the set of known,
-working versions for each tool used to build it.</p>
-<p>When this file is present, <code>fuelup</code> will override the default toolchain with the specified toolchain when executing binaries
-in the toolchain.</p>
-<p>In these cases, the toolchain can be specified in a file called <code>fuel-toolchain.toml</code>. These toolchains can only be
-the <a href="concepts/toolchains.html#toolchains">distributed toolchains</a> at this point in time.</p>
+<p>The <code>fuel-toolchain.toml</code> file allows a project to select a distributable base channel and, optionally, specific component versions or local executables. Recording these choices improves repeatability, but the file is not a complete bit-for-bit lockfile: version entries do not include the artifact hashes from a channel manifest.</p>
+<p>When this file is present, <code>fuelup</code> overrides the default toolchain when it executes a managed binary.</p>
+<p>The <code>[toolchain]</code> channel must be one of:</p>
+<ul>
+<li><code>mainnet</code> or <code>testnet</code>; or</li>
+<li>an archived <code>latest-YYYY-MM-DD</code> or <code>nightly-YYYY-MM-DD</code> channel whose manifest was actually published.</li>
+</ul>
+<p>Although the install command accepts undated <code>latest</code> and <code>nightly</code>, those two names require a date in <code>fuel-toolchain.toml</code>. Custom installed toolchain names cannot be used as the base channel. Locally built tools are supported through path entries in <code>[components]</code>.</p>
 <!-- toolchain:example:end -->
 <p>Here's what a sample project might look like:</p>
 <pre><code class="language-console">$ tree -L 1 # 'tree -L 1' shows the project structure up to the depth of 1
@@ -489,13 +517,14 @@ the <a href="concepts/toolchains.html#toolchains">distributed toolchains</a> at 
 <pre><code class="language-toml">[toolchain]
 channel = &quot;testnet&quot;
 </code></pre>
-<p>Let's say we have a project on the Fuel testnet network, and we want to try using a different version forc to develop on it:</p>
+<p>To override the Forc version while retaining testnet as the base channel:</p>
 <pre><code class="language-toml">[toolchain]
 channel = &quot;testnet&quot;
 
 [components]
-forc = &quot;0.65.0&quot; # in testnet, forc is pinned to v0.66.1
+forc = &quot;&lt;FORC_SEMVER&gt;&quot;
 </code></pre>
+<p>Replace <code>&lt;FORC_SEMVER&gt;</code> with a published semantic version that is compatible with the network and the other components. Do not infer the current testnet version from this page; inspect the <a href="https://github.com/FuelLabs/fuelup/blob/gh-pages/channel-fuel-testnet.toml">testnet manifest</a>.</p>
 <p>Alternatively, you can specify local paths to custom binaries. This is useful for development with locally-built tools:</p>
 <pre><code class="language-toml">[toolchain]
 channel = &quot;testnet&quot;
@@ -509,19 +538,19 @@ fuel-core = &quot;../../../fuel-core/target/release/fuel-core&quot; # relative p
 channel = &quot;testnet&quot;
 
 [components]
-forc = &quot;/path/to/custom/forc&quot; # use local custom forc
-fuel-core = &quot;0.41.7&quot;         # use specific version of fuel-core
+forc = &quot;/path/to/custom/forc&quot;
+fuel-core = &quot;&lt;FUEL_CORE_SEMVER&gt;&quot;
 </code></pre>
-<p>Local paths can be either absolute or relative to the <code>fuel-toolchain.toml</code> file. When using local paths, <code>fuelup</code> will validate that the specified binaries exist and are executable.</p>
+<p>Local paths can be absolute or relative to the <code>fuel-toolchain.toml</code> file. Fuelup validates that a referenced path is a file and is executable.</p>
 <h2 id="exporting-toolchains"><a class="header" href="#exporting-toolchains">Exporting toolchains</a></h2>
 <!-- This section should explain how to export toolchains -->
 <!-- export:example:start -->
-<p>You can generate a <code>fuel-toolchain.toml</code> file from your current toolchain configuration using the <code>export</code> command. This is useful for sharing your exact toolchain setup with team members or documenting the specific tool versions used in your project.</p>
+<p>You can generate a <code>fuel-toolchain.toml</code> inventory with the <code>export</code> command. Review the generated file before sharing it: export records detected component versions, but it does not guarantee that the base channel is archived or that the file can restore the exact same artifacts.</p>
 <!-- export:example:end -->
-<p>To export your currently active toolchain:</p>
+<p>Without a name, export reads the configured default toolchain. It does not export a project override that happens to be active in the current directory:</p>
 <pre><code class="language-sh">fuelup toolchain export
 </code></pre>
-<p>This creates a <code>fuel-toolchain.toml</code> file in the current directory containing your active toolchain's channel and installed component versions.</p>
+<p>This creates a <code>fuel-toolchain.toml</code> file in the current directory containing the default toolchain's derived channel and detected component versions.</p>
 <p>You can also export a specific toolchain by name:</p>
 <pre><code class="language-sh">fuelup toolchain export my-custom-toolchain
 </code></pre>
@@ -529,25 +558,27 @@ fuel-core = &quot;0.41.7&quot;         # use specific version of fuel-core
 <pre><code class="language-sh">fuelup toolchain export -o my-backup.toml
 fuelup toolchain export --output /path/to/my-toolchain.toml
 </code></pre>
-<h3 id="export-examples"><a class="header" href="#export-examples">Export examples</a></h3>
-<p>Exporting a <code>latest</code> toolchain produces a file like:</p>
+<h3 id="what-export-preserves"><a class="header" href="#what-export-preserves">What export preserves</a></h3>
+<p>For a <code>mainnet</code> or <code>testnet</code> toolchain, export preserves the dateless network channel and records the semantic version of each detected publishable component. The output has this shape:</p>
 <pre><code class="language-toml">[toolchain]
-channel = &quot;latest-2025-09-03&quot;
+channel = &quot;mainnet&quot;
 
 [components]
-forc = &quot;0.69.1&quot;
-fuel-core = &quot;0.45.1&quot;
-fuel-core-keygen = &quot;0.45.1&quot;
-forc-wallet = &quot;0.15.1&quot;
+forc = &quot;&lt;INSTALLED_FORC_SEMVER&gt;&quot;
+fuel-core = &quot;&lt;INSTALLED_FUEL_CORE_SEMVER&gt;&quot;
+# Other detected components are included here.
 </code></pre>
-<p>Exporting a custom toolchain preserves the custom name:</p>
-<pre><code class="language-toml">[toolchain]
-channel = &quot;my-dev-toolchain&quot;
-
-[components]
-forc = &quot;0.69.1&quot;
-fuel-core = &quot;0.45.1&quot;
-</code></pre>
+<p>The generated component entries do not preserve channel-manifest hashes. Export also does not preserve the source of locally built binaries; it records a version when Fuelup can identify one.</p>
+<h3 id="dated-channel-caveat"><a class="header" href="#dated-channel-caveat">Dated channel caveat</a></h3>
+<p>When the installed toolchain is undated <code>latest</code> or <code>nightly</code>, export currently turns its name into <code>latest-&lt;today&gt;</code> or <code>nightly-&lt;today&gt;</code>. Export does not check whether a matching archive manifest exists.</p>
+<p>This is especially important for <code>latest</code>: <code>latest</code> is an alias for the current mainnet manifest, but dated <code>latest</code> manifests are not published for every date. A dated nightly is available only when that day's nightly was successfully published. If the generated archive is missing, Fuelup can still install individually listed component versions when they are invoked, so a partial restore may look successful even though the base toolchain was not restored.</p>
+<p>Before committing an export:</p>
+<ol>
+<li>Verify that its dated channel manifest exists.</li>
+<li>If the source was undated <code>latest</code>, use <code>mainnet</code> as the base channel when a moving, mainnet-compatible base is appropriate.</li>
+<li>Test the file with an empty Fuelup home rather than relying on already cached components.</li>
+</ol>
+<p>Exporting a custom toolchain preserves its custom name in the generated file, but custom names are not accepted as <code>[toolchain].channel</code> values by the override parser. Such output is an inventory only and is not currently a restorable project override.</p>
 <h3 id="overwrite-protection"><a class="header" href="#overwrite-protection">Overwrite protection</a></h3>
 <p>By default, <code>export</code> will fail if a <code>fuel-toolchain.toml</code> file already exists in the current directory:</p>
 <pre><code class="language-console">$ fuelup toolchain export
@@ -556,9 +587,10 @@ error: fuel-toolchain.toml already exists in the current directory. Use --force 
 <p>You can either use the <code>--force</code> flag to overwrite the existing file:</p>
 <pre><code class="language-sh">fuelup toolchain export --force
 </code></pre>
-<p>Or export to a different path to avoid the conflict entirely:</p>
+<p>Or export to a different path:</p>
 <pre><code class="language-sh">fuelup toolchain export -o backup-toolchain.toml
 </code></pre>
+<p>The default-path protection applies only to <code>fuel-toolchain.toml</code>. A custom output path is overwritten if it already exists, even without <code>--force</code>.</p>
 <div id="chapter_begin" style="break-before: page; page-break-before: always;"></div><h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
 <p><em>fuelup</em> has a <a href="https://github.com/toml-lang/toml">TOML</a> settings file at
 <code>.fuelup/settings.toml</code>. The schema for this file is not part of the public
@@ -839,10 +871,13 @@ detail in the <a href="developer_guide/../concepts/channels.html#developer-guide
 feed into the <a href="https://github.com/FuelLabs/fuelup/blob/master/.github/workflows/update-channel.yml"><code>Update Channel</code></a> workflow. It fails fast if a pinned version has missing release artifacts.</p>
 <p>For example, building a <code>testnet</code> channel is done like so:</p>
 <pre><code class="language-sh"># from fuelup project root
-cd ci/build-channel &amp;&amp; cargo run -- channel-fuel-testnet.toml 2023-02-13 forc=0.35.0 fuel-core=0.17.1
+cargo run --locked -p build-channel -- \
+  channel-fuel-testnet.toml YYYY-MM-DD \
+  forc=&lt;FORC_VERSION&gt; fuel-core=&lt;FUEL_CORE_VERSION&gt;
 </code></pre>
-<p>The above command means that we're building a channel named <code>channel-fuel-testnet.toml</code> with the date <code>2023-02-13</code> (<code>YYYY-MM-DD</code>)
-and <code>forc</code> and <code>fuel-core</code> versions <code>0.35.0</code> and <code>0.17.1</code> respectively, and the latest versions for the other unlisted components.</p>
+<p>Replace the date and version placeholders before running the command. Unlisted
+components are resolved by <code>build-channel</code>; inspect every generated version,
+download URL, and hash before publishing the manifest.</p>
 <h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
 <h3 id="arguments"><a class="header" href="#arguments">Arguments</a></h3>
 <p><code>OUT_FILE</code></p>

@@ -188,7 +188,7 @@ pub fn download(url: &str) -> Result<Vec<u8>> {
 
     let handle = build_agent()?;
 
-    for _ in 1..RETRY_ATTEMPTS {
+    for attempt in 1..=RETRY_ATTEMPTS {
         match handle.get(url).call() {
             Ok(response) => {
                 let mut data = Vec::new();
@@ -200,8 +200,10 @@ pub fn download(url: &str) -> Result<Vec<u8>> {
                 error!("Failed to download from {}", &url);
                 let retry: Option<u64> = r.header("retry-after").and_then(|h| h.parse().ok());
                 let retry = retry.unwrap_or(RETRY_DELAY_SECS);
-                info!("Retrying..");
-                thread::sleep(Duration::from_secs(retry));
+                if attempt < RETRY_ATTEMPTS {
+                    info!("Retrying attempt {}/{}..", attempt + 1, RETRY_ATTEMPTS);
+                    thread::sleep(Duration::from_secs(retry));
+                }
             }
             Err(e) => {
                 // handle other status code and non-status code errors
@@ -210,7 +212,7 @@ pub fn download(url: &str) -> Result<Vec<u8>> {
         }
     }
 
-    bail!("Could not read file");
+    bail!("Could not download {url} after {RETRY_ATTEMPTS} attempts");
 }
 
 pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
@@ -225,7 +227,7 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
         .truncate(true)
         .open(path)?;
 
-    for _ in 1..RETRY_ATTEMPTS {
+    for attempt in 1..=RETRY_ATTEMPTS {
         match handle.get(url).call() {
             Ok(response) => {
                 if let Err(e) = write_response_with_progress_bar(
@@ -243,8 +245,10 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
                 error!("Failed to download from {}", &url);
                 let retry: Option<u64> = r.header("retry-after").and_then(|h| h.parse().ok());
                 let retry = retry.unwrap_or(RETRY_DELAY_SECS);
-                info!("Retrying..");
-                thread::sleep(Duration::from_secs(retry));
+                if attempt < RETRY_ATTEMPTS {
+                    info!("Retrying attempt {}/{}..", attempt + 1, RETRY_ATTEMPTS);
+                    thread::sleep(Duration::from_secs(retry));
+                }
             }
             Err(e) => {
                 fs::remove_file(path)?;
@@ -255,7 +259,7 @@ pub fn download_file(url: &str, path: &PathBuf) -> Result<()> {
     }
 
     fs::remove_file(path)?;
-    bail!("Could not download file");
+    bail!("Could not download {url} after {RETRY_ATTEMPTS} attempts");
 }
 
 pub fn download_file_and_unpack(download_cfg: &DownloadCfg, dst_dir_path: &Path) -> Result<()> {
@@ -443,7 +447,16 @@ mod tests {
     use super::*;
     use dirs::home_dir;
     use indoc::indoc;
-    use std::io::{self, Result};
+    use std::{
+        io::{self, Result},
+        net::TcpListener,
+        sync::{
+            atomic::{AtomicUsize, Ordering},
+            Arc,
+        },
+        thread,
+        time::Duration,
+    };
     use tempfile;
 
     struct MockWriter;
@@ -567,6 +580,98 @@ mod tests {
                 .unwrap_err()
                 .to_string(),
             "Something went wrong writing data: Mock Interrupted Error"
+        );
+    }
+
+    #[test]
+    fn test_download_makes_configured_number_of_attempts() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        listener
+            .set_nonblocking(true)
+            .expect("set listener to non-blocking");
+        let url = format!("http://{}/download", listener.local_addr().unwrap());
+        let request_count = Arc::new(AtomicUsize::new(0));
+        let server_request_count = Arc::clone(&request_count);
+
+        let server = thread::spawn(move || {
+            let deadline = std::time::Instant::now() + Duration::from_secs(10);
+            while std::time::Instant::now() < deadline
+                && server_request_count.load(Ordering::Relaxed) < 4
+            {
+                match listener.accept() {
+                    Ok((mut stream, _)) => {
+                        let request_number =
+                            server_request_count.fetch_add(1, Ordering::Relaxed) + 1;
+                        let retry_after = if request_number == 4 { 1 } else { 0 };
+                        let response = format!(
+                            "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nRetry-After: {retry_after}\r\n\r\n"
+                        );
+                        let _ = stream.write_all(response.as_bytes());
+                    }
+                    Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
+                        thread::sleep(Duration::from_millis(10));
+                    }
+                    Err(error) => panic!("failed to accept request: {error}"),
+                }
+            }
+        });
+
+        let started_at = std::time::Instant::now();
+        let error = download(&url).expect_err("all test requests should return 404");
+        let elapsed = started_at.elapsed();
+        server.join().unwrap();
+
+        assert_eq!(request_count.load(Ordering::Relaxed), 4);
+        assert!(
+            elapsed < Duration::from_millis(800),
+            "download slept after its final attempt: {elapsed:?}"
+        );
+        assert_eq!(
+            error.to_string(),
+            format!("Could not download {url} after 4 attempts")
+        );
+    }
+
+    #[test]
+    fn test_download_file_makes_configured_number_of_attempts() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        listener
+            .set_nonblocking(true)
+            .expect("set listener to non-blocking");
+        let url = format!("http://{}/download", listener.local_addr().unwrap());
+        let request_count = Arc::new(AtomicUsize::new(0));
+        let server_request_count = Arc::clone(&request_count);
+
+        let server = thread::spawn(move || {
+            let deadline = std::time::Instant::now() + Duration::from_secs(2);
+            while std::time::Instant::now() < deadline
+                && server_request_count.load(Ordering::Relaxed) < 4
+            {
+                match listener.accept() {
+                    Ok((mut stream, _)) => {
+                        server_request_count.fetch_add(1, Ordering::Relaxed);
+                        let response =
+                            "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nRetry-After: 0\r\n\r\n";
+                        let _ = stream.write_all(response.as_bytes());
+                    }
+                    Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
+                        thread::sleep(Duration::from_millis(10));
+                    }
+                    Err(error) => panic!("failed to accept request: {error}"),
+                }
+            }
+        });
+
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("download");
+        let error = download_file(&url, &path).expect_err("all test requests should return 404");
+        server.join().unwrap();
+
+        assert_eq!(request_count.load(Ordering::Relaxed), 4);
+        assert!(!path.exists());
+        assert_eq!(
+            error.to_string(),
+            format!("Could not download {url} after 4 attempts")
         );
     }
 

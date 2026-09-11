@@ -4,7 +4,29 @@ use std::{fs, io, os::unix::fs::PermissionsExt, path::Path};
 
 #[cfg(unix)]
 pub(crate) fn is_executable(file: &Path) -> bool {
-    file.is_file() && file.metadata().unwrap().permissions().mode() & 0o111 != 0
+    fs::metadata(file)
+        .map(|metadata| metadata.is_file() && metadata.permissions().mode() & 0o111 != 0)
+        .unwrap_or(false)
+}
+
+#[cfg(all(test, unix))]
+mod tests {
+    use super::is_executable;
+    use std::{fs::File, os::unix::fs::PermissionsExt};
+
+    #[test]
+    fn executable_check_handles_missing_and_non_executable_files() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let missing = temp_dir.path().join("missing");
+        assert!(!is_executable(&missing));
+
+        let file = temp_dir.path().join("plain");
+        File::create(&file).unwrap();
+        assert!(!is_executable(&file));
+
+        std::fs::set_permissions(&file, std::fs::Permissions::from_mode(0o755)).unwrap();
+        assert!(is_executable(&file));
+    }
 }
 
 #[derive(Debug, thiserror::Error)]

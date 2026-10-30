@@ -399,6 +399,39 @@ mod tests {
     }
 
     #[test]
+    fn test_forc_binaries_plugins_toml() -> Result<()> {
+        const EXPECTED_TARGETS: [&str; 4] =
+            ["linux_amd64", "linux_arm64", "darwin_amd64", "darwin_arm64"];
+
+        let components = Components::collect()?;
+        let mut matched = 0usize;
+
+        for component in components.component.values() {
+            if component.is_plugin != Some(true)
+                || component.tarball_prefix != "forc-binaries"
+                || component.repository_name != "sway"
+                || component.legacy_repository_name.is_some()
+            {
+                continue;
+            }
+
+            assert_eq!(component.is_plugin, Some(true));
+            assert_eq!(component.tarball_prefix, "forc-binaries");
+            assert_eq!(component.executables, [component.name.clone()]);
+            assert_eq!(component.repository_name, "sway");
+            assert_eq!(component.targets, EXPECTED_TARGETS);
+            matched += 1;
+        }
+
+        assert!(
+            matched >= 7,
+            "expected at least 7 forc-binaries sway plugins, found {matched}"
+        );
+
+        Ok(())
+    }
+
+    #[test]
     fn test_collect_exclude_plugins() -> Result<()> {
         let components = Components::collect_exclude_plugins().unwrap();
         let actual = components

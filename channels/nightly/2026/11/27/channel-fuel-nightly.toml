@@ -1,0 +1,35 @@
+published_by = "https://github.com/FuelLabs/fuelup/actions/runs/45920033735"
+date = "2026-11-27"
+
+[pkg.forc]
+version = "0.72.1+nightly.20261127.2ce2b31118"
+
+[pkg.forc.target.linux_amd64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20261127/forc-binaries-0.72.1%2Bnightly.20261127.2ce2b31118-linux_amd64.tar.gz"
+hash = "9ddef62266b585aa0db0e96ab3ffae6fb8c4fe79f232f18040d679429afaddbf"
+
+[pkg.forc.target.linux_arm64]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20261127/forc-binaries-0.72.1%2Bnightly.20261127.2ce2b31118-linux_arm64.tar.gz"
+hash = "6cbcb6b3374cf1ab6702a6b27a79dcf646c9117e7584de074e730b398c8e7e05"
+
+[pkg.fuel-core]
+version = "0.48.3+nightly.20261127.8bd82d4d1f"
+
+[pkg.fuel-core.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20261127/fuel-core-0.48.3%2Bnightly.20261127.8bd82d4d1f-aarch64-unknown-linux-gnu.tar.gz"
+hash = "5f2a74dd37e883374c73a614410619254591977cc593d6e80d00b6e96d1e784c"
+
+[pkg.fuel-core.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20261127/fuel-core-0.48.3%2Bnightly.20261127.8bd82d4d1f-x86_64-unknown-linux-gnu.tar.gz"
+hash = "e16ded5e551ab096530ea869430bc2150c9bfb0f0375d6534ed84cecc655906a"
+
+[pkg.fuel-core-keygen]
+version = "0.48.3+nightly.20261127.8bd82d4d1f"
+
+[pkg.fuel-core-keygen.target.aarch64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20261127/fuel-core-0.48.3%2Bnightly.20261127.8bd82d4d1f-aarch64-unknown-linux-gnu.tar.gz"
+hash = "5f2a74dd37e883374c73a614410619254591977cc593d6e80d00b6e96d1e784c"
+
+[pkg.fuel-core-keygen.target.x86_64-unknown-linux-gnu]
+url = "https://github.com/FuelLabs/sway-nightly-binaries/releases/download/nightly-20261127/fuel-core-0.48.3%2Bnightly.20261127.8bd82d4d1f-x86_64-unknown-linux-gnu.tar.gz"
+hash = "e16ded5e551ab096530ea869430bc2150c9bfb0f0375d6534ed84cecc655906a"
